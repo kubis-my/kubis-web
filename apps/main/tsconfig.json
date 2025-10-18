@@ -16,8 +16,11 @@
       "@/component/*": [
         "./components/*"
       ],
-      "@/libs/*": [
-        "./libs/*"
+      "@/actions/*": [
+        "./actions/*"
+      ],
+      "@/dict/*": [
+        "./dict/*"
       ],
     }
   },

@@ -1,0 +1,12 @@
+import { AUTH_SVC_URL } from "./base";
+
+export const AUTH_SERVICE_ROUTE = {
+    AUTH: {
+        SIGN_IN: `${AUTH_SVC_URL}/sign-in/with-identifier`,
+        REFRESH: `${AUTH_SVC_URL}/auth/refresh`,
+        VALIDATE: `${AUTH_SVC_URL}/auth/validate`,
+    },
+    OAUTH: {
+        EXCHANGE_TOKEN: `${AUTH_SVC_URL}/oauth/token`
+    }
+}

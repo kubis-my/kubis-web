@@ -5,15 +5,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname, "../../"),
   },
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/sign-in',
-        permanent: true,
-      },
-    ]
-  },
 };
 
 export default nextConfig;
