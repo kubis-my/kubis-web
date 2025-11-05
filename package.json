@@ -1,5 +1,6 @@
 {
   "name": "kubis-web",
+  "description": "Your all in one workspace",
   "private": true,
   "scripts": {
     "build": "turbo run build",

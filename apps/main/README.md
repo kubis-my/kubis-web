@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Main Application
 
-## Getting Started
+The main application for Kubis Web - your all in one workspace.
 
-First, run the development server:
+## Overview
+
+This is the core application built with [Next.js](https://nextjs.org). It provides the main user interface and functionality for the Kubis Web platform.
+
+## Development
+
+From the project root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Install dependencies (if not already done)
+pnpm install
+
+# Run development server
+pnpm dev --filter=main
+
+# Or using turbo directly
+turbo dev --filter=main
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at [http://localhost:3000](http://localhost:3000) (port may vary).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Build from project root
+pnpm build --filter=main
+
+# Or using turbo directly
+turbo build --filter=main
+```
+
+## Tech Stack
+
+- [Next.js](https://nextjs.org) - React framework
+- [TypeScript](https://www.typescriptlang.org/) - Type safety
+- [React](https://react.dev/) - UI library
+
+## Project Structure
+
+```
+apps/main/
+├── app/              # Next.js app directory
+├── public/           # Static assets
+├── .eslintrc.js      # ESLint configuration
+├── next.config.ts    # Next.js configuration
+├── tsconfig.json     # TypeScript configuration
+└── package.json      # Package dependencies
+```
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+To learn more about the technologies used:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js Documentation](https://nextjs.org/docs)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
