@@ -5,9 +5,12 @@
     }
   ],
   "cSpell.words": [
+    "Buildx",
+    "Flyctl",
     "hdrs",
     "KUBIS",
     "PKCE",
+    "superfly",
     "turbopack",
     "Turborepo"
   ]
