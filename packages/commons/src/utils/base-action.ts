@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { cookies, headers, } from "next/headers";
+import { env } from "../constant/env";
 
 export const useBaseAction = async (props: { form?: FormData } = {}) => {
     const cookie = await cookies();
@@ -16,8 +17,8 @@ export const useBaseAction = async (props: { form?: FormData } = {}) => {
     } = {}) => {
         cookie.set(id, value, {
             secure: true,
-            sameSite: process.env.NODE_ENV === "production" ? "strict" : "none",
-            httpOnly: process.env.NODE_ENV === "production",
+            sameSite: env.APP_ENV === "production" ? "none" : "lax",
+            httpOnly: env.APP_ENV === "production",
             ...options
         });
     }

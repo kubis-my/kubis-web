@@ -19,7 +19,7 @@ primary_region = 'REGION_PLACEHOLDER'
   strategy = 'rolling'
 
 [env]
-  APP_ENV = "staging"
+  APP_ENV = "production"
 
 [http_service]
   internal_port = 3000
