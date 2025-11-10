@@ -5,6 +5,7 @@ import { authClient } from '@repo/commons/lib/auth-client';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react'
 import Loader from '../custom-components/loader';
+import { secureTokenStorage } from "@repo/commons/utils/secure-token-storage";
 
 export default function ExchangeCodeForToken({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -38,13 +39,17 @@ export default function ExchangeCodeForToken({ children }: { children: React.Rea
                 return;
             }
 
-            try {
-                await authClient.exchangeCodeForTokens({
-                    code,
-                    clientId,
-                    redirectUri,
-                    codeVerifier
-                })
+            const res = await authClient.exchangeCodeForTokens({
+                code,
+                clientId,
+                redirectUri,
+                codeVerifier
+            })
+
+            if (res.code === 200) {
+                const { accessToken, refreshToken } = res.raw
+
+                secureTokenStorage.setTokens(accessToken, refreshToken)
 
                 sessionStorage.removeItem('pkce_verifier');
                 sessionStorage.removeItem('oauth_state');
@@ -54,14 +59,11 @@ export default function ExchangeCodeForToken({ children }: { children: React.Rea
 
                 // Clean URL first without causing navigation
                 window.history.replaceState({}, document.title, window.location.pathname);
-
-                // Set flags to render children, avoid router navigation
-                setInitial(false);
-                setIsChecking(false);
-            } catch (error) {
-                setInitial(false);
-                setIsChecking(false);
             }
+
+            // Set flags to render children, avoid router navigation
+            setInitial(false);
+            setIsChecking(false);
         };
 
         exchangeHandler()

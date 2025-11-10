@@ -15,6 +15,7 @@ import { MAIN_CLIENT_ID } from "@repo/commons/constant/client-id";
 import { MAIN_APP_BASE_URL } from "@repo/commons/constant/base";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@repo/commons/lib/auth-client";
+import { secureTokenStorage } from "@repo/commons/utils/secure-token-storage";
 
 
 export default function SignInWithIdentifierForm() {
@@ -40,8 +41,18 @@ export default function SignInWithIdentifierForm() {
         });
 
         if (res.code === 200) {
-            const finalRedirectUrl = new URL(res.raw.redirectUrl!);
-            finalRedirectUrl.hash = `verifier=${res.raw.verifier}`;
+            const { twoFactorEnabled, sessionToken, redirectUrl } = res.raw;
+
+            // Store session token encrypted in localStorage
+            await secureTokenStorage.setSessionToken(sessionToken);
+
+            // Redirect with verifier in URL hash
+            const finalRedirectUrl = new URL(redirectUrl);
+
+            if (res.raw.verifier) {
+                finalRedirectUrl.hash = `verifier=${res.raw.verifier}`;
+            }
+
             window.location.href = finalRedirectUrl.toString();
         } else if (res.code === 400) {
             setFormValidation(res.raw)

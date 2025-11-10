@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Loader from "../custom-components/loader";
 import { useAuth } from "../providers/auth-provider";
 import { generateCodeChallenge, generateCodeVerifier, generateState } from "@repo/commons/utils/pkce";
-import { AUTH_SVC_URL } from "@repo/commons/constant/base";
+import { SSO_APP_BASE_URL } from "@repo/commons/constant/base";
 
 export default function AuthGuard({ children, baseUrl, clientId }: { children: React.ReactNode, baseUrl: string, clientId: string }) {
     const ctx = useAuth()
@@ -28,7 +28,7 @@ export default function AuthGuard({ children, baseUrl, clientId }: { children: R
             state,
         });
 
-        window.location.href = `${AUTH_SVC_URL}/oauth/authorize?${params}`
+        window.location.href = `${SSO_APP_BASE_URL}/oauth/authorize?${params}`
     }
 
     useEffect(() => {

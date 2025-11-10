@@ -7,6 +7,7 @@ export const AUTH_SERVICE_ROUTE = {
         VALIDATE: `${AUTH_SVC_URL}/auth/validate`,
     },
     OAUTH: {
-        EXCHANGE_TOKEN: `${AUTH_SVC_URL}/oauth/token`
+        EXCHANGE_TOKEN: `${AUTH_SVC_URL}/oauth/token`,
+        AUTHORIZE: `${AUTH_SVC_URL}/oauth/authorize`
     }
 }

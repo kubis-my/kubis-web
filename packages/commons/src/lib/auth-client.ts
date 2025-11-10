@@ -27,9 +27,7 @@ export const authClient = {
         }
 
         try {
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN, input, {
-                withCredentials: true
-            })
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN, input)
 
             return {
                 code: 200,
@@ -69,10 +67,13 @@ export const authClient = {
         driver?: AxiosInstance
     }) {
         const driver = props.driver || axios
-        const input = { refreshToken: props.refreshToken }
 
         try {
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.REFRESH, input)
+            const { data } = await driver.get(AUTH_SERVICE_ROUTE.AUTH.REFRESH, {
+                headers: {
+                    "Authorization": `Bearer ${props.refreshToken}`,
+                }
+            })
 
             return {
                 code: 200,
@@ -82,13 +83,6 @@ export const authClient = {
             if (error instanceof AxiosError && error.response) {
                 const response = error.response
                 const data = response.data;
-
-                if (response.status === 400) {
-                    return {
-                        code: 400,
-                        raw: convertErrorMessageListToObject(Object.keys(input), data.message)
-                    }
-                }
 
                 if (data.id) {
                     return {
@@ -109,10 +103,13 @@ export const authClient = {
         driver?: AxiosInstance
     }) {
         const driver = props.driver || axios
-        const input = { token: props.token }
 
         try {
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.VALIDATE, input)
+            const { data } = await driver.get(AUTH_SERVICE_ROUTE.AUTH.VALIDATE, {
+                headers: {
+                    "Authorization": `Bearer ${props.token}`,
+                }
+            })
 
             return {
                 code: 200,
@@ -122,13 +119,6 @@ export const authClient = {
             if (error instanceof AxiosError && error.response) {
                 const response = error.response
                 const data = response.data;
-
-                if (response.status === 400) {
-                    return {
-                        code: 400,
-                        raw: convertErrorMessageListToObject(Object.keys(input), data.message)
-                    }
-                }
 
                 if (data.id) {
                     return {
@@ -161,8 +151,62 @@ export const authClient = {
         }
 
         try {
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.OAUTH.EXCHANGE_TOKEN, input, {
-                withCredentials: true
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.OAUTH.EXCHANGE_TOKEN, input);
+
+            return {
+                code: 200,
+                raw: data
+            }
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response
+                const data = response.data;
+
+                if (response.status === 400) {
+                    return {
+                        code: 400,
+                        raw: convertErrorMessageListToObject(Object.keys(input), data.message)
+                    }
+                }
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data
+                    }
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {}
+            }
+        }
+    },
+    async redirectAuthorize(props: {
+        sessionToken: string
+        clientId: string
+        redirectUri: string
+        codeChallenge: string
+        scope?: string
+        state?: string
+        driver?: AxiosInstance
+    }) {
+        const driver = props.driver || axios
+        const input = {
+            clientId: props.clientId,
+            redirectUri: props.redirectUri,
+            codeChallenge: props.codeChallenge,
+            scope: props.scope,
+            state: props.state
+        }
+
+        try {
+            const { data } = await driver.get(AUTH_SERVICE_ROUTE.OAUTH.AUTHORIZE, {
+                headers: {
+                    "Authorization": `Bearer ${props.sessionToken}`,
+                },
+                params: input
             });
 
             return {
