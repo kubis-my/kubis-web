@@ -6,6 +6,7 @@ import { ApolloProvider } from "@repo/shadcn-ui/providers/apollo-provider";
 import ExchangeCodeForToken from "@repo/shadcn-ui/guards/exchange-code-for-token";
 import { Suspense } from "react";
 import { ACCOUNT_SVC_GRAPHQL_URL } from "@repo/commons/constant/base";
+import { Toaster } from "@repo/shadcn-ui/components/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,7 @@ export default function RootLayout({
             </ApolloProvider>
           </ExchangeCodeForToken>
         </Suspense>
+        <Toaster />
       </body>
     </html>
   );

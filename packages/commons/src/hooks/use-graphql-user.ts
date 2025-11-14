@@ -1,7 +1,7 @@
 "use client";
 
 import { gql, TypedDocumentNode } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 
 export type Company = {
     publicId: string
@@ -24,6 +24,12 @@ export type User = {
     updatedAt: string
 }
 
+export type CompleteProfileInput = {
+    firstName: string
+    lastName: string
+    nickname: string
+}
+
 const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
     query GetAuthUser {
         getAuthUser {
@@ -41,6 +47,7 @@ const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
                 publicId
                 name
                 registrationNo
+                isUnclassified
                 logo
             }
         }
@@ -49,4 +56,32 @@ const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
 
 export const useAuthUser = (options?: { skip?: boolean }) => {
     return useQuery(GET_AUTH_USER, options);
+}
+
+const COMPLETE_PROFILE: TypedDocumentNode<{ completeProfile: User }, { input: CompleteProfileInput }> = gql`
+    mutation CompleteProfile($input: CompleteProfileInput!) {
+        completeProfile(input: $input) {
+            publicId
+            firstName
+            lastName
+            nickname
+            displayName
+            profilePicture
+            bod
+            gender
+            createdAt
+            updatedAt
+            companies {
+                publicId
+                name
+                registrationNo
+                isUnclassified
+                logo
+            }
+        }
+    }
+`
+
+export const useCompleteProfile = () => {
+    return useMutation(COMPLETE_PROFILE);
 }

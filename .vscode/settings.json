@@ -8,10 +8,31 @@
     "Buildx",
     "Flyctl",
     "hdrs",
+    "johndoe",
     "KUBIS",
     "PKCE",
     "superfly",
     "turbopack",
     "Turborepo"
-  ]
+  ],
+  "tailwindCSS.experimental.configFile": "packages/shadcn-ui/src/styles/globals.css",
+  "tailwindCSS.experimental.classRegex": [
+    [
+      "cva\\(([^)]*)\\)",
+      "[\"'`]([^\"'`]*).*?[\"'`]"
+    ],
+    [
+      "cn\\(([^)]*)\\)",
+      "(?:'|\"|`)([^\"'`]*)(?:'|\"|`)"
+    ]
+  ],
+  "tailwindCSS.files.exclude": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**"
+  ],
+  "editor.quickSuggestions": {
+    "strings": "on"
+  }
 }

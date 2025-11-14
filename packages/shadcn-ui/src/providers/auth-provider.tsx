@@ -13,9 +13,11 @@ interface AuthContextType {
     isAuthenticated: boolean;
     authUser: User | undefined
     isLoading: boolean;
+    hasIncompleteProfile: boolean
     logout: () => Promise<void>;
     authorize: () => Promise<void>
-    hasIncompleteProfile: boolean
+    updateAuthUser: (user: User | undefined) => void
+    profileSetupCompleted: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -100,6 +102,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, []);
 
+    const updateAuthUser = (user: User | undefined) => {
+        setAuthUser(user)
+    }
+
+    const profileSetupCompleted = () => {
+        setHasIncompleteProfile(false)
+    }
+
     // Set user data from GraphQL when available
     useEffect(() => {
         if (userData?.getAuthUser) {
@@ -170,7 +180,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [authorize])
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, isLoading, logout, authUser, authorize, hasIncompleteProfile }}>
+        <AuthContext.Provider value={
+            {
+                isAuthenticated,
+                isLoading,
+                authUser,
+                hasIncompleteProfile,
+                logout,
+                authorize,
+                updateAuthUser,
+                profileSetupCompleted
+            }
+        }>
             {isLoading ? <Loader /> : children}
         </AuthContext.Provider>
     );
