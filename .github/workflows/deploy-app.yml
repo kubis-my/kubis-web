@@ -25,6 +25,8 @@ on:
         required: true
       NEXT_PUBLIC_MAIN_CLIENT_ID:
         required: true
+      NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL:
+        required: true
 
 jobs:
   deploy:
@@ -72,6 +74,7 @@ jobs:
             NEXT_PUBLIC_AUTH_URL="${{ secrets.NEXT_PUBLIC_AUTH_URL }}" \
             NEXT_PUBLIC_MAIN_APP_BASE_URL="${{ secrets.NEXT_PUBLIC_MAIN_APP_BASE_URL }}" \
             NEXT_PUBLIC_SSO_APP_BASE_URL="${{ secrets.NEXT_PUBLIC_SSO_APP_BASE_URL }}" \
+            NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL="${{ secrets.NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL }}" \
             NEXT_PUBLIC_MAIN_CLIENT_ID="${{ secrets.NEXT_PUBLIC_MAIN_CLIENT_ID }}"
 
       - name: Deploy to Fly.io
@@ -84,5 +87,6 @@ jobs:
             --build-arg NEXT_PUBLIC_MAIN_APP_BASE_URL="${{ secrets.NEXT_PUBLIC_MAIN_APP_BASE_URL }}" \
             --build-arg NEXT_PUBLIC_SSO_APP_BASE_URL="${{ secrets.NEXT_PUBLIC_SSO_APP_BASE_URL }}" \
             --build-arg NEXT_PUBLIC_MAIN_CLIENT_ID="${{ secrets.NEXT_PUBLIC_MAIN_CLIENT_ID }}" \
+            --build-arg NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL="${{ secrets.NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL }}" \
             --yes \
             --ha=false
