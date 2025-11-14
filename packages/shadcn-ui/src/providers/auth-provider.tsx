@@ -135,6 +135,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [userError]);
 
+    // Periodic token refresh - refresh every 25 minutes (before 30-minute expiration)
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const REFRESH_INTERVAL = 25 * 60 * 1000; // 25 minutes in milliseconds
+        const refreshInterval = setInterval(async () => {
+            await authorize();
+        }, REFRESH_INTERVAL);
+
+        return () => {
+            clearInterval(refreshInterval);
+        };
+    }, [isAuthenticated, authorize]);
+
+    // Listen for storage changes (e.g., manual token deletion)
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleStorageChange = async (e: StorageEvent) => {
+            // Check if token-related storage was cleared
+            if (e.key === null || e.key?.includes('token') || e.key?.includes('auth')) {
+                const refreshToken = await secureTokenStorage.getRefreshToken();
+
+                if (!refreshToken && isAuthenticated) {
+                    // Tokens were cleared but state shows authenticated - logout
+                    setIsAuthenticated(false);
+                    setAuthUser(undefined);
+                    setHasIncompleteProfile(false);
+                }
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, [isAuthenticated]);
+
+    // Validate tokens when user returns to tab/window
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleVisibilityChange = async () => {
+            if (document.visibilityState === 'visible' && isAuthenticated) {
+                const refreshToken = await secureTokenStorage.getRefreshToken();
+
+                if (!refreshToken) {
+                    // No refresh token found - logout
+                    setIsAuthenticated(false);
+                    setAuthUser(undefined);
+                    setHasIncompleteProfile(false);
+                } else {
+                    // Refresh token exists - validate/refresh access token
+                    await authorize();
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [isAuthenticated, authorize]);
+
     useEffect(() => {
         let mounted = true;
         let timeoutId: NodeJS.Timeout;
