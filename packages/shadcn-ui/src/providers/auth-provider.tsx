@@ -6,17 +6,16 @@ import { secureTokenStorage } from "@repo/commons/utils/secure-token-storage";
 import { authClient } from '@repo/commons/lib/auth-client';
 import Loader from '../custom-components/loader';
 import { initEncryption } from '@repo/commons/utils/token-encryption';
+import { useAuthUser, User } from '@repo/commons/hooks/use-graphql-user';
+import { hasGraphQLError } from "@repo/commons/utils/graphql"
 
-type AuthUser = {
-    username: string
-    email: string
-}
 interface AuthContextType {
     isAuthenticated: boolean;
-    authUser: AuthUser | undefined
+    authUser: User | undefined
     isLoading: boolean;
     logout: () => Promise<void>;
     authorize: () => Promise<void>
+    hasIncompleteProfile: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,22 +23,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [authUser, setAuthUser] = useState<AuthUser | undefined>(undefined);
+    const [authUser, setAuthUser] = useState<User | undefined>(undefined);
+    const [hasIncompleteProfile, setHasIncompleteProfile] = useState(false);
 
     const router = useRouter();
 
+    // Fetch user data from GraphQL only when authenticated
+    const { data: userData, error: userError } = useAuthUser({ skip: !isAuthenticated });
+
     const logout = useCallback(async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/auth/logout`, {
+            await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/auth/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });
-
-            if (!response.ok) {
-                console.error('Logout failed:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Logout request failed:', error);
+        } catch {
+            // Silently handle logout errors - we'll clear local state anyway
         } finally {
             // Clear local tokens and state regardless of backend response
             secureTokenStorage.clearTokens();
@@ -81,8 +80,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     const { code, raw } = await authClient.validate({ token: currentAccessToken });
 
                     if (raw.valid && code === 200) {
-                        setAuthUser(raw.payload);
                         setIsAuthenticated(true);
+                        // User data will be fetched via GraphQL query
                     } else {
                         // Token validation failed
                         secureTokenStorage.clearTokens();
@@ -95,12 +94,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setIsAuthenticated(false);
             }
         } catch (error) {
-            console.error('Authorization failed:', error);
             secureTokenStorage.clearTokens();
             setAuthUser(undefined);
             setIsAuthenticated(false);
         }
     }, []);
+
+    // Set user data from GraphQL when available
+    useEffect(() => {
+        if (userData?.getAuthUser) {
+            setAuthUser(userData.getAuthUser);
+        }
+    }, [userData]);
+
+    // Handle GraphQL errors and auth failures
+    useEffect(() => {
+        if (!userError) return;
+
+        if (hasGraphQLError(userError)) {
+            // Check both 'errors' and 'graphQLErrors' properties
+            const gqlError = (userError.errors?.[0] || userError.graphQLErrors?.[0]);
+
+            if (gqlError) {
+                const errorCode = gqlError.extensions?.code as string | undefined;
+
+                if (errorCode === 'AUTH_USER_NOT_FOUND') {
+                    setHasIncompleteProfile(true)
+                }
+            }
+        }
+    }, [userError]);
 
     useEffect(() => {
         let mounted = true;
@@ -147,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [authorize])
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, isLoading, logout, authUser, authorize }}>
+        <AuthContext.Provider value={{ isAuthenticated, isLoading, logout, authUser, authorize, hasIncompleteProfile }}>
             {isLoading ? <Loader /> : children}
         </AuthContext.Provider>
     );

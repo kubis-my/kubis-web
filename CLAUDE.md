@@ -81,6 +81,80 @@ The project implements OAuth 2.0 Authorization Code flow with PKCE:
    - `checkCurrentCredential` action: Server-side credential validation
    - `refreshCredentialToken` action: Server-side token refresh
 
+### GraphQL Integration
+
+The project uses Apollo Client for GraphQL queries and mutations, with automatic authentication token injection.
+
+1. **Apollo Client Configuration** (`packages/commons/src/lib/apollo-client.ts`):
+   - Configured with authentication link that automatically adds access tokens to requests
+   - Error handling for GraphQL and network errors
+   - Cache management with InMemoryCache
+   - SSR-safe client creation
+   - **Flexible URI configuration**: Supports multiple GraphQL endpoints for different services
+   - Client instances are cached per URI for optimal performance
+
+2. **ApolloProvider** (`packages/shadcn-ui/src/providers/apollo-provider.tsx`):
+   - Wraps the application to provide GraphQL capabilities
+   - **Accepts optional `uri` prop** to specify GraphQL endpoint
+   - Falls back to `NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL` if no URI provided
+   - Each app can use different GraphQL backends by passing different URIs
+   - Example: `<ApolloProvider uri="https://api.example.com/graphql">`
+
+3. **Using GraphQL in Components**:
+   ```tsx
+   import { gql } from '@apollo/client';
+   import { useQuery, useMutation } from '@apollo/client/react';
+
+   // Define your query
+   const GET_DATA = gql`
+     query GetData {
+       data {
+         id
+         name
+       }
+     }
+   `;
+
+   // Use in component
+   function MyComponent() {
+     const { data, loading, error } = useQuery(GET_DATA);
+
+     if (loading) return <div>Loading...</div>;
+     if (error) return <div>Error: {error.message}</div>;
+
+     return <div>{data.data.name}</div>;
+   }
+   ```
+
+4. **Authentication with GraphQL**:
+   - Access tokens are automatically retrieved from `secureTokenStorage`
+   - Tokens are added to Authorization header for every GraphQL request
+   - Authentication errors (UNAUTHENTICATED, FORBIDDEN) are logged automatically
+
+5. **Example Hooks** (`packages/commons/src/hooks/use-graphql-examples.ts`):
+   - Contains template queries and mutations
+   - Shows patterns for useQuery, useMutation with variables
+   - Demonstrates cache updates and refetching strategies
+
+6. **Client Management Functions**:
+   - `getApolloClient(uri?)`: Get or create Apollo Client instance for a specific URI
+   - `resetApolloClient(uri?)`: Clear Apollo Client cache (useful after logout). If URI is omitted, clears all clients
+   - `reinitializeApolloClient(uri?)`: Completely reset client instance. If URI is omitted, resets all clients
+
+7. **Multiple GraphQL Backends**:
+   Each app can connect to different GraphQL endpoints by passing the `uri` prop:
+   ```tsx
+   // Main app - uses account service
+   <ApolloProvider uri={process.env.NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL}>
+     <App />
+   </ApolloProvider>
+
+   // Another app - uses different service
+   <ApolloProvider uri={process.env.NEXT_PUBLIC_OTHER_SERVICE_URL}>
+     <App />
+   </ApolloProvider>
+   ```
+
 ### Environment Variables
 
 Required environment variables (validated via `@t3-oss/env-core` in `packages/commons/src/constant/env.ts`):
@@ -89,21 +163,22 @@ Required environment variables (validated via `@t3-oss/env-core` in `packages/co
 - `NEXT_PUBLIC_MAIN_APP_BASE_URL`: Main app base URL
 - `NEXT_PUBLIC_SSO_APP_BASE_URL`: SSO app base URL
 - `NEXT_PUBLIC_MAIN_CLIENT_ID`: OAuth client ID for main app
+- `NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL`: GraphQL API endpoint URL for external account service
 
 ### Shared Package Exports
 
 **@repo/commons**:
-- `./lib/*`: Auth client and utilities
+- `./lib/*`: Auth client, Apollo Client configuration, and utilities
 - `./constant/*`: Environment variables, URLs, client IDs
 - `./utils/*`: PKCE generators, error handlers, base actions
 - `./actions/*`: Server actions for auth operations
-- `./hooks/*`: Custom React hooks
+- `./hooks/*`: Custom React hooks, GraphQL example hooks
 
 **@repo/shadcn-ui**:
 - `./components/*`: shadcn/ui components
 - `./custom-components/*`: Custom components (loader, error, countdown, etc.)
 - `./guards/*`: AuthGuard, ExchangeCodeForToken
-- `./providers/*`: AuthProvider
+- `./providers/*`: AuthProvider, ApolloProvider
 - `./hooks/*`: use-mobile, use-countdown, use-debounce
 - `./lib/*`: Utility functions
 
@@ -116,6 +191,8 @@ Required environment variables (validated via `@t3-oss/env-core` in `packages/co
 - **pnpm 9.0.0**: Package manager
 - **Turborepo 2.5.8**: Monorepo build system
 - **shadcn/ui**: UI component library (Radix UI primitives)
+- **Apollo Client 4**: GraphQL client with caching and state management
+- **GraphQL 16**: Query language for APIs
 - **Zod 4**: Schema validation
 - **Axios**: HTTP client
 - **Luxon**: Date/time handling

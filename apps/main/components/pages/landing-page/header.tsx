@@ -57,9 +57,12 @@ export default function Header() {
     const auth = useAuth()
 
     const getAvatarFallback = (): string => {
-        if (!auth.authUser) return "K"
-
-        return auth.authUser.username.at(0)!.toUpperCase();
+        return [
+            auth.authUser?.displayName,
+            auth.authUser?.nickname,
+            auth.authUser?.firstName,
+            auth.authUser?.lastName,
+        ].filter(Boolean)[0]?.at(0) ?? "K"
     }
 
     return (
@@ -103,7 +106,7 @@ export default function Header() {
                             </Button>
 
                             <Avatar className="w-9 h-9 cursor-pointer">
-                                <AvatarFallback className="bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] text-white font-medium">
+                                <AvatarFallback className="bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] text-white font-medium uppercase">
                                     {getAvatarFallback()}
                                 </AvatarFallback>
                             </Avatar>
