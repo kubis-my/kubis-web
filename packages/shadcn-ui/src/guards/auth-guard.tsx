@@ -13,8 +13,13 @@ export default function AuthGuard({ children, baseUrl, clientId }: { children: R
     const [isAuthenticating, setIsAuthenticating] = useState(true);
 
     const handleSSO = async () => {
-        if (ctx.isAuthenticated) return;
+        if (ctx.isAuthenticated) {
+            // User is authenticated, no redirect needed
+            setIsAuthenticating(false);
+            return;
+        }
 
+        // User is not authenticated, prepare SSO redirect
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = await generateCodeChallenge(codeVerifier);
         const state = generateState();
@@ -29,16 +34,20 @@ export default function AuthGuard({ children, baseUrl, clientId }: { children: R
             state,
         });
 
+        // Redirect to SSO - keep showing loader during redirect
         window.location.href = `${SSO_APP_BASE_URL}/oauth/authorize?${params}`
+        // Don't set isAuthenticating to false - we're redirecting away
     }
 
     useEffect(() => {
-        handleSSO().finally(() => {
-            setIsAuthenticating(false)
-        })
-    }, [])
+        // Only run SSO check after AuthProvider has finished loading
+        if (!ctx.isLoading) {
+            handleSSO();
+        }
+    }, [ctx.isLoading, ctx.isAuthenticated])
 
-    if (isAuthenticating) return <Loader />
+    // Show loader while AuthProvider is loading OR while redirecting to SSO
+    if (ctx.isLoading || isAuthenticating) return <Loader />
     if (ctx.hasIncompleteProfile) return <ProfileSetup onSuccess={(user) => {
         ctx.updateAuthUser(user)
         ctx.profileSetupCompleted()
