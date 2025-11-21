@@ -22,6 +22,9 @@
       "@/dict/*": [
         "./dict/*"
       ],
+      "@/shadcn/*": [
+        "../../packages/shadcn-ui/src/*"
+      ]
     }
   },
   "include": [
