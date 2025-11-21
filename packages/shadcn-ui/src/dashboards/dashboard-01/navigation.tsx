@@ -1,5 +1,6 @@
 import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from './sidebar'
 import { NavigationItem, NavigationProps } from './types'
+import Link from "next/link";
 
 export default function Navigation({ navigation }: NavigationProps) {
     return navigation.map(nav => {
@@ -18,9 +19,12 @@ const NavigationGroup = ({ items, props, label }: NavigationItem) => {
                             <SidebarMenuButton
                                 className={item.isActive ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear" : undefined}
                                 tooltip={item.title}
+                                asChild
                             >
-                                {item.icon}
-                                <span>{item.title}</span>
+                                <Link href={item.url}>
+                                    {item.icon}
+                                    <span>{item.title}</span>
+                                </Link>
                             </SidebarMenuButton>
                             {item.actionButton}
                         </SidebarMenuItem>

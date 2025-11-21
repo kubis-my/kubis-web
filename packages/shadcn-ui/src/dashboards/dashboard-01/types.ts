@@ -5,7 +5,7 @@ export type DashboardContextType = {
     user: User | undefined
     navigationList: NavigationItem[]
     breadcrumbList: BreadcrumbItem[]
-    storeUser: (user: User | undefined) => void
+    updateUser: Dispatch<SetStateAction<User | undefined>>
     updateNavigationList: Dispatch<SetStateAction<NavigationItem[]>>
     updateBreadcrumbList: Dispatch<SetStateAction<BreadcrumbItem[]>>
 }

@@ -13,10 +13,7 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
   const [user, setUser] = useState<User | undefined>(props.user)
   const [breadcrumbList, setBreadcrumbList] = useState<BreadcrumbItem[]>([])
 
-  const storeUser = (user: User | undefined) => {
-    setUser(user)
-  }
-
+  const updateUser = setUser
   const updateNavigationList = setNavigationList
   const updateBreadcrumbList = setBreadcrumbList;
 
@@ -25,7 +22,7 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
       user,
       navigationList,
       breadcrumbList,
-      storeUser,
+      updateUser,
       updateNavigationList,
       updateBreadcrumbList
     }}>
@@ -40,22 +37,14 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
         <AppSidebar variant="inset" navigations={navigationList} navigationUserItems={props.userCardItems} user={user} appName={props.appName} />
         <SidebarInset>
           <SiteHeader items={breadcrumbList} />
-          <div className="flex flex-1 flex-col">
-            <div className="@container/main flex flex-1 flex-col gap-2">
-              <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                <div className="px-4 lg:px-6">
-                  {children}
-                </div>
-              </div>
-            </div>
-          </div>
+          {children}
         </SidebarInset>
       </SidebarProvider>
     </DashboardContext.Provider>
   )
 }
 
-export function useDashboard() {
+export function useDashboard01() {
   const context = useContext(DashboardContext);
 
   if (context === undefined) {
