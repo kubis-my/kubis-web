@@ -14,8 +14,11 @@ export default function AuthGuard({ children, baseUrl, clientId }: { children: R
 
     const handleSSO = async () => {
         if (ctx.isAuthenticated) {
-            // User is authenticated, no redirect needed
-            setIsAuthenticating(false);
+            // User is authenticated, wait for profile status to be determined
+            // Only stop authenticating when we know if profile is complete or not
+            if (ctx.authUser || ctx.hasIncompleteProfile) {
+                setIsAuthenticating(false);
+            }
             return;
         }
 
@@ -44,7 +47,7 @@ export default function AuthGuard({ children, baseUrl, clientId }: { children: R
         if (!ctx.isLoading) {
             handleSSO();
         }
-    }, [ctx.isLoading, ctx.isAuthenticated])
+    }, [ctx.isLoading, ctx.isAuthenticated, ctx.authUser, ctx.hasIncompleteProfile])
 
     // Show loader while AuthProvider is loading OR while redirecting to SSO
     if (ctx.isLoading || isAuthenticating) return <Loader />
