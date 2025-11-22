@@ -8,24 +8,24 @@ import { useEffect } from "react";
 
 export default function DashboardContainer({ children }: Readonly<{ children: React.ReactNode; }>) {
     const { authUser } = useAuth();
-    const dashboardContext = useDashboard01();
+    const { updateUser, updateNavigationList } = useDashboard01();
     const currentPathname = usePathname();
 
     useEffect(() => {
         if (!authUser) {
-            dashboardContext.updateUser(undefined)
+            updateUser(undefined)
         } else {
-            dashboardContext.updateUser({
+            updateUser({
                 name: authUser.nickname,
                 email: authUser.credential?.email || "",
                 avatar: authUser.profilePicture || "",
                 avatarFallbackText: authUser.nickname.at(0)?.toUpperCase() ?? ""
             })
         }
-    }, [authUser])
+    }, [authUser, updateUser])
 
     useEffect(() => {
-        dashboardContext.updateNavigationList(cur => cur.map(item => ({
+        updateNavigationList(cur => cur.map(item => ({
             ...item,
             items: item.items.map(subItem => ({
                 ...subItem,
@@ -34,7 +34,7 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
                     : currentPathname.startsWith(subItem.url)
             }))
         })))
-    }, [currentPathname])
+    }, [currentPathname, updateNavigationList])
 
     return children
 }

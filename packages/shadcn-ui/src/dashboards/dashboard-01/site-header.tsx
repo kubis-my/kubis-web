@@ -3,6 +3,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Separator } from "../../components/separator"
 import { SidebarTrigger } from "./sidebar"
 import { SiteHeaderProps } from "./types"
+import Link from "next/link"
 
 export function SiteHeader({ items }: SiteHeaderProps) {
   return (
@@ -22,8 +23,10 @@ export function SiteHeader({ items }: SiteHeaderProps) {
                 return (
                   <Fragment key={i}>
                     <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href={item.url}>
-                        {item.name}
+                      <BreadcrumbLink asChild className="cursor-pointer">
+                        <Link className="cursor-pointer" href={item.url || ""}>
+                          {item.name}
+                        </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />

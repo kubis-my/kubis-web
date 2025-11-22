@@ -41,7 +41,7 @@ export default function SignInWithIdentifierForm() {
         });
 
         if (res.code === 200) {
-            const { twoFactorEnabled, sessionToken, redirectUrl } = res.raw;
+            const { sessionToken, redirectUrl } = res.raw;
 
             // Store session token encrypted in localStorage
             await secureTokenStorage.setSessionToken(sessionToken);

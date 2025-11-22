@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { SidebarInset, SidebarProvider } from "./sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
@@ -13,19 +13,17 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
   const [user, setUser] = useState<User | undefined>(props.user)
   const [breadcrumbList, setBreadcrumbList] = useState<BreadcrumbItem[]>([])
 
-  const updateUser = setUser
-  const updateNavigationList = setNavigationList
-  const updateBreadcrumbList = setBreadcrumbList;
+  const contextValue = useMemo(() => ({
+    user,
+    navigationList,
+    breadcrumbList,
+    updateUser: setUser,
+    updateNavigationList: setNavigationList,
+    updateBreadcrumbList: setBreadcrumbList
+  }), [user, navigationList, breadcrumbList]);
 
   return (
-    <DashboardContext.Provider value={{
-      user,
-      navigationList,
-      breadcrumbList,
-      updateUser,
-      updateNavigationList,
-      updateBreadcrumbList
-    }}>
+    <DashboardContext.Provider value={contextValue}>
       <SidebarProvider
         style={
           {

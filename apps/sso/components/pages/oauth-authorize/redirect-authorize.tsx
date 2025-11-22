@@ -57,7 +57,7 @@ export default function RedirectAuthorize({ children, ...input }: {
         };
 
         authorize();
-    }, [])
+    }, [input])
 
     return children
 }

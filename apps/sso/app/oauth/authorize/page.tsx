@@ -2,7 +2,7 @@ import RedirectAuthorize from "@/root/components/pages/oauth-authorize/redirect-
 import Loader from "@repo/shadcn-ui/custom-components/loader";
 import { notFound } from "next/navigation";
 
-export default async function page({ searchParams }: { searchParams: Promise<Record<string, any>> }) {
+export default async function page({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
     const { clientId, redirectUri, codeChallenge, state } = await searchParams
 
     if (!clientId || !redirectUri || !codeChallenge || !state) notFound()
