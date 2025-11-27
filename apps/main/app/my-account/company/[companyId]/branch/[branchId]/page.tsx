@@ -1,16 +1,22 @@
-import React from 'react'
+import CompanyBranchBillingAddressCard from '@/root/components/pages/company-branch-detail/company-branch-billing-address-card';
+import CompanyBranchDetailCard from '@/root/components/pages/company-branch-detail/company-branch-detail-card';
+import CompanyBranchDetailContainer from '@/root/components/pages/company-branch-detail/company-branch-detail-container';
+import CompanyBranchPhysicalAddressCard from '@/root/components/pages/company-branch-detail/company-branch-physical-address-card';
+import TabContainer from '@/root/components/pages/company-branch-detail/tab-container';
 
 export default async function BranchPage({ params }: { params: Promise<{ companyId: string; branchId: string }> }) {
     const { companyId, branchId } = await params;
 
     return (
-        <div className="flex flex-1 flex-col gap-4 p-4">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div className="bg-muted/50 aspect-video rounded-xl" />
-                <div className="bg-muted/50 aspect-video rounded-xl" />
-                <div className="bg-muted/50 aspect-video rounded-xl" />
+        <CompanyBranchDetailContainer companyId={Number(companyId)} branchId={Number(branchId)}>
+            <div className="flex flex-1 flex-col gap-4 p-4">
+                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+                    <CompanyBranchDetailCard />
+                    <CompanyBranchPhysicalAddressCard />
+                    <CompanyBranchBillingAddressCard />
+                </div>
+                <TabContainer />
             </div>
-            <div className="bg-muted/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-        </div>
+        </CompanyBranchDetailContainer>
     )
 }
