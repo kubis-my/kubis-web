@@ -1,39 +1,44 @@
-// ============================================
-// GraphQL Schema TypeScript Types
-// Generated from schema.gql
-// ============================================
 
-// ============================================
-// Scalars
-// ============================================
-export type DateTime = string; // ISO 8601 date-time string
+/*
+ * -------------------------------------------------------
+ * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+ * -------------------------------------------------------
+ */
 
-// ============================================
-// Enums
-// ============================================
+/* tslint:disable */
+/* eslint-disable */
+
 export enum DayOfWeek {
-  SUNDAY = 'SUNDAY',
-  MONDAY = 'MONDAY',
-  TUESDAY = 'TUESDAY',
-  WEDNESDAY = 'WEDNESDAY',
-  THURSDAY = 'THURSDAY',
-  FRIDAY = 'FRIDAY',
-  SATURDAY = 'SATURDAY',
+  SUNDAY = "SUNDAY",
+  MONDAY = "MONDAY",
+  TUESDAY = "TUESDAY",
+  WEDNESDAY = "WEDNESDAY",
+  THURSDAY = "THURSDAY",
+  FRIDAY = "FRIDAY",
+  SATURDAY = "SATURDAY"
 }
 
-// ============================================
-// Types
-// ============================================
+export interface BranchPaginationInput {
+  cursor?: Nullable<number>;
+  take: number;
+}
+
+export interface CompanyPaginationInput {
+  cursor?: Nullable<number>;
+  take: number;
+}
+
+export interface CompleteProfileInput {
+  firstName: string;
+  lastName: string;
+  nickname: string;
+}
+
 export interface PageInfo {
-  /** Cursor of the last item in the current page */
-  endCursor: number | null;
-  /** Whether there are more items available */
+  endCursor?: Nullable<number>;
   hasNextPage: boolean;
-  /** Total count of all items */
   total: number;
-  /** Current page number (1-indexed) */
   currentPage: number;
-  /** Total number of pages */
   totalPages: number;
 }
 
@@ -76,29 +81,34 @@ export interface Company {
   name: string;
   registrationNo: string;
   isUnclassified: boolean;
-  logo: string | null;
+  isActive: boolean;
+  logo?: Nullable<string>;
+  createdAt: DateTime;
+  updatedAt: DateTime;
+  totalActiveEmployee: number;
+  totalActiveBranch: number;
   user: User;
   userAccounts: UserAccount[];
-  companyPhysicalAddresses: CompanyPhysicalAddress | null;
-  companyBillingAddress: CompanyBillingAddress | null;
-  branches: PaginatedBranch;
+  companyPhysicalAddresses?: Nullable<CompanyPhysicalAddress>;
+  companyBillingAddress?: Nullable<CompanyBillingAddress>;
+  branches?: PaginatedBranch;
 }
 
 export interface Credential {
   publicId: string;
   email: string;
-  username: string | null;
+  username?: Nullable<string>;
 }
 
 export interface User {
   publicId: string;
-  firstName: string | null;
-  lastName: string | null;
-  nickname: string | null;
-  displayName: string | null;
-  profilePicture: string | null;
-  bod: DateTime | null;
-  gender: string | null;
+  firstName?: Nullable<string>;
+  lastName?: Nullable<string>;
+  nickname?: Nullable<string>;
+  displayName?: Nullable<string>;
+  profilePicture?: Nullable<string>;
+  bod?: Nullable<DateTime>;
+  gender?: Nullable<string>;
   createdAt: DateTime;
   updatedAt: DateTime;
   companies: Company[];
@@ -147,85 +157,54 @@ export interface Branch {
   publicId: string;
   name: string;
   code: string;
-  email: string | null;
-  phoneCode: string | null;
-  phoneNumber: string | null;
+  email?: Nullable<string>;
+  phoneCode?: Nullable<string>;
+  phoneNumber?: Nullable<string>;
   isActive: boolean;
   company: Company;
-  branchPhysicalAddresses: BranchPhysicalAddress | null;
-  branchBillingAddress: BranchBillingAddress | null;
+  branchPhysicalAddresses?: Nullable<BranchPhysicalAddress>;
+  branchBillingAddress?: Nullable<BranchBillingAddress>;
   branchOperationHours: BranchOperationHours[];
   userAccounts: UserAccount[];
 }
 
+export interface CompaniesOverview {
+  totalCompanies: number;
+  activeCompanies: number;
+  deactivatedCompanies: number;
+  companiesDeactivatedThisMonth: number;
+  retentionRate: number;
+  deactivationRate: number;
+  totalBranches: number;
+  newBranchesThisMonth: number;
+  newBranchesThisQuarter: number;
+  branchGrowthRate: number;
+  totalStaff: number;
+  newStaffThisQuarter: number;
+  staffGrowthRate: number;
+  averageStaffPerBranch: number;
+}
+
 export interface PaginatedCompany {
-  /** Array of companies for the current page */
   data: Company[];
-  /** Pagination metadata */
   pageInfo: PageInfo;
+  overview: CompaniesOverview;
 }
 
 export interface PaginatedBranch {
-  /** Array of branches for the current page */
   data: Branch[];
-  /** Pagination metadata */
   pageInfo: PageInfo;
 }
 
-// ============================================
-// Input Types
-// ============================================
-export interface CompanyPaginationInput {
-  /** Cursor pointing to the last item from previous page */
-  cursor?: number | null;
-  /** Number of items to fetch (max: 100) */
-  take?: number; // Default: 10
+export interface IQuery {
+  getAuthUser(): User | Promise<User>;
+  getUserCompanies(pagination: CompanyPaginationInput): PaginatedCompany | Promise<PaginatedCompany>;
+  getCompanyBranches(companyPublicId: string, pagination: BranchPaginationInput): PaginatedBranch | Promise<PaginatedBranch>;
 }
 
-export interface BranchPaginationInput {
-  /** Cursor pointing to the last item from previous page */
-  cursor?: number | null;
-  /** Number of items to fetch (max: 100) */
-  take?: number; // Default: 10
+export interface IMutation {
+  completeProfile(input: CompleteProfileInput): User | Promise<User>;
 }
 
-export interface CompleteProfileInput {
-  firstName: string;
-  lastName: string;
-  nickname: string;
-}
-
-// ============================================
-// Query & Mutation Response Types
-// ============================================
-export interface GetAuthUserResponse {
-  getAuthUser: User;
-}
-
-export interface GetUserCompaniesResponse {
-  getUserCompanies: PaginatedCompany;
-}
-
-export interface GetCompanyBranchesResponse {
-  getCompanyBranches: PaginatedBranch;
-}
-
-export interface CompleteProfileResponse {
-  completeProfile: User;
-}
-
-// ============================================
-// Query Variables
-// ============================================
-export interface GetUserCompaniesVariables {
-  pagination: CompanyPaginationInput;
-}
-
-export interface GetCompanyBranchesVariables {
-  companyPublicId: string;
-  pagination: BranchPaginationInput;
-}
-
-export interface CompleteProfileVariables {
-  input: CompleteProfileInput;
-}
+export type DateTime = any;
+type Nullable<T> = T | null;

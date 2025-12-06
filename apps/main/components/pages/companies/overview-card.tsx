@@ -10,8 +10,11 @@ import {
     CardTitle,
 } from "@/shadcn/components/card"
 import { Badge } from "@/shadcn/components/badge"
+import { useCompany } from "./company-container";
 
 export function OverviewCard() {
+    const ctx = useCompany();
+
     return (
         <>
             {/*
@@ -25,21 +28,21 @@ export function OverviewCard() {
                 <CardHeader>
                     <CardDescription>Active Companies</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        156 / 12
+                        {ctx.paginatedCompany.overview.activeCompanies} / {ctx.paginatedCompany.overview.deactivatedCompanies}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
                             <IconTrendingDown />
-                            -7.1%
+                            {ctx.paginatedCompany.overview.deactivationRate.toFixed(2)}%
                         </Badge>
                     </CardAction>
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        92.9% retention rate <IconTrendingDown className="size-4" />
+                        {ctx.paginatedCompany.overview.retentionRate.toFixed(2)}% retention rate <IconTrendingDown className="size-4" />
                     </div>
                     <div className="text-muted-foreground">
-                        12 companies deactivated this month
+                        {ctx.paginatedCompany.overview.companiesDeactivatedThisMonth} companies deactivated this month
                     </div>
                 </CardFooter>
             </Card>
@@ -54,20 +57,20 @@ export function OverviewCard() {
                 <CardHeader>
                     <CardDescription>Branch Companies</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        45
+                        {ctx.paginatedCompany.overview.totalBranches}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
                             <IconTrendingUp />
-                            +15.4%
+                            {ctx.paginatedCompany.overview.branchGrowthRate.toFixed(2)}%
                         </Badge>
                     </CardAction>
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        6 new branches this quarter <IconTrendingUp className="size-4" />
+                        {ctx.paginatedCompany.overview.newBranchesThisQuarter} new branches this quarter <IconTrendingUp className="size-4" />
                     </div>
-                    <div className="text-muted-foreground">Expanding to new regions</div>
+                    <div className="text-muted-foreground">{ctx.paginatedCompany.overview.newBranchesThisMonth} branches opened this month</div>
                 </CardFooter>
             </Card>
             {/*
@@ -82,20 +85,20 @@ export function OverviewCard() {
                 <CardHeader>
                     <CardDescription>Total Staff</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        2,847
+                        {ctx.paginatedCompany.overview.totalStaff}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
                             <IconTrendingUp />
-                            +13.7%
+                            {ctx.paginatedCompany.overview.staffGrowthRate.toFixed(2)}%
                         </Badge>
                     </CardAction>
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        +342 employees this quarter <IconTrendingUp className="size-4" />
+                        {ctx.paginatedCompany.overview.newStaffThisQuarter} employees this quarter <IconTrendingUp className="size-4" />
                     </div>
-                    <div className="text-muted-foreground">Average 63 staff per branch</div>
+                    <div className="text-muted-foreground">Average {ctx.paginatedCompany.overview.averageStaffPerBranch} staff per branch</div>
                 </CardFooter>
             </Card>
         </>

@@ -31,6 +31,7 @@
         "./constant/*": "./src/constant/*.ts",
         "./utils/*": "./src/utils/*.ts",
         "./actions/*": "./src/actions/*.ts",
-        "./hooks/*": "./src/hooks/*.ts"
+        "./hooks/*": "./src/hooks/*.ts",
+        "./types/*": "./src/types/*.ts"
     }
 }
