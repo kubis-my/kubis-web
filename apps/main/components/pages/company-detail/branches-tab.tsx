@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 import {
     ColumnDef,
     flexRender,
@@ -37,20 +36,21 @@ import {
     IconChevronsLeft,
     IconChevronsRight,
 } from "@tabler/icons-react";
+import { DateTime } from "luxon";
 import { TabsContent } from "@/shadcn/components/tabs";
 import { useCompanyDetail } from "./company-detail-container";
-import { branchSchema } from "@/root/libs/mock-up/company-data";
+import { Branch, DayOfWeek } from "@repo/commons/types/account-service-schema.type";
 
-const columns: ColumnDef<z.infer<typeof branchSchema>>[] = [
+const columns: ColumnDef<Branch>[] = [
     {
         accessorKey: "branchName",
         header: "Branch",
         cell: ({ row }) => {
             return (
                 <div className="flex flex-col">
-                    <span className="font-medium">{row.original.branchName}</span>
+                    <span className="font-medium">{row.original.name}</span>
                     <span className="text-sm text-muted-foreground">
-                        {row.original.branchCode}
+                        {row.original.code}
                     </span>
                 </div>
             );
@@ -63,7 +63,7 @@ const columns: ColumnDef<z.infer<typeof branchSchema>>[] = [
         cell: ({ row }) => {
             return (
                 <div className="flex flex-col gap-1">
-                    <div className="font-mono text-sm">{row.original.phone}</div>
+                    <div className="font-mono text-sm">{row.original.phoneCode} {row.original.phoneNumber}</div>
                     <div className="text-sm text-muted-foreground">
                         {row.original.email}
                     </div>
@@ -76,7 +76,7 @@ const columns: ColumnDef<z.infer<typeof branchSchema>>[] = [
         accessorKey: "physicalAddress",
         header: "Location",
         cell: ({ row }) => {
-            const { city, country } = row.original.physicalAddress;
+            const { city, country } = row.original.branchPhysicalAddresses!;
             return (
                 <div className="text-sm">
                     <div>{city}</div>
@@ -90,11 +90,37 @@ const columns: ColumnDef<z.infer<typeof branchSchema>>[] = [
         accessorKey: "operationHours",
         header: "Operating Hours",
         cell: ({ row }) => {
-            const { days, hours } = row.original.operationHours;
+            const openDays = row.original.branchOperationHours.filter(r => !r.isClosed);
+
+            if (openDays.length === 0) {
+                return <div className="text-sm text-muted-foreground">Closed</div>;
+            }
+
+            // Get the order of days
+            const dayOrder = Object.values(DayOfWeek);
+
+            // Sort open days by day of week
+            const sortedOpenDays = openDays.sort((a, b) =>
+                dayOrder.indexOf(a.dayOfWeek) - dayOrder.indexOf(b.dayOfWeek)
+            );
+
+            const firstDay = sortedOpenDays[0]!;
+            const lastDay = sortedOpenDays[sortedOpenDays.length - 1]!;
+
+            // Format day range
+            const dayRange = sortedOpenDays.length === 1
+                ? firstDay.dayOfWeek
+                : `${firstDay.dayOfWeek} - ${lastDay.dayOfWeek}`;
+
+            // Format time - use the first day's hours as representative
+            const openTime = DateTime.fromISO(firstDay.openTime).toFormat("h:mm a");
+            const closeTime = DateTime.fromISO(firstDay.closeTime).toFormat("h:mm a");
+            const timeRange = `${openTime} - ${closeTime}`;
+
             return (
                 <div className="text-sm">
-                    <div className="font-medium">{days}</div>
-                    <div className="text-muted-foreground">{hours}</div>
+                    <div className="font-medium">{dayRange}</div>
+                    <div className="text-muted-foreground">{timeRange}</div>
                 </div>
             );
         },
@@ -105,7 +131,7 @@ const columns: ColumnDef<z.infer<typeof branchSchema>>[] = [
         header: () => <div className="text-right">Employees</div>,
         cell: ({ row }) => (
             <div className="text-right font-medium tabular-nums">
-                {row.original.employees.toLocaleString()}
+                {row.original.totalOfEmployee}
             </div>
         ),
         size: 130,
@@ -114,13 +140,12 @@ const columns: ColumnDef<z.infer<typeof branchSchema>>[] = [
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => {
-            const isActive = row.original.status === "active";
             return (
                 <Badge
-                    variant={isActive ? "default" : "secondary"}
-                    className={isActive ? "bg-green-500 hover:bg-green-600" : ""}
+                    variant={row.original.isActive ? "default" : "secondary"}
+                    className={row.original.isActive ? "bg-green-500 hover:bg-green-600" : ""}
                 >
-                    {row.original.status}
+                    {row.original.isActive ? "Active" : "Inactive"}
                 </Badge>
             );
         },
@@ -128,7 +153,7 @@ const columns: ColumnDef<z.infer<typeof branchSchema>>[] = [
     },
 ];
 
-function BranchRow({ row, companyId }: { row: Row<z.infer<typeof branchSchema>>; companyId: number }) {
+function BranchRow({ row, companyId }: { row: Row<Branch>; companyId: string }) {
     const router = useRouter();
 
     const handleRowClick = (e: React.MouseEvent) => {
@@ -142,7 +167,7 @@ function BranchRow({ row, companyId }: { row: Row<z.infer<typeof branchSchema>>;
             return;
         }
 
-        router.push(`/my-account/company/${companyId}/branch/${row.original.id}`);
+        router.push(`/my-account/company/${companyId}/branch/${row.original.publicId}`);
     };
 
     return (
@@ -181,25 +206,19 @@ export default function BranchesTab() {
     });
 
     const table = useReactTable({
-        data: ctx.branches,
+        data: ctx.company?.branches?.data ?? [],
         columns,
         state: {
             sorting,
             pagination,
         },
-        getRowId: (row) => row.id.toString(),
+        getRowId: (row) => row.publicId,
         onSortingChange: setSorting,
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
     });
-
-    if (ctx.isLoading.branches) {
-        return (
-            <div className="bg-red-500/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-        );
-    }
 
     return (
         <TabsContent value="branches">
@@ -242,7 +261,7 @@ export default function BranchesTab() {
                                     <BranchRow
                                         key={row.id}
                                         row={row}
-                                        companyId={ctx.company?.id || 0}
+                                        companyId={ctx.company?.publicId || "-1"}
                                     />
                                 ))
                             ) : (

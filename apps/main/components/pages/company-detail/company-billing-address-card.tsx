@@ -25,7 +25,7 @@ export default function CompanyBillingAddressCard() {
         phone: ''
     });
 
-    if (ctx.isLoading.companyDetail) return <Skeleton className="aspect-video rounded-xl" />
+    if (ctx.isFetchingCompany) return <Skeleton className="aspect-video rounded-xl" />
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,12 +36,12 @@ export default function CompanyBillingAddressCard() {
 
     const resetForm = () => {
         setFormData({
-            street: ctx.company?.billingAddress?.street || '',
-            city: ctx.company?.billingAddress?.city || '',
-            state: ctx.company?.billingAddress?.state || '',
-            postalCode: ctx.company?.billingAddress?.postalCode || '',
-            country: ctx.company?.billingAddress?.country || '',
-            phone: ctx.company?.billingAddress?.phone || ''
+            street: ctx.company?.companyBillingAddress?.street || '',
+            city: ctx.company?.companyBillingAddress?.city || '',
+            state: ctx.company?.companyBillingAddress?.state || '',
+            postalCode: ctx.company?.companyBillingAddress?.postalCode || '',
+            country: ctx.company?.companyBillingAddress?.country || '',
+            phone: ctx.company?.companyBillingAddress?.phoneNumber || ''
         });
     };
 
@@ -61,7 +61,7 @@ export default function CompanyBillingAddressCard() {
                                 <IconBuilding className="size-3.5 text-primary shrink-0" /> Street
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.billingAddress?.street}
+                                {ctx.company?.companyBillingAddress?.street ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -69,7 +69,7 @@ export default function CompanyBillingAddressCard() {
                                 <IconMapPin className="size-3.5 shrink-0" /> City
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.billingAddress?.city}
+                                {ctx.company?.companyBillingAddress?.city ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -77,7 +77,7 @@ export default function CompanyBillingAddressCard() {
                                 <IconMapPin className="size-3.5 shrink-0" /> State
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.billingAddress?.state}
+                                {ctx.company?.companyBillingAddress?.state ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -85,7 +85,7 @@ export default function CompanyBillingAddressCard() {
                                 <IconMailbox className="size-3.5 shrink-0" /> Postal Code
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.billingAddress?.postalCode}
+                                {ctx.company?.companyBillingAddress?.postalCode ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -93,7 +93,7 @@ export default function CompanyBillingAddressCard() {
                                 <IconWorld className="size-3.5 shrink-0" /> Country
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.billingAddress?.country}
+                                {ctx.company?.companyBillingAddress?.country ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center px-1 py-2'>
@@ -102,7 +102,11 @@ export default function CompanyBillingAddressCard() {
                                 <span className="text-sm font-medium">Phone</span>
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.billingAddress?.phone}
+                                {
+                                    (ctx.company?.companyBillingAddress?.phoneCode && ctx.company?.companyBillingAddress?.phoneNumber)
+                                        ? `${ctx.company?.companyBillingAddress?.phoneCode} ${ctx.company?.companyBillingAddress?.phoneNumber}`
+                                        : "-"
+                                }
                             </div>
                         </div>
                     </CardContent>

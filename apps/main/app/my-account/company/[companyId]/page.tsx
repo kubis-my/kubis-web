@@ -9,7 +9,7 @@ export default async function page({ params }: { params: Promise<{ companyId: st
     const { companyId } = await params;
 
     return (
-        <CompanyDetailContainer id={Number(companyId)}>
+        <CompanyDetailContainer id={companyId}>
             <div className="flex flex-1 flex-col gap-4 p-4">
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <CompanyDetailCard />

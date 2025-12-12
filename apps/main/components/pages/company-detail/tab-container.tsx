@@ -15,14 +15,14 @@ export default function TabContainer() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState("branches");
 
-    if (ctx.isLoading.branches) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
+    if (ctx.isFetchingCompany) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
 
     const handleAddBranch = () => {
-        router.push(`/my-account/company/${ctx.company?.id}/branch/new`);
+        router.push(`/my-account/company/${ctx.company?.publicId}/branch/new`);
     };
 
     const handleAddUser = () => {
-        router.push(`/my-account/company/${ctx.company?.id}/user/new`);
+        router.push(`/my-account/company/${ctx.company?.publicId}/user/new`);
     };
 
     return (

@@ -23,7 +23,7 @@ export default function CompanyDetailCard() {
         status: false
     });
 
-    if (ctx.isLoading.companyDetail) return <Skeleton className="aspect-video rounded-xl" />
+    if (ctx.isFetchingCompany) return <Skeleton className="aspect-video rounded-xl" />
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -34,9 +34,9 @@ export default function CompanyDetailCard() {
 
     const resetForm = () => {
         setFormData({
-            companyName: ctx.company?.companyName || '',
-            registrationNumber: ctx.company?.registrationNumber || '',
-            status: ctx.company?.status === 'active'
+            companyName: ctx.company?.name || '',
+            registrationNumber: ctx.company?.registrationNo || '',
+            status: ctx.company?.isActive ?? false
         });
     };
 
@@ -56,7 +56,7 @@ export default function CompanyDetailCard() {
                                 <IconBuildingStore className="size-3.5 text-primary shrink-0" /> Name
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.companyName}
+                                {ctx.company?.name ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -64,7 +64,7 @@ export default function CompanyDetailCard() {
                                 <IconFileDigit className="size-3.5 shrink-0" /> Register Number
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.registrationNumber}
+                                {ctx.company?.registrationNo ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -72,7 +72,7 @@ export default function CompanyDetailCard() {
                                 <IconCalendar className="size-3.5 shrink-0" /> Register Date
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.registeredAt}
+                                {ctx.company?.createdAt ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -80,7 +80,7 @@ export default function CompanyDetailCard() {
                                 <IconCalendarClock className="size-3.5 shrink-0" /> Last Update
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.registeredAt}
+                                {ctx.company?.updatedAt ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center px-1 py-2'>
@@ -89,7 +89,7 @@ export default function CompanyDetailCard() {
                                 <span className="text-sm font-medium">Status</span>
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.status}
+                                {ctx.company?.isActive === undefined ? "-" : ctx.company?.isActive ? "Active" : "Inactive"}
                             </div>
                         </div>
                     </CardContent>
@@ -135,7 +135,7 @@ export default function CompanyDetailCard() {
                                 <Label className="text-muted-foreground">Registration Date</Label>
                                 <Input
                                     disabled
-                                    value={ctx.company?.registeredAt || 'N/A'}
+                                    value={ctx.company?.createdAt || '-'}
                                     className="cursor-not-allowed"
                                 />
                             </div>
@@ -144,7 +144,7 @@ export default function CompanyDetailCard() {
                                 <Label className="text-muted-foreground">Last Updated</Label>
                                 <Input
                                     disabled
-                                    value={ctx.company?.registeredAt}
+                                    value={ctx.company?.updatedAt || '-'}
                                     className="cursor-not-allowed"
                                 />
                             </div>

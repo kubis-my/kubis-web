@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
 import {
     ColumnDef,
     flexRender,
@@ -39,16 +38,16 @@ import {
 } from "@tabler/icons-react";
 import { TabsContent } from "@/shadcn/components/tabs";
 import { useCompanyDetail } from "./company-detail-container";
-import { userSchema } from "@/root/libs/mock-up/company-data";
+import { UserAccount, UserAccountStatus } from "@repo/commons/types/account-service-schema.type";
 
-const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
+const columns: ColumnDef<UserAccount>[] = [
     {
         accessorKey: "userCode",
         header: "User Code",
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm font-medium">
-                    {row.original.userCode}
+                    #{row.original.code}
                 </div>
             );
         },
@@ -59,13 +58,13 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
         accessorKey: "fullName",
         header: "Full Name",
         cell: ({ row }) => {
-            const fullName = `${row.original.firstName} ${row.original.lastName}`;
+            const fullName = `${row.original.user.firstName} ${row.original.user.lastName}`;
             return (
                 <div className="flex flex-col">
                     <span className="font-medium">{fullName}</span>
-                    {row.original.nickname && (
+                    {row.original.user.nickname && (
                         <span className="text-sm text-muted-foreground">
-                            &quot;{row.original.nickname}&quot;
+                            &quot;{row.original.user.nickname}&quot;
                         </span>
                     )}
                 </div>
@@ -79,7 +78,7 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
         cell: ({ row }) => {
             return (
                 <div className="text-sm">
-                    {row.original.position}
+                    {row.original.position || "-"}
                 </div>
             );
         },
@@ -91,7 +90,7 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm">
-                    {row.original.phone}
+                    {row.original.phoneCode && row.original.phoneNumber ? `${row.original.phoneCode} ${row.original.phoneNumber}` : "-"}
                 </div>
             );
         },
@@ -103,10 +102,10 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
         cell: ({ row }) => {
             const status = row.original.status;
             const statusConfig = {
-                active: { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", label: "Active" },
-                inactive: { variant: "secondary" as const, className: "", label: "Inactive" },
-                pending: { variant: "default" as const, className: "bg-amber-500 hover:bg-amber-600", label: "Pending Invitation" },
-                expired: { variant: "destructive" as const, className: "", label: "Expired Invitation" },
+                [UserAccountStatus.ACTIVE]: { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", label: "Active" },
+                [UserAccountStatus.INACTIVE]: { variant: "secondary" as const, className: "", label: "Inactive" },
+                [UserAccountStatus.PENDING_INVITATION]: { variant: "default" as const, className: "bg-amber-500 hover:bg-amber-600", label: "Pending Invitation" },
+                [UserAccountStatus.EXPIRED_INVITATION]: { variant: "destructive" as const, className: "", label: "Expired Invitation" },
             };
 
             const config = statusConfig[status];
@@ -124,7 +123,7 @@ const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
     },
 ];
 
-function UserRow({ row, companyId }: { row: Row<z.infer<typeof userSchema>>; companyId: number }) {
+function UserRow({ row, companyId }: { row: Row<UserAccount>; companyId: string }) {
     const router = useRouter();
 
     const handleRowClick = (e: React.MouseEvent) => {
@@ -138,7 +137,7 @@ function UserRow({ row, companyId }: { row: Row<z.infer<typeof userSchema>>; com
             return;
         }
 
-        router.push(`/my-account/company/${companyId}/user/${row.original.id}`);
+        router.push(`/my-account/company/${companyId}/user/${row.original.publicId}`);
     };
 
     return (
@@ -175,25 +174,19 @@ export default function UsersTab() {
     });
 
     const table = useReactTable({
-        data: ctx.users,
+        data: ctx.company?.userAccounts?.data || [],
         columns,
         state: {
             sorting,
             pagination,
         },
-        getRowId: (row) => row.id.toString(),
+        getRowId: (row) => row.publicId,
         onSortingChange: setSorting,
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
     });
-
-    if (ctx.isLoading.users) {
-        return (
-            <div className="bg-red-500/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-        );
-    }
 
     return (
         <TabsContent value="users">
@@ -234,7 +227,7 @@ export default function UsersTab() {
                                     <UserRow
                                         key={row.id}
                                         row={row}
-                                        companyId={ctx.company?.id || 0}
+                                        companyId={ctx.company?.publicId || "-1"}
                                     />
                                 ))
                             ) : (

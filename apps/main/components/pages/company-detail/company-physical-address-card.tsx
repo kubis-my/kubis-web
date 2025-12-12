@@ -25,7 +25,7 @@ export default function CompanyPhysicalAddressCard() {
         phone: ''
     });
 
-    if (ctx.isLoading.companyDetail) return <Skeleton className="aspect-video rounded-xl" />
+    if (ctx.isFetchingCompany) return <Skeleton className="aspect-video rounded-xl" />
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,12 +36,12 @@ export default function CompanyPhysicalAddressCard() {
 
     const resetForm = () => {
         setFormData({
-            street: ctx.company?.physicalAddress?.street || '',
-            city: ctx.company?.physicalAddress?.city || '',
-            state: ctx.company?.physicalAddress?.state || '',
-            postalCode: ctx.company?.physicalAddress?.postalCode || '',
-            country: ctx.company?.physicalAddress?.country || '',
-            phone: ctx.company?.physicalAddress?.phone || ''
+            street: ctx.company?.companyPhysicalAddresses?.street || '',
+            city: ctx.company?.companyPhysicalAddresses?.city || '',
+            state: ctx.company?.companyPhysicalAddresses?.state || '',
+            postalCode: ctx.company?.companyPhysicalAddresses?.postalCode || '',
+            country: ctx.company?.companyPhysicalAddresses?.country || '',
+            phone: ctx.company?.companyPhysicalAddresses?.phoneNumber || ''
         });
     };
 
@@ -61,7 +61,7 @@ export default function CompanyPhysicalAddressCard() {
                                 <IconBuilding className="size-3.5 text-primary shrink-0" /> Street
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.physicalAddress?.street}
+                                {ctx.company?.companyPhysicalAddresses?.street ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -69,7 +69,7 @@ export default function CompanyPhysicalAddressCard() {
                                 <IconMapPin className="size-3.5 shrink-0" /> City
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.physicalAddress?.city}
+                                {ctx.company?.companyPhysicalAddresses?.city ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -77,7 +77,7 @@ export default function CompanyPhysicalAddressCard() {
                                 <IconMapPin className="size-3.5 shrink-0" /> State
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.physicalAddress?.state}
+                                {ctx.company?.companyPhysicalAddresses?.state ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -85,7 +85,7 @@ export default function CompanyPhysicalAddressCard() {
                                 <IconMailbox className="size-3.5 shrink-0" /> Postal Code
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.physicalAddress?.postalCode}
+                                {ctx.company?.companyPhysicalAddresses?.postalCode ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -93,7 +93,7 @@ export default function CompanyPhysicalAddressCard() {
                                 <IconWorld className="size-3.5 shrink-0" /> Country
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.physicalAddress?.country}
+                                {ctx.company?.companyPhysicalAddresses?.country ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center px-1 py-2'>
@@ -102,7 +102,11 @@ export default function CompanyPhysicalAddressCard() {
                                 <span className="text-sm font-medium">Phone</span>
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.physicalAddress?.phone}
+                                {
+                                    (ctx.company?.companyPhysicalAddresses?.phoneCode && ctx.company?.companyPhysicalAddresses?.phoneNumber)
+                                        ? `${ctx.company?.companyPhysicalAddresses?.phoneCode} ${ctx.company?.companyPhysicalAddresses?.phoneNumber}`
+                                        : "-"
+                                }
                             </div>
                         </div>
                     </CardContent>

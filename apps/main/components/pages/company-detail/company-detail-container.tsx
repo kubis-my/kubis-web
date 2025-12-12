@@ -1,107 +1,53 @@
 "use client";
 
 import { ROUTE } from "@/root/libs/constants";
-import { branchDataByCompany, branchSchema, companyData, companySchema, userDataByCompany, userSchema } from "@/root/libs/mock-up/company-data";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { z } from "zod"
+import { useGetCompanyDetail } from "@repo/commons/hooks/use-graphql-company";
+import { Company } from "@repo/commons/types/account-service-schema.type";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-export type IsLoadingType = {
-    companyDetail: boolean
-    branches: boolean
-    users: boolean
-}
 
 export type CompanyDetailContext = {
-    company?: z.infer<typeof companySchema>
-    branches: z.infer<typeof branchSchema>[]
-    users: z.infer<typeof userSchema>[]
-    isLoading: IsLoadingType
+    company?: Company
+    isFetchingCompany: boolean
 }
 
 const CompanyDetailContext = createContext<CompanyDetailContext | undefined>(undefined);
 
-export default function CompanyDetailContainer({ children, id }: Readonly<{ children: React.ReactNode, id: number }>) {
+export default function CompanyDetailContainer({ children, id }: Readonly<{ children: React.ReactNode, id: string }>) {
     const { updateBreadcrumbList } = useDashboard01();
-
-    const [company, setCompany] = useState<z.infer<typeof companySchema> | undefined>(undefined);
-    const [branches, setBranches] = useState<z.infer<typeof branchSchema>[]>([]);
-    const [users, setUsers] = useState<z.infer<typeof userSchema>[]>([]);
-    const [isLoading, setIsLoading] = useState<IsLoadingType>({
-        companyDetail: true,
-        branches: true,
-        users: true,
+    const { data, loading: isFetchingCompany } = useGetCompanyDetail({
+        companyPublicId: id,
+        branchPaginationInput: {
+            take: 10
+        },
+        userAccountPaginationInput: {
+            take: 10
+        }
     })
 
-    const getCompanyDetail = useCallback(async () => {
-        // Simulate actual graphql api called
-        await new Promise(res => setTimeout(() => res(true), 3000));
-
-        const company = companyData.find(row => row.id === Number(id));
-
-        if (!company) {
-            return;
-        }
-
-        updateBreadcrumbList([
-            {
-                name: "Company",
-                url: ROUTE.MY_ACCOUNT.COMPANY
-            },
-            {
-                name: company.companyName
-            },
-        ]);
-
-        setCompany(company)
-        setIsLoading(cur => ({
-            ...cur,
-            companyDetail: false
-        }))
-    }, [id, updateBreadcrumbList])
-
-    const getBranchList = useCallback(async () => {
-        // Simulate actual graphql api called
-        await new Promise(res => setTimeout(() => res(true), 3000));
-
-        const companyBranches = branchDataByCompany[Number(id)] || [];
-        setBranches(companyBranches);
-
-        setIsLoading(cur => ({
-            ...cur,
-            branches: false
-        }))
-    }, [id])
-
-    const getUserList = useCallback(async () => {
-        // Simulate actual graphql api called
-        await new Promise(res => setTimeout(() => res(true), 3000));
-
-        const companyUsers = userDataByCompany[Number(id)] || [];
-        setUsers(companyUsers);
-
-        setIsLoading(cur => ({
-            ...cur,
-            users: false
-        }))
-    }, [id])
+    const [company, setCompany] = useState<Company | undefined>(undefined);
 
     useEffect(() => {
-        const fetchData = async () => {
-            await getCompanyDetail()
-            await getBranchList()
-            await getUserList()
-        }
+        setCompany(data?.getCompanyDetail)
 
-        fetchData()
-    }, [getCompanyDetail, getBranchList, getUserList])
+        if (data?.getCompanyDetail) {
+            updateBreadcrumbList([
+                {
+                    name: "Company",
+                    url: ROUTE.MY_ACCOUNT.COMPANY
+                },
+                {
+                    name: data.getCompanyDetail.name
+                },
+            ]);
+        }
+    }, [data])
 
     const contextValue = useMemo(() => ({
         company,
-        branches,
-        users,
-        isLoading
-    }), [company, branches, users, isLoading]);
+        isFetchingCompany,
+    }), [company, isFetchingCompany]);
 
     return (
         <CompanyDetailContext.Provider value={contextValue}>

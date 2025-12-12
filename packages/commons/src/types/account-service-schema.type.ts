@@ -8,6 +8,13 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export enum UserAccountStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  PENDING_INVITATION = "PENDING_INVITATION",
+  EXPIRED_INVITATION = "EXPIRED_INVITATION"
+}
+
 export enum DayOfWeek {
   SUNDAY = "SUNDAY",
   MONDAY = "MONDAY",
@@ -16,6 +23,11 @@ export enum DayOfWeek {
   THURSDAY = "THURSDAY",
   FRIDAY = "FRIDAY",
   SATURDAY = "SATURDAY"
+}
+
+export interface UserAccountPaginationInput {
+  cursor?: Nullable<number>;
+  take: number;
 }
 
 export interface BranchPaginationInput {
@@ -40,12 +52,6 @@ export interface PageInfo {
   total: number;
   currentPage: number;
   totalPages: number;
-}
-
-export interface UserAccount {
-  publicId: string;
-  user: User;
-  company: Company;
 }
 
 export interface CompanyPhysicalAddress {
@@ -88,10 +94,24 @@ export interface Company {
   totalActiveEmployee: number;
   totalActiveBranch: number;
   user: User;
-  userAccounts: UserAccount[];
+  userAccounts?: PaginatedUserAccount;
   companyPhysicalAddresses?: Nullable<CompanyPhysicalAddress>;
   companyBillingAddress?: Nullable<CompanyBillingAddress>;
   branches?: PaginatedBranch;
+}
+
+export interface UserAccount {
+  publicId: string;
+  code: string;
+  status: UserAccountStatus;
+  joinedAt?: Nullable<DateTime>;
+  phoneCode?: Nullable<string>;
+  phoneNumber?: Nullable<string>;
+  position?: Nullable<string>;
+  companyPublicId: string;
+  branchPublicId: string;
+  user: User;
+  company: Company;
 }
 
 export interface Credential {
@@ -161,6 +181,7 @@ export interface Branch {
   phoneCode?: Nullable<string>;
   phoneNumber?: Nullable<string>;
   isActive: boolean;
+  totalOfEmployee: number;
   company: Company;
   branchPhysicalAddresses?: Nullable<BranchPhysicalAddress>;
   branchBillingAddress?: Nullable<BranchBillingAddress>;
@@ -196,9 +217,15 @@ export interface PaginatedBranch {
   pageInfo: PageInfo;
 }
 
+export interface PaginatedUserAccount {
+  data: UserAccount[];
+  pageInfo: PageInfo;
+}
+
 export interface IQuery {
   getAuthUser(): User | Promise<User>;
   getUserCompanies(pagination: CompanyPaginationInput): PaginatedCompany | Promise<PaginatedCompany>;
+  getCompanyDetail(companyPublicId: string): Company | Promise<Company>;
   getCompanyBranches(companyPublicId: string, pagination: BranchPaginationInput): PaginatedBranch | Promise<PaginatedBranch>;
 }
 
