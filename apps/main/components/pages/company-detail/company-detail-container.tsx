@@ -2,10 +2,117 @@
 
 import { ROUTE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
-import { useGetCompanyDetail } from "@repo/commons/hooks/use-graphql-company";
-import { Company } from "@repo/commons/types/account-service-schema.type";
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
+import { BranchPaginationInput, Company, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
+interface GetCompanyDetailResponse {
+    getCompanyDetail: Company;
+}
+
+interface GetCompanyDetailVariables {
+    companyPublicId: string;
+    branchPaginationInput: BranchPaginationInput
+    userAccountPaginationInput: UserAccountPaginationInput
+}
+
+export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, GetCompanyDetailVariables> = gql`
+    query GetCompanyDetail($companyPublicId:String!,$branchPaginationInput:BranchPaginationInput!,$userAccountPaginationInput:UserAccountPaginationInput!){
+        getCompanyDetail(companyPublicId:$companyPublicId){
+            publicId
+            name
+            registrationNo
+            isUnclassified
+            isActive
+            logo
+            createdAt
+            updatedAt
+            totalActiveEmployee
+            totalActiveBranch
+            companyPhysicalAddresses {
+                publicId
+                street
+                city
+                state
+                postalCode
+                country
+                phoneCode
+                phoneNumber
+                createdAt
+                updatedAt
+            }
+            companyBillingAddress {
+                publicId
+                street
+                city
+                state
+                postalCode
+                country
+                phoneCode
+                phoneNumber
+                createdAt
+                updatedAt
+            }
+            branches(pagination:$branchPaginationInput) {
+                data { 
+                    publicId
+                    name
+                    code
+                    email
+                    phoneCode
+                    phoneNumber
+                    isActive
+                    branchPhysicalAddresses {
+                        city
+                        state
+                        country
+                    }
+                    branchOperationHours {
+                        dayOfWeek
+                        openTime
+                        closeTime
+                        isClosed
+                    }
+                    totalOfEmployee
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                    total
+                    currentPage
+                    totalPages
+                }
+            }
+            userAccounts (pagination:$userAccountPaginationInput){
+                data {
+                    publicId
+                    status
+                    joinedAt
+                    companyPublicId
+                    branchPublicId
+                    phoneCode
+                    phoneNumber
+                    position
+                    code
+                    user {
+                        publicId
+                        firstName
+                        lastName
+                        nickname
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                    total
+                    currentPage
+                    totalPages
+                }
+            }
+        }
+    }
+`
 
 export type CompanyDetailContext = {
     company?: Company
@@ -16,13 +123,15 @@ const CompanyDetailContext = createContext<CompanyDetailContext | undefined>(und
 
 export default function CompanyDetailContainer({ children, id }: Readonly<{ children: React.ReactNode, id: string }>) {
     const { updateBreadcrumbList } = useDashboard01();
-    const { data, loading: isFetchingCompany } = useGetCompanyDetail({
-        companyPublicId: id,
-        branchPaginationInput: {
-            take: 10
-        },
-        userAccountPaginationInput: {
-            take: 10
+    const { data, loading: isFetchingCompany } = useQuery(GET_COMPANY_DETAIL, {
+        variables: {
+            companyPublicId: id,
+            branchPaginationInput: {
+                take: 10
+            },
+            userAccountPaginationInput: {
+                take: 10
+            }
         }
     })
 

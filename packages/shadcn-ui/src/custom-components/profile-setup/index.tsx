@@ -7,9 +7,35 @@ import { Button } from "../../components/button";
 import { useCallback, useState } from "react";
 import ShowErrorText from "../show-error-text";
 import { toast } from "sonner";
-import { CompleteProfileInput, useCompleteProfile, User } from "@repo/commons/hooks/use-graphql-user";
 import { hasGraphQLError } from "@repo/commons/utils/graphql";
 import { convertErrorMessageListToObject } from "@repo/commons/utils/error-message";
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { CompleteProfileInput, User } from "@repo/commons/types/account-service-schema.type";
+import { useMutation } from "@apollo/client/react";
+
+const COMPLETE_PROFILE: TypedDocumentNode<{ completeProfile: User }, { input: CompleteProfileInput }> = gql`
+    mutation CompleteProfile($input: CompleteProfileInput!) {
+        completeProfile(input: $input) {
+            publicId
+            firstName
+            lastName
+            nickname
+            displayName
+            profilePicture
+            bod
+            gender
+            createdAt
+            updatedAt
+            companies {
+                publicId
+                name
+                registrationNo
+                isUnclassified
+                logo
+            }
+        }
+    }
+`
 
 interface ProfileSetupProps {
   onSuccess: (user: User) => void;
@@ -21,7 +47,7 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
   const [nickname, setNickname] = useState("");
   const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
 
-  const [completeProfile, { loading }] = useCompleteProfile();
+  const [completeProfile, { loading }] = useMutation(COMPLETE_PROFILE);
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();

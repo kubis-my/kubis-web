@@ -1,9 +1,60 @@
 "use client";
 
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
-import { useLazyUserCompanies } from "@repo/commons/hooks/use-graphql-company";
 import { CompanyPaginationInput, PaginatedCompany } from "@repo/commons/types/account-service-schema.type";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
+
+interface GetUserCompaniesResponse {
+    getUserCompanies: PaginatedCompany;
+}
+
+interface GetUserCompaniesVariables {
+    pagination: CompanyPaginationInput;
+}
+
+const GET_USER_COMPANIES: TypedDocumentNode<GetUserCompaniesResponse, GetUserCompaniesVariables> = gql`
+    query GetUserCompanies($pagination: CompanyPaginationInput!) {
+        getUserCompanies(pagination: $pagination) {
+            data {
+                publicId
+                name
+                registrationNo
+                isUnclassified
+                logo
+                isActive
+                createdAt
+                updatedAt
+                totalActiveEmployee
+                totalActiveBranch
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                total
+                currentPage
+                totalPages
+            }
+            overview {
+                activeCompanies
+                totalCompanies
+                deactivatedCompanies
+                companiesDeactivatedThisMonth
+                retentionRate
+                deactivationRate
+                totalBranches
+                newBranchesThisQuarter
+                branchGrowthRate
+                totalStaff
+                newStaffThisQuarter
+                staffGrowthRate
+                averageStaffPerBranch
+                newBranchesThisMonth
+            }
+        }
+    }
+`
 
 export type CompanyContext = {
     paginatedCompany: PaginatedCompany;
@@ -46,7 +97,7 @@ const CompanyContext = createContext<CompanyContext | undefined>(undefined);
 
 export default function CompanyContainer({ children }: Readonly<{ children: React.ReactNode; }>) {
     const { updateBreadcrumbList } = useDashboard01();
-    const [getUserCompanies, { data, loading: isFetchingCompany }] = useLazyUserCompanies();
+    const [getUserCompanies, { data, loading: isFetchingCompany }] = useLazyQuery(GET_USER_COMPANIES);
     const [pageSize, setPageSize] = useState(10);
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 

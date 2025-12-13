@@ -6,8 +6,40 @@ import { secureTokenStorage } from "@repo/commons/utils/secure-token-storage";
 import { authClient } from '@repo/commons/lib/auth-client';
 import Loader from '../custom-components/loader';
 import { initEncryption } from '@repo/commons/utils/token-encryption';
-import { useAuthUser, User } from '@repo/commons/hooks/use-graphql-user';
 import { hasGraphQLError } from "@repo/commons/utils/graphql"
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { User } from '@repo/commons/types/account-service-schema.type';
+import { useQuery } from '@apollo/client/react';
+
+const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
+    query GetAuthUser {
+        getAuthUser {
+            publicId
+            firstName
+            lastName
+            nickname
+            displayName
+            profilePicture
+            bod
+            gender
+            createdAt
+            updatedAt
+            companies {
+                publicId
+                name
+                registrationNo
+                isUnclassified
+                logo
+            }
+            credential{
+                publicId
+                email
+                username
+            }
+        }
+    }
+`;
+
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -31,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     // Fetch user data from GraphQL only when authenticated
-    const { data: userData, error: userError } = useAuthUser({ skip: !isAuthenticated });
+    const { data: userData, error: userError } = useQuery(GET_AUTH_USER, { skip: !isAuthenticated });
 
     const logout = useCallback(async () => {
         try {

@@ -20,6 +20,9 @@ importers:
 
   apps/main:
     dependencies:
+      '@apollo/client':
+        specifier: ^4.0.9
+        version: 4.0.9(graphql@16.12.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(rxjs@7.8.2)
       '@repo/commons':
         specifier: workspace:*
         version: link:../../packages/commons
