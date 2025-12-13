@@ -12,6 +12,7 @@ import { Input } from '@/shadcn/components/input';
 import { Separator } from '@/shadcn/components/separator';
 import { Button } from '@/shadcn/components/button';
 import { Switch } from '@/shadcn/components/switch';
+import { formatDateTime } from '@repo/commons/utils/date';
 
 export default function CompanyDetailCard() {
     const ctx = useCompanyDetail();
@@ -72,7 +73,7 @@ export default function CompanyDetailCard() {
                                 <IconCalendar className="size-3.5 shrink-0" /> Register Date
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.createdAt ?? "-"}
+                                {formatDateTime(ctx.company?.createdAt)}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -80,7 +81,7 @@ export default function CompanyDetailCard() {
                                 <IconCalendarClock className="size-3.5 shrink-0" /> Last Update
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.updatedAt ?? "-"}
+                                {formatDateTime(ctx.company?.updatedAt)}
                             </div>
                         </div>
                         <div className='flex justify-between items-center px-1 py-2'>
@@ -135,7 +136,7 @@ export default function CompanyDetailCard() {
                                 <Label className="text-muted-foreground">Registration Date</Label>
                                 <Input
                                     disabled
-                                    value={ctx.company?.createdAt || '-'}
+                                    value={formatDateTime(ctx.company?.createdAt)}
                                     className="cursor-not-allowed"
                                 />
                             </div>
@@ -144,7 +145,7 @@ export default function CompanyDetailCard() {
                                 <Label className="text-muted-foreground">Last Updated</Label>
                                 <Input
                                     disabled
-                                    value={ctx.company?.updatedAt || '-'}
+                                    value={formatDateTime(ctx.company?.updatedAt)}
                                     className="cursor-not-allowed"
                                 />
                             </div>
