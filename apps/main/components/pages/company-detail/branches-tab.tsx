@@ -1,18 +1,12 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import {
-    ColumnDef,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
-    Row,
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Badge } from "@repo/shadcn-ui/components/badge";
 import { Button } from "@repo/shadcn-ui/components/button";
 import { Label } from "@repo/shadcn-ui/components/label";
 import {
@@ -33,192 +27,134 @@ import {
 import {
     IconChevronLeft,
     IconChevronRight,
-    IconChevronsLeft,
-    IconChevronsRight,
 } from "@tabler/icons-react";
-import { DateTime } from "luxon";
 import { TabsContent } from "@/shadcn/components/tabs";
 import { useCompanyDetail } from "./company-detail-container";
-import { Branch, DayOfWeek } from "@repo/commons/types/account-service-schema.type";
+import { BranchPaginationInput, PaginatedBranch } from "@repo/commons/types/account-service-schema.type";
+import { BRANCH_PAGINATION_SIZE } from "./hooks";
+import { useCallback, useEffect, useState } from "react";
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client/react";
+import { BranchColumn } from "./components/branch-column";
+import { BranchRow } from "./components/branch-row";
+import { BranchSkeletonRow } from "./components/branch-skeleton-row";
 
-const columns: ColumnDef<Branch>[] = [
-    {
-        accessorKey: "branchName",
-        header: "Branch",
-        cell: ({ row }) => {
-            return (
-                <div className="flex flex-col">
-                    <span className="font-medium">{row.original.name}</span>
-                    <span className="text-sm text-muted-foreground">
-                        {row.original.code}
-                    </span>
-                </div>
-            );
-        },
-        enableHiding: false,
-    },
-    {
-        accessorKey: "contact",
-        header: "Contact",
-        cell: ({ row }) => {
-            return (
-                <div className="flex flex-col gap-1">
-                    <div className="font-mono text-sm">{row.original.phoneCode} {row.original.phoneNumber}</div>
-                    <div className="text-sm text-muted-foreground">
-                        {row.original.email}
-                    </div>
-                </div>
-            );
-        },
-        size: 200,
-    },
-    {
-        accessorKey: "physicalAddress",
-        header: "Location",
-        cell: ({ row }) => {
-            const { city, country } = row.original.branchPhysicalAddresses!;
-            return (
-                <div className="text-sm">
-                    <div>{city}</div>
-                    <div className="text-muted-foreground">{country}</div>
-                </div>
-            );
-        },
-        size: 180,
-    },
-    {
-        accessorKey: "operationHours",
-        header: "Operating Hours",
-        cell: ({ row }) => {
-            const openDays = row.original.branchOperationHours.filter(r => !r.isClosed);
+interface GetUserCompaniesResponse {
+    getCompanyBranches: PaginatedBranch;
+}
 
-            if (openDays.length === 0) {
-                return <div className="text-sm text-muted-foreground">Closed</div>;
+interface GetUserCompaniesVariables {
+    pagination: BranchPaginationInput;
+    companyPublicId: string
+}
+
+const GET_COMPANY_BRANCHES: TypedDocumentNode<GetUserCompaniesResponse, GetUserCompaniesVariables> = gql`
+    query GetCompanyBranches($pagination:BranchPaginationInput!,$companyPublicId:String!){
+        getCompanyBranches(pagination:$pagination,companyPublicId:$companyPublicId){
+            data { 
+                publicId
+                name
+                code
+                email
+                phoneCode
+                phoneNumber
+                isActive
+                branchPhysicalAddresses {
+                    city
+                    state
+                    country
+                }
+                branchOperationHours {
+                    dayOfWeek
+                    openTime
+                    closeTime
+                    isClosed
+                }
+                totalOfEmployee
             }
-
-            // Get the order of days
-            const dayOrder = Object.values(DayOfWeek);
-
-            // Sort open days by day of week
-            const sortedOpenDays = openDays.sort((a, b) =>
-                dayOrder.indexOf(a.dayOfWeek) - dayOrder.indexOf(b.dayOfWeek)
-            );
-
-            const firstDay = sortedOpenDays[0]!;
-            const lastDay = sortedOpenDays[sortedOpenDays.length - 1]!;
-
-            // Format day range
-            const dayRange = sortedOpenDays.length === 1
-                ? firstDay.dayOfWeek
-                : `${firstDay.dayOfWeek} - ${lastDay.dayOfWeek}`;
-
-            // Format time - use the first day's hours as representative
-            const openTime = DateTime.fromISO(firstDay.openTime).toFormat("h:mm a");
-            const closeTime = DateTime.fromISO(firstDay.closeTime).toFormat("h:mm a");
-            const timeRange = `${openTime} - ${closeTime}`;
-
-            return (
-                <div className="text-sm">
-                    <div className="font-medium">{dayRange}</div>
-                    <div className="text-muted-foreground">{timeRange}</div>
-                </div>
-            );
-        },
-        size: 180,
-    },
-    {
-        accessorKey: "employees",
-        header: () => <div className="text-right">Employees</div>,
-        cell: ({ row }) => (
-            <div className="text-right font-medium tabular-nums">
-                {row.original.totalOfEmployee}
-            </div>
-        ),
-        size: 130,
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-            return (
-                <Badge
-                    variant={row.original.isActive ? "default" : "secondary"}
-                    className={row.original.isActive ? "bg-green-500 hover:bg-green-600" : ""}
-                >
-                    {row.original.isActive ? "Active" : "Inactive"}
-                </Badge>
-            );
-        },
-        size: 100,
-    },
-];
-
-function BranchRow({ row, companyId }: { row: Row<Branch>; companyId: string }) {
-    const router = useRouter();
-
-    const handleRowClick = (e: React.MouseEvent) => {
-        // Prevent navigation when clicking on interactive elements
-        const target = e.target as HTMLElement;
-        if (
-            target.closest("button") ||
-            target.closest("input") ||
-            target.closest("a")
-        ) {
-            return;
+            pageInfo {
+                endCursor
+                hasNextPage
+                total
+                currentPage
+                totalPages
+            }
         }
+    }
+`
 
-        router.push(`/my-account/company/${companyId}/branch/${row.original.publicId}`);
-    };
-
-    return (
-        <TableRow
-            onClick={handleRowClick}
-            className="cursor-pointer transition-colors hover:bg-muted/50"
-        >
-            {row.getVisibleCells().map((cell) => {
-                return (
-                    <TableCell
-                        key={cell.id}
-                        className="px-5 py-3"
-                        style={{
-                            width:
-                                cell.column.id === "branchName"
-                                    ? "auto"
-                                    : cell.column.id === "contact"
-                                        ? `${cell.column.getSize()}px`
-                                        : `${cell.column.getSize()}px`,
-                        }}
-                    >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                );
-            })}
-        </TableRow>
-    );
+const initialPaginatedBranch: PaginatedBranch = {
+    data: [],
+    pageInfo: {
+        endCursor: null,
+        hasNextPage: false,
+        total: 0,
+        currentPage: 1,
+        totalPages: 1
+    },
 }
 
 export default function BranchesTab() {
     const ctx = useCompanyDetail();
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [pagination, setPagination] = React.useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
+    const [getCompanyBranches, { data, loading }] = useLazyQuery(GET_COMPANY_BRANCHES);
+
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pageSize, setPageSize] = useState(BRANCH_PAGINATION_SIZE)
+    const [paginatedBranch, setPaginatedBranch] = useState<PaginatedBranch>(initialPaginatedBranch)
+    const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
+
+    const goToNextPage = useCallback(() => {
+        if (paginatedBranch.pageInfo.hasNextPage && paginatedBranch.pageInfo.endCursor !== null) {
+            // Save current cursor to history for back navigation
+            setCursorHistory(prev => [...prev, paginatedBranch.pageInfo.endCursor]);
+            getCompanyBranches({
+                variables: {
+                    companyPublicId: ctx.company?.publicId ?? "-1",
+                    pagination: {
+                        cursor: paginatedBranch.pageInfo.endCursor,
+                        take: pageSize
+                    }
+                }
+            });
+        }
+    }, [paginatedBranch, pageSize, getCompanyBranches]);
+
+    const goToPreviousPage = useCallback(() => {
+        if (cursorHistory.length > 1) {
+            // Remove the last cursor and use the one before it
+            const newHistory = [...cursorHistory];
+            newHistory.pop();
+            const previousCursor = newHistory[newHistory.length - 1];
+            setCursorHistory(newHistory);
+            getCompanyBranches({
+                variables: {
+                    companyPublicId: ctx.company?.publicId ?? "-1",
+                    pagination: {
+                        cursor: previousCursor,
+                        take: pageSize
+                    }
+                }
+            });
+        }
+    }, [cursorHistory, pageSize, getCompanyBranches]);
 
     const table = useReactTable({
-        data: ctx.company?.branches?.data ?? [],
-        columns,
+        data: paginatedBranch.data,
+        columns: BranchColumn,
         state: {
             sorting,
-            pagination,
         },
-        getRowId: (row) => row.publicId,
+        getRowId: (row) => row.publicId.toString(),
         onSortingChange: setSorting,
-        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        manualPagination: true,
+        pageCount: paginatedBranch.pageInfo.totalPages,
     });
+
+    useEffect(() => {
+        setPaginatedBranch(data?.getCompanyBranches ?? ctx.company?.branches ?? initialPaginatedBranch)
+    }, [ctx.company?.branches, data?.getCompanyBranches])
 
     return (
         <TabsContent value="branches">
@@ -256,7 +192,12 @@ export default function BranchesTab() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {loading ? (
+                                // Show skeleton rows matching the page size
+                                Array.from({ length: pageSize }).map((_, index) => (
+                                    <BranchSkeletonRow key={`skeleton-${index}`} />
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <BranchRow
                                         key={row.id}
@@ -267,7 +208,7 @@ export default function BranchesTab() {
                             ) : (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={columns.length}
+                                        colSpan={BranchColumn.length}
                                         className="h-24 text-center"
                                     >
                                         No branches found.
@@ -278,107 +219,82 @@ export default function BranchesTab() {
                     </Table>
                 </div>
 
-                {/* Pagination controls */}
-                {table.getRowModel().rows?.length > 0 && (
-                    <div className="flex items-center justify-between px-4">
-                        {/* Left: Showing count */}
-                        <div className="text-sm text-muted-foreground">
-                            Showing{" "}
-                            <span className="font-medium text-foreground">
-                                {table.getRowModel().rows.length === 0
-                                    ? 0
-                                    : table.getState().pagination.pageIndex *
-                                    table.getState().pagination.pageSize +
-                                    1}
-                            </span>
-                            {" - "}
-                            <span className="font-medium text-foreground">
-                                {Math.min(
-                                    (table.getState().pagination.pageIndex + 1) *
-                                    table.getState().pagination.pageSize,
-                                    table.getFilteredRowModel().rows.length
-                                )}
-                            </span>
-                            {" of "}
-                            <span className="font-medium text-foreground">
-                                {table.getFilteredRowModel().rows.length}
-                            </span>
-                        </div>
-
-                        {/* Center: Pagination controls */}
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                onClick={() => table.setPageIndex(0)}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to first page</span>
-                                <IconChevronsLeft className="size-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to previous page</span>
-                                <IconChevronLeft className="size-4" />
-                            </Button>
-                            <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                                <span>{table.getState().pagination.pageIndex + 1}</span>
-                                <span className="text-muted-foreground">of</span>
-                                <span>{table.getPageCount()}</span>
-                            </div>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to next page</span>
-                                <IconChevronRight className="size-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to last page</span>
-                                <IconChevronsRight className="size-4" />
-                            </Button>
-                        </div>
-
-                        {/* Right: Rows per page */}
-                        <div className="flex items-center gap-2">
-                            <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                                Rows per page
-                            </Label>
-                            <Select
-                                value={`${table.getState().pagination.pageSize}`}
-                                onValueChange={(value) => {
-                                    table.setPageSize(Number(value));
-                                }}
-                            >
-                                <SelectTrigger className="h-8 w-16" id="rows-per-page">
-                                    <SelectValue placeholder={table.getState().pagination.pageSize} />
-                                </SelectTrigger>
-                                <SelectContent side="top">
-                                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                                        <SelectItem key={pageSize} value={`${pageSize}`}>
-                                            {pageSize}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <div className="flex items-center justify-between px-4">
+                    {/* Left: Showing count */}
+                    <div className="text-sm text-muted-foreground">
+                        Showing{" "}
+                        <span className="font-medium text-foreground">
+                            {paginatedBranch.pageInfo.total === 0
+                                ? 0
+                                : (paginatedBranch.pageInfo.currentPage - 1) * pageSize + 1}
+                        </span>
+                        {" - "}
+                        <span className="font-medium text-foreground">
+                            {Math.min(
+                                paginatedBranch.pageInfo.currentPage * pageSize,
+                                paginatedBranch.pageInfo.total
+                            )}
+                        </span>
+                        {" of "}
+                        <span className="font-medium text-foreground">
+                            {paginatedBranch.pageInfo.total}
+                        </span>
                     </div>
-                )}
+
+                    {/* Center: Pagination controls */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            className="size-8"
+                            size="icon"
+                            onClick={goToPreviousPage}
+                            disabled={paginatedBranch.pageInfo.currentPage === 1 || loading}
+                        >
+                            <span className="sr-only">Go to previous page</span>
+                            <IconChevronLeft className="size-4" />
+                        </Button>
+                        <div className="flex items-center gap-1 px-2 text-sm font-medium">
+                            <span>{paginatedBranch.pageInfo.currentPage}</span>
+                            <span className="text-muted-foreground">of</span>
+                            <span>{paginatedBranch.pageInfo.totalPages}</span>
+                        </div>
+                        <Button
+                            variant="outline"
+                            className="size-8"
+                            size="icon"
+                            onClick={goToNextPage}
+                            disabled={!paginatedBranch.pageInfo.hasNextPage || loading}
+                        >
+                            <span className="sr-only">Go to next page</span>
+                            <IconChevronRight className="size-4" />
+                        </Button>
+                    </div>
+
+                    {/* Right: Rows per page */}
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                            Rows per page
+                        </Label>
+                        <Select
+                            value={String(pageSize)}
+                            onValueChange={(value) => {
+                                setPageSize(Number(value))
+                            }}
+                            disabled={loading}
+                        >
+                            <SelectTrigger className="h-8 w-auto" id="rows-per-page">
+                                <SelectValue placeholder={pageSize} />
+                            </SelectTrigger>
+                            <SelectContent side="top">
+                                {[10, 20, 30, 40, 50].map((pageSize) => (
+                                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                                        {pageSize}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
             </div>
         </TabsContent>
     );

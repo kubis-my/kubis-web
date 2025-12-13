@@ -16,10 +16,10 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
             updateUser(undefined)
         } else {
             updateUser({
-                name: authUser.nickname,
+                name: authUser.nickname!,
                 email: authUser.credential?.email || "",
                 avatar: authUser.profilePicture || "",
-                avatarFallbackText: authUser.nickname.at(0)?.toUpperCase() ?? ""
+                avatarFallbackText: authUser.nickname!.at(0)?.toUpperCase() ?? ""
             })
         }
     }, [authUser, updateUser])
