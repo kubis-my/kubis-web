@@ -1,18 +1,12 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
 import {
-    ColumnDef,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
-    Row,
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Badge } from "@repo/shadcn-ui/components/badge";
 import { Button } from "@repo/shadcn-ui/components/button";
 import { Label } from "@repo/shadcn-ui/components/label";
 import {
@@ -33,160 +27,129 @@ import {
 import {
     IconChevronLeft,
     IconChevronRight,
-    IconChevronsLeft,
-    IconChevronsRight,
 } from "@tabler/icons-react";
 import { TabsContent } from "@/shadcn/components/tabs";
 import { useCompanyDetail } from "./company-detail-container";
-import { UserAccount, UserAccountStatus } from "@repo/commons/types/account-service-schema.type";
+import { UserColumn } from "./components/user-column";
+import { UserRow } from "./components/user-row";
+import { UserSkeletonRow } from "./components/user-skeleton-row";
+import { useCallback, useEffect, useState } from "react";
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { PaginatedUserAccount, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
+import { useLazyQuery } from "@apollo/client/react";
+import { USER_ACCOUNT_PAGINATION_SIZE } from "./hooks";
 
-const columns: ColumnDef<UserAccount>[] = [
-    {
-        accessorKey: "userCode",
-        header: "User Code",
-        cell: ({ row }) => {
-            return (
-                <div className="font-mono text-sm font-medium">
-                    #{row.original.code}
-                </div>
-            );
-        },
-        size: 100,
-        enableHiding: false,
+interface GetUserAccountResponse {
+    getCompanyUserAccounts: PaginatedUserAccount;
+}
+
+interface GetUserAccountVariables {
+    pagination: UserAccountPaginationInput;
+    companyPublicId: string
+}
+
+const GET_COMPANY_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse, GetUserAccountVariables> = gql`
+    query GetCompanyUserAccounts($pagination:UserAccountPaginationInput!,$companyPublicId:String!) { 
+        getCompanyUserAccounts(pagination:$pagination,companyPublicId:$companyPublicId){
+            data {
+                publicId
+                status
+                joinedAt
+                companyPublicId
+                branchPublicId
+                phoneCode
+                phoneNumber
+                position
+                code
+                user {
+                    publicId
+                    firstName
+                    lastName
+                    nickname
+                }
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                total
+                currentPage
+                totalPages
+            }
+        }  
+    }
+`
+const initialPaginatedUserAccount: PaginatedUserAccount = {
+    data: [],
+    pageInfo: {
+        endCursor: null,
+        hasNextPage: false,
+        total: 0,
+        currentPage: 1,
+        totalPages: 1
     },
-    {
-        accessorKey: "fullName",
-        header: "Full Name",
-        cell: ({ row }) => {
-            const fullName = `${row.original.user.firstName} ${row.original.user.lastName}`;
-            return (
-                <div className="flex flex-col">
-                    <span className="font-medium">{fullName}</span>
-                    {row.original.user.nickname && (
-                        <span className="text-sm text-muted-foreground">
-                            &quot;{row.original.user.nickname}&quot;
-                        </span>
-                    )}
-                </div>
-            );
-        },
-        enableHiding: false,
-    },
-    {
-        accessorKey: "position",
-        header: "Position",
-        cell: ({ row }) => {
-            return (
-                <div className="text-sm">
-                    {row.original.position || "-"}
-                </div>
-            );
-        },
-        size: 220,
-    },
-    {
-        accessorKey: "phone",
-        header: "Phone",
-        cell: ({ row }) => {
-            return (
-                <div className="font-mono text-sm">
-                    {row.original.phoneCode && row.original.phoneNumber ? `${row.original.phoneCode} ${row.original.phoneNumber}` : "-"}
-                </div>
-            );
-        },
-        size: 180,
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-            const status = row.original.status;
-            const statusConfig = {
-                [UserAccountStatus.ACTIVE]: { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", label: "Active" },
-                [UserAccountStatus.INACTIVE]: { variant: "secondary" as const, className: "", label: "Inactive" },
-                [UserAccountStatus.PENDING_INVITATION]: { variant: "default" as const, className: "bg-amber-500 hover:bg-amber-600", label: "Pending Invitation" },
-                [UserAccountStatus.EXPIRED_INVITATION]: { variant: "destructive" as const, className: "", label: "Expired Invitation" },
-            };
-
-            const config = statusConfig[status];
-
-            return (
-                <Badge
-                    variant={config.variant}
-                    className={config.className}
-                >
-                    {config.label}
-                </Badge>
-            );
-        },
-        size: 180,
-    },
-];
-
-function UserRow({ row, companyId }: { row: Row<UserAccount>; companyId: string }) {
-    const router = useRouter();
-
-    const handleRowClick = (e: React.MouseEvent) => {
-        // Prevent navigation when clicking on interactive elements
-        const target = e.target as HTMLElement;
-        if (
-            target.closest("button") ||
-            target.closest("input") ||
-            target.closest("a")
-        ) {
-            return;
-        }
-
-        router.push(`/my-account/company/${companyId}/user/${row.original.publicId}`);
-    };
-
-    return (
-        <TableRow
-            onClick={handleRowClick}
-            className="cursor-pointer transition-colors hover:bg-muted/50"
-        >
-            {row.getVisibleCells().map((cell) => {
-                return (
-                    <TableCell
-                        key={cell.id}
-                        className="px-5 py-3"
-                        style={{
-                            width:
-                                cell.column.id === "fullName"
-                                    ? "auto"
-                                    : `${cell.column.getSize()}px`,
-                        }}
-                    >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                );
-            })}
-        </TableRow>
-    );
 }
 
 export default function UsersTab() {
     const ctx = useCompanyDetail();
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [pagination, setPagination] = React.useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
+    const [GetCompanyUserAccounts, { data, loading }] = useLazyQuery(GET_COMPANY_USER_ACCOUNTS);
+
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pageSize, setPageSize] = useState(USER_ACCOUNT_PAGINATION_SIZE)
+    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedUserAccount>(initialPaginatedUserAccount)
+    const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
+
+    const goToNextPage = useCallback(() => {
+        if (paginatedUserAccount.pageInfo.hasNextPage && paginatedUserAccount.pageInfo.endCursor !== null) {
+            // Save current cursor to history for back navigation
+            setCursorHistory(prev => [...prev, paginatedUserAccount.pageInfo.endCursor]);
+            GetCompanyUserAccounts({
+                variables: {
+                    companyPublicId: ctx.company?.publicId ?? "-1",
+                    pagination: {
+                        cursor: paginatedUserAccount.pageInfo.endCursor,
+                        take: pageSize
+                    }
+                }
+            });
+        }
+    }, [paginatedUserAccount, pageSize, GetCompanyUserAccounts]);
+
+    const goToPreviousPage = useCallback(() => {
+        if (cursorHistory.length > 1) {
+            // Remove the last cursor and use the one before it
+            const newHistory = [...cursorHistory];
+            newHistory.pop();
+            const previousCursor = newHistory[newHistory.length - 1];
+            setCursorHistory(newHistory);
+            GetCompanyUserAccounts({
+                variables: {
+                    companyPublicId: ctx.company?.publicId ?? "-1",
+                    pagination: {
+                        cursor: previousCursor,
+                        take: pageSize
+                    }
+                }
+            });
+        }
+    }, [cursorHistory, pageSize, GetCompanyUserAccounts]);
 
     const table = useReactTable({
-        data: ctx.company?.userAccounts?.data || [],
-        columns,
+        data: paginatedUserAccount.data,
+        columns: UserColumn,
         state: {
             sorting,
-            pagination,
         },
-        getRowId: (row) => row.publicId,
+        getRowId: (row) => row.publicId.toString(),
         onSortingChange: setSorting,
-        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        manualPagination: true,
+        pageCount: paginatedUserAccount.pageInfo.totalPages,
     });
+
+    useEffect(() => {
+        setPaginatedUserAccount(data?.getCompanyUserAccounts ?? ctx.company?.userAccounts ?? initialPaginatedUserAccount)
+    }, [ctx.company?.userAccounts, data?.getCompanyUserAccounts])
 
     return (
         <TabsContent value="users">
@@ -222,7 +185,12 @@ export default function UsersTab() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {loading ? (
+                                // Show skeleton rows matching the page size
+                                Array.from({ length: pageSize }).map((_, index) => (
+                                    <UserSkeletonRow key={`skeleton-${index}`} />
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <UserRow
                                         key={row.id}
@@ -233,7 +201,7 @@ export default function UsersTab() {
                             ) : (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={columns.length}
+                                        colSpan={UserColumn.length}
                                         className="h-24 text-center"
                                     >
                                         No users found.
@@ -244,107 +212,82 @@ export default function UsersTab() {
                     </Table>
                 </div>
 
-                {/* Pagination controls */}
-                {table.getRowModel().rows?.length > 0 && (
-                    <div className="flex items-center justify-between px-4">
-                        {/* Left: Showing count */}
-                        <div className="text-sm text-muted-foreground">
-                            Showing{" "}
-                            <span className="font-medium text-foreground">
-                                {table.getRowModel().rows.length === 0
-                                    ? 0
-                                    : table.getState().pagination.pageIndex *
-                                    table.getState().pagination.pageSize +
-                                    1}
-                            </span>
-                            {" - "}
-                            <span className="font-medium text-foreground">
-                                {Math.min(
-                                    (table.getState().pagination.pageIndex + 1) *
-                                    table.getState().pagination.pageSize,
-                                    table.getFilteredRowModel().rows.length
-                                )}
-                            </span>
-                            {" of "}
-                            <span className="font-medium text-foreground">
-                                {table.getFilteredRowModel().rows.length}
-                            </span>
-                        </div>
-
-                        {/* Center: Pagination controls */}
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                onClick={() => table.setPageIndex(0)}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to first page</span>
-                                <IconChevronsLeft className="size-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to previous page</span>
-                                <IconChevronLeft className="size-4" />
-                            </Button>
-                            <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                                <span>{table.getState().pagination.pageIndex + 1}</span>
-                                <span className="text-muted-foreground">of</span>
-                                <span>{table.getPageCount()}</span>
-                            </div>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to next page</span>
-                                <IconChevronRight className="size-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to last page</span>
-                                <IconChevronsRight className="size-4" />
-                            </Button>
-                        </div>
-
-                        {/* Right: Rows per page */}
-                        <div className="flex items-center gap-2">
-                            <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                                Rows per page
-                            </Label>
-                            <Select
-                                value={`${table.getState().pagination.pageSize}`}
-                                onValueChange={(value) => {
-                                    table.setPageSize(Number(value));
-                                }}
-                            >
-                                <SelectTrigger className="h-8 w-16" id="rows-per-page">
-                                    <SelectValue placeholder={table.getState().pagination.pageSize} />
-                                </SelectTrigger>
-                                <SelectContent side="top">
-                                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                                        <SelectItem key={pageSize} value={`${pageSize}`}>
-                                            {pageSize}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <div className="flex items-center justify-between px-4">
+                    {/* Left: Showing count */}
+                    <div className="text-sm text-muted-foreground">
+                        Showing{" "}
+                        <span className="font-medium text-foreground">
+                            {paginatedUserAccount.pageInfo.total === 0
+                                ? 0
+                                : (paginatedUserAccount.pageInfo.currentPage - 1) * pageSize + 1}
+                        </span>
+                        {" - "}
+                        <span className="font-medium text-foreground">
+                            {Math.min(
+                                paginatedUserAccount.pageInfo.currentPage * pageSize,
+                                paginatedUserAccount.pageInfo.total
+                            )}
+                        </span>
+                        {" of "}
+                        <span className="font-medium text-foreground">
+                            {paginatedUserAccount.pageInfo.total}
+                        </span>
                     </div>
-                )}
+
+                    {/* Center: Pagination controls */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            className="size-8"
+                            size="icon"
+                            onClick={goToPreviousPage}
+                            disabled={paginatedUserAccount.pageInfo.currentPage === 1 || loading}
+                        >
+                            <span className="sr-only">Go to previous page</span>
+                            <IconChevronLeft className="size-4" />
+                        </Button>
+                        <div className="flex items-center gap-1 px-2 text-sm font-medium">
+                            <span>{paginatedUserAccount.pageInfo.currentPage}</span>
+                            <span className="text-muted-foreground">of</span>
+                            <span>{paginatedUserAccount.pageInfo.totalPages}</span>
+                        </div>
+                        <Button
+                            variant="outline"
+                            className="size-8"
+                            size="icon"
+                            onClick={goToNextPage}
+                            disabled={!paginatedUserAccount.pageInfo.hasNextPage || loading}
+                        >
+                            <span className="sr-only">Go to next page</span>
+                            <IconChevronRight className="size-4" />
+                        </Button>
+                    </div>
+
+                    {/* Right: Rows per page */}
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                            Rows per page
+                        </Label>
+                        <Select
+                            value={String(pageSize)}
+                            onValueChange={(value) => {
+                                setPageSize(Number(value))
+                            }}
+                            disabled={loading}
+                        >
+                            <SelectTrigger className="h-8 w-auto" id="rows-per-page">
+                                <SelectValue placeholder={pageSize} />
+                            </SelectTrigger>
+                            <SelectContent side="top">
+                                {[10, 20, 30, 40, 50].map((pageSize) => (
+                                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                                        {pageSize}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
             </div>
         </TabsContent>
     );

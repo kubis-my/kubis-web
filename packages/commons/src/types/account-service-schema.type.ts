@@ -8,13 +8,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export enum UserAccountStatus {
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-  PENDING_INVITATION = "PENDING_INVITATION",
-  EXPIRED_INVITATION = "EXPIRED_INVITATION"
-}
-
 export enum DayOfWeek {
   SUNDAY = "SUNDAY",
   MONDAY = "MONDAY",
@@ -23,6 +16,13 @@ export enum DayOfWeek {
   THURSDAY = "THURSDAY",
   FRIDAY = "FRIDAY",
   SATURDAY = "SATURDAY"
+}
+
+export enum UserAccountStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  PENDING_INVITATION = "PENDING_INVITATION",
+  EXPIRED_INVITATION = "EXPIRED_INVITATION"
 }
 
 export interface UserAccountPaginationInput {
@@ -100,42 +100,6 @@ export interface Company {
   branches?: PaginatedBranch;
 }
 
-export interface UserAccount {
-  publicId: string;
-  code: string;
-  status: UserAccountStatus;
-  joinedAt?: Nullable<DateTime>;
-  phoneCode?: Nullable<string>;
-  phoneNumber?: Nullable<string>;
-  position?: Nullable<string>;
-  companyPublicId: string;
-  branchPublicId: string;
-  user: User;
-  company: Company;
-}
-
-export interface Credential {
-  publicId: string;
-  email: string;
-  username?: Nullable<string>;
-}
-
-export interface User {
-  publicId: string;
-  firstName?: Nullable<string>;
-  lastName?: Nullable<string>;
-  nickname?: Nullable<string>;
-  displayName?: Nullable<string>;
-  profilePicture?: Nullable<string>;
-  bod?: Nullable<DateTime>;
-  gender?: Nullable<string>;
-  createdAt: DateTime;
-  updatedAt: DateTime;
-  companies: Company[];
-  userAccounts: UserAccount[];
-  credential: Credential;
-}
-
 export interface BranchPhysicalAddress {
   publicId: string;
   street: string;
@@ -189,6 +153,43 @@ export interface Branch {
   userAccounts: UserAccount[];
 }
 
+export interface UserAccount {
+  publicId: string;
+  code: string;
+  status: UserAccountStatus;
+  joinedAt?: Nullable<DateTime>;
+  phoneCode?: Nullable<string>;
+  phoneNumber?: Nullable<string>;
+  position?: Nullable<string>;
+  companyPublicId: string;
+  branchPublicId: string;
+  user: User;
+  company: Company;
+  branch: Branch;
+}
+
+export interface Credential {
+  publicId: string;
+  email: string;
+  username?: Nullable<string>;
+}
+
+export interface User {
+  publicId: string;
+  firstName?: Nullable<string>;
+  lastName?: Nullable<string>;
+  nickname?: Nullable<string>;
+  displayName?: Nullable<string>;
+  profilePicture?: Nullable<string>;
+  bod?: Nullable<DateTime>;
+  gender?: Nullable<string>;
+  createdAt: DateTime;
+  updatedAt: DateTime;
+  companies: Company[];
+  userAccounts: UserAccount[];
+  credential: Credential;
+}
+
 export interface CompaniesOverview {
   totalCompanies: number;
   activeCompanies: number;
@@ -226,6 +227,7 @@ export interface IQuery {
   getAuthUser(): User | Promise<User>;
   getUserCompanies(pagination: CompanyPaginationInput): PaginatedCompany | Promise<PaginatedCompany>;
   getCompanyDetail(companyPublicId: string): Company | Promise<Company>;
+  getCompanyUserAccounts(companyPublicId: string, pagination: UserAccountPaginationInput): PaginatedUserAccount | Promise<PaginatedUserAccount>;
   getCompanyBranches(companyPublicId: string, pagination: BranchPaginationInput): PaginatedBranch | Promise<PaginatedBranch>;
 }
 

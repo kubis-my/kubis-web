@@ -6,7 +6,7 @@ import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { BranchPaginationInput, Company, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { BRANCH_PAGINATION_SIZE, USER_PAGINATION_SIZE } from "./hooks";
+import { BRANCH_PAGINATION_SIZE, USER_ACCOUNT_PAGINATION_SIZE } from "./hooks";
 
 interface GetCompanyDetailResponse {
     getCompanyDetail: Company;
@@ -131,7 +131,7 @@ export default function CompanyDetailContainer({ children, id }: Readonly<{ chil
                 take: BRANCH_PAGINATION_SIZE
             },
             userAccountPaginationInput: {
-                take: USER_PAGINATION_SIZE
+                take: USER_ACCOUNT_PAGINATION_SIZE
             }
         }
     })
