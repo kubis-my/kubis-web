@@ -1,8 +1,11 @@
 import { Elysia, t } from 'elysia'
 import { authClient } from './auth-client';
-import { clearAuthCookies, getAccessTokenCookie, getRefreshTokenCookie, setAccessTokenCookie, setAuthCookies } from '../utils/cookie-helpers';
+import { clearAuthCookies, clearCsrfTokenCookie, getAccessTokenCookie, getRefreshTokenCookie, setAccessTokenCookie, setAuthCookies, setCsrfTokenCookie } from '../utils/cookie-helpers';
+import { generateCsrfToken } from '../utils/csrf';
+import { csrfProtection } from './csrf-plugin';
 
 const auth = new Elysia({ prefix: '/api/auth' })
+    .use(csrfProtection())
     .post(
         '/exchange',
         async ({ body, set }) => {
@@ -11,6 +14,10 @@ const auth = new Elysia({ prefix: '/api/auth' })
 
                 if (code === 200 && raw.accessToken && raw.refreshToken) {
                     await setAuthCookies(raw.accessToken, raw.refreshToken);
+
+                    // Generate and set CSRF token for new session
+                    const csrfToken = generateCsrfToken();
+                    await setCsrfTokenCookie(csrfToken);
 
                     return {
                         success: true,
@@ -47,6 +54,7 @@ const auth = new Elysia({ prefix: '/api/auth' })
         async ({ set }) => {
             try {
                 await clearAuthCookies();
+                await clearCsrfTokenCookie();
 
                 return {
                     success: true,
@@ -75,6 +83,10 @@ const auth = new Elysia({ prefix: '/api/auth' })
                     } else {
                         await setAccessTokenCookie(raw.token);
                     }
+
+                    // Rotate CSRF token on refresh
+                    const csrfToken = generateCsrfToken();
+                    await setCsrfTokenCookie(csrfToken);
 
                     return {
                         success: true,

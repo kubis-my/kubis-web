@@ -7,6 +7,7 @@ import { hasGraphQLError } from "@repo/commons/utils/graphql"
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { User } from '@repo/commons/types/account-service-schema.type';
 import { useQuery } from '@apollo/client/react';
+import { getCsrfHeaders } from "@repo/commons/utils/csrf-client";
 
 const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
     query GetAuthUser {
@@ -65,6 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
             await fetch('/api/auth/logout', {
                 method: 'POST',
+                headers: getCsrfHeaders(),
                 credentials: 'include',
             });
         } finally {
@@ -79,6 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Attempt to refresh tokens via API endpoint
             const refreshResponse = await fetch('/api/auth/refresh', {
                 method: 'POST',
+                headers: getCsrfHeaders(),
                 credentials: 'include',
             });
 

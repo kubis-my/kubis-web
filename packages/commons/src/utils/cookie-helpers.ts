@@ -4,19 +4,21 @@
  */
 
 import { cookies } from 'next/headers';
+import { ACCESS_TOKEN_KEY, CSRF_TOKEN_KEY, REFRESH_TOKEN_KEY, SESSION_TOKEN_KEY } from '../constant/cookies-key';
 
 // Cookie names
 export const COOKIE_NAMES = {
-  ACCESS_TOKEN: 'C76A85C95AT3185',
-  REFRESH_TOKEN: '7818RT76CAC658E',
-  SESSION_TOKEN: '3B5F3DE1ST42A5A',
+  ACCESS_TOKEN: ACCESS_TOKEN_KEY,
+  REFRESH_TOKEN: REFRESH_TOKEN_KEY,
+  SESSION_TOKEN: SESSION_TOKEN_KEY,
+  CSRF_TOKEN: CSRF_TOKEN_KEY,
 } as const;
 
 // Cookie configuration
 const COOKIE_CONFIG = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  sameSite: 'lax' as const,
   path: '/',
   // Access token: 30 minutes (matches token expiration)
   accessTokenMaxAge: 30 * 60,
@@ -24,6 +26,8 @@ const COOKIE_CONFIG = {
   refreshTokenMaxAge: 7 * 24 * 60 * 60,
   // Session token: 7 days
   sessionTokenMaxAge: 7 * 24 * 60 * 60,
+  // CSRF token: 7 days (matches session)
+  csrfTokenMaxAge: 7 * 24 * 60 * 60,
 };
 
 /**
@@ -123,4 +127,35 @@ export async function clearSessionCookies(): Promise<void> {
 export async function clearAccessTokenCookie(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAMES.ACCESS_TOKEN);
+}
+
+/**
+ * Set CSRF token in readable cookie (NOT httpOnly)
+ * Client needs to read this to send in X-CSRF-Token header
+ */
+export async function setCsrfTokenCookie(token: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(COOKIE_NAMES.CSRF_TOKEN, token, {
+    httpOnly: false, // MUST be readable by client JavaScript
+    secure: COOKIE_CONFIG.secure,
+    sameSite: 'strict', // Stricter than 'lax' for CSRF protection
+    path: COOKIE_CONFIG.path,
+    maxAge: COOKIE_CONFIG.csrfTokenMaxAge,
+  });
+}
+
+/**
+ * Get CSRF token from cookies (server-side)
+ */
+export async function getCsrfTokenCookie(): Promise<string | undefined> {
+  const cookieStore = await cookies();
+  return cookieStore.get(COOKIE_NAMES.CSRF_TOKEN)?.value;
+}
+
+/**
+ * Clear CSRF token cookie
+ */
+export async function clearCsrfTokenCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(COOKIE_NAMES.CSRF_TOKEN);
 }

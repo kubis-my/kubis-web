@@ -1,8 +1,11 @@
 import { Elysia, t } from 'elysia'
 import { authClient } from '@repo/commons/lib/auth-client';
-import { clearSessionCookies, getSessionTokenCookie, setSessionTokenCookie } from '@repo/commons/utils/cookie-helpers';
+import { clearCsrfTokenCookie, clearSessionCookies, getSessionTokenCookie, setCsrfTokenCookie, setSessionTokenCookie } from '@repo/commons/utils/cookie-helpers';
+import { generateCsrfToken } from '@repo/commons/utils/csrf';
+import { csrfProtection } from '@repo/commons/lib/csrf-plugin';
 
 const auth = new Elysia({ prefix: '/api/auth' })
+    .use(csrfProtection())
     .post(
         '/sign-in',
         async ({ body, set }) => {
@@ -11,6 +14,11 @@ const auth = new Elysia({ prefix: '/api/auth' })
 
                 if (code === 200 && raw.sessionToken) {
                     await setSessionTokenCookie(raw.sessionToken);
+
+                    // Generate CSRF token for new session
+                    const csrfToken = generateCsrfToken();
+                    await setCsrfTokenCookie(csrfToken);
+
                     await new Promise(resolve => setTimeout(resolve, 500));
 
                     return {
@@ -126,6 +134,7 @@ const auth = new Elysia({ prefix: '/api/auth' })
         async ({ set }) => {
             try {
                 await clearSessionCookies();
+                await clearCsrfTokenCookie();
 
                 return {
                     success: true,

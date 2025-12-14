@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { MAIN_CLIENT_ID } from "@repo/commons/constant/client-id";
 import { MAIN_APP_BASE_URL } from "@repo/commons/constant/base";
 import { useSearchParams } from "next/navigation";
+import { getCsrfHeaders } from "@repo/commons/utils/csrf-client";
 
 
 export default function SignInWithIdentifierForm() {
@@ -31,12 +32,11 @@ export default function SignInWithIdentifierForm() {
         setIsSignIn(true);
 
         try {
-            // TODO: Add CSRF token protection to prevent cross-site request forgery attacks
             const response = await fetch('/api/auth/sign-in', {
                 method: 'POST',
-                headers: {
+                headers: getCsrfHeaders({
                     'Content-Type': 'application/json',
-                },
+                }),
                 credentials: 'include',
                 body: JSON.stringify({
                     identifier,

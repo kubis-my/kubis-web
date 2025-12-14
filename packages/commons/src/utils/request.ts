@@ -12,10 +12,10 @@ export const getDefaultHeaders = (endpoints: string[]) => {
         sources.push("http://localhost:*");
     }
 
-    // Script CSP - only allow unsafe-eval in development for Next.js
+    // Script CSP - allow inline scripts for Next.js
     const scriptSrc = process.env.NODE_ENV === "development"
         ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'" // Dev: Allow for Next.js hot reload
-        : "script-src 'self'"; // Production: Strict policy
+        : "script-src 'self' 'unsafe-inline'"; // Production: Allow inline scripts
 
     return [
         {

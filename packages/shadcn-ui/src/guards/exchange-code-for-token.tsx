@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import Loader from '../custom-components/loader';
+import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 
 export default function ExchangeCodeForToken({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -39,9 +40,9 @@ export default function ExchangeCodeForToken({ children }: { children: React.Rea
             try {
                 const response = await fetch('/api/auth/exchange', {
                     method: 'POST',
-                    headers: {
+                    headers: getCsrfHeaders({
                         'Content-Type': 'application/json',
-                    },
+                    }),
                     credentials: 'include',
                     body: JSON.stringify({
                         code,

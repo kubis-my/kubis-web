@@ -1,8 +1,10 @@
 import { Elysia } from 'elysia'
 import { getAccessTokenCookie } from '../utils/cookie-helpers';
+import { csrfProtection } from './csrf-plugin';
 
 export const graphql = (GRAPHQL_URL: string) => {
     return new Elysia({ prefix: '/api/graphql' })
+        .use(csrfProtection())
         .post(
             '/',
             async ({ body, set }) => {
