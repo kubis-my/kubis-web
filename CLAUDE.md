@@ -4,229 +4,154 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Kubis Web is a monorepo workspace implementing a multi-app architecture with centralized authentication. The project consists of two Next.js applications (`main` and `sso`) that communicate with an external authentication service using OAuth 2.0 with PKCE flow.
+Kubis Web is a monorepo workspace application built with Turborepo. It consists of two Next.js applications (main and SSO) with shared packages for common functionality, UI components, and configuration.
 
-## Essential Commands
+## Development Commands
 
+### Setup
 ```bash
-# Install dependencies
-pnpm install
+pnpm install              # Install all dependencies
+```
 
-# Development - all apps
-pnpm dev
+### Development
+```bash
+pnpm dev                  # Run all apps in development mode
+turbo dev --filter=main   # Run only main app (localhost:3001)
+turbo dev --filter=sso    # Run only SSO app (localhost:3000)
+```
 
-# Development - specific app
-turbo dev --filter=main    # Main app on port 3001
-turbo dev --filter=sso     # SSO app on port 3000
-
-# Build all apps
-pnpm build
-
-# Build specific app
-turbo build --filter=main
-turbo build --filter=sso
-
-# Linting
-pnpm lint                  # All packages
-turbo lint --filter=main   # Specific app
-
-# Type checking
-pnpm check-types
-
-# Code formatting
-pnpm format
+### Build & Quality
+```bash
+pnpm build                # Build all apps
+turbo build --filter=main # Build specific app
+pnpm lint                 # Lint all packages
+pnpm format               # Format code with Prettier
+pnpm check-types          # Type check all packages
 ```
 
 ## Architecture
 
 ### Monorepo Structure
 
-This is a Turborepo monorepo managed with pnpm workspaces:
+```
+apps/
+  main/          # Main application (port 3001)
+  sso/           # Single Sign-On application (port 3000)
+packages/
+  commons/       # Shared utilities, types, API clients
+  shadcn-ui/     # UI components and providers
+  ui/            # Additional UI components
+  tailwind-config/   # Shared Tailwind configuration
+  typescript-config/ # Shared TypeScript configuration
+  eslint-config/     # Shared ESLint configuration
+```
 
-- **apps/main**: Primary application (port 3001)
-- **apps/sso**: Single Sign-On authentication app (port 3000)
-- **packages/commons**: Shared utilities, auth client, constants, and server actions
-- **packages/shadcn-ui**: Shared UI components (shadcn/ui), guards, and providers
-- **packages/eslint-config**: Shared ESLint configurations
-- **packages/typescript-config**: Shared TypeScript configurations
-- **packages/tailwind-config**: Shared Tailwind CSS configurations
-- **packages/ui**: Additional shared UI components
+### Authentication Architecture
 
-### Authentication Flow
+The project implements **httpOnly cookie-based authentication** using OAuth 2.0 with PKCE flow:
 
-The project implements OAuth 2.0 Authorization Code flow with PKCE:
+1. **SSO App** (`apps/sso`): Handles OAuth authorization and sign-in flow
+2. **Main App** (`apps/main`): Protected application that requires authentication
+3. **Commons Package** (`packages/commons`): Contains shared authentication logic
 
-1. **SSO App (`apps/sso`)**: Handles user login
-   - Middleware redirects authenticated users to main app
-   - Uses `authClient.signIn()` from `@repo/commons/lib/auth-client`
-   - Generates PKCE code verifier/challenge
-   - Communicates with external auth service
+#### Key Components
 
-2. **Main App (`apps/main`)**: Protected application
-   - Uses `AuthGuard` from `@repo/shadcn-ui/guards/auth-guard` to protect routes
-   - `AuthGuard` redirects unauthenticated users to SSO app with OAuth parameters
-   - Middleware refreshes tokens on page loads using `refreshCredentialTokenAction()`
-   - `ExchangeCodeForToken` component handles OAuth callback
+- **API Route Handlers**: Both apps use Elysia.js for API routes
+  - `/api/auth` - Authentication endpoints (exchange, refresh, logout, session)
+  - `/api/graphql` - GraphQL proxy with automatic token injection
 
-3. **Auth Client** (`packages/commons/src/lib/auth-client.ts`):
-   - `signIn()`: Authenticate with identifier/password
-   - `refresh()`: Refresh access tokens
-   - `validate()`: Validate access tokens
-   - `exchangeCodeForTokens()`: Exchange authorization code for tokens
+- **Cookie Management** (`packages/commons/src/utils/cookie-helpers.ts`):
+  - Access tokens: 30 minutes (httpOnly, secure in production)
+  - Refresh tokens: 7 days (httpOnly, secure in production)
+  - All cookies use `sameSite: 'strict'` for security
 
-4. **Key Auth Components**:
-   - `AuthProvider` (`packages/shadcn-ui/src/providers/auth-provider.tsx`): Context for auth state
-   - `AuthGuard`: Client-side route protection with OAuth redirect
-   - `ExchangeCodeForToken`: Handles OAuth callback and token exchange
-   - `checkCurrentCredential` action: Server-side credential validation
-   - `refreshCredentialToken` action: Server-side token refresh
+- **Auth Client** (`packages/commons/src/lib/auth-client.ts`):
+  - Handles OAuth code exchange, token refresh, and validation
+  - Used by API routes to communicate with auth backend
+
+- **Apollo Client** (`packages/commons/src/lib/apollo-client.ts`):
+  - Uses `/api/graphql` proxy endpoint for authenticated requests
+  - Tokens handled server-side (not exposed to client)
+  - Cache management utilities included
 
 ### GraphQL Integration
 
-The project uses Apollo Client for GraphQL queries and mutations, with automatic authentication token injection.
-
-1. **Apollo Client Configuration** (`packages/commons/src/lib/apollo-client.ts`):
-   - Configured with authentication link that automatically adds access tokens to requests
-   - Error handling for GraphQL and network errors
-   - Cache management with InMemoryCache
-   - SSR-safe client creation
-   - **Flexible URI configuration**: Supports multiple GraphQL endpoints for different services
-   - Client instances are cached per URI for optimal performance
-
-2. **ApolloProvider** (`packages/shadcn-ui/src/providers/apollo-provider.tsx`):
-   - Wraps the application to provide GraphQL capabilities
-   - **Accepts optional `uri` prop** to specify GraphQL endpoint
-   - Falls back to `NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL` if no URI provided
-   - Each app can use different GraphQL backends by passing different URIs
-   - Example: `<ApolloProvider uri="https://api.example.com/graphql">`
-
-3. **Using GraphQL in Components**:
-   ```tsx
-   import { gql } from '@apollo/client';
-   import { useQuery, useMutation } from '@apollo/client/react';
-
-   // Define your query
-   const GET_DATA = gql`
-     query GetData {
-       data {
-         id
-         name
-       }
-     }
-   `;
-
-   // Use in component
-   function MyComponent() {
-     const { data, loading, error } = useQuery(GET_DATA);
-
-     if (loading) return <div>Loading...</div>;
-     if (error) return <div>Error: {error.message}</div>;
-
-     return <div>{data.data.name}</div>;
-   }
-   ```
-
-4. **Authentication with GraphQL**:
-   - Access tokens are automatically retrieved from `secureTokenStorage`
-   - Tokens are added to Authorization header for every GraphQL request
-   - Authentication errors (UNAUTHENTICATED, FORBIDDEN) are logged automatically
-
-5. **Example Hooks** (`packages/commons/src/hooks/use-graphql-examples.ts`):
-   - Contains template queries and mutations
-   - Shows patterns for useQuery, useMutation with variables
-   - Demonstrates cache updates and refetching strategies
-
-6. **Client Management Functions**:
-   - `getApolloClient(uri?)`: Get or create Apollo Client instance for a specific URI
-   - `resetApolloClient(uri?)`: Clear Apollo Client cache (useful after logout). If URI is omitted, clears all clients
-   - `reinitializeApolloClient(uri?)`: Completely reset client instance. If URI is omitted, resets all clients
-
-7. **Multiple GraphQL Backends**:
-   Each app can connect to different GraphQL endpoints by passing the `uri` prop:
-   ```tsx
-   // Main app - uses account service
-   <ApolloProvider uri={process.env.NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL}>
-     <App />
-   </ApolloProvider>
-
-   // Another app - uses different service
-   <ApolloProvider uri={process.env.NEXT_PUBLIC_OTHER_SERVICE_URL}>
-     <App />
-   </ApolloProvider>
-   ```
+Both apps use Apollo Client for GraphQL queries. The authentication flow:
+1. Client makes GraphQL request to `/api/graphql`
+2. API route extracts access token from httpOnly cookie
+3. API route forwards request to backend with `Authorization: Bearer {token}` header
+4. Response returned to client
 
 ### Environment Variables
 
-Required environment variables (validated via `@t3-oss/env-core` in `packages/commons/src/constant/env.ts`):
+Required environment variables (see `packages/commons/src/constant/env.ts`):
+- `NEXT_PUBLIC_AUTH_URL` - OAuth provider URL
+- `NEXT_PUBLIC_MAIN_APP_BASE_URL` - Main app URL
+- `NEXT_PUBLIC_SSO_APP_BASE_URL` - SSO app URL
+- `NEXT_PUBLIC_MAIN_CLIENT_ID` - OAuth client ID
+- `NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL` - GraphQL backend URL
 
-- `NEXT_PUBLIC_AUTH_URL`: External authentication service URL
-- `NEXT_PUBLIC_MAIN_APP_BASE_URL`: Main app base URL
-- `NEXT_PUBLIC_SSO_APP_BASE_URL`: SSO app base URL
-- `NEXT_PUBLIC_MAIN_CLIENT_ID`: OAuth client ID for main app
-- `NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL`: GraphQL API endpoint URL for external account service
+Example values in `apps/main/.env` and `apps/sso/.env`
 
-### Shared Package Exports
+### Package Exports
 
-**@repo/commons**:
-- `./lib/*`: Auth client, Apollo Client configuration, and utilities
-- `./constant/*`: Environment variables, URLs, client IDs
-- `./utils/*`: PKCE generators, error handlers, base actions
-- `./actions/*`: Server actions for auth operations
-- `./hooks/*`: Custom React hooks, GraphQL example hooks
-
-**@repo/shadcn-ui**:
-- `./components/*`: shadcn/ui components
-- `./custom-components/*`: Custom components (loader, error, countdown, etc.)
-- `./guards/*`: AuthGuard, ExchangeCodeForToken
-- `./providers/*`: AuthProvider, ApolloProvider
-- `./hooks/*`: use-mobile, use-countdown, use-debounce
-- `./lib/*`: Utility functions
-
-### Tech Stack
-
-- **Next.js 15.5.6**: React framework with Turbopack
-- **React 19.1.0**: UI library
-- **TypeScript 5**: Static typing
-- **Tailwind CSS 4**: Styling with PostCSS
-- **pnpm 9.0.0**: Package manager
-- **Turborepo 2.5.8**: Monorepo build system
-- **shadcn/ui**: UI component library (Radix UI primitives)
-- **Apollo Client 4**: GraphQL client with caching and state management
-- **GraphQL 16**: Query language for APIs
-- **Zod 4**: Schema validation
-- **Axios**: HTTP client
-- **Luxon**: Date/time handling
-
-## Important Implementation Details
-
-### Middleware Behavior
-
-- **SSO middleware**: Redirects authenticated users to main app
-- **Main middleware**: Refreshes tokens with cooldown (1 second) to prevent duplicate calls during navigation
-
-### PKCE Implementation
-
-All OAuth flows use PKCE (Proof Key for Code Exchange):
-- Code verifier generated with `generateCodeVerifier()`
-- Code challenge generated with `generateCodeChallenge()`
-- State parameter generated with `generateState()`
-- Verifier stored in sessionStorage during authorization
-- Verifier used during token exchange
-
-### Error Handling
-
-Error handling uses standardized format from `convertErrorMessageListToObject()` in `packages/commons/src/utils/error-message.ts`. Auth client returns structured responses:
+The `@repo/commons` package exports modules via path-based exports:
 ```typescript
-{ code: 200 | 400 | 500, raw: data }
+import { ... } from "@repo/commons/lib/apollo-client"
+import { ... } from "@repo/commons/utils/cookie-helpers"
+import { ... } from "@repo/commons/constant/env"
+import { ... } from "@repo/commons/types/..."
 ```
 
-### Working with Workspace Packages
+### Next.js Configuration
 
-When importing from workspace packages:
-- Use `workspace:*` or `workspace:^` in package.json dependencies
-- Import using package exports defined in each package's package.json
-- Example: `import { authClient } from "@repo/commons/lib/auth-client"`
+Both apps use:
+- Turbopack for faster builds and dev mode
+- Monorepo root configuration (`turbopack.root` set to `../../`)
+- Custom headers via `getDefaultHeaders()` from commons
+- SSO app redirects `/` to `/sign-in`
 
-### Adding shadcn/ui Components
+## Key Patterns
 
-shadcn/ui components are centralized in `packages/shadcn-ui`. Configuration is in `packages/shadcn-ui/components.json`. Add new components to this package, not individual apps.
+### API Routes
+Both apps use Elysia.js (not Next.js route handlers) for API routes. Example pattern:
+```typescript
+// apps/{app}/app/api/auth/[[...slugs]]/route.ts
+export * from "@repo/commons/lib/auth-api-route";
+```
+
+The actual implementation is in `packages/commons/src/lib/*-api-route.ts`
+
+### Authentication Guards
+The main app wraps the application with:
+- `ExchangeCodeForToken` - Handles OAuth code exchange on callback
+- `ApolloProvider` - Provides Apollo Client instance
+- `AuthProvider` - Manages auth state
+
+### Component Organization
+- `apps/main/components/` - App-specific components
+  - `container/` - Layout containers
+  - `pages/` - Page-level components
+- `packages/shadcn-ui/` - Shared UI components built with shadcn/ui
+
+## Technology Stack
+
+- **Framework**: Next.js 16 with App Router
+- **Build Tool**: Turborepo with Turbopack
+- **Package Manager**: pnpm 9.0.0
+- **Language**: TypeScript 5.9.2
+- **Styling**: Tailwind CSS 4
+- **UI Components**: shadcn/ui, Radix UI primitives
+- **GraphQL**: Apollo Client
+- **API Layer**: Elysia.js
+- **Validation**: Zod
+- **Icons**: Tabler Icons, Lucide React
+- **Notifications**: Sonner (toast notifications)
+
+## Important Notes
+
+- Node.js >= 18 required
+- Both apps must run simultaneously for full functionality (SSO for auth, main for app)
+- Authentication tokens are stored in httpOnly cookies and never exposed to client JavaScript
+- All GraphQL requests must go through `/api/graphql` proxy to inject auth tokens
+- Use `turbo dev --filter={app}` to run individual apps during development
