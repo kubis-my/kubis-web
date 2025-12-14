@@ -1,9 +1,6 @@
 "use client";
 
 import { SSO_APP_BASE_URL } from "@repo/commons/constant/base";
-import { authClient } from "@repo/commons/lib/auth-client";
-import { secureTokenStorage } from "@repo/commons/utils/secure-token-storage";
-import { initEncryption } from "@repo/commons/utils/token-encryption";
 import React, { useEffect } from "react";
 
 export default function RedirectAuthorize({ children, ...input }: {
@@ -17,41 +14,45 @@ export default function RedirectAuthorize({ children, ...input }: {
 
     useEffect(() => {
         const authorize = async () => {
-            // Early exit if no session token exists
-            if (!secureTokenStorage.hasSessionToken()) {
-                secureTokenStorage.clearTokens();
-                window.location.replace(`${SSO_APP_BASE_URL}/sign-in`);
-                return;
-            }
-
             try {
-                // Initialize encryption and retrieve session token
-                await initEncryption();
-                const token = await secureTokenStorage.getSessionToken();
-
-                // If token retrieval fails (decryption error, corrupted data, etc.)
-                if (!token) {
-                    throw new Error('Failed to retrieve session token');
-                }
-
-                // Attempt OAuth authorization
-                const { code, raw } = await authClient.redirectAuthorize({
-                    ...input,
-                    sessionToken: token
+                const response = await fetch('/api/auth/authorize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        clientId: input.clientId,
+                        redirectUri: input.redirectUri,
+                        codeChallenge: input.codeChallenge,
+                        scope: input.scope,
+                        state: input.state,
+                    }),
                 });
 
+                const data = await response.json();
+
                 // Successful authorization - redirect to client app
-                if (code === 200) {
-                    window.location.replace(raw.redirectUrl);
+                if (response.ok && data.success) {
+                    window.location.replace(data.data.redirectUrl);
                     return;
                 }
 
-                // Authorization failed - fall through to error handling
+                // Authorization failed - redirect to sign-in
                 throw new Error('Authorization failed');
             } catch (error) {
-                // On any error: clear tokens and redirect to sign-in
+                // On any error: logout first, then redirect to sign-in
                 console.error('OAuth authorization error:', error);
-                secureTokenStorage.clearTokens();
+
+                try {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        credentials: 'include',
+                    });
+                } catch (logoutError) {
+                    console.error('Logout error:', logoutError);
+                }
+
                 window.location.replace(`${SSO_APP_BASE_URL}/sign-in`);
             }
         };

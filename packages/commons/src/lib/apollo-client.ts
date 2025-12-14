@@ -1,49 +1,24 @@
 import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from '@apollo/client';
 import { Observable } from '@apollo/client/utilities';
-import { secureTokenStorage } from '../utils/secure-token-storage';
-import { initEncryption } from '../utils/token-encryption';
 
 // Store multiple Apollo Client instances by URI
 const apolloClients: Map<string, ApolloClient> = new Map();
 
 /**
- * Create a new Apollo Client instance for a specific GraphQL endpoint
+ * Create a new Apollo Client instance
+ * Uses Next.js API proxy for authenticated requests (tokens in httpOnly cookies)
+ *
+ * @param useProxy - If true, uses /api/graphql proxy (for authenticated requests)
+ *                   If false, connects directly to external service (for public queries)
  */
-function createApolloClient(uri: string) {
+function createApolloClient(useProxy: boolean = true) {
+  // Use proxy endpoint for authenticated requests (handles tokens server-side)
+  // Or direct connection for public/unauthenticated queries
+  const uri = useProxy ? '/api/graphql' : '';
+
   const httpLink = new HttpLink({
     uri,
-    credentials: 'include',
-  });
-
-  // Auth link that adds the access token to every request
-  const authLink = new ApolloLink((operation, forward) => {
-    return new Observable((observer) => {
-      (async () => {
-        try {
-          await initEncryption();
-          const token = await secureTokenStorage.getAccessToken();
-
-          if (token) {
-            operation.setContext(({ headers = {} }) => ({
-              headers: {
-                ...headers,
-                authorization: `Bearer ${token}`,
-              },
-            }));
-          }
-        } catch (error) {
-          console.error('Failed to get access token for GraphQL request:', error);
-        }
-
-        const subscription = forward(operation).subscribe({
-          next: observer.next.bind(observer),
-          error: observer.error.bind(observer),
-          complete: observer.complete.bind(observer),
-        });
-
-        return () => subscription.unsubscribe();
-      })();
-    });
+    credentials: 'include', // Send cookies with requests
   });
 
   // Error handling link
@@ -65,7 +40,7 @@ function createApolloClient(uri: string) {
   });
 
   return new ApolloClient({
-    link: ApolloLink.from([errorLink, authLink, httpLink]),
+    link: ApolloLink.from([errorLink, httpLink]),
     cache: new InMemoryCache(),
     defaultOptions: {
       watchQuery: {
@@ -84,68 +59,43 @@ function createApolloClient(uri: string) {
 }
 
 /**
- * Get or create an Apollo Client instance for a specific GraphQL endpoint
+ * Get or create an Apollo Client instance
+ * Uses httpOnly cookie-based authentication via Next.js API proxy
  *
- * @param uri - The GraphQL endpoint URL. If not provided, uses NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL from env
- * @returns Apollo Client instance for the specified URI
- *
- * @example
- * // Use default URI from environment
- * const client = getApolloClient();
- *
- * @example
- * // Use custom URI for a different service
- * const client = getApolloClient('https://api.example.com/graphql');
+ * @returns Apollo Client instance
  */
-export function getApolloClient(uri: string) {
+export function getApolloClient() {
   const isServer = typeof window === 'undefined';
+  const clientKey = 'default';
 
   if (isServer) {
     // Always create a new client for SSR
-    return createApolloClient(uri);
+    return createApolloClient(true);
   }
 
-  // Reuse client on the client-side for the same URI
-  if (!apolloClients.has(uri)) {
-    apolloClients.set(uri, createApolloClient(uri));
+  // Reuse client on the client-side
+  if (!apolloClients.has(clientKey)) {
+    apolloClients.set(clientKey, createApolloClient(true));
   }
 
-  return apolloClients.get(uri)!;
+  return apolloClients.get(clientKey)!;
 }
 
 /**
- * Reset the Apollo Client cache for a specific URI
+ * Reset the Apollo Client cache
  * Useful after logout or when authentication state changes
- *
- * @param uri - Optional GraphQL endpoint URL. If not provided, clears all clients
  */
-export function resetApolloClient(uri?: string) {
-  if (uri) {
-    const client = apolloClients.get(uri);
-    if (client) {
-      client.clearStore();
-    }
-  } else {
-    // Clear all clients if no URI specified
-    apolloClients.forEach((client) => {
-      client.clearStore();
-    });
-  }
+export function resetApolloClient() {
+  apolloClients.forEach((client) => {
+    client.clearStore();
+  });
 }
 
 /**
- * Completely reset Apollo Client instance(s)
+ * Completely reset Apollo Client instance
  * Creates a new client on next access and clears the cache
- *
- * @param uri - Optional GraphQL endpoint URL. If not provided, resets all clients
  */
-export function reinitializeApolloClient(uri: string) {
-  if (uri) {
-    apolloClients.delete(uri);
-    return getApolloClient(uri);
-  } else {
-    // Reset all clients if no URI specified
-    apolloClients.clear();
-    return getApolloClient(uri);
-  }
+export function reinitializeApolloClient() {
+  apolloClients.clear();
+  return getApolloClient();
 }

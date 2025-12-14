@@ -14,8 +14,6 @@ import { toast } from "sonner";
 import { MAIN_CLIENT_ID } from "@repo/commons/constant/client-id";
 import { MAIN_APP_BASE_URL } from "@repo/commons/constant/base";
 import { useSearchParams } from "next/navigation";
-import { authClient } from "@repo/commons/lib/auth-client";
-import { secureTokenStorage } from "@repo/commons/utils/secure-token-storage";
 
 
 export default function SignInWithIdentifierForm() {
@@ -32,39 +30,54 @@ export default function SignInWithIdentifierForm() {
         setFormValidation({});
         setIsSignIn(true);
 
-        // TODO: Add CSRF token protection to prevent cross-site request forgery attacks
-        const res = await authClient.signIn({
-            identifier,
-            password,
-            clientId,
-            redirectUri,
-        });
+        try {
+            // TODO: Add CSRF token protection to prevent cross-site request forgery attacks
+            const response = await fetch('/api/auth/sign-in', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    identifier,
+                    password,
+                    clientId,
+                    redirectUri,
+                }),
+            });
 
-        if (res.code === 200) {
-            const { sessionToken, redirectUrl } = res.raw;
+            const data = await response.json();
 
-            // Store session token encrypted in localStorage
-            await secureTokenStorage.setSessionToken(sessionToken);
+            if (response.ok && data.success) {
+                const { redirectUrl, verifier } = data.data;
 
-            // Redirect with verifier in URL hash
-            const finalRedirectUrl = new URL(redirectUrl);
+                // Redirect with verifier in URL hash
+                const finalRedirectUrl = new URL(redirectUrl);
 
-            if (res.raw.verifier) {
-                finalRedirectUrl.hash = `verifier=${res.raw.verifier}`;
-            }
+                if (verifier) {
+                    finalRedirectUrl.hash = `verifier=${verifier}`;
+                }
 
-            window.location.href = finalRedirectUrl.toString();
-        } else if (res.code === 400) {
-            setFormValidation(res.raw)
-        } else if (res.code !== 500 && res.raw?.id) {
-            const statusKey = res.raw?.id || "-1";
+                window.location.href = finalRedirectUrl.toString();
+            } else if (response.status === 400 && data.details) {
+                setFormValidation(data.details)
+            } else if (!response.ok && data.details?.id) {
+                const statusKey = data.details?.id || "-1";
 
-            if (statusKey in errorDict) {
-                toast.error(errorDict[statusKey as keyof typeof errorDict],
-                    {
-                        position: "top-center"
-                    }
-                );
+                if (statusKey in errorDict) {
+                    toast.error(errorDict[statusKey as keyof typeof errorDict],
+                        {
+                            position: "top-center"
+                        }
+                    );
+                } else {
+                    toast.error(
+                        "An unexpected error occurred. Please contact our support team for assistance.",
+                        {
+                            position: "top-center",
+                        }
+                    );
+                }
             } else {
                 toast.error(
                     "An unexpected error occurred. Please contact our support team for assistance.",
@@ -73,7 +86,8 @@ export default function SignInWithIdentifierForm() {
                     }
                 );
             }
-        } else if (res.code === 500) {
+        } catch (error) {
+            console.error('Sign in error:', error);
             toast.error(
                 "An unexpected error occurred. Please contact our support team for assistance.",
                 {
@@ -83,8 +97,6 @@ export default function SignInWithIdentifierForm() {
         }
 
         setIsSignIn(false);
-
-        return res;
     }, [
         identifier,
         password,

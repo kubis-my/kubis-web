@@ -2,10 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { secureTokenStorage } from "@repo/commons/utils/secure-token-storage";
-import { authClient } from '@repo/commons/lib/auth-client';
 import Loader from '../custom-components/loader';
-import { initEncryption } from '@repo/commons/utils/token-encryption';
 import { hasGraphQLError } from "@repo/commons/utils/graphql"
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { User } from '@repo/commons/types/account-service-schema.type';
@@ -40,7 +37,6 @@ const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
     }
 `;
 
-
 interface AuthContextType {
     isAuthenticated: boolean;
     authUser: User | undefined
@@ -67,15 +63,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const logout = useCallback(async () => {
         try {
-            await fetch(`${process.env.NEXT_PUBLIC_AUTH_API_URL}/auth/logout`, {
+            await fetch('/api/auth/logout', {
                 method: 'POST',
                 credentials: 'include',
             });
-        } catch {
-            // Silently handle logout errors - we'll clear local state anyway
         } finally {
-            // Clear local tokens and state regardless of backend response
-            secureTokenStorage.clearTokens();
             setIsAuthenticated(false);
             setAuthUser(undefined);
             router.push('/');
@@ -84,53 +76,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const authorize = useCallback(async () => {
         try {
-            await initEncryption();
+            // Attempt to refresh tokens via API endpoint
+            const refreshResponse = await fetch('/api/auth/refresh', {
+                method: 'POST',
+                credentials: 'include',
+            });
 
-            const refreshToken = await secureTokenStorage.getRefreshToken();
-            let isRefreshed = false;
+            if (refreshResponse.ok) {
+                // Small delay to ensure cookies are set
+                await new Promise(resolve => setTimeout(resolve, 100));
 
-            if (refreshToken) {
-                const { code, raw } = await authClient.refresh({ refreshToken });
+                // Validate session via API endpoint
+                const sessionResponse = await fetch('/api/auth/session', {
+                    method: 'GET',
+                    credentials: 'include',
+                });
 
-                if (code === 200) {
-                    const { refreshToken: newRefreshToken, token } = raw;
+                if (sessionResponse.ok) {
+                    const sessionData = await sessionResponse.json();
 
-                    await secureTokenStorage.updateTokensAfterRefresh(token, newRefreshToken);
-                    isRefreshed = true;
-                } else {
-                    // Token refresh failed, clear tokens
-                    secureTokenStorage.clearTokens();
-                    setIsAuthenticated(false);
-                    setAuthUser(undefined);
-                }
-            }
-
-            if (isRefreshed) {
-                // Small delay to ensure token storage is fully updated
-                await new Promise(resolve => setTimeout(resolve, 500));
-                const currentAccessToken = await secureTokenStorage.getAccessToken();
-
-                if (currentAccessToken) {
-                    const { code, raw } = await authClient.validate({ token: currentAccessToken });
-
-                    if (raw.valid && code === 200) {
+                    if (sessionData.authenticated) {
                         setIsAuthenticated(true);
                         // User data will be fetched via GraphQL query
-                    } else {
-                        // Token validation failed
-                        secureTokenStorage.clearTokens();
-                        setAuthUser(undefined);
-                        setIsAuthenticated(false);
+                        return;
                     }
                 }
-            } else {
-                setAuthUser(undefined);
-                setIsAuthenticated(false);
             }
-        } catch (error) {
-            secureTokenStorage.clearTokens();
-            setAuthUser(undefined);
+
+            // Refresh or validation failed
             setIsAuthenticated(false);
+            setAuthUser(undefined);
+        } catch (error) {
+            console.error('Authorization error:', error);
+            setIsAuthenticated(false);
+            setAuthUser(undefined);
         }
     }, []);
 
@@ -181,48 +160,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
     }, [isAuthenticated, authorize]);
 
-    // Listen for storage changes (e.g., manual token deletion)
-    useEffect(() => {
-        if (typeof window === 'undefined') return;
-
-        const handleStorageChange = async (e: StorageEvent) => {
-            // Check if token-related storage was cleared
-            if (e.key === null || e.key?.includes('token') || e.key?.includes('auth')) {
-                const refreshToken = await secureTokenStorage.getRefreshToken();
-
-                if (!refreshToken && isAuthenticated) {
-                    // Tokens were cleared but state shows authenticated - logout
-                    setIsAuthenticated(false);
-                    setAuthUser(undefined);
-                    setHasIncompleteProfile(false);
-                }
-            }
-        };
-
-        window.addEventListener('storage', handleStorageChange);
-
-        return () => {
-            window.removeEventListener('storage', handleStorageChange);
-        };
-    }, [isAuthenticated]);
-
-    // Validate tokens when user returns to tab/window
+    // Validate session when user returns to tab/window
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
         const handleVisibilityChange = async () => {
             if (document.visibilityState === 'visible' && isAuthenticated) {
-                const refreshToken = await secureTokenStorage.getRefreshToken();
-
-                if (!refreshToken) {
-                    // No refresh token found - logout
-                    setIsAuthenticated(false);
-                    setAuthUser(undefined);
-                    setHasIncompleteProfile(false);
-                } else {
-                    // Refresh token exists - validate/refresh access token
-                    await authorize();
-                }
+                // Re-validate session when tab becomes visible
+                await authorize();
             }
         };
 

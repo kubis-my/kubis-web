@@ -1,11 +1,8 @@
 "use client";
 
-import { MAIN_CLIENT_ID } from '@repo/commons/constant/client-id';
-import { authClient } from '@repo/commons/lib/auth-client';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Loader from '../custom-components/loader';
-import { secureTokenStorage } from "@repo/commons/utils/secure-token-storage";
 
 export default function ExchangeCodeForToken({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -39,26 +36,33 @@ export default function ExchangeCodeForToken({ children }: { children: React.Rea
                 return;
             }
 
-            const res = await authClient.exchangeCodeForTokens({
-                code,
-                clientId,
-                redirectUri,
-                codeVerifier
-            })
+            try {
+                const response = await fetch('/api/auth/exchange', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        code,
+                        clientId,
+                        redirectUri,
+                        codeVerifier,
+                    }),
+                });
 
-            if (res.code === 200) {
-                const { accessToken, refreshToken } = res.raw
+                if (response.ok) {
+                    sessionStorage.removeItem('pkce_verifier');
+                    sessionStorage.removeItem('oauth_state');
 
-                secureTokenStorage.setTokens(accessToken, refreshToken)
+                    // Mark exchange as complete before rendering children
+                    sessionStorage.setItem('token_exchange_complete', 'true');
 
-                sessionStorage.removeItem('pkce_verifier');
-                sessionStorage.removeItem('oauth_state');
-
-                // Mark exchange as complete before rendering children
-                sessionStorage.setItem('token_exchange_complete', 'true');
-
-                // Clean URL first without causing navigation
-                window.history.replaceState({}, document.title, window.location.pathname);
+                    // Clean URL first without causing navigation
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            } catch (error) {
+                console.error('Token exchange failed:', error);
             }
 
             // Set flags to render children, avoid router navigation
