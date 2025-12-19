@@ -58,8 +58,8 @@ const GET_COMPANY_BRANCH_EVENT: TypedDocumentNode<GetBranchEventResponse, GetBra
                 name
                 type
                 description
-                StartDate
-                EndDate
+                startDate
+                endDate
                 createdAt
                 updatedAt
             }

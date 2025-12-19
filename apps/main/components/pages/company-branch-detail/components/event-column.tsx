@@ -8,18 +8,18 @@ export const EventColumn: ColumnDef<BranchEvent>[] = [
         accessorKey: "date",
         header: "Date",
         cell: ({ row }) => {
-            const startDate = new Date(row.original.StartDate);
-            const endDate = new Date(row.original.EndDate);
+            const startDate = new Date(row.original.startDate);
+            const endDate = new Date(row.original.endDate);
             const isSameDay = startDate.toDateString() === endDate.toDateString();
 
             return (
                 <div className="text-sm">
                     <div className="font-medium">
-                        {formatDateTime(row.original.StartDate, { format: "dd MMM yyyy" })}
+                        {formatDateTime(row.original.startDate, { format: "dd MMM yyyy" })}
                     </div>
                     {!isSameDay && (
                         <div className="text-xs text-muted-foreground">
-                            to {formatDateTime(row.original.EndDate, { format: "dd MMM yyyy" })}
+                            to {formatDateTime(row.original.endDate, { format: "dd MMM yyyy" })}
                         </div>
                     )}
                 </div>
@@ -59,7 +59,7 @@ export const EventColumn: ColumnDef<BranchEvent>[] = [
         cell: ({ row }) => {
             return (
                 <div className="text-sm">
-                    {getDuration(new Date(row.original.StartDate), new Date(row.original.EndDate))}
+                    {getDuration(new Date(row.original.startDate), new Date(row.original.endDate))}
                 </div>
             );
         },

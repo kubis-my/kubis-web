@@ -96,8 +96,8 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                     name
                     type
                     description
-                    StartDate
-                    EndDate
+                    startDate
+                    endDate
                     createdAt
                     updatedAt
                 }

@@ -213,8 +213,8 @@ export interface BranchEvent {
   name: string;
   type: string;
   description?: Nullable<string>;
-  StartDate: DateTime;
-  EndDate: DateTime;
+  startDate: DateTime;
+  endDate: DateTime;
   createdAt: DateTime;
   updatedAt: DateTime;
   branch: Branch;
