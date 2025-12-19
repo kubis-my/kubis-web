@@ -1,12 +1,11 @@
 "use client";
 
-import { ROUTE } from "@/root/libs/constants";
+import { BRANCH_PAGINATION_SIZE, ROUTE, USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { BranchPaginationInput, Company, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { BRANCH_PAGINATION_SIZE, USER_ACCOUNT_PAGINATION_SIZE } from "./hooks";
 
 interface GetCompanyDetailResponse {
     getCompanyDetail: Company;

@@ -31,13 +31,13 @@ import {
 import { TabsContent } from "@/shadcn/components/tabs";
 import { useCompanyDetail } from "./company-detail-container";
 import { BranchPaginationInput, PaginatedBranch } from "@repo/commons/types/account-service-schema.type";
-import { BRANCH_PAGINATION_SIZE } from "./hooks";
 import { useCallback, useEffect, useState } from "react";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 import { BranchColumn } from "./components/branch-column";
 import { BranchRow } from "./components/branch-row";
 import { BranchSkeletonRow } from "./components/branch-skeleton-row";
+import { BRANCH_PAGINATION_SIZE } from "@/root/libs/constants";
 
 interface GetUserCompaniesResponse {
     getCompanyBranches: PaginatedBranch;

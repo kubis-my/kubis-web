@@ -8,7 +8,7 @@ export default async function BranchPage({ params }: { params: Promise<{ company
     const { companyId, branchId } = await params;
 
     return (
-        <CompanyBranchDetailContainer companyId={Number(companyId)} branchId={Number(branchId)}>
+        <CompanyBranchDetailContainer companyId={companyId} branchId={branchId}>
             <div className="flex flex-1 flex-col gap-4 p-4">
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <CompanyBranchDetailCard />

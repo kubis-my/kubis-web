@@ -1,5 +1,3 @@
-"use client";
-
 import { Badge } from "@/shadcn/components/badge";
 import { UserAccount, UserAccountStatus } from "@repo/commons/types/account-service-schema.type";
 import { ColumnDef } from "@tanstack/react-table";
@@ -11,7 +9,7 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm font-medium">
-                    #{row.original.code}
+                    {row.original.code}
                 </div>
             );
         },
@@ -42,7 +40,7 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         cell: ({ row }) => {
             return (
                 <div className="text-sm">
-                    {row.original.position || "-"}
+                    {row.original.position}
                 </div>
             );
         },
@@ -54,7 +52,7 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm">
-                    {row.original.phoneCode && row.original.phoneNumber ? `${row.original.phoneCode} ${row.original.phoneNumber}` : "-"}
+                    {(row.original.phoneCode && row.original.phoneNumber) ? `${row.original.phoneCode} ${row.original.phoneNumber}` : "-"}
                 </div>
             );
         },

@@ -25,7 +25,7 @@ export default function CompanyBranchDetailCard() {
         status: false
     });
 
-    if (ctx.isLoading.branchDetail) return <Skeleton className="aspect-video rounded-xl" />
+    if (ctx.loading) return <Skeleton className="aspect-video rounded-xl" />
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,11 +36,11 @@ export default function CompanyBranchDetailCard() {
 
     const resetForm = () => {
         setFormData({
-            branchName: ctx.branch?.branchName || '',
-            branchCode: ctx.branch?.branchCode || '',
-            phone: ctx.branch?.phone || '',
+            branchName: ctx.branch?.name || '',
+            branchCode: ctx.branch?.code || '',
+            phone: ctx.branch?.phoneCode || '',
             email: ctx.branch?.email || '',
-            status: ctx.branch?.status === 'active'
+            status: ctx.branch?.isActive || false
         });
     };
 
@@ -60,7 +60,7 @@ export default function CompanyBranchDetailCard() {
                                 <IconBuildingStore className="size-3.5 text-primary shrink-0" /> Branch Name
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.branchName}
+                                {ctx.branch?.name ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -68,7 +68,7 @@ export default function CompanyBranchDetailCard() {
                                 <IconCode className="size-3.5 shrink-0" /> Branch Code
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.branchCode}
+                                {ctx.branch?.code ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -76,7 +76,7 @@ export default function CompanyBranchDetailCard() {
                                 <IconPhone className="size-3.5 shrink-0" /> Phone
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.phone}
+                                {(ctx.branch?.phoneCode && ctx.branch?.phoneNumber) ? `${ctx.branch?.phoneCode} ${ctx.branch?.phoneNumber}` : "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -84,7 +84,7 @@ export default function CompanyBranchDetailCard() {
                                 <IconMail className="size-3.5 shrink-0" /> Email
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.email}
+                                {ctx.branch?.email ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center px-1 py-2'>
@@ -93,7 +93,7 @@ export default function CompanyBranchDetailCard() {
                                 <span className="text-sm font-medium">Status</span>
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.status}
+                                {ctx.branch?.isActive ? "Active" : "Inactive"}
                             </div>
                         </div>
                     </CardContent>

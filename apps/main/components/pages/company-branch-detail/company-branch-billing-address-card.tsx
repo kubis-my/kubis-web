@@ -24,7 +24,7 @@ export default function CompanyBranchBillingAddressCard() {
         country: ''
     });
 
-    if (ctx.isLoading.branchDetail) return <Skeleton className="aspect-video rounded-xl" />
+    if (ctx.loading) return <Skeleton className="aspect-video rounded-xl" />
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,11 +35,11 @@ export default function CompanyBranchBillingAddressCard() {
 
     const resetForm = () => {
         setFormData({
-            street: ctx.branch?.billingAddress?.street || '',
-            city: ctx.branch?.billingAddress?.city || '',
-            state: ctx.branch?.billingAddress?.state || '',
-            postalCode: ctx.branch?.billingAddress?.postalCode || '',
-            country: ctx.branch?.billingAddress?.country || ''
+            street: ctx.branch?.branchBillingAddress?.street || '',
+            city: ctx.branch?.branchBillingAddress?.city || '',
+            state: ctx.branch?.branchBillingAddress?.state || '',
+            postalCode: ctx.branch?.branchBillingAddress?.postalCode || '',
+            country: ctx.branch?.branchBillingAddress?.country || ''
         });
     };
 
@@ -59,7 +59,7 @@ export default function CompanyBranchBillingAddressCard() {
                                 <IconBuilding className="size-3.5 text-primary shrink-0" /> Street
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.billingAddress?.street}
+                                {ctx.branch?.branchBillingAddress?.street ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -67,7 +67,7 @@ export default function CompanyBranchBillingAddressCard() {
                                 <IconMapPin className="size-3.5 shrink-0" /> City
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.billingAddress?.city}
+                                {ctx.branch?.branchBillingAddress?.city ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -75,7 +75,7 @@ export default function CompanyBranchBillingAddressCard() {
                                 <IconMapPin className="size-3.5 shrink-0" /> State
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.billingAddress?.state}
+                                {ctx.branch?.branchBillingAddress?.state ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -83,7 +83,7 @@ export default function CompanyBranchBillingAddressCard() {
                                 <IconMailbox className="size-3.5 shrink-0" /> Postal Code
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.billingAddress?.postalCode}
+                                {ctx.branch?.branchBillingAddress?.postalCode ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center px-1 py-2'>
@@ -91,7 +91,7 @@ export default function CompanyBranchBillingAddressCard() {
                                 <IconWorld className="size-3.5 shrink-0" /> Country
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.billingAddress?.country}
+                                {ctx.branch?.branchBillingAddress?.country ?? "-"}
                             </div>
                         </div>
                     </CardContent>

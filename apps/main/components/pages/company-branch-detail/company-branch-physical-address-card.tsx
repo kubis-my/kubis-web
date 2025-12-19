@@ -24,7 +24,7 @@ export default function CompanyBranchPhysicalAddressCard() {
         country: ''
     });
 
-    if (ctx.isLoading.branchDetail) return <Skeleton className="aspect-video rounded-xl" />
+    if (ctx.loading) return <Skeleton className="aspect-video rounded-xl" />
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,11 +35,11 @@ export default function CompanyBranchPhysicalAddressCard() {
 
     const resetForm = () => {
         setFormData({
-            street: ctx.branch?.physicalAddress?.street || '',
-            city: ctx.branch?.physicalAddress?.city || '',
-            state: ctx.branch?.physicalAddress?.state || '',
-            postalCode: ctx.branch?.physicalAddress?.postalCode || '',
-            country: ctx.branch?.physicalAddress?.country || ''
+            street: ctx.branch?.branchPhysicalAddresses?.street || '',
+            city: ctx.branch?.branchPhysicalAddresses?.city || '',
+            state: ctx.branch?.branchPhysicalAddresses?.state || '',
+            postalCode: ctx.branch?.branchPhysicalAddresses?.postalCode || '',
+            country: ctx.branch?.branchPhysicalAddresses?.country || ''
         });
     };
 
@@ -59,7 +59,7 @@ export default function CompanyBranchPhysicalAddressCard() {
                                 <IconBuilding className="size-3.5 text-primary shrink-0" /> Street
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.physicalAddress?.street}
+                                {ctx.branch?.branchPhysicalAddresses?.street ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -67,7 +67,7 @@ export default function CompanyBranchPhysicalAddressCard() {
                                 <IconMapPin className="size-3.5 shrink-0" /> City
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.physicalAddress?.city}
+                                {ctx.branch?.branchPhysicalAddresses?.city ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -75,7 +75,7 @@ export default function CompanyBranchPhysicalAddressCard() {
                                 <IconMapPin className="size-3.5 shrink-0" /> State
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.physicalAddress?.state}
+                                {ctx.branch?.branchPhysicalAddresses?.state ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -83,7 +83,7 @@ export default function CompanyBranchPhysicalAddressCard() {
                                 <IconMailbox className="size-3.5 shrink-0" /> Postal Code
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.physicalAddress?.postalCode}
+                                {ctx.branch?.branchPhysicalAddresses?.postalCode ?? "-"}
                             </div>
                         </div>
                         <div className='flex justify-between items-center px-1 py-2'>
@@ -91,7 +91,7 @@ export default function CompanyBranchPhysicalAddressCard() {
                                 <IconWorld className="size-3.5 shrink-0" /> Country
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.physicalAddress?.country}
+                                {ctx.branch?.branchPhysicalAddresses?.country ?? "-"}
                             </div>
                         </div>
                     </CardContent>

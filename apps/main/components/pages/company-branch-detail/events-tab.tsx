@@ -1,19 +1,12 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
 import {
-    ColumnDef,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
-    Row,
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Badge } from "@repo/shadcn-ui/components/badge";
 import { Button } from "@repo/shadcn-ui/components/button";
 import { Label } from "@repo/shadcn-ui/components/label";
 import {
@@ -39,166 +32,120 @@ import {
 } from "@tabler/icons-react";
 import { TabsContent } from "@/shadcn/components/tabs";
 import { useCompanyBranchDetail } from "./company-branch-detail-container";
-import { eventSchema } from "@/root/libs/mock-up/company-data";
+import { useCallback, useEffect, useState } from "react";
+import { EventColumn } from "./components/event-column";
+import EventRow from "./components/event-row";
+import { EventSkeletonRow } from "./components/event-skeleton-row";
+import { BranchEventPaginationInput, PaginatedBranchEvent } from "@repo/commons/types/account-service-schema.type";
+import { BRANCH_EVENT_PAGINATION_SIZE } from "@/root/libs/constants";
+import { useLazyQuery } from "@apollo/client/react";
+import { gql, TypedDocumentNode } from "@apollo/client";
 
-const eventTypeConfig = {
-    holiday: { variant: "default" as const, className: "bg-red-500 hover:bg-red-600", label: "Holiday" },
-    closure: { variant: "destructive" as const, className: "", label: "Closure" },
-    maintenance: { variant: "default" as const, className: "bg-amber-500 hover:bg-amber-600", label: "Maintenance" },
-    special: { variant: "default" as const, className: "bg-purple-500 hover:bg-purple-600", label: "Special Event" },
-};
+interface GetBranchEventResponse {
+    getCompanyBranchEvent: PaginatedBranchEvent;
+}
 
-const columns: ColumnDef<z.infer<typeof eventSchema>>[] = [
-    {
-        accessorKey: "date",
-        header: "Date",
-        cell: ({ row }) => {
-            const startDate = new Date(row.original.date);
-            const endDate = row.original.endDate ? new Date(row.original.endDate) : null;
+interface GetBranchEventVariables {
+    pagination: BranchEventPaginationInput;
+    companyPublicId: string;
+}
 
-            return (
-                <div className="text-sm">
-                    <div className="font-medium">
-                        {startDate.toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                        })}
-                    </div>
-                    {endDate && (
-                        <div className="text-xs text-muted-foreground">
-                            to {endDate.toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric'
-                            })}
-                        </div>
-                    )}
-                </div>
-            );
-        },
-        size: 150,
-        enableHiding: false,
-    },
-    {
-        accessorKey: "title",
-        header: "Event Name",
-        cell: ({ row }) => {
-            return (
-                <div className="flex flex-col">
-                    <span className="font-medium">{row.original.title}</span>
-                    <span className="text-sm text-muted-foreground">
-                        {row.original.description}
-                    </span>
-                </div>
-            );
-        },
-        enableHiding: false,
-    },
-    {
-        accessorKey: "type",
-        header: "Type",
-        cell: ({ row }) => {
-            const type = row.original.type;
-            const config = eventTypeConfig[type];
-
-            return (
-                <Badge
-                    variant={config.variant}
-                    className={config.className}
-                >
-                    {config.label}
-                </Badge>
-            );
-        },
-        size: 150,
-    },
-    {
-        accessorKey: "allDay",
-        header: "Duration",
-        cell: ({ row }) => {
-            return (
-                <div className="text-sm">
-                    {row.original.allDay ? "All Day" : "Partial Day"}
-                </div>
-            );
-        },
-        size: 120,
-    },
-];
-
-function EventRow({ row, companyId, branchId }: { row: Row<z.infer<typeof eventSchema>>; companyId: number; branchId: number }) {
-    const router = useRouter();
-
-    const handleRowClick = (e: React.MouseEvent) => {
-        // Prevent navigation when clicking on interactive elements
-        const target = e.target as HTMLElement;
-        if (
-            target.closest("button") ||
-            target.closest("input") ||
-            target.closest("a")
-        ) {
-            return;
+const GET_COMPANY_BRANCH_EVENT: TypedDocumentNode<GetBranchEventResponse, GetBranchEventVariables> = gql`
+    query GetCompanyBranchEvent($pagination: BranchEventPaginationInput!, $companyPublicId: String!) {
+        getCompanyBranchEvent(pagination: $pagination, companyPublicId: $companyPublicId) {
+            data {
+                publicId
+                name
+                type
+                description
+                StartDate
+                EndDate
+                createdAt
+                updatedAt
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                total
+                currentPage
+                totalPages
+            }
         }
+    }
+`
 
-        router.push(`/my-account/company/${companyId}/branch/${branchId}/event/${row.original.id}`);
-    };
-
-    return (
-        <TableRow
-            onClick={handleRowClick}
-            className="cursor-pointer transition-colors hover:bg-muted/50"
-        >
-            {row.getVisibleCells().map((cell) => {
-                return (
-                    <TableCell
-                        key={cell.id}
-                        className="px-5 py-3"
-                        style={{
-                            width:
-                                cell.column.id === "title"
-                                    ? "auto"
-                                    : `${cell.column.getSize()}px`,
-                        }}
-                    >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                );
-            })}
-        </TableRow>
-    );
+const initialPaginatedBranchEvent: PaginatedBranchEvent = {
+    data: [],
+    pageInfo: {
+        endCursor: null,
+        hasNextPage: false,
+        total: 0,
+        currentPage: 1,
+        totalPages: 1
+    },
 }
 
 export default function EventsTab() {
     const ctx = useCompanyBranchDetail();
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [pagination, setPagination] = React.useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
+    const [getCompanyBranchEvent, { data, loading }] = useLazyQuery(GET_COMPANY_BRANCH_EVENT);
+
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pageSize, setPageSize] = useState(BRANCH_EVENT_PAGINATION_SIZE);
+    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedBranchEvent>(initialPaginatedBranchEvent);
+    const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
+
+    const goToNextPage = useCallback(() => {
+        if (paginatedUserAccount.pageInfo.hasNextPage && paginatedUserAccount.pageInfo.endCursor !== null) {
+            setCursorHistory(prev => [...prev, paginatedUserAccount.pageInfo.endCursor]);
+            getCompanyBranchEvent({
+                variables: {
+                    companyPublicId: ctx.branch?.company.publicId ?? "-1",
+                    pagination: {
+                        cursor: paginatedUserAccount.pageInfo.endCursor,
+                        take: pageSize,
+                        branchPublicId: ctx.branch?.publicId ?? "-1",
+                    }
+                }
+            });
+        }
+    }, [paginatedUserAccount, pageSize, getCompanyBranchEvent, ctx.branch]);
+
+    const goToPreviousPage = useCallback(() => {
+        if (cursorHistory.length > 1) {
+            const newHistory = [...cursorHistory];
+            newHistory.pop();
+            const previousCursor = newHistory[newHistory.length - 1];
+            setCursorHistory(newHistory);
+            getCompanyBranchEvent({
+                variables: {
+                    companyPublicId: ctx.branch?.company.publicId ?? "-1",
+                    pagination: {
+                        cursor: previousCursor,
+                        take: pageSize,
+                        branchPublicId: ctx.branch?.publicId ?? "-1",
+                    }
+                }
+            });
+        }
+    }, [cursorHistory, pageSize, getCompanyBranchEvent, ctx.branch]);
 
     const table = useReactTable({
-        data: ctx.events,
-        columns,
+        data: paginatedUserAccount.data,
+        columns: EventColumn,
         state: {
             sorting,
-            pagination,
         },
-        getRowId: (row) => row.id.toString(),
+        getRowId: (row) => row.publicId.toString(),
         onSortingChange: setSorting,
-        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        manualPagination: true,
+        pageCount: paginatedUserAccount.pageInfo.totalPages,
     });
 
-    if (ctx.isLoading.events) {
-        return (
-            <TabsContent value="events">
-                <div className="bg-red-500/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-            </TabsContent>
-        );
-    }
+    useEffect(() => {
+        setPaginatedUserAccount(data?.getCompanyBranchEvent ?? ctx.branch?.branchEvents ?? initialPaginatedBranchEvent)
+    }, [ctx.branch?.userAccounts, data?.getCompanyBranchEvent])
 
     return (
         <TabsContent value="events">
@@ -234,19 +181,23 @@ export default function EventsTab() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {loading ? (
+                                Array.from({ length: pageSize }).map((_, index) => (
+                                    <EventSkeletonRow key={`skeleton-${index}`} />
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <EventRow
                                         key={row.id}
                                         row={row}
-                                        companyId={ctx.company?.id || 0}
-                                        branchId={ctx.branch?.id || 0}
+                                        companyId={ctx.branch?.company.publicId ?? "-1"}
+                                        branchId={ctx.branch?.publicId ?? "-1"}
                                     />
                                 ))
                             ) : (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={columns.length}
+                                        colSpan={EventColumn.length}
                                         className="h-24 text-center"
                                     >
                                         No events found.
@@ -257,107 +208,82 @@ export default function EventsTab() {
                     </Table>
                 </div>
 
-                {/* Pagination controls */}
-                {table.getRowModel().rows?.length > 0 && (
-                    <div className="flex items-center justify-between px-4">
-                        {/* Left: Showing count */}
-                        <div className="text-sm text-muted-foreground">
-                            Showing{" "}
-                            <span className="font-medium text-foreground">
-                                {table.getRowModel().rows.length === 0
-                                    ? 0
-                                    : table.getState().pagination.pageIndex *
-                                    table.getState().pagination.pageSize +
-                                    1}
-                            </span>
-                            {" - "}
-                            <span className="font-medium text-foreground">
-                                {Math.min(
-                                    (table.getState().pagination.pageIndex + 1) *
-                                    table.getState().pagination.pageSize,
-                                    table.getFilteredRowModel().rows.length
-                                )}
-                            </span>
-                            {" of "}
-                            <span className="font-medium text-foreground">
-                                {table.getFilteredRowModel().rows.length}
-                            </span>
-                        </div>
-
-                        {/* Center: Pagination controls */}
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                onClick={() => table.setPageIndex(0)}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to first page</span>
-                                <IconChevronsLeft className="size-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to previous page</span>
-                                <IconChevronLeft className="size-4" />
-                            </Button>
-                            <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                                <span>{table.getState().pagination.pageIndex + 1}</span>
-                                <span className="text-muted-foreground">of</span>
-                                <span>{table.getPageCount()}</span>
-                            </div>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to next page</span>
-                                <IconChevronRight className="size-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to last page</span>
-                                <IconChevronsRight className="size-4" />
-                            </Button>
-                        </div>
-
-                        {/* Right: Rows per page */}
-                        <div className="flex items-center gap-2">
-                            <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                                Rows per page
-                            </Label>
-                            <Select
-                                value={`${table.getState().pagination.pageSize}`}
-                                onValueChange={(value) => {
-                                    table.setPageSize(Number(value));
-                                }}
-                            >
-                                <SelectTrigger className="h-8 w-16" id="rows-per-page">
-                                    <SelectValue placeholder={table.getState().pagination.pageSize} />
-                                </SelectTrigger>
-                                <SelectContent side="top">
-                                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                                        <SelectItem key={pageSize} value={`${pageSize}`}>
-                                            {pageSize}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <div className="flex items-center justify-between px-4">
+                    {/* Left: Showing count */}
+                    <div className="text-sm text-muted-foreground">
+                        Showing{" "}
+                        <span className="font-medium text-foreground">
+                            {paginatedUserAccount.pageInfo.total === 0
+                                ? 0
+                                : (paginatedUserAccount.pageInfo.currentPage - 1) * pageSize + 1}
+                        </span>
+                        {" - "}
+                        <span className="font-medium text-foreground">
+                            {Math.min(
+                                paginatedUserAccount.pageInfo.currentPage * pageSize,
+                                paginatedUserAccount.pageInfo.total
+                            )}
+                        </span>
+                        {" of "}
+                        <span className="font-medium text-foreground">
+                            {paginatedUserAccount.pageInfo.total}
+                        </span>
                     </div>
-                )}
+
+                    {/* Center: Pagination controls */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            className="size-8"
+                            size="icon"
+                            onClick={goToPreviousPage}
+                            disabled={paginatedUserAccount.pageInfo.currentPage === 1 || loading}
+                        >
+                            <span className="sr-only">Go to previous page</span>
+                            <IconChevronLeft className="size-4" />
+                        </Button>
+                        <div className="flex items-center gap-1 px-2 text-sm font-medium">
+                            <span>{paginatedUserAccount.pageInfo.currentPage}</span>
+                            <span className="text-muted-foreground">of</span>
+                            <span>{paginatedUserAccount.pageInfo.totalPages}</span>
+                        </div>
+                        <Button
+                            variant="outline"
+                            className="size-8"
+                            size="icon"
+                            onClick={goToNextPage}
+                            disabled={!paginatedUserAccount.pageInfo.hasNextPage || loading}
+                        >
+                            <span className="sr-only">Go to next page</span>
+                            <IconChevronRight className="size-4" />
+                        </Button>
+                    </div>
+
+                    {/* Right: Rows per page */}
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                            Rows per page
+                        </Label>
+                        <Select
+                            value={String(pageSize)}
+                            onValueChange={(value) => {
+                                setPageSize(Number(value))
+                            }}
+                            disabled={loading}
+                        >
+                            <SelectTrigger className="h-8 w-auto" id="rows-per-page">
+                                <SelectValue placeholder={pageSize} />
+                            </SelectTrigger>
+                            <SelectContent side="top">
+                                {[10, 20, 30, 40, 50].map((pageSize) => (
+                                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                                        {pageSize}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
             </div>
         </TabsContent>
     );

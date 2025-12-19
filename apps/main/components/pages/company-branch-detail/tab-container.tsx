@@ -17,14 +17,14 @@ export default function TabContainer() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState("users");
 
-    // if (ctx.isLoading.branches) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
+    if (ctx.loading) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
 
     const handleAddEvent = () => {
-        router.push(`/my-account/company/${ctx.company?.id}/branch/${ctx.branch?.id}/event/new`);
+        router.push(`/my-account/company/${ctx.branch?.company.publicId}/branch/${ctx.branch?.publicId}/event/new`);
     };
 
     const handleAddUser = () => {
-        router.push(`/my-account/company/${ctx.company?.id}/branch/${ctx.branch?.id}/user/new`);
+        router.push(`/my-account/company/${ctx.branch?.company.publicId}/branch/${ctx.branch?.publicId}/user/new`);
     };
 
     return (
@@ -55,7 +55,7 @@ export default function TabContainer() {
 
             <UsersTab />
             <EventsTab />
-            <ActivityLogsTab />
+            {/* <ActivityLogsTab /> */}
             <SettingsTab />
         </Tabs>
     );

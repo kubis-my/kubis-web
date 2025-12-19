@@ -28,11 +28,18 @@ export enum UserAccountStatus {
 export interface UserAccountPaginationInput {
   cursor?: Nullable<number>;
   take: number;
+  branchPublicId?: Nullable<string>;
 }
 
 export interface BranchPaginationInput {
   cursor?: Nullable<number>;
   take: number;
+}
+
+export interface BranchEventPaginationInput {
+  cursor?: Nullable<number>;
+  take: number;
+  branchPublicId?: Nullable<string>;
 }
 
 export interface CompanyPaginationInput {
@@ -137,6 +144,16 @@ export interface BranchOperationHours {
   branch: Branch;
 }
 
+export interface PaginatedBranchEvent {
+  data: BranchEvent[];
+  pageInfo: PageInfo;
+}
+
+export interface PaginatedUserAccount {
+  data: UserAccount[];
+  pageInfo: PageInfo;
+}
+
 export interface Branch {
   publicId: string;
   name: string;
@@ -150,7 +167,8 @@ export interface Branch {
   branchPhysicalAddresses?: Nullable<BranchPhysicalAddress>;
   branchBillingAddress?: Nullable<BranchBillingAddress>;
   branchOperationHours: BranchOperationHours[];
-  userAccounts: UserAccount[];
+  branchEvents?: PaginatedBranchEvent;
+  userAccounts?: PaginatedUserAccount;
 }
 
 export interface UserAccount {
@@ -190,6 +208,18 @@ export interface User {
   credential: Credential;
 }
 
+export interface BranchEvent {
+  publicId: string;
+  name: string;
+  type: string;
+  description?: Nullable<string>;
+  StartDate: DateTime;
+  EndDate: DateTime;
+  createdAt: DateTime;
+  updatedAt: DateTime;
+  branch: Branch;
+}
+
 export interface CompaniesOverview {
   totalCompanies: number;
   activeCompanies: number;
@@ -218,17 +248,14 @@ export interface PaginatedBranch {
   pageInfo: PageInfo;
 }
 
-export interface PaginatedUserAccount {
-  data: UserAccount[];
-  pageInfo: PageInfo;
-}
-
 export interface IQuery {
   getAuthUser(): User | Promise<User>;
   getUserCompanies(pagination: CompanyPaginationInput): PaginatedCompany | Promise<PaginatedCompany>;
   getCompanyDetail(companyPublicId: string): Company | Promise<Company>;
   getCompanyUserAccounts(companyPublicId: string, pagination: UserAccountPaginationInput): PaginatedUserAccount | Promise<PaginatedUserAccount>;
   getCompanyBranches(companyPublicId: string, pagination: BranchPaginationInput): PaginatedBranch | Promise<PaginatedBranch>;
+  getBranchDetail(branchPublicId: string): Branch | Promise<Branch>;
+  getCompanyBranchEvent(companyPublicId: string, pagination: BranchEventPaginationInput): PaginatedBranchEvent | Promise<PaginatedBranchEvent>;
 }
 
 export interface IMutation {

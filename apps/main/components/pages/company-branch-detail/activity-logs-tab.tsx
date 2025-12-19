@@ -150,7 +150,7 @@ export default function ActivityLogsTab() {
     });
 
     const table = useReactTable({
-        data: ctx.activityLogs,
+        data: [],
         columns,
         state: {
             sorting,
@@ -163,14 +163,6 @@ export default function ActivityLogsTab() {
         getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
     });
-
-    if (ctx.isLoading.activityLogs) {
-        return (
-            <TabsContent value="activity-logs">
-                <div className="bg-red-500/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-            </TabsContent>
-        );
-    }
 
     return (
         <TabsContent value="activity-logs">

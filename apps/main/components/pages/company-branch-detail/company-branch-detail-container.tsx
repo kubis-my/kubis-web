@@ -1,144 +1,170 @@
 "use client";
 
-import { branchDataByCompany, branchSchema, companyData, companySchema, userDataByCompany, userSchema, eventDataByBranch, eventSchema, activityLogDataByBranch, activityLogSchema } from "@/root/libs/mock-up/company-data";
+import { BRANCH_EVENT_PAGINATION_SIZE, USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
+import { Branch, BranchEventPaginationInput, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
 import { usePathname } from "next/navigation";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { z } from "zod"
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-export type IsLoadingType = {
-    branchDetail: boolean
-    users: boolean
-    events: boolean
-    activityLogs: boolean
+interface GetBranchDetailResponse {
+    getBranchDetail: Branch;
 }
 
+interface GetBranchDetailVariables {
+    companyPublicId: string;
+    branchPublicId: string;
+    userAccountPaginationInput: UserAccountPaginationInput
+    branchEventPaginationInput: BranchEventPaginationInput
+}
+
+export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetBranchDetailVariables> = gql`
+    query GetBranchDetail($branchPublicId:String!,$companyPublicId:String!,$userAccountPaginationInput:UserAccountPaginationInput!,$branchEventPaginationInput:BranchEventPaginationInput!){
+        getBranchDetail(branchPublicId:$branchPublicId){ 
+            publicId
+            name
+            code
+            email
+            phoneCode
+            phoneNumber
+            isActive
+            company {
+                publicId
+                name
+            }
+            branchPhysicalAddresses {
+                publicId
+                street
+                city
+                state
+                postalCode
+                country
+                phoneCode
+                phoneNumber
+                createdAt
+                updatedAt
+            }
+            branchBillingAddress {
+                publicId
+                street
+                city
+                state
+                postalCode
+                country
+                phoneCode
+                phoneNumber
+                createdAt
+                updatedAt
+            }
+            branchOperationHours {
+                publicId
+                dayOfWeek
+                openTime
+                closeTime
+                isClosed
+            }
+            userAccounts (companyPublicId:$companyPublicId,pagination:$userAccountPaginationInput){
+                data {
+                    publicId
+                    code
+                    status
+                    joinedAt
+                    phoneCode
+                    phoneNumber
+                    position
+                    companyPublicId
+                    branchPublicId
+                    user {
+                        publicId
+                        firstName
+                        lastName
+                        nickname
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                    total
+                    currentPage
+                    totalPages
+                }
+            },
+            branchEvents (companyPublicId:$companyPublicId,pagination:$branchEventPaginationInput){
+                data {
+                    publicId
+                    name
+                    type
+                    description
+                    StartDate
+                    EndDate
+                    createdAt
+                    updatedAt
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                    total
+                    currentPage
+                    totalPages
+                }
+            }
+        }
+    }
+`
+
 export type CompanyBranchDetailContext = {
-    company?: z.infer<typeof companySchema>
-    branch?: z.infer<typeof branchSchema>
-    users: z.infer<typeof userSchema>[]
-    events: z.infer<typeof eventSchema>[]
-    activityLogs: z.infer<typeof activityLogSchema>[]
-    isLoading: IsLoadingType
+    branch?: Branch
+    loading: boolean
 }
 
 const CompanyBranchDetailContext = createContext<CompanyBranchDetailContext | undefined>(undefined);
 
-export default function CompanyBranchDetailContainer({ children, companyId, branchId }: Readonly<{ children: React.ReactNode, companyId: number, branchId: number }>) {
+export default function CompanyBranchDetailContainer({ children, companyId, branchId }: Readonly<{ children: React.ReactNode, companyId: string, branchId: string }>) {
     const pathName = usePathname();
 
     const { updateBreadcrumbList } = useDashboard01();
-
-    const [company, setCompany] = useState<z.infer<typeof companySchema> | undefined>(undefined);
-    const [branch, setBranch] = useState<z.infer<typeof branchSchema> | undefined>(undefined);
-    const [users, setUsers] = useState<z.infer<typeof userSchema>[]>([]);
-    const [events, setEvents] = useState<z.infer<typeof eventSchema>[]>([]);
-    const [activityLogs, setActivityLogs] = useState<z.infer<typeof activityLogSchema>[]>([]);
-    const [isLoading, setIsLoading] = useState<IsLoadingType>({
-        branchDetail: true,
-        users: true,
-        events: true,
-        activityLogs: true,
+    const { data, loading } = useQuery(GET_COMPANY_DETAIL, {
+        variables: {
+            companyPublicId: companyId,
+            branchPublicId: branchId,
+            userAccountPaginationInput: {
+                take: USER_ACCOUNT_PAGINATION_SIZE
+            },
+            branchEventPaginationInput: {
+                take: BRANCH_EVENT_PAGINATION_SIZE
+            }
+        }
     })
 
-    const getCompanyBranchDetail = useCallback(async () => {
-        // Simulate actual graphql api called
-        await new Promise(res => setTimeout(() => res(true), 3000));
-
-        const company = companyData.find(row => row.id === Number(companyId));
-
-        if (!company) {
-            return;
-        }
-
-        const branch = branchDataByCompany[company.id]?.find(row => row.id === branchId);
-
-        if (!branch) {
-            return;
-        }
-
-        // ['my-account', 'company', '1', 'branch', '101']
-        const companyURL = pathName.split(new RegExp(/\//g))
-            .filter(Boolean)
-            .splice(0, 3)
-            .join("/");
-
-        updateBreadcrumbList([
-            {
-                name: company.companyName,
-                url: "/" + companyURL
-            },
-            {
-                name: branch.branchCode
-            },
-        ]);
-
-        setCompany(company)
-        setBranch(branch)
-        setIsLoading(cur => ({
-            ...cur,
-            branchDetail: false
-        }))
-    }, [companyId, updateBreadcrumbList])
-
-    const getUserList = useCallback(async () => {
-        // Simulate actual graphql api called
-        await new Promise(res => setTimeout(() => res(true), 3000));
-
-        const companyUsers = userDataByCompany[Number(companyId)] || [];
-        setUsers(companyUsers);
-
-        setIsLoading(cur => ({
-            ...cur,
-            users: false
-        }))
-    }, [companyId])
-
-    const getEventList = useCallback(async () => {
-        // Simulate actual graphql api called
-        await new Promise(res => setTimeout(() => res(true), 2000));
-
-        const branchEvents = eventDataByBranch[Number(branchId)] || [];
-        setEvents(branchEvents);
-
-        setIsLoading(cur => ({
-            ...cur,
-            events: false
-        }))
-    }, [branchId])
-
-    const getActivityLogs = useCallback(async () => {
-        // Simulate actual graphql api called
-        await new Promise(res => setTimeout(() => res(true), 2500));
-
-        const branchActivityLogs = activityLogDataByBranch[Number(branchId)] || [];
-        setActivityLogs(branchActivityLogs);
-
-        setIsLoading(cur => ({
-            ...cur,
-            activityLogs: false
-        }))
-    }, [branchId])
+    const [branch, setBranch] = useState<Branch | undefined>(undefined);
 
     useEffect(() => {
-        const fetchData = async () => {
-            await getCompanyBranchDetail()
-            await getUserList()
-            await getEventList()
-            await getActivityLogs()
-        }
+        setBranch(data?.getBranchDetail);
 
-        fetchData()
-    }, [getCompanyBranchDetail, getUserList, getEventList, getActivityLogs])
+        if (data?.getBranchDetail) {
+            // ['my-account', 'company', '1', 'branch', '101']
+            const companyURL = pathName.split(new RegExp(/\//g))
+                .filter(Boolean)
+                .splice(0, 3)
+                .join("/");
+
+            updateBreadcrumbList([
+                {
+                    name: data?.getBranchDetail.company.name,
+                    url: "/" + companyURL
+                },
+                {
+                    name: data?.getBranchDetail.code
+                },
+            ]);
+        }
+    }, [data])
 
     const contextValue = useMemo(() => ({
-        company,
         branch,
-        users,
-        events,
-        activityLogs,
-        isLoading
-    }), [company, branch, users, events, activityLogs, isLoading]);
+        loading
+    }), [branch, loading]);
 
     return (
         <CompanyBranchDetailContext.Provider value={contextValue}>

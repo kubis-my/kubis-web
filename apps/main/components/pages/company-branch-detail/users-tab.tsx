@@ -1,19 +1,12 @@
 "use client";
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
 import {
-    ColumnDef,
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
-    Row,
     SortingState,
     useReactTable,
 } from "@tanstack/react-table";
-import { Badge } from "@repo/shadcn-ui/components/badge";
 import { Button } from "@repo/shadcn-ui/components/button";
 import { Label } from "@repo/shadcn-ui/components/label";
 import {
@@ -34,166 +27,130 @@ import {
 import {
     IconChevronLeft,
     IconChevronRight,
-    IconChevronsLeft,
-    IconChevronsRight,
 } from "@tabler/icons-react";
 import { TabsContent } from "@/shadcn/components/tabs";
 import { useCompanyBranchDetail } from "./company-branch-detail-container";
-import { userSchema } from "@/root/libs/mock-up/company-data";
+import { useCallback, useEffect, useState } from "react";
+import { UserColumn } from "./components/user-column";
+import UserRow from "./components/user-row";
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { PaginatedUserAccount, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
+import { useLazyQuery } from "@apollo/client/react";
+import { UserSkeletonRow } from "./components/user-skeleton-row";
+import { USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
 
-const columns: ColumnDef<z.infer<typeof userSchema>>[] = [
-    {
-        accessorKey: "userCode",
-        header: "User Code",
-        cell: ({ row }) => {
-            return (
-                <div className="font-mono text-sm font-medium">
-                    {row.original.userCode}
-                </div>
-            );
-        },
-        size: 100,
-        enableHiding: false,
-    },
-    {
-        accessorKey: "fullName",
-        header: "Full Name",
-        cell: ({ row }) => {
-            const fullName = `${row.original.firstName} ${row.original.lastName}`;
-            return (
-                <div className="flex flex-col">
-                    <span className="font-medium">{fullName}</span>
-                    {row.original.nickname && (
-                        <span className="text-sm text-muted-foreground">
-                            &quot;{row.original.nickname}&quot;
-                        </span>
-                    )}
-                </div>
-            );
-        },
-        enableHiding: false,
-    },
-    {
-        accessorKey: "position",
-        header: "Position",
-        cell: ({ row }) => {
-            return (
-                <div className="text-sm">
-                    {row.original.position}
-                </div>
-            );
-        },
-        size: 220,
-    },
-    {
-        accessorKey: "phone",
-        header: "Phone",
-        cell: ({ row }) => {
-            return (
-                <div className="font-mono text-sm">
-                    {row.original.phone}
-                </div>
-            );
-        },
-        size: 180,
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-            const status = row.original.status;
-            const statusConfig = {
-                active: { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", label: "Active" },
-                inactive: { variant: "secondary" as const, className: "", label: "Inactive" },
-                pending: { variant: "default" as const, className: "bg-amber-500 hover:bg-amber-600", label: "Pending Invitation" },
-                expired: { variant: "destructive" as const, className: "", label: "Expired Invitation" },
-            };
+interface GetUserAccountResponse {
+    getCompanyUserAccounts: PaginatedUserAccount;
+}
 
-            const config = statusConfig[status];
+interface GetUserAccountVariables {
+    pagination: UserAccountPaginationInput;
+    companyPublicId: string;
+}
 
-            return (
-                <Badge
-                    variant={config.variant}
-                    className={config.className}
-                >
-                    {config.label}
-                </Badge>
-            );
-        },
-        size: 180,
-    },
-];
-
-function UserRow({ row, companyId, branchId }: { row: Row<z.infer<typeof userSchema>>; companyId: number; branchId: number }) {
-    const router = useRouter();
-
-    const handleRowClick = (e: React.MouseEvent) => {
-        // Prevent navigation when clicking on interactive elements
-        const target = e.target as HTMLElement;
-        if (
-            target.closest("button") ||
-            target.closest("input") ||
-            target.closest("a")
-        ) {
-            return;
+const GET_COMPANY_BRANCH_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse, GetUserAccountVariables> = gql`
+    query GetCompanyUserAccounts($pagination:UserAccountPaginationInput!,$companyPublicId:String!) {
+        getCompanyUserAccounts(pagination:$pagination,companyPublicId:$companyPublicId){
+            data {
+                publicId
+                status
+                joinedAt
+                companyPublicId
+                branchPublicId
+                phoneCode
+                phoneNumber
+                position
+                code
+                user {
+                    publicId
+                    firstName
+                    lastName
+                    nickname
+                }
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                total
+                currentPage
+                totalPages
+            }
         }
+    }
+`
 
-        router.push(`/my-account/company/${companyId}/branch/${branchId}/user/${row.original.id}`);
-    };
-
-    return (
-        <TableRow
-            onClick={handleRowClick}
-            className="cursor-pointer transition-colors hover:bg-muted/50"
-        >
-            {row.getVisibleCells().map((cell) => {
-                return (
-                    <TableCell
-                        key={cell.id}
-                        className="px-5 py-3"
-                        style={{
-                            width:
-                                cell.column.id === "fullName"
-                                    ? "auto"
-                                    : `${cell.column.getSize()}px`,
-                        }}
-                    >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                );
-            })}
-        </TableRow>
-    );
+const initialPaginatedUserAccount: PaginatedUserAccount = {
+    data: [],
+    pageInfo: {
+        endCursor: null,
+        hasNextPage: false,
+        total: 0,
+        currentPage: 1,
+        totalPages: 1
+    },
 }
 
 export default function UsersTab() {
     const ctx = useCompanyBranchDetail();
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [pagination, setPagination] = React.useState({
-        pageIndex: 0,
-        pageSize: 10,
-    });
+    const [getCompanyUserAccounts, { data, loading }] = useLazyQuery(GET_COMPANY_BRANCH_USER_ACCOUNTS);
+
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [pageSize, setPageSize] = useState(USER_ACCOUNT_PAGINATION_SIZE);
+    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedUserAccount>(initialPaginatedUserAccount);
+    const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
+
+    const goToNextPage = useCallback(() => {
+        if (paginatedUserAccount.pageInfo.hasNextPage && paginatedUserAccount.pageInfo.endCursor !== null) {
+            setCursorHistory(prev => [...prev, paginatedUserAccount.pageInfo.endCursor]);
+            getCompanyUserAccounts({
+                variables: {
+                    companyPublicId: ctx.branch?.company.publicId ?? "-1",
+                    pagination: {
+                        cursor: paginatedUserAccount.pageInfo.endCursor,
+                        take: pageSize,
+                        branchPublicId: ctx.branch?.publicId ?? "-1",
+                    }
+                }
+            });
+        }
+    }, [paginatedUserAccount, pageSize, getCompanyUserAccounts, ctx.branch]);
+
+    const goToPreviousPage = useCallback(() => {
+        if (cursorHistory.length > 1) {
+            const newHistory = [...cursorHistory];
+            newHistory.pop();
+            const previousCursor = newHistory[newHistory.length - 1];
+            setCursorHistory(newHistory);
+            getCompanyUserAccounts({
+                variables: {
+                    companyPublicId: ctx.branch?.company.publicId ?? "-1",
+                    pagination: {
+                        cursor: previousCursor,
+                        take: pageSize,
+                        branchPublicId: ctx.branch?.publicId ?? "-1",
+                    }
+                }
+            });
+        }
+    }, [cursorHistory, pageSize, getCompanyUserAccounts, ctx.branch]);
 
     const table = useReactTable({
-        data: ctx.users,
-        columns,
+        data: paginatedUserAccount.data,
+        columns: UserColumn,
         state: {
             sorting,
-            pagination,
         },
-        getRowId: (row) => row.id.toString(),
+        getRowId: (row) => row.publicId.toString(),
         onSortingChange: setSorting,
-        onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
+        manualPagination: true,
+        pageCount: paginatedUserAccount.pageInfo.totalPages,
     });
 
-    if (ctx.isLoading.users) {
-        return (
-            <div className="bg-red-500/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-        );
-    }
+    useEffect(() => {
+        setPaginatedUserAccount(data?.getCompanyUserAccounts ?? ctx.branch?.userAccounts ?? initialPaginatedUserAccount)
+    }, [ctx.branch?.userAccounts, data?.getCompanyUserAccounts])
 
     return (
         <TabsContent value="users">
@@ -229,19 +186,23 @@ export default function UsersTab() {
                             ))}
                         </TableHeader>
                         <TableBody>
-                            {table.getRowModel().rows?.length ? (
+                            {loading ? (
+                                Array.from({ length: pageSize }).map((_, index) => (
+                                    <UserSkeletonRow key={`skeleton-${index}`} />
+                                ))
+                            ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
                                     <UserRow
                                         key={row.id}
                                         row={row}
-                                        companyId={ctx.company?.id || 0}
-                                        branchId={ctx.branch?.id || 0}
+                                        companyId={ctx.branch?.company.publicId ?? "-1"}
+                                        branchId={ctx.branch?.publicId ?? "-1"}
                                     />
                                 ))
                             ) : (
                                 <TableRow>
                                     <TableCell
-                                        colSpan={columns.length}
+                                        colSpan={UserColumn.length}
                                         className="h-24 text-center"
                                     >
                                         No users found.
@@ -252,107 +213,82 @@ export default function UsersTab() {
                     </Table>
                 </div>
 
-                {/* Pagination controls */}
-                {table.getRowModel().rows?.length > 0 && (
-                    <div className="flex items-center justify-between px-4">
-                        {/* Left: Showing count */}
-                        <div className="text-sm text-muted-foreground">
-                            Showing{" "}
-                            <span className="font-medium text-foreground">
-                                {table.getRowModel().rows.length === 0
-                                    ? 0
-                                    : table.getState().pagination.pageIndex *
-                                    table.getState().pagination.pageSize +
-                                    1}
-                            </span>
-                            {" - "}
-                            <span className="font-medium text-foreground">
-                                {Math.min(
-                                    (table.getState().pagination.pageIndex + 1) *
-                                    table.getState().pagination.pageSize,
-                                    table.getFilteredRowModel().rows.length
-                                )}
-                            </span>
-                            {" of "}
-                            <span className="font-medium text-foreground">
-                                {table.getFilteredRowModel().rows.length}
-                            </span>
-                        </div>
-
-                        {/* Center: Pagination controls */}
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                onClick={() => table.setPageIndex(0)}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to first page</span>
-                                <IconChevronsLeft className="size-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                onClick={() => table.previousPage()}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to previous page</span>
-                                <IconChevronLeft className="size-4" />
-                            </Button>
-                            <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                                <span>{table.getState().pagination.pageIndex + 1}</span>
-                                <span className="text-muted-foreground">of</span>
-                                <span>{table.getPageCount()}</span>
-                            </div>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                onClick={() => table.nextPage()}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to next page</span>
-                                <IconChevronRight className="size-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to last page</span>
-                                <IconChevronsRight className="size-4" />
-                            </Button>
-                        </div>
-
-                        {/* Right: Rows per page */}
-                        <div className="flex items-center gap-2">
-                            <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                                Rows per page
-                            </Label>
-                            <Select
-                                value={`${table.getState().pagination.pageSize}`}
-                                onValueChange={(value) => {
-                                    table.setPageSize(Number(value));
-                                }}
-                            >
-                                <SelectTrigger className="h-8 w-16" id="rows-per-page">
-                                    <SelectValue placeholder={table.getState().pagination.pageSize} />
-                                </SelectTrigger>
-                                <SelectContent side="top">
-                                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                                        <SelectItem key={pageSize} value={`${pageSize}`}>
-                                            {pageSize}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
+                <div className="flex items-center justify-between px-4">
+                    {/* Left: Showing count */}
+                    <div className="text-sm text-muted-foreground">
+                        Showing{" "}
+                        <span className="font-medium text-foreground">
+                            {paginatedUserAccount.pageInfo.total === 0
+                                ? 0
+                                : (paginatedUserAccount.pageInfo.currentPage - 1) * pageSize + 1}
+                        </span>
+                        {" - "}
+                        <span className="font-medium text-foreground">
+                            {Math.min(
+                                paginatedUserAccount.pageInfo.currentPage * pageSize,
+                                paginatedUserAccount.pageInfo.total
+                            )}
+                        </span>
+                        {" of "}
+                        <span className="font-medium text-foreground">
+                            {paginatedUserAccount.pageInfo.total}
+                        </span>
                     </div>
-                )}
+
+                    {/* Center: Pagination controls */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            className="size-8"
+                            size="icon"
+                            onClick={goToPreviousPage}
+                            disabled={paginatedUserAccount.pageInfo.currentPage === 1 || loading}
+                        >
+                            <span className="sr-only">Go to previous page</span>
+                            <IconChevronLeft className="size-4" />
+                        </Button>
+                        <div className="flex items-center gap-1 px-2 text-sm font-medium">
+                            <span>{paginatedUserAccount.pageInfo.currentPage}</span>
+                            <span className="text-muted-foreground">of</span>
+                            <span>{paginatedUserAccount.pageInfo.totalPages}</span>
+                        </div>
+                        <Button
+                            variant="outline"
+                            className="size-8"
+                            size="icon"
+                            onClick={goToNextPage}
+                            disabled={!paginatedUserAccount.pageInfo.hasNextPage || loading}
+                        >
+                            <span className="sr-only">Go to next page</span>
+                            <IconChevronRight className="size-4" />
+                        </Button>
+                    </div>
+
+                    {/* Right: Rows per page */}
+                    <div className="flex items-center gap-2">
+                        <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                            Rows per page
+                        </Label>
+                        <Select
+                            value={String(pageSize)}
+                            onValueChange={(value) => {
+                                setPageSize(Number(value))
+                            }}
+                            disabled={loading}
+                        >
+                            <SelectTrigger className="h-8 w-auto" id="rows-per-page">
+                                <SelectValue placeholder={pageSize} />
+                            </SelectTrigger>
+                            <SelectContent side="top">
+                                {[10, 20, 30, 40, 50].map((pageSize) => (
+                                    <SelectItem key={pageSize} value={`${pageSize}`}>
+                                        {pageSize}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
             </div>
         </TabsContent>
     );

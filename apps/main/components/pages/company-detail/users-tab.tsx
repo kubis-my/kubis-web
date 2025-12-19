@@ -37,7 +37,7 @@ import { useCallback, useEffect, useState } from "react";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { PaginatedUserAccount, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
 import { useLazyQuery } from "@apollo/client/react";
-import { USER_ACCOUNT_PAGINATION_SIZE } from "./hooks";
+import { USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
 
 interface GetUserAccountResponse {
     getCompanyUserAccounts: PaginatedUserAccount;

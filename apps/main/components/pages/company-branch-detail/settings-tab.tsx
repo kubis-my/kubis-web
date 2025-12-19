@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { TabsContent } from "@/shadcn/components/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/shadcn-ui/components/card";
 import { Label } from "@repo/shadcn-ui/components/label";
@@ -10,7 +9,6 @@ import { Button } from "@repo/shadcn-ui/components/button";
 import { Input } from "@repo/shadcn-ui/components/input";
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -23,31 +21,18 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@repo/shadcn-ui/component
 import { Separator } from "@repo/shadcn-ui/components/separator";
 import { IconClock, IconTrash, IconDeviceFloppy, IconAlertTriangle } from "@tabler/icons-react";
 import { useCompanyBranchDetail } from "./company-branch-detail-container";
-
-type DaySchedule = {
-    isOpen: boolean;
-    openTime: string;
-    closeTime: string;
-};
-
-type WeekSchedule = {
-    monday: DaySchedule;
-    tuesday: DaySchedule;
-    wednesday: DaySchedule;
-    thursday: DaySchedule;
-    friday: DaySchedule;
-    saturday: DaySchedule;
-    sunday: DaySchedule;
-};
+import { useState } from "react";
+import { DayOfWeek } from "@repo/commons/types/account-service-schema.type";
+import { DateTime } from "luxon";
 
 const DAYS_OF_WEEK = [
-    { key: "monday", label: "Monday" },
-    { key: "tuesday", label: "Tuesday" },
-    { key: "wednesday", label: "Wednesday" },
-    { key: "thursday", label: "Thursday" },
-    { key: "friday", label: "Friday" },
-    { key: "saturday", label: "Saturday" },
-    { key: "sunday", label: "Sunday" },
+    { key: DayOfWeek.MONDAY, label: "Monday" },
+    { key: DayOfWeek.TUESDAY, label: "Tuesday" },
+    { key: DayOfWeek.WEDNESDAY, label: "Wednesday" },
+    { key: DayOfWeek.THURSDAY, label: "Thursday" },
+    { key: DayOfWeek.FRIDAY, label: "Friday" },
+    { key: DayOfWeek.SATURDAY, label: "Saturday" },
+    { key: DayOfWeek.SUNDAY, label: "Sunday" },
 ] as const;
 
 const TIMEZONES = [
@@ -73,55 +58,41 @@ const CURRENCIES = [
 
 export default function SettingsTab() {
     const ctx = useCompanyBranchDetail();
-    const [weekSchedule, setWeekSchedule] = React.useState<WeekSchedule>({
-        monday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
-        tuesday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
-        wednesday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
-        thursday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
-        friday: { isOpen: true, openTime: "09:00", closeTime: "17:00" },
-        saturday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
-        sunday: { isOpen: false, openTime: "09:00", closeTime: "17:00" },
-    });
-    const [timezone, setTimezone] = React.useState("America/Los_Angeles");
-    const [currency, setCurrency] = React.useState("USD");
-    const [invoicePrefix, setInvoicePrefix] = React.useState("INV");
-    const [taxRate, setTaxRate] = React.useState("10");
-    const [notifications, setNotifications] = React.useState({
+
+    const [timezone, setTimezone] = useState("America/Los_Angeles");
+    const [currency, setCurrency] = useState("USD");
+    const [invoicePrefix, setInvoicePrefix] = useState("INV");
+    const [taxRate, setTaxRate] = useState("10");
+    const [notifications, setNotifications] = useState({
         newUsers: true,
         upcomingEvents: true,
         branchUpdates: false,
     });
 
     // Delete branch state
-    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-    const [deleteStep, setDeleteStep] = React.useState<"code" | "otp">("code");
-    const [branchCodeInput, setBranchCodeInput] = React.useState("");
-    const [otpValue, setOtpValue] = React.useState("");
-    const [isRequestingOtp, setIsRequestingOtp] = React.useState(false);
-    const [isDeleting, setIsDeleting] = React.useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteStep, setDeleteStep] = useState<"code" | "otp">("code");
+    const [branchCodeInput, setBranchCodeInput] = useState("");
+    const [otpValue, setOtpValue] = useState("");
+    const [isRequestingOtp, setIsRequestingOtp] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
-    const handleDayToggle = (day: keyof WeekSchedule, isOpen: boolean) => {
-        setWeekSchedule((prev) => ({
-            ...prev,
-            [day]: { ...prev[day], isOpen },
-        }));
+    const handleDayToggle = (day: DayOfWeek, isOpen: boolean) => {
+        // setWeekSchedule((prev) => ({
+        //     ...prev,
+        //     [day]: { ...prev[day], isOpen },
+        // }));
     };
 
     const handleTimeChange = (
-        day: keyof WeekSchedule,
+        day: DayOfWeek,
         timeType: "openTime" | "closeTime",
         value: string
     ) => {
-        setWeekSchedule((prev) => ({
-            ...prev,
-            [day]: { ...prev[day], [timeType]: value },
-        }));
-    };
-
-    const handleSaveOperationHours = async () => {
-        // TODO: Implement GraphQL mutation to save operation hours
-        console.log("Saving operation hours:", weekSchedule);
-        // await updateBranchOperationHours({ branchId: ctx.branch?.id, schedule: weekSchedule });
+        // setWeekSchedule((prev) => ({
+        //     ...prev,
+        //     [day]: { ...prev[day], [timeType]: value },
+        // }));
     };
 
     const handleSaveGeneralSettings = async () => {
@@ -139,7 +110,7 @@ export default function SettingsTab() {
         setIsRequestingOtp(true);
         // TODO: Implement GraphQL mutation to request OTP
         // This should send OTP to company owner (CEO)
-        console.log("Requesting OTP for company:", ctx.company?.id);
+        // console.log("Requesting OTP for company:", ctx.company?.id);
 
         // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -170,16 +141,9 @@ export default function SettingsTab() {
         setDeleteDialogOpen(false);
     };
 
-    const isBranchCodeValid = branchCodeInput === ctx.branch?.branchCode;
+    const isBranchCodeValid = branchCodeInput === ctx.branch?.code;
     const isOtpValid = otpValue.length === 6;
 
-    if (ctx.isLoading.branchDetail) {
-        return (
-            <TabsContent value="settings">
-                <div className="bg-red-500/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-            </TabsContent>
-        );
-    }
 
     return (
         <TabsContent value="settings" className="space-y-6">
@@ -196,7 +160,8 @@ export default function SettingsTab() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {DAYS_OF_WEEK.map(({ key, label }) => {
-                        const schedule = weekSchedule[key];
+                        const schedule = ctx.branch?.branchOperationHours?.find(row => row.dayOfWeek === key);
+
                         return (
                             <div
                                 key={key}
@@ -204,16 +169,16 @@ export default function SettingsTab() {
                             >
                                 <div className="flex items-center gap-3">
                                     <Switch
-                                        checked={schedule.isOpen}
+                                        checked={schedule?.isClosed}
                                         onCheckedChange={(checked) => handleDayToggle(key, checked)}
                                     />
                                     <Label className="min-w-[100px] font-medium">{label}</Label>
                                 </div>
-                                {schedule.isOpen ? (
+                                {!schedule?.isClosed ? (
                                     <div className="flex items-center gap-2">
                                         <Input
                                             type="time"
-                                            value={schedule.openTime}
+                                            value={DateTime.fromISO(schedule?.openTime).toFormat("hh:mm")}
                                             onChange={(e) =>
                                                 handleTimeChange(key, "openTime", e.target.value)
                                             }
@@ -222,7 +187,7 @@ export default function SettingsTab() {
                                         <span className="text-muted-foreground">to</span>
                                         <Input
                                             type="time"
-                                            value={schedule.closeTime}
+                                            value={DateTime.fromISO(schedule?.closeTime).toFormat("hh:mm")}
                                             onChange={(e) =>
                                                 handleTimeChange(key, "closeTime", e.target.value)
                                             }
@@ -235,12 +200,6 @@ export default function SettingsTab() {
                             </div>
                         );
                     })}
-                    <div className="flex justify-end pt-2">
-                        <Button onClick={handleSaveOperationHours}>
-                            <IconDeviceFloppy className="size-4" />
-                            Save Operation Hours
-                        </Button>
-                    </div>
                 </CardContent>
             </Card>
 
@@ -435,8 +394,8 @@ export default function SettingsTab() {
                                         <div className="rounded-lg bg-destructive/10 p-3 text-sm">
                                             <p className="font-medium">This will delete:</p>
                                             <ul className="ml-4 mt-2 list-disc space-y-1 text-muted-foreground">
-                                                <li>{ctx.users.length} users</li>
-                                                <li>{ctx.events.length} events</li>
+                                                <li>{1} users</li>
+                                                <li>{1} events</li>
                                                 <li>All branch settings and data</li>
                                             </ul>
                                         </div>
@@ -444,7 +403,7 @@ export default function SettingsTab() {
                                             <Label htmlFor="branch-code">
                                                 Type{" "}
                                                 <span className="font-mono font-bold">
-                                                    {ctx.branch?.branchCode}
+                                                    {ctx.branch?.code}
                                                 </span>{" "}
                                                 to confirm
                                             </Label>
