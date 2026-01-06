@@ -7,9 +7,7 @@ const nextConfig: NextConfig = {
     root: path.join(__dirname, "../../"),
   },
   async headers() {
-    return getDefaultHeaders([
-      process.env.NEXT_PUBLIC_AUTH_URL ?? ""
-    ])
+    return getDefaultHeaders([])
   },
 };
 
