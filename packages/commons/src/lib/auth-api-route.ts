@@ -1,16 +1,26 @@
 import { Elysia, t } from 'elysia'
+import axios from 'axios';
 import { authClient } from './auth-client';
 import { clearAuthCookies, clearCsrfTokenCookie, getAccessTokenCookie, getRefreshTokenCookie, setAccessTokenCookie, setAuthCookies, setCsrfTokenCookie } from '../utils/cookie-helpers';
 import { generateCsrfToken } from '../utils/csrf';
 import { csrfProtection } from './csrf-plugin';
+import { createForwardedHeaders } from '../utils/client-ip';
 
 const auth = new Elysia({ prefix: '/api/auth' })
     .use(csrfProtection())
     .post(
         '/exchange',
-        async ({ body, set }) => {
+        async ({ body, set, request }) => {
             try {
-                const { code, raw } = await authClient.exchangeCodeForTokens(body);
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                const { code, raw } = await authClient.exchangeCodeForTokens({
+                    ...body,
+                    driver,
+                });
 
                 if (code === 200 && raw.accessToken && raw.refreshToken) {
                     await setAuthCookies(raw.accessToken, raw.refreshToken);
@@ -72,10 +82,18 @@ const auth = new Elysia({ prefix: '/api/auth' })
     )
     .post(
         "refresh",
-        async ({ set }) => {
+        async ({ set, request }) => {
             try {
                 const refreshToken = await getRefreshTokenCookie() ?? "invalid-token";
-                const { code, raw } = await authClient.refresh({ refreshToken });
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                const { code, raw } = await authClient.refresh({
+                    refreshToken,
+                    driver,
+                });
 
                 if (code === 200 && raw.token) {
                     if (raw.refreshToken) {
@@ -114,10 +132,18 @@ const auth = new Elysia({ prefix: '/api/auth' })
     )
     .get(
         "session",
-        async ({ set }) => {
+        async ({ set, request }) => {
             try {
                 const accessToken = await getAccessTokenCookie() ?? "invalid-token";
-                const { code, raw } = await authClient.validate({ token: accessToken });
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                const { code, raw } = await authClient.validate({
+                    token: accessToken,
+                    driver,
+                });
 
                 if (code === 200 && raw.valid) {
                     return {

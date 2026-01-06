@@ -1,16 +1,26 @@
 import { Elysia, t } from 'elysia'
+import axios from 'axios';
 import { authClient } from '@repo/commons/lib/auth-client';
 import { clearCsrfTokenCookie, clearSessionCookies, getSessionTokenCookie, setCsrfTokenCookie, setSessionTokenCookie } from '@repo/commons/utils/cookie-helpers';
 import { generateCsrfToken } from '@repo/commons/utils/csrf';
 import { csrfProtection } from '@repo/commons/lib/csrf-plugin';
+import { createForwardedHeaders } from '@repo/commons/utils/client-ip';
 
 const auth = new Elysia({ prefix: '/api/auth' })
     .use(csrfProtection())
     .post(
         '/sign-in',
-        async ({ body, set }) => {
+        async ({ body, set, request }) => {
             try {
-                const { code, raw } = await authClient.signIn(body);
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                const { code, raw } = await authClient.signIn({
+                    ...body,
+                    driver,
+                });
 
                 if (code === 200 && raw.sessionToken) {
                     await setSessionTokenCookie(raw.sessionToken);
@@ -57,12 +67,18 @@ const auth = new Elysia({ prefix: '/api/auth' })
     )
     .post(
         '/authorize',
-        async ({ body, set }) => {
+        async ({ body, set, request }) => {
             try {
                 const sessionToken = await getSessionTokenCookie() ?? "invalid-token";
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
                 const { code, raw } = await authClient.redirectAuthorize({
                     ...body,
                     sessionToken,
+                    driver,
                 });
 
                 if (code === 200 && raw.redirectUrl) {
@@ -102,10 +118,18 @@ const auth = new Elysia({ prefix: '/api/auth' })
     )
     .get(
         '/session',
-        async ({ set }) => {
+        async ({ set, request }) => {
             try {
                 const sessionToken = await getSessionTokenCookie() ?? "invalid-token";
-                const { code, raw } = await authClient.validate({ token: sessionToken });
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                const { code, raw } = await authClient.validate({
+                    token: sessionToken,
+                    driver,
+                });
 
                 if (code === 200) {
                     return {

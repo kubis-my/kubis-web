@@ -1,14 +1,16 @@
 import { Elysia } from 'elysia'
 import { getAccessTokenCookie } from '../utils/cookie-helpers';
 import { csrfProtection } from './csrf-plugin';
+import { createForwardedHeaders } from '../utils/client-ip';
 
 export const graphql = (GRAPHQL_URL: string) => {
     return new Elysia({ prefix: '/api/graphql' })
         .use(csrfProtection())
         .post(
             '/',
-            async ({ body, set }) => {
+            async ({ body, set, request }) => {
                 const accessToken = await getAccessTokenCookie() ?? "invalid-token";
+                const forwardedHeaders = createForwardedHeaders(request);
 
                 try {
                     const response = await fetch(GRAPHQL_URL, {
@@ -16,6 +18,7 @@ export const graphql = (GRAPHQL_URL: string) => {
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${accessToken}`,
+                            ...forwardedHeaders,
                         },
                         body: JSON.stringify(body),
                         credentials: 'include',
@@ -36,8 +39,9 @@ export const graphql = (GRAPHQL_URL: string) => {
         )
         .get(
             '/',
-            async ({ query, set }) => {
+            async ({ query, set, request }) => {
                 const accessToken = await getAccessTokenCookie() ?? "invalid-token";
+                const forwardedHeaders = createForwardedHeaders(request);
 
                 try {
                     // Apollo Client may send GET requests with query params
@@ -50,6 +54,7 @@ export const graphql = (GRAPHQL_URL: string) => {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${accessToken}`,
+                            ...forwardedHeaders,
                         },
                         credentials: 'include',
                     });
