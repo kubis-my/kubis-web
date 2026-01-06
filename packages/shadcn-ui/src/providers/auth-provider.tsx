@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Loader from '../custom-components/loader';
 import { hasGraphQLError } from "@repo/commons/utils/graphql"
@@ -62,6 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Fetch user data from GraphQL only when authenticated
     const { data: userData, error: userError } = useQuery(GET_AUTH_USER, { skip: !isAuthenticated });
 
+    // Track ongoing authorization to prevent race conditions
+    const authorizationPromiseRef = useRef<Promise<void> | null>(null);
+
     const logout = useCallback(async () => {
         try {
             await fetch('/api/auth/logout', {
@@ -77,43 +80,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [router]);
 
     const authorize = useCallback(async () => {
-        try {
-            // Attempt to refresh tokens via API endpoint
-            const refreshResponse = await fetch('/api/auth/refresh', {
-                method: 'POST',
-                headers: getCsrfHeaders(),
-                credentials: 'include',
-            });
+        // If authorization is already in progress, wait for it to complete
+        if (authorizationPromiseRef.current) {
+            return authorizationPromiseRef.current;
+        }
 
-            if (refreshResponse.ok) {
-                // Small delay to ensure cookies are set
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                // Validate session via API endpoint
-                const sessionResponse = await fetch('/api/auth/session', {
-                    method: 'GET',
+        // Create new authorization promise
+        const authPromise = (async () => {
+            try {
+                // Attempt to refresh tokens via API endpoint
+                const refreshResponse = await fetch('/api/auth/refresh', {
+                    method: 'POST',
+                    headers: getCsrfHeaders(),
                     credentials: 'include',
                 });
 
-                if (sessionResponse.ok) {
-                    const sessionData = await sessionResponse.json();
+                if (refreshResponse.ok) {
+                    // Small delay to ensure cookies are set
+                    await new Promise(resolve => setTimeout(resolve, 500));
 
-                    if (sessionData.authenticated) {
-                        setIsAuthenticated(true);
-                        // User data will be fetched via GraphQL query
-                        return;
+                    // Validate session via API endpoint
+                    const sessionResponse = await fetch('/api/auth/session', {
+                        method: 'GET',
+                        credentials: 'include',
+                    });
+
+                    if (sessionResponse.ok) {
+                        const sessionData = await sessionResponse.json();
+
+                        if (sessionData.authenticated) {
+                            setIsAuthenticated(true);
+                            // User data will be fetched via GraphQL query
+                            return;
+                        }
                     }
                 }
-            }
 
-            // Refresh or validation failed
-            setIsAuthenticated(false);
-            setAuthUser(undefined);
-        } catch (error) {
-            console.error('Authorization error:', error);
-            setIsAuthenticated(false);
-            setAuthUser(undefined);
-        }
+                // Refresh or validation failed
+                setIsAuthenticated(false);
+                setAuthUser(undefined);
+            } catch (error) {
+                console.error('Authorization error:', error);
+                setIsAuthenticated(false);
+                setAuthUser(undefined);
+            } finally {
+                // Clear the promise reference when done
+                authorizationPromiseRef.current = null;
+            }
+        })();
+
+        authorizationPromiseRef.current = authPromise;
+        return authPromise;
     }, []);
 
     const updateAuthUser = (user: User | undefined) => {
