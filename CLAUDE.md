@@ -89,7 +89,7 @@ Required environment variables (see `packages/commons/src/constant/env.ts`):
 - `NEXT_PUBLIC_MAIN_APP_BASE_URL` - Main app URL
 - `NEXT_PUBLIC_SSO_APP_BASE_URL` - SSO app URL
 - `NEXT_PUBLIC_MAIN_CLIENT_ID` - OAuth client ID
-- `NEXT_PUBLIC_ACCOUNT_GRAPHQL_URL` - GraphQL backend URL
+- `NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL` - GraphQL backend URL
 
 Example values in `apps/main/.env` and `apps/sso/.env`
 
