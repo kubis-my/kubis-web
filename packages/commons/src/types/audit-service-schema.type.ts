@@ -31,6 +31,7 @@ export interface User {
 
 export interface Company {
     publicId: string;
+    auditLogs?: PaginatedAuditLog;
 }
 
 export interface Branch {

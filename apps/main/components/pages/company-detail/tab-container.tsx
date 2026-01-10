@@ -9,6 +9,7 @@ import { Skeleton } from "@/shadcn/components/skeleton";
 import UsersTab from "./users-tab";
 import { Button } from "@/shadcn/components/button";
 import { IconPlus } from "@tabler/icons-react";
+import ActivityLogsTab from "./activity-logs-tab";
 
 export default function TabContainer() {
     const ctx = useCompanyDetail();
@@ -31,6 +32,7 @@ export default function TabContainer() {
                 <TabsList>
                     <TabsTrigger value="branches">Branches</TabsTrigger>
                     <TabsTrigger value="users">Users</TabsTrigger>
+                    <TabsTrigger value="activity-logs">Activity Logs</TabsTrigger>
                 </TabsList>
                 <div className="flex items-center gap-2">
                     {activeTab === "branches" && (
@@ -50,6 +52,7 @@ export default function TabContainer() {
             </div>
             <BranchesTab />
             <UsersTab />
+            <ActivityLogsTab />
         </Tabs>
     );
 }

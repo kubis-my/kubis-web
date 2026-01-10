@@ -9,10 +9,13 @@ import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
+
+type ExtendedBranch = Branch & {
+    auditLogs?: PaginatedAuditLog
+}
+
 interface GetBranchDetailResponse {
-    getBranchDetail: Branch & {
-        auditLogs: PaginatedAuditLog
-    }
+    getBranchDetail: ExtendedBranch
 }
 
 interface GetBranchDetailVariables {
@@ -156,9 +159,7 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
 `
 
 export type CompanyBranchDetailContext = {
-    branch?: Branch & {
-        auditLogs?: PaginatedAuditLog
-    }
+    branch?: ExtendedBranch
     loading: boolean
 }
 
