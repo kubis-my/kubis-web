@@ -220,12 +220,12 @@ export default function UsersTab() {
                         <span className="font-medium text-foreground">
                             {paginatedUserAccount.pageInfo.total === 0
                                 ? 0
-                                : (paginatedUserAccount.pageInfo.currentPage - 1) * pageSize + 1}
+                                : (cursorHistory.length - 1) * pageSize + 1}
                         </span>
                         {" - "}
                         <span className="font-medium text-foreground">
                             {Math.min(
-                                paginatedUserAccount.pageInfo.currentPage * pageSize,
+                                cursorHistory.length * pageSize,
                                 paginatedUserAccount.pageInfo.total
                             )}
                         </span>
@@ -242,13 +242,13 @@ export default function UsersTab() {
                             className="size-8"
                             size="icon"
                             onClick={goToPreviousPage}
-                            disabled={paginatedUserAccount.pageInfo.currentPage === 1 || loading}
+                            disabled={cursorHistory.length === 1 || loading}
                         >
                             <span className="sr-only">Go to previous page</span>
                             <IconChevronLeft className="size-4" />
                         </Button>
                         <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                            <span>{paginatedUserAccount.pageInfo.currentPage}</span>
+                            <span>{cursorHistory.length}</span>
                             <span className="text-muted-foreground">of</span>
                             <span>{paginatedUserAccount.pageInfo.totalPages}</span>
                         </div>

@@ -57,7 +57,12 @@ const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLogsVariab
                 auditLogAuthor {
                     publicId
                     credentialId
-                    userId
+                    user {
+                        publicId
+                        firstName
+                        lastName
+                        nickname
+                    }
                 }
                 auditLogResource {
                     publicId
@@ -237,12 +242,12 @@ export default function ActivityLogsTab() {
                         <span className="font-medium text-foreground">
                             {paginatedAuditLog.pageInfo.total === 0
                                 ? 0
-                                : (paginatedAuditLog.pageInfo.currentPage - 1) * pageSize + 1}
+                                : (cursorHistory.length - 1) * pageSize + 1}
                         </span>
                         {" - "}
                         <span className="font-medium text-foreground">
                             {Math.min(
-                                paginatedAuditLog.pageInfo.currentPage * pageSize,
+                                cursorHistory.length * pageSize,
                                 paginatedAuditLog.pageInfo.total
                             )}
                         </span>
@@ -259,13 +264,13 @@ export default function ActivityLogsTab() {
                             className="size-8"
                             size="icon"
                             onClick={goToPreviousPage}
-                            disabled={paginatedAuditLog.pageInfo.currentPage === 1 || loading}
+                            disabled={cursorHistory.length === 1 || loading}
                         >
                             <span className="sr-only">Go to previous page</span>
                             <IconChevronLeft className="size-4" />
                         </Button>
                         <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                            <span>{paginatedAuditLog.pageInfo.currentPage}</span>
+                            <span>{cursorHistory.length}</span>
                             <span className="text-muted-foreground">of</span>
                             <span>{paginatedAuditLog.pageInfo.totalPages}</span>
                         </div>

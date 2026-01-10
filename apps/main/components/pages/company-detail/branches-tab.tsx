@@ -226,12 +226,12 @@ export default function BranchesTab() {
                         <span className="font-medium text-foreground">
                             {paginatedBranch.pageInfo.total === 0
                                 ? 0
-                                : (paginatedBranch.pageInfo.currentPage - 1) * pageSize + 1}
+                                : (cursorHistory.length - 1) * pageSize + 1}
                         </span>
                         {" - "}
                         <span className="font-medium text-foreground">
                             {Math.min(
-                                paginatedBranch.pageInfo.currentPage * pageSize,
+                                cursorHistory.length * pageSize,
                                 paginatedBranch.pageInfo.total
                             )}
                         </span>
@@ -248,13 +248,13 @@ export default function BranchesTab() {
                             className="size-8"
                             size="icon"
                             onClick={goToPreviousPage}
-                            disabled={paginatedBranch.pageInfo.currentPage === 1 || loading}
+                            disabled={cursorHistory.length === 1 || loading}
                         >
                             <span className="sr-only">Go to previous page</span>
                             <IconChevronLeft className="size-4" />
                         </Button>
                         <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                            <span>{paginatedBranch.pageInfo.currentPage}</span>
+                            <span>{cursorHistory.length}</span>
                             <span className="text-muted-foreground">of</span>
                             <span>{paginatedBranch.pageInfo.totalPages}</span>
                         </div>

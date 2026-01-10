@@ -298,12 +298,12 @@ export function DataTable() {
                     <span className="font-medium text-foreground">
                         {ctx.paginatedCompany.pageInfo.total === 0
                             ? 0
-                            : (ctx.paginatedCompany.pageInfo.currentPage - 1) * ctx.pageSize + 1}
+                            : (ctx.cursorHistory.length - 1) * ctx.pageSize + 1}
                     </span>
                     {" - "}
                     <span className="font-medium text-foreground">
                         {Math.min(
-                            ctx.paginatedCompany.pageInfo.currentPage * ctx.pageSize,
+                            ctx.cursorHistory.length * ctx.pageSize,
                             ctx.paginatedCompany.pageInfo.total
                         )}
                     </span>
@@ -320,13 +320,13 @@ export function DataTable() {
                         className="size-8"
                         size="icon"
                         onClick={ctx.goToPreviousPage}
-                        disabled={ctx.paginatedCompany.pageInfo.currentPage === 1 || ctx.isFetchingCompany}
+                        disabled={ctx.cursorHistory.length === 1 || ctx.isFetchingCompany}
                     >
                         <span className="sr-only">Go to previous page</span>
                         <IconChevronLeft className="size-4" />
                     </Button>
                     <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                        <span>{ctx.paginatedCompany.pageInfo.currentPage}</span>
+                        <span>{ctx.cursorHistory.length}</span>
                         <span className="text-muted-foreground">of</span>
                         <span>{ctx.paginatedCompany.pageInfo.totalPages}</span>
                     </div>

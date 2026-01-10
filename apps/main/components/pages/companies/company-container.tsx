@@ -64,6 +64,7 @@ export type CompanyContext = {
     goToPreviousPage: () => void;
     setPageSize: (size: number) => void;
     pageSize: number;
+    cursorHistory: (number | null | undefined)[]
 }
 
 const initialPaginatedCompany: PaginatedCompany = {
@@ -164,7 +165,8 @@ export default function CompanyContainer({ children }: Readonly<{ children: Reac
         goToNextPage,
         goToPreviousPage,
         setPageSize: handleSetPageSize,
-        pageSize
+        pageSize,
+        cursorHistory
     }), [data, isFetchingCompany, fetchCompanies, goToNextPage, goToPreviousPage, handleSetPageSize, pageSize]);
 
     return (
