@@ -55,17 +55,17 @@ const GET_COMPANY_BRANCH_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse
                 publicId
                 status
                 joinedAt
-                companyPublicId
                 branchPublicId
-                phoneCode
-                phoneNumber
-                position
-                code
-                user {
-                    publicId
-                    firstName
-                    lastName
-                    nickname
+                companyEmployee{
+                    phoneCode
+                    phoneNumber
+                    position
+                    user {
+                        publicId
+                        firstName
+                        lastName
+                        nickname
+                    }
                 }
             }
             pageInfo {

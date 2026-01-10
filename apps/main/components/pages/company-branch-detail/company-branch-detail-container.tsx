@@ -169,7 +169,8 @@ export default function CompanyBranchDetailContainer({ children, companyId, bran
             companyPublicId: companyId,
             branchPublicId: branchId,
             userAccountPaginationInput: {
-                take: USER_ACCOUNT_PAGINATION_SIZE
+                take: USER_ACCOUNT_PAGINATION_SIZE,
+                branchPublicId: branchId,
             },
             branchEventPaginationInput: {
                 take: BRANCH_EVENT_PAGINATION_SIZE
