@@ -83,6 +83,7 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                         phoneCode
                         phoneNumber
                         position
+                        internalId
                         user {
                             publicId
                             firstName
@@ -132,6 +133,9 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                             firstName
                             lastName
                             nickname
+                            companyEmployee(companyPublicId:$companyPublicId){
+                                internalId
+                            }
                         }
                     }
                     auditLogResource {

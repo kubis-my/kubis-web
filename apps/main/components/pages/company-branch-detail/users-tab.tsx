@@ -60,6 +60,7 @@ const GET_COMPANY_BRANCH_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse
                     phoneCode
                     phoneNumber
                     position
+                    internalId
                     user {
                         publicId
                         firstName

@@ -94,6 +94,7 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
                         position
                         phoneCode
                         phoneNumber
+                        internalId
                         user {
                             publicId
                             firstName

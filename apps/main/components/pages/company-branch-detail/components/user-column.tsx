@@ -7,10 +7,9 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         accessorKey: "code",
         header: "ID",
         cell: ({ row }) => {
-            // TODO: FIX THIS LATER
             return (
                 <div className="font-mono text-sm font-medium">
-                    #0001
+                    #{row.original.companyEmployee.internalId.toString().padStart(5, "0")}
                 </div>
             );
         },

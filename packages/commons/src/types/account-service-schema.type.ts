@@ -218,6 +218,7 @@ export interface User {
   companies: Company[];
   userAccounts: UserAccount[];
   credential: Credential;
+  companyEmployee?: Nullable<CompanyEmployee>;
 }
 
 export interface BranchEvent {

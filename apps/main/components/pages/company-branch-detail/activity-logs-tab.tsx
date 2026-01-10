@@ -37,6 +37,7 @@ import { gql, TypedDocumentNode } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityColumn } from "./components/activity-column";
+import { ActivitySkeletonRow } from "./components/activity-skeleton-row";
 
 interface GetAuditLogsResponse {
     getAuditLogs: PaginatedAuditLog;
@@ -44,10 +45,14 @@ interface GetAuditLogsResponse {
 
 interface GetAuditLogsVariables {
     pagination: AuditLogPaginationInput;
+    companyPublicId: string;
 }
 
 const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLogsVariables> = gql`
-    query GetAuditLogs($pagination: AuditLogPaginationInput!) {
+    query GetAuditLogs(
+        $companyPublicId:String!
+        $pagination: AuditLogPaginationInput!
+        ) {
         getAuditLogs(pagination: $pagination) {
             data {
                 publicId
@@ -62,6 +67,9 @@ const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLogsVariab
                         firstName
                         lastName
                         nickname
+                        companyEmployee(companyPublicId: $companyPublicId){
+                            internalId
+                        }
                     }
                 }
                 auditLogResource {
@@ -106,6 +114,7 @@ export default function ActivityLogsTab() {
             setCursorHistory(prev => [...prev, paginatedAuditLog.pageInfo.endCursor]);
             getAuditLogs({
                 variables: {
+                    companyPublicId: ctx.branch?.company?.publicId ?? "-1",
                     pagination: {
                         cursor: paginatedAuditLog.pageInfo.endCursor,
                         take: pageSize,
@@ -124,6 +133,7 @@ export default function ActivityLogsTab() {
             setCursorHistory(newHistory);
             getAuditLogs({
                 variables: {
+                    companyPublicId: ctx.branch?.company?.publicId ?? "-1",
                     pagination: {
                         cursor: previousCursor,
                         take: pageSize,
@@ -188,13 +198,7 @@ export default function ActivityLogsTab() {
                         <TableBody>
                             {loading ? (
                                 Array.from({ length: pageSize }).map((_, index) => (
-                                    <TableRow key={`skeleton-${index}`}>
-                                        {ActivityColumn.map((_, colIndex) => (
-                                            <TableCell key={colIndex} className="px-5 py-3">
-                                                <div className="h-4 w-full animate-pulse rounded bg-muted" />
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
+                                    <ActivitySkeletonRow key={`skeleton-${index}`} />
                                 ))
                             ) : table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (

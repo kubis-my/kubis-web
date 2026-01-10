@@ -1,6 +1,6 @@
 import { activityTypeConfig } from "@/root/libs/constants";
 import { Badge } from "@/shadcn/components/badge";
-import { User } from "@repo/commons/types/account-service-schema.type";
+import { CompanyEmployee, User } from "@repo/commons/types/account-service-schema.type";
 import { AuditLog, AuditLogAuthor } from "@repo/commons/types/audit-service-schema.type";
 import { formatDateTime } from "@repo/commons/utils/date";
 import { ColumnDef } from "@tanstack/react-table";
@@ -28,7 +28,11 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
         accessorKey: "auditLogAuthor",
         header: "User",
         cell: ({ row }) => {
-            const author = row.original.auditLogAuthor as AuditLogAuthor & { user: User }
+            const author = row.original.auditLogAuthor as AuditLogAuthor & {
+                user: User & {
+                    companyEmployee?: CompanyEmployee
+                }
+            }
 
             if (!author) {
                 return <span className="text-xs text-muted-foreground">Unknown</span>;
@@ -38,8 +42,7 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
                 <div className="flex flex-col">
                     <span className="font-medium">{author.user.firstName} {author.user.lastName}</span>
                     <span className="font-mono text-xs text-muted-foreground">
-                        {/* TODO:FIX THIS */}
-                        #00001
+                        #{(author.user.companyEmployee?.internalId ?? 0).toString().padStart(5, "0")}
                     </span>
                 </div>
             );
