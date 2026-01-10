@@ -18,16 +18,9 @@ const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
             nickname
             displayName
             profilePicture
-            bod
-            gender
-            createdAt
-            updatedAt
             companies {
                 publicId
                 name
-                registrationNo
-                isUnclassified
-                logo
             }
             credential{
                 publicId

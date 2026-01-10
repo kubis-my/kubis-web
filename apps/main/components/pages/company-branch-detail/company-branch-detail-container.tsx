@@ -1,15 +1,18 @@
 "use client";
 
-import { BRANCH_EVENT_PAGINATION_SIZE, USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
+import { AUDIT_LOG_PAGINATION_SIZE, BRANCH_EVENT_PAGINATION_SIZE, USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { Branch, BranchEventPaginationInput, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
+import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 interface GetBranchDetailResponse {
-    getBranchDetail: Branch;
+    getBranchDetail: Branch & {
+        auditLogs: PaginatedAuditLog
+    }
 }
 
 interface GetBranchDetailVariables {
@@ -17,10 +20,16 @@ interface GetBranchDetailVariables {
     branchPublicId: string;
     userAccountPaginationInput: UserAccountPaginationInput
     branchEventPaginationInput: BranchEventPaginationInput
+    auditLogPaginationInput: AuditLogPaginationInput
 }
 
 export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetBranchDetailVariables> = gql`
-    query GetBranchDetail($branchPublicId:String!,$companyPublicId:String!,$userAccountPaginationInput:UserAccountPaginationInput!,$branchEventPaginationInput:BranchEventPaginationInput!){
+    query GetBranchDetail(
+        $branchPublicId:String!,$companyPublicId:String!,
+        $userAccountPaginationInput:UserAccountPaginationInput!,
+        $branchEventPaginationInput:BranchEventPaginationInput!,
+        $auditLogPaginationInput:AuditLogPaginationInput!,
+        ){
         getBranchDetail(branchPublicId:$branchPublicId){ 
             publicId
             name
@@ -67,19 +76,19 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
             userAccounts (companyPublicId:$companyPublicId,pagination:$userAccountPaginationInput){
                 data {
                     publicId
-                    code
                     status
                     joinedAt
-                    phoneCode
-                    phoneNumber
-                    position
-                    companyPublicId
                     branchPublicId
-                    user {
-                        publicId
-                        firstName
-                        lastName
-                        nickname
+                    companyEmployee{
+                        phoneCode
+                        phoneNumber
+                        position
+                        user {
+                            publicId
+                            firstName
+                            lastName
+                            nickname
+                        }
                     }
                 }
                 pageInfo {
@@ -109,12 +118,43 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                     totalPages
                 }
             }
+            auditLogs(pagination:$auditLogPaginationInput){
+                data {
+                    publicId
+                    emittedAt
+                    type
+                    description
+                    auditLogAuthor {
+                        publicId
+                        credentialId
+                        user {
+                            publicId
+                            firstName
+                            lastName
+                            nickname
+                        }
+                    }
+                    auditLogResource {
+                        publicId
+                        type
+                    }
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                    total
+                    currentPage
+                    totalPages
+                }
+            }
         }
     }
 `
 
 export type CompanyBranchDetailContext = {
-    branch?: Branch
+    branch?: Branch & {
+        auditLogs?: PaginatedAuditLog
+    }
     loading: boolean
 }
 
@@ -133,6 +173,9 @@ export default function CompanyBranchDetailContainer({ children, companyId, bran
             },
             branchEventPaginationInput: {
                 take: BRANCH_EVENT_PAGINATION_SIZE
+            },
+            auditLogPaginationInput: {
+                take: AUDIT_LOG_PAGINATION_SIZE
             }
         }
     })

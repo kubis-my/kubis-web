@@ -55,7 +55,7 @@ export default function TabContainer() {
 
             <UsersTab />
             <EventsTab />
-            {/* <ActivityLogsTab /> */}
+            <ActivityLogsTab />
             <SettingsTab />
         </Tabs>
     );

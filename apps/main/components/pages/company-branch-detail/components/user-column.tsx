@@ -7,9 +7,10 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         accessorKey: "code",
         header: "ID",
         cell: ({ row }) => {
+            // TODO: FIX THIS LATER
             return (
                 <div className="font-mono text-sm font-medium">
-                    {row.original.code}
+                    #0001
                 </div>
             );
         },
@@ -20,13 +21,13 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         accessorKey: "fullName",
         header: "Full Name",
         cell: ({ row }) => {
-            const fullName = `${row.original.user.firstName} ${row.original.user.lastName}`;
+            const fullName = `${row.original.companyEmployee.user.firstName} ${row.original.companyEmployee.user.lastName}`;
             return (
                 <div className="flex flex-col">
                     <span className="font-medium">{fullName}</span>
-                    {row.original.user.nickname && (
+                    {row.original.companyEmployee.user.nickname && (
                         <span className="text-sm text-muted-foreground">
-                            &quot;{row.original.user.nickname}&quot;
+                            &quot;{row.original.companyEmployee.user.nickname}&quot;
                         </span>
                     )}
                 </div>
@@ -40,7 +41,7 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         cell: ({ row }) => {
             return (
                 <div className="text-sm">
-                    {row.original.position}
+                    {row.original.companyEmployee.position}
                 </div>
             );
         },
@@ -52,7 +53,7 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm">
-                    {(row.original.phoneCode && row.original.phoneNumber) ? `${row.original.phoneCode} ${row.original.phoneNumber}` : "-"}
+                    {(row.original.companyEmployee.phoneCode && row.original.companyEmployee.phoneNumber) ? `${row.original.companyEmployee.phoneCode} ${row.original.companyEmployee.phoneNumber}` : "-"}
                 </div>
             );
         },

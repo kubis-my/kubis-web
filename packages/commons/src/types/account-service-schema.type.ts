@@ -31,6 +31,11 @@ export interface UserAccountPaginationInput {
   branchPublicId?: Nullable<string>;
 }
 
+export interface CompanyEmployeePaginationInput {
+  cursor?: Nullable<number>;
+  take: number;
+}
+
 export interface BranchPaginationInput {
   cursor?: Nullable<number>;
   take: number;
@@ -102,9 +107,21 @@ export interface Company {
   totalActiveBranch: number;
   user: User;
   userAccounts?: PaginatedUserAccount;
+  companyEmployees?: PaginatedCompanyEmployee;
   companyPhysicalAddresses?: Nullable<CompanyPhysicalAddress>;
   companyBillingAddress?: Nullable<CompanyBillingAddress>;
   branches?: PaginatedBranch;
+}
+
+export interface CompanyEmployee {
+  publicId: string;
+  internalId: number;
+  position: string;
+  phoneCode?: Nullable<string>;
+  phoneNumber?: Nullable<string>;
+  dateOfBirth?: Nullable<DateTime>;
+  user: User;
+  company: Company;
 }
 
 export interface BranchPhysicalAddress {
@@ -173,16 +190,11 @@ export interface Branch {
 
 export interface UserAccount {
   publicId: string;
-  code: string;
   status: UserAccountStatus;
   joinedAt?: Nullable<DateTime>;
-  phoneCode?: Nullable<string>;
-  phoneNumber?: Nullable<string>;
-  position?: Nullable<string>;
-  companyPublicId: string;
+  companyEmployeePublicId: string;
   branchPublicId: string;
-  user: User;
-  company: Company;
+  companyEmployee: CompanyEmployee;
   branch: Branch;
 }
 
@@ -243,6 +255,11 @@ export interface PaginatedCompany {
   overview: CompaniesOverview;
 }
 
+export interface PaginatedCompanyEmployee {
+  data: CompanyEmployee[];
+  pageInfo: PageInfo;
+}
+
 export interface PaginatedBranch {
   data: Branch[];
   pageInfo: PageInfo;
@@ -253,6 +270,7 @@ export interface IQuery {
   getUserCompanies(pagination: CompanyPaginationInput): PaginatedCompany | Promise<PaginatedCompany>;
   getCompanyDetail(companyPublicId: string): Company | Promise<Company>;
   getCompanyUserAccounts(companyPublicId: string, pagination: UserAccountPaginationInput): PaginatedUserAccount | Promise<PaginatedUserAccount>;
+  getCompanyEmployees(companyPublicId: string, pagination: CompanyEmployeePaginationInput): PaginatedCompanyEmployee | Promise<PaginatedCompanyEmployee>;
   getCompanyBranches(companyPublicId: string, pagination: BranchPaginationInput): PaginatedBranch | Promise<PaginatedBranch>;
   getBranchDetail(branchPublicId: string): Branch | Promise<Branch>;
   getCompanyBranchEvent(companyPublicId: string, pagination: BranchEventPaginationInput): PaginatedBranchEvent | Promise<PaginatedBranchEvent>;

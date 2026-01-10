@@ -89,17 +89,17 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
                     publicId
                     status
                     joinedAt
-                    companyPublicId
                     branchPublicId
-                    phoneCode
-                    phoneNumber
-                    position
-                    code
-                    user {
-                        publicId
-                        firstName
-                        lastName
-                        nickname
+                    companyEmployee{
+                        position
+                        phoneCode
+                        phoneNumber
+                        user {
+                            publicId
+                            firstName
+                            lastName
+                            nickname
+                        }
                     }
                 }
                 pageInfo {

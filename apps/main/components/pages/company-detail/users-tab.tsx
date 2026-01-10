@@ -55,17 +55,17 @@ const GET_COMPANY_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse, GetUs
                 publicId
                 status
                 joinedAt
-                companyPublicId
                 branchPublicId
-                phoneCode
-                phoneNumber
-                position
-                code
-                user {
-                    publicId
-                    firstName
-                    lastName
-                    nickname
+                companyEmployee{
+                    phoneCode
+                    phoneNumber
+                    position
+                    user {
+                        publicId
+                        firstName
+                        lastName
+                        nickname
+                    }
                 }
             }
             pageInfo {
@@ -88,7 +88,7 @@ const initialPaginatedUserAccount: PaginatedUserAccount = {
         totalPages: 1
     },
 }
-
+// TODO: VERIFY FOR SECOND PAGE
 export default function UsersTab() {
     const ctx = useCompanyDetail();
     const [GetCompanyUserAccounts, { data, loading }] = useLazyQuery(GET_COMPANY_USER_ACCOUNTS);

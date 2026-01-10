@@ -11,3 +11,4 @@ export const ROUTE = {
 export const BRANCH_PAGINATION_SIZE = 10;
 export const USER_ACCOUNT_PAGINATION_SIZE = 10;
 export const BRANCH_EVENT_PAGINATION_SIZE = 10;
+export const AUDIT_LOG_PAGINATION_SIZE = 10;
