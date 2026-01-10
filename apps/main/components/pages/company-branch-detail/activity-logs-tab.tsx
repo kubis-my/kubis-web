@@ -163,7 +163,7 @@ export default function ActivityLogsTab() {
                                                 colSpan={header.colSpan}
                                                 style={{
                                                     width:
-                                                        header.column.id === "details"
+                                                        header.column.id === "description"
                                                             ? "auto"
                                                             : `${header.getSize()}px`,
                                                 }}
