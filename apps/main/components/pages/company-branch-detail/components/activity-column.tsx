@@ -51,6 +51,27 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: "auditLogResource",
+        header: "Resource",
+        cell: ({ row }) => {
+            const resource = row.original.auditLogResource;
+
+            if (!resource) {
+                return <span className="text-xs text-muted-foreground">Unknown</span>;
+            }
+
+            return (
+                <div className="flex flex-col">
+                    <span className="font-medium">{resource.type}</span>
+                    <span className="font-mono text-xs text-muted-foreground">
+                        #{resource.publicId.slice(0, 8)}
+                    </span>
+                </div>
+            );
+        },
+        size: 110,
+    },
+    {
         accessorKey: "type",
         header: "Type",
         cell: ({ row }) => {
@@ -71,27 +92,6 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
             );
         },
         size: 80,
-    },
-    {
-        accessorKey: "auditLogResource",
-        header: "Resource",
-        cell: ({ row }) => {
-            const resource = row.original.auditLogResource;
-
-            if (!resource) {
-                return <span className="text-xs text-muted-foreground">Unknown</span>;
-            }
-
-            return (
-                <div className="flex flex-col">
-                    <span className="font-medium">{resource.type}</span>
-                    <span className="font-mono text-xs text-muted-foreground">
-                        #{resource.publicId.slice(0, 8)}
-                    </span>
-                </div>
-            );
-        },
-        size: 110,
     },
     {
         accessorKey: "description",

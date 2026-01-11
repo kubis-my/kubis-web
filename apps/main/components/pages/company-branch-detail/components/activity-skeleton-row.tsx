@@ -18,16 +18,16 @@ export function ActivitySkeletonRow() {
                     <Skeleton className="h-3 w-16" />
                 </div>
             </TableCell>
-            {/* Type column */}
-            <TableCell className="px-5 py-3" style={{ width: "80px" }}>
-                <Skeleton className="h-6 w-20 rounded-full" />
-            </TableCell>
             {/* Resource column */}
             <TableCell className="px-5 py-3" style={{ width: "110px" }}>
                 <div className="flex flex-col gap-2">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-3 w-16" />
                 </div>
+            </TableCell>
+            {/* Type column */}
+            <TableCell className="px-5 py-3" style={{ width: "80px" }}>
+                <Skeleton className="h-6 w-20 rounded-full" />
             </TableCell>
             {/* Details column */}
             <TableCell className="px-5 py-3">
