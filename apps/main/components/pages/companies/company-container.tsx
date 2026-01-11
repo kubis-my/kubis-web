@@ -156,6 +156,10 @@ export default function CompanyContainer({ children }: Readonly<{ children: Reac
                 name: "List of Companies"
             }
         ]);
+
+        return () => {
+            updateBreadcrumbList([]);
+        }
     }, [updateBreadcrumbList]);
 
     const contextValue = useMemo(() => ({

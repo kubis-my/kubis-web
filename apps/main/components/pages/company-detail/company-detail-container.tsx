@@ -201,6 +201,10 @@ export default function CompanyDetailContainer({ children, id }: Readonly<{ chil
                     name: data.getCompanyDetail.name
                 },
             ]);
+
+            return () => {
+                updateBreadcrumbList([]);
+            }
         }
     }, [data])
 

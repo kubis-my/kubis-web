@@ -207,6 +207,10 @@ export default function CompanyBranchDetailContainer({ children, companyId, bran
                     name: data?.getBranchDetail.code
                 },
             ]);
+
+            return () => {
+                updateBreadcrumbList([]);
+            }
         }
     }, [data])
 
