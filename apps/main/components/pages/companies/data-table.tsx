@@ -2,38 +2,11 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import {
-    ColumnDef,
-    flexRender,
-    getCoreRowModel,
-    getSortedRowModel,
-    Row,
-    SortingState,
-    useReactTable,
-} from "@tanstack/react-table"
+import { ColumnDef } from "@tanstack/react-table"
 import { Avatar, AvatarFallback, AvatarImage } from "@repo/shadcn-ui/components/avatar"
-import { Button } from "@repo/shadcn-ui/components/button"
-import { Label } from "@repo/shadcn-ui/components/label"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@repo/shadcn-ui/components/select"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@repo/shadcn-ui/components/table"
+import { DataTable } from "@repo/shadcn-ui/components/data-table"
+import { TableCell, TableRow } from "@repo/shadcn-ui/components/table"
 import { Skeleton } from "@repo/shadcn-ui/components/skeleton"
-import {
-    IconChevronLeft,
-    IconChevronRight,
-} from "@tabler/icons-react"
 import { Company } from "@repo/commons/types/account-service-schema.type"
 import { useCompany } from "./company-container"
 
@@ -133,47 +106,6 @@ const columns: ColumnDef<Company>[] = [
     }
 ]
 
-function CompanyRow({ row }: { row: Row<Company> }) {
-    const router = useRouter()
-
-    const handleRowClick = (e: React.MouseEvent) => {
-        // Prevent navigation when clicking on interactive elements
-        const target = e.target as HTMLElement
-        if (
-            target.closest("button") ||
-            target.closest("input") ||
-            target.closest("a")
-        ) {
-            return
-        }
-
-        router.push(`/my-account/company/${row.original.publicId}`)
-    }
-
-    return (
-        <TableRow
-            onClick={handleRowClick}
-            className="cursor-pointer transition-colors hover:bg-muted/50"
-        >
-            {row.getVisibleCells().map((cell) => {
-                return (
-                    <TableCell
-                        key={cell.id}
-                        className="px-5 py-3"
-                        style={{
-                            width:
-                                cell.column.id === "companyName"
-                                    ? "auto"
-                                    : `${cell.column.getSize()}px`,
-                        }}
-                    >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                )
-            })}
-        </TableRow>
-    )
-}
 
 function SkeletonRow() {
     return (
@@ -218,155 +150,30 @@ function SkeletonRow() {
     )
 }
 
-export function DataTable() {
+export function CompanyDataTable() {
     const ctx = useCompany()
-    const [sorting, setSorting] = React.useState<SortingState>([])
+    const router = useRouter()
 
-    const table = useReactTable({
-        data: ctx.paginatedCompany.data,
-        columns,
-        state: {
-            sorting,
-        },
-        getRowId: (row) => row.publicId.toString(),
-        onSortingChange: setSorting,
-        getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        manualPagination: true,
-        pageCount: ctx.paginatedCompany.pageInfo.totalPages,
-    })
+    const handleRowClick = (company: Company) => {
+        router.push(`/my-account/company/${company.publicId}`)
+    }
 
     return (
-        <div className="flex w-full flex-col gap-4">
-            <div className="overflow-hidden rounded-lg border shadow-sm">
-                <Table>
-                    <TableHeader className="bg-muted sticky top-0 z-10">
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => {
-                                    return (
-                                        <TableHead
-                                            className="px-5 py-2"
-                                            key={header.id}
-                                            colSpan={header.colSpan}
-                                            style={{
-                                                width:
-                                                    header.column.id === "companyName"
-                                                        ? "auto"
-                                                        : `${header.getSize()}px`,
-                                            }}
-                                        >
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </TableHead>
-                                    )
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {ctx.isFetchingCompany ? (
-                            // Show skeleton rows matching the page size
-                            Array.from({ length: ctx.pageSize }).map((_, index) => (
-                                <SkeletonRow key={`skeleton-${index}`} />
-                            ))
-                        ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <CompanyRow key={row.id} row={row} />
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    No companies found.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
-            <div className="flex items-center justify-between px-4">
-                {/* Left: Showing count */}
-                <div className="text-sm text-muted-foreground">
-                    Showing{" "}
-                    <span className="font-medium text-foreground">
-                        {ctx.paginatedCompany.pageInfo.total === 0
-                            ? 0
-                            : (ctx.cursorHistory.length - 1) * ctx.pageSize + 1}
-                    </span>
-                    {" - "}
-                    <span className="font-medium text-foreground">
-                        {Math.min(
-                            ctx.cursorHistory.length * ctx.pageSize,
-                            ctx.paginatedCompany.pageInfo.total
-                        )}
-                    </span>
-                    {" of "}
-                    <span className="font-medium text-foreground">
-                        {ctx.paginatedCompany.pageInfo.total}
-                    </span>
-                </div>
-
-                {/* Center: Pagination controls */}
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        className="size-8"
-                        size="icon"
-                        onClick={ctx.goToPreviousPage}
-                        disabled={ctx.cursorHistory.length === 1 || ctx.isFetchingCompany}
-                    >
-                        <span className="sr-only">Go to previous page</span>
-                        <IconChevronLeft className="size-4" />
-                    </Button>
-                    <div className="flex items-center gap-1 px-2 text-sm font-medium">
-                        <span>{ctx.cursorHistory.length}</span>
-                        <span className="text-muted-foreground">of</span>
-                        <span>{ctx.paginatedCompany.pageInfo.totalPages}</span>
-                    </div>
-                    <Button
-                        variant="outline"
-                        className="size-8"
-                        size="icon"
-                        onClick={ctx.goToNextPage}
-                        disabled={!ctx.paginatedCompany.pageInfo.hasNextPage || ctx.isFetchingCompany}
-                    >
-                        <span className="sr-only">Go to next page</span>
-                        <IconChevronRight className="size-4" />
-                    </Button>
-                </div>
-
-                {/* Right: Rows per page */}
-                <div className="flex items-center gap-2">
-                    <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                        Rows per page
-                    </Label>
-                    <Select
-                        value={`${ctx.pageSize}`}
-                        onValueChange={(value) => {
-                            ctx.setPageSize(Number(value))
-                        }}
-                        disabled={ctx.isFetchingCompany}
-                    >
-                        <SelectTrigger className="h-8 w-auto" id="rows-per-page">
-                            <SelectValue placeholder={ctx.pageSize} />
-                        </SelectTrigger>
-                        <SelectContent side="top">
-                            {[10, 20, 30, 40, 50].map((pageSize) => (
-                                <SelectItem key={pageSize} value={`${pageSize}`}>
-                                    {pageSize}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-        </div>
+        <DataTable
+            columns={columns}
+            data={ctx.paginatedCompany.data}
+            pageInfo={ctx.paginatedCompany.pageInfo}
+            isLoading={ctx.isFetchingCompany}
+            pageSize={ctx.pageSize}
+            onPageSizeChange={ctx.setPageSize}
+            cursorHistory={ctx.cursorHistory}
+            onNextPage={ctx.goToNextPage}
+            onPreviousPage={ctx.goToPreviousPage}
+            emptyMessage="No companies found."
+            getRowId={(row) => row.publicId.toString()}
+            onRowClick={handleRowClick}
+            renderSkeletonRow={() => <SkeletonRow />}
+            flexColumnId="companyName"
+        />
     )
 }

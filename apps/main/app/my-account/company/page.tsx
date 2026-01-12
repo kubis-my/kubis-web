@@ -1,5 +1,5 @@
 import { OverviewCard } from "@/root/components/pages/companies/overview-card";
-import { DataTable } from "@/root/components/pages/companies/data-table";
+import { CompanyDataTable } from "@/root/components/pages/companies/data-table";
 import CompanyContainer from "@/root/components/pages/companies/company-container";
 
 export default function page() {
@@ -12,7 +12,7 @@ export default function page() {
                 </div>
                 {/* Table list of company */}
                 <div className="min-h-screen flex-1 rounded-xl md:min-h-min">
-                    <DataTable />
+                    <CompanyDataTable />
                 </div>
             </div>
         </CompanyContainer>
