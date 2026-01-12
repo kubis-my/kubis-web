@@ -38,6 +38,7 @@ import { BranchColumn } from "./components/branch-column";
 import { BranchRow } from "./components/branch-row";
 import { BranchSkeletonRow } from "./components/branch-skeleton-row";
 import { BRANCH_PAGINATION_SIZE } from "@/root/libs/constants";
+import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
 
 interface GetUserCompaniesResponse {
     getCompanyBranches: PaginatedBranch;
@@ -83,24 +84,13 @@ const GET_COMPANY_BRANCHES: TypedDocumentNode<GetUserCompaniesResponse, GetUserC
     }
 `
 
-const initialPaginatedBranch: PaginatedBranch = {
-    data: [],
-    pageInfo: {
-        endCursor: null,
-        hasNextPage: false,
-        total: 0,
-        currentPage: 1,
-        totalPages: 1
-    },
-}
-
 export default function BranchesTab() {
     const ctx = useCompanyDetail();
     const [getCompanyBranches, { data, loading }] = useLazyQuery(GET_COMPANY_BRANCHES);
 
     const [sorting, setSorting] = useState<SortingState>([]);
     const [pageSize, setPageSize] = useState(BRANCH_PAGINATION_SIZE)
-    const [paginatedBranch, setPaginatedBranch] = useState<PaginatedBranch>(initialPaginatedBranch)
+    const [paginatedBranch, setPaginatedBranch] = useState<PaginatedBranch>(createInitialPaginatedData())
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
@@ -153,7 +143,7 @@ export default function BranchesTab() {
     });
 
     useEffect(() => {
-        setPaginatedBranch(data?.getCompanyBranches ?? ctx.company?.branches ?? initialPaginatedBranch)
+        setPaginatedBranch(data?.getCompanyBranches ?? ctx.company?.branches ?? createInitialPaginatedData())
     }, [ctx.company?.branches, data?.getCompanyBranches])
 
     return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { AUDIT_LOG_PAGINATION_SIZE } from "@/root/libs/constants";
+import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
 import { useLazyQuery } from "@apollo/client/react";
 import { PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
 import { flexRender, getCoreRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table";
@@ -14,25 +15,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ActivityColumn } from "./components/activity-column";
 import { ActivitySkeletonRow } from "./components/activity-skeleton-row";
 
-const initialPaginatedAuditLog: PaginatedAuditLog = {
-    data: [],
-    pageInfo: {
-        endCursor: null,
-        hasNextPage: false,
-        total: 0,
-        currentPage: 1,
-        totalPages: 1
-    },
-}
-
-
 export default function CredentialActivityTable() {
     const ctx = useMyAccount()
     const [getAuditLogs, { data, loading }] = useLazyQuery(GET_AUDIT_LOGS);
 
     const [sorting, setSorting] = useState<SortingState>([]);
     const [pageSize, setPageSize] = useState(AUDIT_LOG_PAGINATION_SIZE);
-    const [paginatedAuditLog, setPaginatedAuditLog] = useState<PaginatedAuditLog>(initialPaginatedAuditLog);
+    const [paginatedAuditLog, setPaginatedAuditLog] = useState<PaginatedAuditLog>(createInitialPaginatedData());
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
@@ -83,7 +72,7 @@ export default function CredentialActivityTable() {
     });
 
     useEffect(() => {
-        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.auditLog ?? initialPaginatedAuditLog)
+        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.auditLog ?? createInitialPaginatedData())
     }, [ctx.auditLog, data?.getAuditLogs])
 
     return (

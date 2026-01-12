@@ -38,6 +38,7 @@ import EventRow from "./components/event-row";
 import { EventSkeletonRow } from "./components/event-skeleton-row";
 import { BranchEventPaginationInput, PaginatedBranchEvent } from "@repo/commons/types/account-service-schema.type";
 import { BRANCH_EVENT_PAGINATION_SIZE } from "@/root/libs/constants";
+import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
 import { useLazyQuery } from "@apollo/client/react";
 import { gql, TypedDocumentNode } from "@apollo/client";
 
@@ -74,24 +75,13 @@ const GET_COMPANY_BRANCH_EVENT: TypedDocumentNode<GetBranchEventResponse, GetBra
     }
 `
 
-const initialPaginatedBranchEvent: PaginatedBranchEvent = {
-    data: [],
-    pageInfo: {
-        endCursor: null,
-        hasNextPage: false,
-        total: 0,
-        currentPage: 1,
-        totalPages: 1
-    },
-}
-
 export default function EventsTab() {
     const ctx = useCompanyBranchDetail();
     const [getCompanyBranchEvent, { data, loading }] = useLazyQuery(GET_COMPANY_BRANCH_EVENT);
 
     const [sorting, setSorting] = useState<SortingState>([]);
     const [pageSize, setPageSize] = useState(BRANCH_EVENT_PAGINATION_SIZE);
-    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedBranchEvent>(initialPaginatedBranchEvent);
+    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedBranchEvent>(createInitialPaginatedData());
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
@@ -144,7 +134,7 @@ export default function EventsTab() {
     });
 
     useEffect(() => {
-        setPaginatedUserAccount(data?.getCompanyBranchEvent ?? ctx.branch?.branchEvents ?? initialPaginatedBranchEvent)
+        setPaginatedUserAccount(data?.getCompanyBranchEvent ?? ctx.branch?.branchEvents ?? createInitialPaginatedData())
     }, [ctx.branch?.userAccounts, data?.getCompanyBranchEvent])
 
     return (

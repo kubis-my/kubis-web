@@ -38,6 +38,7 @@ import { PaginatedUserAccount, UserAccountPaginationInput } from "@repo/commons/
 import { useLazyQuery } from "@apollo/client/react";
 import { UserSkeletonRow } from "./components/user-skeleton-row";
 import { USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
+import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
 
 interface GetUserAccountResponse {
     getCompanyUserAccounts: PaginatedUserAccount;
@@ -80,24 +81,13 @@ const GET_COMPANY_BRANCH_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse
     }
 `
 
-const initialPaginatedUserAccount: PaginatedUserAccount = {
-    data: [],
-    pageInfo: {
-        endCursor: null,
-        hasNextPage: false,
-        total: 0,
-        currentPage: 1,
-        totalPages: 1
-    },
-}
-
 export default function UsersTab() {
     const ctx = useCompanyBranchDetail();
     const [getCompanyUserAccounts, { data, loading }] = useLazyQuery(GET_COMPANY_BRANCH_USER_ACCOUNTS);
 
     const [sorting, setSorting] = useState<SortingState>([]);
     const [pageSize, setPageSize] = useState(USER_ACCOUNT_PAGINATION_SIZE);
-    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedUserAccount>(initialPaginatedUserAccount);
+    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedUserAccount>(createInitialPaginatedData());
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
@@ -150,7 +140,7 @@ export default function UsersTab() {
     });
 
     useEffect(() => {
-        setPaginatedUserAccount(data?.getCompanyUserAccounts ?? ctx.branch?.userAccounts ?? initialPaginatedUserAccount)
+        setPaginatedUserAccount(data?.getCompanyUserAccounts ?? ctx.branch?.userAccounts ?? createInitialPaginatedData())
     }, [ctx.branch?.userAccounts, data?.getCompanyUserAccounts])
 
     return (

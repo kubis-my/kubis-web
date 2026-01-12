@@ -33,6 +33,7 @@ import { TabsContent } from "@/shadcn/components/tabs";
 import { useCompanyBranchDetail } from "./company-branch-detail-container";
 import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
 import { AUDIT_LOG_PAGINATION_SIZE } from "@/root/libs/constants";
+import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useLazyQuery } from "@apollo/client/react";
 import { useCallback, useEffect, useState } from "react";
@@ -88,25 +89,13 @@ const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLogsVariab
     }
 `
 
-const initialPaginatedAuditLog: PaginatedAuditLog = {
-    data: [],
-    pageInfo: {
-        endCursor: null,
-        hasNextPage: false,
-        total: 0,
-        currentPage: 1,
-        totalPages: 1
-    },
-}
-
-
 export default function ActivityLogsTab() {
     const ctx = useCompanyBranchDetail();
     const [getAuditLogs, { data, loading }] = useLazyQuery(GET_AUDIT_LOGS);
 
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [pageSize, setPageSize] = useState(AUDIT_LOG_PAGINATION_SIZE);
-    const [paginatedAuditLog, setPaginatedAuditLog] = useState<PaginatedAuditLog>(initialPaginatedAuditLog);
+    const [paginatedAuditLog, setPaginatedAuditLog] = useState<PaginatedAuditLog>(createInitialPaginatedData());
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
@@ -159,7 +148,7 @@ export default function ActivityLogsTab() {
     });
 
     useEffect(() => {
-        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.branch?.auditLogs ?? initialPaginatedAuditLog)
+        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.branch?.auditLogs ?? createInitialPaginatedData())
     }, [ctx.branch?.auditLogs, data?.getAuditLogs])
 
     return (
