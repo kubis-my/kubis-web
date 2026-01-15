@@ -3,13 +3,17 @@
 import { ROUTE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { useAuth } from "@/shadcn/providers/auth-provider";
+import { useSocket } from "@/shadcn/providers/socket-provider";
+import { NotificationEvent } from "@repo/commons/constant/web-socket";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 export default function DashboardContainer({ children }: Readonly<{ children: React.ReactNode; }>) {
+    const currentPathname = usePathname();
+
     const { authUser } = useAuth();
     const { updateUser, updateNavigationList } = useDashboard01();
-    const currentPathname = usePathname();
+    const { on, off, isConnected } = useSocket();
 
     useEffect(() => {
         if (!authUser) {
@@ -35,6 +39,20 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
             }))
         })))
     }, [currentPathname, updateNavigationList])
+
+    useEffect(() => {
+        if (!isConnected) return;
+
+        const onNewLogin = (data: unknown) => {
+            console.log(data);
+        }
+
+        on(NotificationEvent.NEW_LOGIN, onNewLogin)
+
+        return () => {
+            off(NotificationEvent.NEW_LOGIN, onNewLogin)
+        }
+    }, [isConnected])
 
     return children
 }

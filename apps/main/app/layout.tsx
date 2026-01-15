@@ -3,9 +3,13 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@repo/shadcn-ui/providers/auth-provider";
 import { ApolloProvider } from "@repo/shadcn-ui/providers/apollo-provider";
+import { SocketProvider } from "@repo/shadcn-ui/providers/socket-provider";
 import ExchangeCodeForToken from "@repo/shadcn-ui/guards/exchange-code-for-token";
 import { Suspense } from "react";
 import { Toaster } from "@repo/shadcn-ui/components/sonner";
+import { env } from "@repo/commons/constant/env";
+
+const SOCKET_URL = env.NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL.replace(/\/graphql\/?$/, '');
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +40,9 @@ export default function RootLayout({
           <ExchangeCodeForToken>
             <ApolloProvider>
               <AuthProvider>
-                {children}
+                <SocketProvider url={SOCKET_URL}>
+                  {children}
+                </SocketProvider>
               </AuthProvider>
             </ApolloProvider>
           </ExchangeCodeForToken>

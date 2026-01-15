@@ -166,6 +166,53 @@ const auth = new Elysia({ prefix: '/api/auth' })
             }
         }
     )
+    .get(
+        "socket-token",
+        async ({ set, request }) => {
+            try {
+                const accessToken = await getAccessTokenCookie();
+
+                if (!accessToken) {
+                    set.status = 401;
+                    return {
+                        error: 'Not authenticated',
+                        token: null,
+                    }
+                }
+
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                // Validate the token before returning it
+                const { code, raw } = await authClient.validate({
+                    token: accessToken,
+                    driver,
+                });
+
+                if (code === 200 && raw.valid) {
+                    return {
+                        token: accessToken,
+                    }
+                }
+
+                set.status = 401;
+                return {
+                    error: 'Invalid or expired token',
+                    token: null,
+                }
+            } catch (e) {
+                set.status = 500
+
+                return {
+                    error: 'Internal server error',
+                    details: (e as Error).message,
+                    token: null,
+                }
+            }
+        }
+    )
 
 export const GET = auth.fetch
 export const POST = auth.fetch
