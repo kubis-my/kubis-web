@@ -1,9 +1,17 @@
 export const getDefaultHeaders = (endpoints: string[]) => {
+    const origins = endpoints
+        .filter(Boolean)
+        .map(val => new URL(val).origin)
+
+    // Add wss:// variants for https:// origins (for WebSocket connections)
+    const wsOrigins = origins
+        .filter(origin => origin.startsWith("https://"))
+        .map(origin => origin.replace("https://", "wss://"))
+
     const sources = [
         "'self'",
-        ...endpoints
-            .filter(Boolean)
-            .map(val => new URL(val).origin)
+        ...origins,
+        ...wsOrigins,
     ]
 
     // In development, allow webpack HMR
