@@ -14,6 +14,7 @@ import { useCompany } from "./company-container";
 
 export function OverviewCard() {
     const ctx = useCompany();
+    const overview = ctx.paginatedCompany?.overview;
 
     return (
         <>
@@ -28,21 +29,21 @@ export function OverviewCard() {
                 <CardHeader>
                     <CardDescription>Active Companies</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        {ctx.paginatedCompany.overview.activeCompanies} / {ctx.paginatedCompany.overview.deactivatedCompanies}
+                        {overview?.activeCompanies ?? 0} / {overview?.deactivatedCompanies ?? 0}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
                             <IconTrendingDown />
-                            {ctx.paginatedCompany.overview.deactivationRate.toFixed(2)}%
+                            {(overview?.deactivationRate ?? 0).toFixed(2)}%
                         </Badge>
                     </CardAction>
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        {ctx.paginatedCompany.overview.retentionRate.toFixed(2)}% retention rate <IconTrendingDown className="size-4" />
+                        {(overview?.retentionRate ?? 0).toFixed(2)}% retention rate <IconTrendingDown className="size-4" />
                     </div>
                     <div className="text-muted-foreground">
-                        {ctx.paginatedCompany.overview.companiesDeactivatedThisMonth} companies deactivated this month
+                        {overview?.companiesDeactivatedThisMonth ?? 0} companies deactivated this month
                     </div>
                 </CardFooter>
             </Card>
@@ -57,20 +58,20 @@ export function OverviewCard() {
                 <CardHeader>
                     <CardDescription>Branch Companies</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        {ctx.paginatedCompany.overview.totalBranches}
+                        {overview?.totalBranches ?? 0}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
                             <IconTrendingUp />
-                            {ctx.paginatedCompany.overview.branchGrowthRate.toFixed(2)}%
+                            {(overview?.branchGrowthRate ?? 0).toFixed(2)}%
                         </Badge>
                     </CardAction>
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        {ctx.paginatedCompany.overview.newBranchesThisQuarter} new branches this quarter <IconTrendingUp className="size-4" />
+                        {overview?.newBranchesThisQuarter ?? 0} new branches this quarter <IconTrendingUp className="size-4" />
                     </div>
-                    <div className="text-muted-foreground">{ctx.paginatedCompany.overview.newBranchesThisMonth} branches opened this month</div>
+                    <div className="text-muted-foreground">{overview?.newBranchesThisMonth ?? 0} branches opened this month</div>
                 </CardFooter>
             </Card>
             {/*
@@ -85,20 +86,20 @@ export function OverviewCard() {
                 <CardHeader>
                     <CardDescription>Total Staff</CardDescription>
                     <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                        {ctx.paginatedCompany.overview.totalStaff}
+                        {overview?.totalStaff ?? 0}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
                             <IconTrendingUp />
-                            {ctx.paginatedCompany.overview.staffGrowthRate.toFixed(2)}%
+                            {(overview?.staffGrowthRate ?? 0).toFixed(2)}%
                         </Badge>
                     </CardAction>
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        {ctx.paginatedCompany.overview.newStaffThisQuarter} employees this quarter <IconTrendingUp className="size-4" />
+                        {overview?.newStaffThisQuarter ?? 0} employees this quarter <IconTrendingUp className="size-4" />
                     </div>
-                    <div className="text-muted-foreground">Average {ctx.paginatedCompany.overview.averageStaffPerBranch} staff per branch</div>
+                    <div className="text-muted-foreground">Average {overview?.averageStaffPerBranch ?? 0} staff per branch</div>
                 </CardFooter>
             </Card>
         </>
