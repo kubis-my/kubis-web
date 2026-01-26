@@ -71,13 +71,13 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
                     name
                     code
                     email
-                    phoneCode
-                    phoneNumber
                     isActive
                     branchPhysicalAddresses {
                         city
                         state
                         country
+                        phoneCode
+                        phoneNumber
                     }
                     branchOperationHours {
                         dayOfWeek

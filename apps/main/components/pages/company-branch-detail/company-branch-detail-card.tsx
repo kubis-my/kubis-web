@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Skeleton } from '@/shadcn/components/skeleton';
 import { useCompanyBranchDetail } from './company-branch-detail-container';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/shadcn/components/card';
-import { IconBuildingStore, IconCode, IconMail, IconPhone, IconCircleCheck } from '@tabler/icons-react';
+import { IconBuildingStore, IconCode, IconMail, IconPhone, IconCircleCheck, IconCalendar, IconCalendarClock } from '@tabler/icons-react';
 import { Drawer, DrawerContent, DrawerTrigger, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/shadcn/components/drawer';
 import { useIsMobile } from '@/shadcn/hooks/use-mobile';
 import { Label } from '@/shadcn/components/label';
@@ -12,6 +12,7 @@ import { Input } from '@/shadcn/components/input';
 import { Separator } from '@/shadcn/components/separator';
 import { Button } from '@/shadcn/components/button';
 import { Switch } from '@/shadcn/components/switch';
+import { formatDateTime } from '@repo/commons/utils/date';
 
 export default function CompanyBranchDetailCard() {
     const ctx = useCompanyBranchDetail();
@@ -20,7 +21,6 @@ export default function CompanyBranchDetailCard() {
     const [formData, setFormData] = useState({
         branchName: '',
         branchCode: '',
-        phone: '',
         email: '',
         status: false
     });
@@ -38,7 +38,6 @@ export default function CompanyBranchDetailCard() {
         setFormData({
             branchName: ctx.branch?.name || '',
             branchCode: ctx.branch?.code || '',
-            phone: ctx.branch?.phoneCode || '',
             email: ctx.branch?.email || '',
             status: ctx.branch?.isActive || false
         });
@@ -73,18 +72,26 @@ export default function CompanyBranchDetailCard() {
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
                             <div className='flex items-center gap-2 font-medium'>
-                                <IconPhone className="size-3.5 shrink-0" /> Phone
-                            </div>
-                            <div className='text-muted-foreground text-xs'>
-                                {(ctx.branch?.phoneCode && ctx.branch?.phoneNumber) ? `${ctx.branch?.phoneCode} ${ctx.branch?.phoneNumber}` : "-"}
-                            </div>
-                        </div>
-                        <div className='flex justify-between items-center border-b px-1 py-2'>
-                            <div className='flex items-center gap-2 font-medium'>
                                 <IconMail className="size-3.5 shrink-0" /> Email
                             </div>
                             <div className='text-muted-foreground text-xs'>
                                 {ctx.branch?.email ?? "-"}
+                            </div>
+                        </div>
+                        <div className='flex justify-between items-center border-b px-1 py-2'>
+                            <div className='flex items-center gap-2 font-medium'>
+                                <IconCalendar className="size-3.5 shrink-0" /> Register Date
+                            </div>
+                            <div className='text-muted-foreground text-xs'>
+                                {formatDateTime(ctx.branch?.createdAt)}
+                            </div>
+                        </div>
+                        <div className='flex justify-between items-center border-b px-1 py-2'>
+                            <div className='flex items-center gap-2 font-medium'>
+                                <IconCalendarClock className="size-3.5 shrink-0" /> Last Update
+                            </div>
+                            <div className='text-muted-foreground text-xs'>
+                                {formatDateTime(ctx.branch?.updatedAt)}
                             </div>
                         </div>
                         <div className='flex justify-between items-center px-1 py-2'>
@@ -135,7 +142,7 @@ export default function CompanyBranchDetailCard() {
 
                             <Separator />
 
-                            <div className="flex flex-col gap-2">
+                            {/* <div className="flex flex-col gap-2">
                                 <Label htmlFor="phone">Phone Number</Label>
                                 <Input
                                     id="phone"
@@ -144,7 +151,7 @@ export default function CompanyBranchDetailCard() {
                                     placeholder="Enter phone number"
                                     required
                                 />
-                            </div>
+                            </div> */}
 
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="email">Email Address</Label>

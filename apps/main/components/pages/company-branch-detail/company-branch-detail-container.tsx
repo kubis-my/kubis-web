@@ -38,9 +38,9 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
             name
             code
             email
-            phoneCode
-            phoneNumber
             isActive
+            createdAt
+            updatedAt
             company {
                 publicId
                 name

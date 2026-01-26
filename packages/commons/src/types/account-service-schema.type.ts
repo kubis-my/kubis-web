@@ -58,6 +58,65 @@ export interface CompleteProfileInput {
   nickname: string;
 }
 
+export interface UpsertCompanyInput {
+  publicId?: Nullable<string>;
+  name: string;
+  registrationNo?: Nullable<string>;
+  physicalAddress?: Nullable<UpsertCompanyPhysicalAddressInput>;
+  billingAddress?: Nullable<UpsertCompanyBillingAddressInput>;
+  branches?: Nullable<UpsertBranchInput[]>;
+}
+
+export interface UpsertCompanyPhysicalAddressInput {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phoneCode: string;
+  phoneNumber: string;
+}
+
+export interface UpsertCompanyBillingAddressInput {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phoneCode: string;
+  phoneNumber: string;
+}
+
+export interface UpsertBranchInput {
+  publicId?: Nullable<string>;
+  companyPublicId: string;
+  name: string;
+  code: string;
+  email?: Nullable<string>;
+  physicalAddress?: Nullable<UpsertBranchPhysicalAddressInput>;
+  billingAddress?: Nullable<UpsertBranchBillingAddressInput>;
+}
+
+export interface UpsertBranchPhysicalAddressInput {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phoneCode: string;
+  phoneNumber: string;
+}
+
+export interface UpsertBranchBillingAddressInput {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phoneCode: string;
+  phoneNumber: string;
+}
+
 export interface PageInfo {
   endCursor?: Nullable<number>;
   hasNextPage: boolean;
@@ -176,9 +235,9 @@ export interface Branch {
   name: string;
   code: string;
   email?: Nullable<string>;
-  phoneCode?: Nullable<string>;
-  phoneNumber?: Nullable<string>;
   isActive: boolean;
+  createdAt: DateTime;
+  updatedAt: DateTime;
   totalOfEmployee: number;
   company: Company;
   branchPhysicalAddresses?: Nullable<BranchPhysicalAddress>;
@@ -279,6 +338,12 @@ export interface IQuery {
 
 export interface IMutation {
   completeProfile(input: CompleteProfileInput): User | Promise<User>;
+  upsertCompany(input: UpsertCompanyInput): Company | Promise<Company>;
+  upsertCompanyPhysicalAddress(companyPublicId: string, input: UpsertCompanyPhysicalAddressInput): Company | Promise<Company>;
+  upsertCompanyBillingAddress(companyPublicId: string, input: UpsertCompanyBillingAddressInput): Company | Promise<Company>;
+  upsertBranch(input: UpsertBranchInput): Branch | Promise<Branch>;
+  upsertBranchPhysicalAddress(branchPublicId: string, input: UpsertBranchPhysicalAddressInput): Branch | Promise<Branch>;
+  upsertBranchBillingAddress(branchPublicId: string, input: UpsertBranchBillingAddressInput): Branch | Promise<Branch>;
 }
 
 export type DateTime = any;

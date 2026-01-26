@@ -27,7 +27,7 @@ export const BranchColumn: ColumnDef<Branch>[] = [
         cell: ({ row }) => {
             return (
                 <div className="flex flex-col gap-1">
-                    <div className="font-mono text-sm">{row.original.phoneCode} {row.original.phoneNumber}</div>
+                    <div className="font-mono text-sm">{row.original.branchPhysicalAddresses?.phoneCode} {row.original.branchPhysicalAddresses?.phoneNumber}</div>
                     <div className="text-sm text-muted-foreground">
                         {row.original.email}
                     </div>

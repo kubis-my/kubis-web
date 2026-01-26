@@ -30,13 +30,13 @@ const GET_COMPANY_BRANCHES: TypedDocumentNode<GetUserCompaniesResponse, GetUserC
                 name
                 code
                 email
-                phoneCode
-                phoneNumber
                 isActive
                 branchPhysicalAddresses {
                     city
                     state
                     country
+                    phoneCode
+                    phoneNumber
                 }
                 branchOperationHours {
                     dayOfWeek
