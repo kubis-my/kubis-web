@@ -34,7 +34,6 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
             publicId
             name
             registrationNo
-            isUnclassified
             isActive
             logo
             createdAt

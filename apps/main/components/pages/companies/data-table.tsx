@@ -28,7 +28,6 @@ const GET_USER_COMPANIES: TypedDocumentNode<GetUserCompaniesResponse, GetUserCom
                 publicId
                 name
                 registrationNo
-                isUnclassified
                 logo
                 isActive
                 createdAt

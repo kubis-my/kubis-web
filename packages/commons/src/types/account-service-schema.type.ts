@@ -157,7 +157,6 @@ export interface Company {
   publicId: string;
   name: string;
   registrationNo: string;
-  isUnclassified: boolean;
   isActive: boolean;
   logo?: Nullable<string>;
   createdAt: DateTime;

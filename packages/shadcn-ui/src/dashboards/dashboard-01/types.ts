@@ -1,13 +1,15 @@
 import type { Sidebar } from "./sidebar"
-import { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
 export type DashboardContextType = {
     user: User | undefined
     navigationList: NavigationItem[]
     breadcrumbList: BreadcrumbItem[]
+    headerAction: React.ReactNode
     updateUser: Dispatch<SetStateAction<User | undefined>>
     updateNavigationList: Dispatch<SetStateAction<NavigationItem[]>>
     updateBreadcrumbList: Dispatch<SetStateAction<BreadcrumbItem[]>>
+    updateHeaderAction: Dispatch<SetStateAction<React.ReactNode>>
 }
 
 export type NavigationItem = {
@@ -70,4 +72,5 @@ export type BreadcrumbItem = {
 
 export type SiteHeaderProps = {
     items: BreadcrumbItem[]
+    action?: React.ReactNode
 }

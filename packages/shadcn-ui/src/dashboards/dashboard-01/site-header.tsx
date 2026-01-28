@@ -5,7 +5,7 @@ import { SidebarTrigger } from "./sidebar"
 import { SiteHeaderProps } from "./types"
 import Link from "next/link"
 
-export function SiteHeader({ items }: SiteHeaderProps) {
+export function SiteHeader({ items, action }: SiteHeaderProps) {
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -42,6 +42,11 @@ export function SiteHeader({ items }: SiteHeaderProps) {
             })}
           </BreadcrumbList>
         </Breadcrumb>
+        {action && (
+          <div className="ml-auto">
+            {action}
+          </div>
+        )}
       </div>
     </header>
   )

@@ -6,6 +6,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { COMPANY_PAGINATION_SIZE } from "@/root/libs/constants";
+import CompanyHeaderAction from "./company-header-action";
 
 interface GetUserCompaniesResponse {
     getUserCompanies: PaginatedCompany;
@@ -22,7 +23,6 @@ const GET_USER_COMPANIES: TypedDocumentNode<GetUserCompaniesResponse, GetUserCom
                 publicId
                 name
                 registrationNo
-                isUnclassified
                 logo
                 isActive
                 createdAt
@@ -65,7 +65,7 @@ export type CompanyContext = {
 const CompanyContext = createContext<CompanyContext | undefined>(undefined);
 
 export default function CompanyContainer({ children }: Readonly<{ children: React.ReactNode; }>) {
-    const { updateBreadcrumbList } = useDashboard01();
+    const { updateBreadcrumbList, updateHeaderAction } = useDashboard01();
 
     const [paginatedCompany, setPaginatedCompany] = useState<PaginatedCompany | undefined>(undefined);
 
@@ -87,9 +87,11 @@ export default function CompanyContainer({ children }: Readonly<{ children: Reac
                 name: "List of Companies"
             }
         ]);
+        updateHeaderAction(CompanyHeaderAction)
 
         return () => {
             updateBreadcrumbList([]);
+            updateHeaderAction(undefined);
         }
     }, [updateBreadcrumbList]);
 

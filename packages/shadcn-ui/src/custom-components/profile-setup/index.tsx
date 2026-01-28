@@ -30,7 +30,6 @@ const COMPLETE_PROFILE: TypedDocumentNode<{ completeProfile: User }, { input: Co
                 publicId
                 name
                 registrationNo
-                isUnclassified
                 logo
             }
         }

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { SidebarInset, SidebarProvider } from "./sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
@@ -12,15 +12,18 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
   const [navigationList, setNavigationList] = useState(props.navigations);
   const [user, setUser] = useState<User | undefined>(props.user)
   const [breadcrumbList, setBreadcrumbList] = useState<BreadcrumbItem[]>([])
+  const [headerAction, setHeaderAction] = useState<React.ReactNode>(undefined)
 
   const contextValue = useMemo(() => ({
     user,
     navigationList,
     breadcrumbList,
+    headerAction,
     updateUser: setUser,
     updateNavigationList: setNavigationList,
-    updateBreadcrumbList: setBreadcrumbList
-  }), [user, navigationList, breadcrumbList]);
+    updateBreadcrumbList: setBreadcrumbList,
+    updateHeaderAction: setHeaderAction
+  }), [user, navigationList, breadcrumbList, headerAction]);
 
   return (
     <DashboardContext.Provider value={contextValue}>
@@ -34,7 +37,7 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
       >
         <AppSidebar variant="inset" navigations={navigationList} navigationUserItems={props.userCardItems} user={user} appName={props.appName} />
         <SidebarInset>
-          <SiteHeader items={breadcrumbList} />
+          <SiteHeader items={breadcrumbList} action={headerAction} />
           {children}
         </SidebarInset>
       </SidebarProvider>

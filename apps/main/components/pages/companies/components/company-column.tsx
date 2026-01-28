@@ -16,7 +16,7 @@ export const CompanyColumn: ColumnDef<Company>[] = [
         header: "Registration Number",
         cell: ({ row }) => (
             <div className="font-mono text-sm text-muted-foreground">
-                {row.original.registrationNo}
+                {row.original.registrationNo.slice(0, 8)}
             </div>
         ),
         size: 170,
