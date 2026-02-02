@@ -63,6 +63,7 @@ export function CreateCompanyFormDialog() {
             const input: UpsertCompanyInput = {
                 name,
                 registrationNo: registrationNo || undefined,
+                isActive: true,
             }
 
             const { data, error } = await upsertCompany({

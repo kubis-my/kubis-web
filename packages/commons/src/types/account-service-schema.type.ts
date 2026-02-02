@@ -62,6 +62,7 @@ export interface UpsertCompanyInput {
   publicId?: Nullable<string>;
   name: string;
   registrationNo?: Nullable<string>;
+  isActive: boolean;
   physicalAddress?: Nullable<UpsertCompanyPhysicalAddressInput>;
   billingAddress?: Nullable<UpsertCompanyBillingAddressInput>;
   branches?: Nullable<UpsertBranchInput[]>;
@@ -115,6 +116,16 @@ export interface UpsertBranchBillingAddressInput {
   country: string;
   phoneCode: string;
   phoneNumber: string;
+}
+
+export interface CreateUserAccountInput {
+  accounts: FactoryCreateUserAccountInput[];
+}
+
+export interface FactoryCreateUserAccountInput {
+  branchPublicId: string;
+  userPublicId: string;
+  position: string;
 }
 
 export interface PageInfo {
@@ -340,6 +351,7 @@ export interface IMutation {
   upsertCompany(input: UpsertCompanyInput): Company | Promise<Company>;
   upsertCompanyPhysicalAddress(companyPublicId: string, input: UpsertCompanyPhysicalAddressInput): Company | Promise<Company>;
   upsertCompanyBillingAddress(companyPublicId: string, input: UpsertCompanyBillingAddressInput): Company | Promise<Company>;
+  createUserAccounts(input: CreateUserAccountInput): UserAccount[] | Promise<UserAccount[]>;
   upsertBranch(input: UpsertBranchInput): Branch | Promise<Branch>;
   upsertBranchPhysicalAddress(branchPublicId: string, input: UpsertBranchPhysicalAddressInput): Branch | Promise<Branch>;
   upsertBranchBillingAddress(branchPublicId: string, input: UpsertBranchBillingAddressInput): Branch | Promise<Branch>;

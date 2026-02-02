@@ -14,7 +14,7 @@ export const BranchColumn: ColumnDef<Branch>[] = [
                 <div className="flex flex-col">
                     <span className="font-medium">{row.original.name}</span>
                     <span className="text-sm text-muted-foreground">
-                        #{row.original.code.slice(0, 8)}
+                        {row.original.code.slice(0, 8)}
                     </span>
                 </div>
             );

@@ -13,33 +13,106 @@ import { Separator } from '@/shadcn/components/separator';
 import { Button } from '@/shadcn/components/button';
 import { Switch } from '@/shadcn/components/switch';
 import { formatDateTime } from '@repo/commons/utils/date';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { Company, UpsertCompanyInput } from '@repo/commons/types/account-service-schema.type';
+import { useApolloClient, useMutation } from '@apollo/client/react';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
+import ShowErrorText from '@/shadcn/custom-components/show-error-text';
+import { toast } from "sonner"
+
+const UPSERT_COMPANY: TypedDocumentNode<
+    { upsertCompany: Company },
+    { input: UpsertCompanyInput }
+> = gql`
+    mutation UpsertCompany($input: UpsertCompanyInput!) {
+        upsertCompany(input: $input) {
+            publicId
+            name
+            registrationNo
+            isActive
+            createdAt
+            updatedAt
+        }
+    }
+`
+
+const initialFormData: UpsertCompanyInput = {
+    name: "",
+    registrationNo: "",
+    isActive: false
+};
 
 export default function CompanyDetailCard() {
     const ctx = useCompanyDetail();
     const isMobile = useIsMobile();
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState({
-        companyName: '',
-        registrationNumber: '',
-        status: false
-    });
+    const [formData, setFormData] = useState(initialFormData);
+    const [formValidation, setFormValidation] = useState<Record<string, string[]>>({})
 
-    if (ctx.isFetchingCompany) return <Skeleton className="aspect-video rounded-xl" />
+    const client = useApolloClient()
+    const [upsertCompany, { loading }] = useMutation(UPSERT_COMPANY)
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
-        // TODO: Add API call to update company details
-        setOpen(false);
+        setFormValidation({})
+
+        const { data, error } = await upsertCompany({
+            variables: {
+                input: {
+                    ...formData,
+                    publicId: ctx.company?.publicId
+                }
+            },
+            errorPolicy: "all",
+        })
+
+        if (hasGraphQLError(error)) {
+            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0]
+
+            if (gqlError) {
+                const err = gqlError.extensions?.originalError as Record<string, any> | undefined
+
+                if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                    setFormValidation(
+                        convertErrorMessageListToObject(Object.keys(formData), err.message)
+                    )
+                    return
+                }
+
+                const id = err?.id;
+
+                if (err?.statusCode === 409 && id === "COMPANY_REGISTRATION_NUMBER_EXISTS") {
+                    setFormValidation({
+                        registrationNo: [
+                            "A company with this registration number already exists."
+                        ]
+                    })
+                    return;
+                }
+            }
+        }
+
+        if (data) {
+            client.refetchQueries({ include: ["GetCompanyDetail"] })
+
+            setOpen(false);
+            toast.success("Company updated successfully!", {
+                position: "top-center",
+            })
+        }
     };
 
     const resetForm = () => {
+        setFormValidation({})
         setFormData({
-            companyName: ctx.company?.name || '',
-            registrationNumber: ctx.company?.registrationNo || '',
-            status: ctx.company?.isActive ?? false
+            name: ctx.company?.name || '',
+            registrationNo: ctx.company?.registrationNo || '',
+            isActive: ctx.company?.isActive ?? false
         });
     };
+
+    if (ctx.isFetchingCompany) return <Skeleton className="aspect-video rounded-xl" />
 
     return (
         <Drawer open={open} onOpenChange={(isOpen) => { setOpen(isOpen); if (isOpen) resetForm(); }} direction={isMobile ? "bottom" : "right"}>
@@ -65,7 +138,7 @@ export default function CompanyDetailCard() {
                                 <IconFileDigit className="size-3.5 shrink-0" /> Register Number
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                #{ctx.company?.registrationNo.slice(0, 8)}
+                                {ctx.company?.registrationNo.slice(0, 8)}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -112,22 +185,24 @@ export default function CompanyDetailCard() {
                                 <Label htmlFor="companyName">Company Name</Label>
                                 <Input
                                     id="companyName"
-                                    value={formData.companyName}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                                    value={formData.name}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                                     placeholder="Enter company name"
-                                    required
+                                    autoComplete='off'
                                 />
+                                <ShowErrorText error={formValidation} field="name" />
                             </div>
 
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="registrationNumber">Registration Number</Label>
                                 <Input
                                     id="registrationNumber"
-                                    value={formData.registrationNumber}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, registrationNumber: e.target.value }))}
+                                    value={formData.registrationNo ?? ""}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, registrationNo: e.target.value }))}
                                     placeholder="Enter registration number"
-                                    required
+                                    autoComplete='off'
                                 />
+                                <ShowErrorText error={formValidation} field="registrationNo" />
                             </div>
 
                             <Separator />
@@ -161,8 +236,8 @@ export default function CompanyDetailCard() {
                                 </div>
                                 <Switch
                                     id="status"
-                                    checked={formData.status}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, status: checked }))}
+                                    checked={formData.isActive}
+                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
                                 />
                             </div>
                         </div>
