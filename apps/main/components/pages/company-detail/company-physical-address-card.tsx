@@ -11,37 +11,107 @@ import { Label } from '@/shadcn/components/label';
 import { Input } from '@/shadcn/components/input';
 import { Separator } from '@/shadcn/components/separator';
 import { Button } from '@/shadcn/components/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/select';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { Company, UpsertCompanyPhysicalAddressInput } from '@repo/commons/types/account-service-schema.type';
+import { useApolloClient, useMutation } from '@apollo/client/react';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
+import ShowErrorText from '@/shadcn/custom-components/show-error-text';
+import { toast } from "sonner";
+import { PHONE_CODES } from '@/root/libs/constants';
+
+const UPSERT_COMPANY_PHYSICAL_ADDRESS: TypedDocumentNode<
+    { upsertCompanyPhysicalAddress: Company },
+    { companyPublicId: string; input: UpsertCompanyPhysicalAddressInput }
+> = gql`
+    mutation UpsertCompanyPhysicalAddress($companyPublicId: String!, $input: UpsertCompanyPhysicalAddressInput!) {
+        upsertCompanyPhysicalAddress(companyPublicId: $companyPublicId, input: $input) {
+            publicId
+            companyPhysicalAddresses {
+                street
+                city
+                state
+                postalCode
+                country
+                phoneCode
+                phoneNumber
+            }
+        }
+    }
+`;
+
+const initialFormData: UpsertCompanyPhysicalAddressInput = {
+    street: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: '',
+    phoneCode: '',
+    phoneNumber: ''
+};
 
 export default function CompanyPhysicalAddressCard() {
     const ctx = useCompanyDetail();
     const isMobile = useIsMobile();
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState({
-        street: '',
-        city: '',
-        state: '',
-        postalCode: '',
-        country: '',
-        phone: ''
-    });
+    const [formData, setFormData] = useState(initialFormData);
+    const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
+
+    const client = useApolloClient();
+    const [upsertPhysicalAddress, { loading }] = useMutation(UPSERT_COMPANY_PHYSICAL_ADDRESS);
 
     if (ctx.isFetchingCompany) return <Skeleton className="aspect-video rounded-xl" />
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
-        // TODO: Add API call to update physical address
-        setOpen(false);
+        setFormValidation({});
+
+        if (!ctx.company?.publicId) return;
+
+        const { data, error } = await upsertPhysicalAddress({
+            variables: {
+                companyPublicId: ctx.company.publicId,
+                input: formData
+            },
+            errorPolicy: "all",
+        });
+
+        if (hasGraphQLError(error)) {
+            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+
+            if (gqlError) {
+                const err = gqlError.extensions?.originalError as Record<string, any> | undefined;
+
+                if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                    setFormValidation(
+                        convertErrorMessageListToObject(Object.keys(formData), err.message)
+                    );
+                    return;
+                }
+            }
+        }
+
+        if (data) {
+            client.refetchQueries({ include: ["GetCompanyDetail"] });
+
+            setOpen(false);
+            toast.success("Physical address updated successfully!", {
+                position: "top-center",
+            });
+        }
     };
 
     const resetForm = () => {
+        setFormValidation({});
         setFormData({
             street: ctx.company?.companyPhysicalAddresses?.street || '',
             city: ctx.company?.companyPhysicalAddresses?.city || '',
             state: ctx.company?.companyPhysicalAddresses?.state || '',
             postalCode: ctx.company?.companyPhysicalAddresses?.postalCode || '',
             country: ctx.company?.companyPhysicalAddresses?.country || '',
-            phone: ctx.company?.companyPhysicalAddresses?.phoneNumber || ''
+            phoneCode: ctx.company?.companyPhysicalAddresses?.phoneCode || '',
+            phoneNumber: ctx.company?.companyPhysicalAddresses?.phoneNumber || ''
         });
     };
 
@@ -104,7 +174,7 @@ export default function CompanyPhysicalAddressCard() {
                             <div className='text-muted-foreground text-xs'>
                                 {
                                     (ctx.company?.companyPhysicalAddresses?.phoneCode && ctx.company?.companyPhysicalAddresses?.phoneNumber)
-                                        ? `${ctx.company?.companyPhysicalAddresses?.phoneCode} ${ctx.company?.companyPhysicalAddresses?.phoneNumber}`
+                                        ? `${ctx.company?.companyPhysicalAddresses?.phoneCode}${ctx.company?.companyPhysicalAddresses?.phoneNumber}`
                                         : "-"
                                 }
                             </div>
@@ -131,76 +201,94 @@ export default function CompanyPhysicalAddressCard() {
                                     value={formData.street}
                                     onChange={(e) => setFormData(prev => ({ ...prev, street: e.target.value }))}
                                     placeholder="Enter street address"
-                                    required
                                 />
+                                <ShowErrorText error={formValidation} field="street" />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-2">
-                                    <Label htmlFor="city">City</Label>
-                                    <Input
-                                        id="city"
-                                        value={formData.city}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                                        placeholder="Enter city"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-2">
-                                    <Label htmlFor="state">State</Label>
-                                    <Input
-                                        id="state"
-                                        value={formData.state}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-                                        placeholder="Enter state"
-                                        required
-                                    />
-                                </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="city">City</Label>
+                                <Input
+                                    id="city"
+                                    value={formData.city}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                                    placeholder="Enter city"
+                                />
+                                <ShowErrorText error={formValidation} field="city" />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-2">
-                                    <Label htmlFor="postalCode">Postal Code</Label>
-                                    <Input
-                                        id="postalCode"
-                                        value={formData.postalCode}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
-                                        placeholder="Enter postal code"
-                                        required
-                                    />
-                                </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="state">State</Label>
+                                <Input
+                                    id="state"
+                                    value={formData.state}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                                    placeholder="Enter state"
+                                />
+                                <ShowErrorText error={formValidation} field="state" />
+                            </div>
 
-                                <div className="flex flex-col gap-2">
-                                    <Label htmlFor="country">Country</Label>
-                                    <Input
-                                        id="country"
-                                        value={formData.country}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
-                                        placeholder="Enter country"
-                                        required
-                                    />
-                                </div>
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="postalCode">Postal Code</Label>
+                                <Input
+                                    id="postalCode"
+                                    value={formData.postalCode}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, postalCode: e.target.value }))}
+                                    placeholder="Enter postal code"
+                                />
+                                <ShowErrorText error={formValidation} field="postalCode" />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="country">Country</Label>
+                                <Input
+                                    id="country"
+                                    value={formData.country}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, country: e.target.value }))}
+                                    placeholder="Enter country"
+                                />
+                                <ShowErrorText error={formValidation} field="country" />
                             </div>
 
                             <Separator />
 
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="phone">Phone Number</Label>
+                                <Label htmlFor="phoneCode">Phone Code</Label>
+                                <Select
+                                    value={formData.phoneCode}
+                                    onValueChange={(value) => setFormData(prev => ({ ...prev, phoneCode: value }))}
+                                >
+                                    <SelectTrigger id="phoneCode" className="w-full">
+                                        <SelectValue placeholder="Select phone code" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {PHONE_CODES.map((code) => (
+                                            <SelectItem key={code.value} value={code.value}>
+                                                {code.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <ShowErrorText error={formValidation} field="phoneCode" />
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="phoneNumber">Phone Number</Label>
                                 <Input
-                                    id="phone"
+                                    id="phoneNumber"
                                     type="tel"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                                    value={formData.phoneNumber}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
                                     placeholder="Enter phone number"
-                                    required
                                 />
+                                <ShowErrorText error={formValidation} field="phoneNumber" />
                             </div>
                         </div>
                     </div>
 
                     <DrawerFooter className="mt-auto">
-                        <Button type="submit">Save Changes</Button>
+                        <Button type="submit" disabled={loading}>
+                            {loading ? "Saving..." : "Save Changes"}
+                        </Button>
                         <DrawerClose asChild>
                             <Button type="button" variant="outline">Cancel</Button>
                         </DrawerClose>
