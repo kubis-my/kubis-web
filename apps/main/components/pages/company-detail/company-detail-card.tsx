@@ -244,7 +244,9 @@ export default function CompanyDetailCard() {
                     </div>
 
                     <DrawerFooter className="mt-auto">
-                        <Button type="submit">Save Changes</Button>
+                        <Button type="submit" disabled={loading}>
+                            {loading ? "Saving..." : "Save Changes"}
+                        </Button>
                         <DrawerClose asChild>
                             <Button type="button" variant="outline">Cancel</Button>
                         </DrawerClose>
