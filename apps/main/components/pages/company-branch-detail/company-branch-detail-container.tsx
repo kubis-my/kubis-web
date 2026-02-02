@@ -204,7 +204,7 @@ export default function CompanyBranchDetailContainer({ children, companyId, bran
                     url: "/" + companyURL
                 },
                 {
-                    name: data?.getBranchDetail.code
+                    name: data?.getBranchDetail.code.slice(0, 8)
                 },
             ]);
 

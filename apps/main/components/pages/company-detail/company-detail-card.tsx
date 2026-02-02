@@ -65,7 +65,7 @@ export default function CompanyDetailCard() {
                                 <IconFileDigit className="size-3.5 shrink-0" /> Register Number
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.company?.registrationNo ?? "-"}
+                                #{ctx.company?.registrationNo.slice(0, 8)}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>

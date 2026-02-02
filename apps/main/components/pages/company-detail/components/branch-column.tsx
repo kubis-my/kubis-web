@@ -14,7 +14,7 @@ export const BranchColumn: ColumnDef<Branch>[] = [
                 <div className="flex flex-col">
                     <span className="font-medium">{row.original.name}</span>
                     <span className="text-sm text-muted-foreground">
-                        {row.original.code}
+                        #{row.original.code.slice(0, 8)}
                     </span>
                 </div>
             );
@@ -25,11 +25,21 @@ export const BranchColumn: ColumnDef<Branch>[] = [
         accessorKey: "contact",
         header: "Contact",
         cell: ({ row }) => {
+            const phone = row.original.branchPhysicalAddresses;
+            const email = row.original.email;
+            const hasPhone = phone?.phoneCode && phone?.phoneNumber;
+
+            if (!hasPhone && !email) {
+                return <span className="text-sm text-muted-foreground">—</span>;
+            }
+
             return (
                 <div className="flex flex-col gap-1">
-                    <div className="font-mono text-sm">{row.original.branchPhysicalAddresses?.phoneCode} {row.original.branchPhysicalAddresses?.phoneNumber}</div>
+                    <div className="font-mono text-sm">
+                        {hasPhone ? `${phone.phoneCode} ${phone.phoneNumber}` : <span className="text-muted-foreground">—</span>}
+                    </div>
                     <div className="text-sm text-muted-foreground">
-                        {row.original.email}
+                        {email || "—"}
                     </div>
                 </div>
             );
@@ -40,11 +50,16 @@ export const BranchColumn: ColumnDef<Branch>[] = [
         accessorKey: "physicalAddress",
         header: "Location",
         cell: ({ row }) => {
-            const { city, country } = row.original.branchPhysicalAddresses!;
+            const location = row.original.branchPhysicalAddresses;
+
+            if (!location) {
+                return <span className="text-sm text-muted-foreground">—</span>;
+            }
+
             return (
                 <div className="text-sm">
-                    <div>{city}</div>
-                    <div className="text-muted-foreground">{country}</div>
+                    <div>{location.city}</div>
+                    <div className="text-muted-foreground">{location.country}</div>
                 </div>
             );
         },
@@ -54,7 +69,13 @@ export const BranchColumn: ColumnDef<Branch>[] = [
         accessorKey: "operationHours",
         header: "Operating Hours",
         cell: ({ row }) => {
-            const openDays = row.original.branchOperationHours.filter(r => !r.isClosed);
+            const operationHours = row.original.branchOperationHours;
+
+            if (!operationHours || operationHours.length === 0) {
+                return <span className="text-sm text-muted-foreground">—</span>;
+            }
+
+            const openDays = operationHours.filter(r => !r.isClosed);
 
             if (openDays.length === 0) {
                 return <div className="text-sm text-muted-foreground">Closed</div>;

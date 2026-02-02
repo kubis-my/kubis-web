@@ -67,7 +67,7 @@ export default function CompanyBranchDetailCard() {
                                 <IconCode className="size-3.5 shrink-0" /> Branch Code
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                {ctx.branch?.code ?? "-"}
+                                #{ctx.branch?.code.slice(0, 8)}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
