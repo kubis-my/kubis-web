@@ -6,6 +6,9 @@ import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { BranchPaginationInput, Company, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
 import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
+import { hasGraphQLError } from "@repo/commons/utils/graphql";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type ExtendedCompany = Company & {
@@ -169,8 +172,9 @@ export type CompanyDetailContext = {
 const CompanyDetailContext = createContext<CompanyDetailContext | undefined>(undefined);
 
 export default function CompanyDetailContainer({ children, id }: Readonly<{ children: React.ReactNode, id: string }>) {
+    const router = useRouter();
     const { updateBreadcrumbList } = useDashboard01();
-    const { data, loading: isFetchingCompany } = useQuery(GET_COMPANY_DETAIL, {
+    const { data, error, loading: isFetchingCompany } = useQuery(GET_COMPANY_DETAIL, {
         variables: {
             companyPublicId: id,
             branchPaginationInput: {
@@ -207,9 +211,33 @@ export default function CompanyDetailContainer({ children, id }: Readonly<{ chil
         }
     }, [data])
 
+    useEffect(() => {
+        if (hasGraphQLError(error)) {
+            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0]
+
+            if (gqlError) {
+                const err = gqlError.extensions?.originalError as Record<string, any> | undefined
+
+                const id = err?.id;
+
+                if (id === "COMPANY_NOT_FOUND") {
+                    toast.error("Company not found", {
+                        position: "top-center",
+                    });
+                    router.replace(ROUTE.MY_ACCOUNT.COMPANY);
+                    return;
+                }
+
+                toast.error(err?.message || gqlError.message || "Something went wrong", {
+                    position: "top-center",
+                });
+            }
+        }
+    }, [error, router])
+
     const contextValue = useMemo(() => ({
         company,
-        isFetchingCompany,
+        isFetchingCompany: error ? true : isFetchingCompany,
     }), [company, isFetchingCompany]);
 
     return (
