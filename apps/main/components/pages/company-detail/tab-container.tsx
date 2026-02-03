@@ -10,6 +10,7 @@ import UsersTab from "./users-tab";
 import { Button } from "@/shadcn/components/button";
 import { IconPlus } from "@tabler/icons-react";
 import ActivityLogsTab from "./activity-logs-tab";
+import CreateBranchDialog from "./create-branch-dialog";
 
 export default function TabContainer() {
     const ctx = useCompanyDetail();
@@ -17,10 +18,6 @@ export default function TabContainer() {
     const [activeTab, setActiveTab] = useState("branches");
 
     if (ctx.isFetchingCompany) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
-
-    const handleAddBranch = () => {
-        router.push(`/my-account/company/${ctx.company?.publicId}/branch/new`);
-    };
 
     const handleAddUser = () => {
         router.push(`/my-account/company/${ctx.company?.publicId}/user/new`);
@@ -36,10 +33,7 @@ export default function TabContainer() {
                 </TabsList>
                 <div className="flex items-center gap-2">
                     {activeTab === "branches" && (
-                        <Button variant="outline" size="sm" onClick={handleAddBranch}>
-                            <IconPlus />
-                            <span className="hidden lg:inline">Add Branch</span>
-                        </Button>
+                        <CreateBranchDialog />
                     )}
                     {activeTab === "users" && (
                         <Button variant="outline" size="sm" onClick={handleAddUser}>

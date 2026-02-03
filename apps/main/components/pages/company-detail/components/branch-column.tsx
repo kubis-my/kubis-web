@@ -30,7 +30,7 @@ export const BranchColumn: ColumnDef<Branch>[] = [
             const hasPhone = phone?.phoneCode && phone?.phoneNumber;
 
             if (!hasPhone && !email) {
-                return <span className="text-sm text-muted-foreground">—</span>;
+                return <span className="text-sm text-muted-foreground">-</span>
             }
 
             return (
@@ -53,7 +53,7 @@ export const BranchColumn: ColumnDef<Branch>[] = [
             const location = row.original.branchPhysicalAddresses;
 
             if (!location) {
-                return <span className="text-sm text-muted-foreground">—</span>;
+                return <span className="text-sm text-muted-foreground">-</span>;
             }
 
             return (
@@ -72,7 +72,7 @@ export const BranchColumn: ColumnDef<Branch>[] = [
             const operationHours = row.original.branchOperationHours;
 
             if (!operationHours || operationHours.length === 0) {
-                return <span className="text-sm text-muted-foreground">—</span>;
+                return <span className="text-sm text-muted-foreground">-</span>;
             }
 
             const openDays = operationHours.filter(r => !r.isClosed);
