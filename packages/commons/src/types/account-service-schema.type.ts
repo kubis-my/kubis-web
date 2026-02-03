@@ -94,6 +94,7 @@ export interface UpsertBranchInput {
   name: string;
   code: string;
   email?: Nullable<string>;
+  isActive: boolean;
   physicalAddress?: Nullable<UpsertBranchPhysicalAddressInput>;
   billingAddress?: Nullable<UpsertBranchBillingAddressInput>;
 }

@@ -13,35 +13,105 @@ import { Separator } from '@/shadcn/components/separator';
 import { Button } from '@/shadcn/components/button';
 import { Switch } from '@/shadcn/components/switch';
 import { formatDateTime } from '@repo/commons/utils/date';
+import { gql, TypedDocumentNode } from "@apollo/client";
+import { useApolloClient, useMutation } from "@apollo/client/react";
+import { Branch, UpsertBranchInput } from "@repo/commons/types/account-service-schema.type";
+import { hasGraphQLError } from "@repo/commons/utils/graphql";
+import { convertErrorMessageListToObject } from "@repo/commons/utils/error-message";
+import ShowErrorText from "@repo/shadcn-ui/custom-components/show-error-text";
+import { toast } from "sonner";
+
+const UPSERT_BRANCH: TypedDocumentNode<
+    { upsertBranch: Branch },
+    { input: UpsertBranchInput }
+> = gql`
+    mutation UpsertBranch($input: UpsertBranchInput!) {
+        upsertBranch(input: $input) {
+            publicId
+            name
+            code
+            email
+            isActive
+            createdAt
+            updatedAt
+        }
+    }
+`;
+
+const initialFormData: Omit<UpsertBranchInput, 'publicId' | 'companyPublicId'> = {
+    name: "",
+    code: "",
+    email: "",
+    isActive: false
+};
 
 export default function CompanyBranchDetailCard() {
     const ctx = useCompanyBranchDetail();
     const isMobile = useIsMobile();
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState({
-        branchName: '',
-        branchCode: '',
-        email: '',
-        status: false
-    });
+    const [formData, setFormData] = useState(initialFormData);
+    const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
 
-    if (ctx.loading) return <Skeleton className="aspect-video rounded-xl" />
+    const client = useApolloClient();
+    const [upsertBranch, { loading: submitting }] = useMutation(UPSERT_BRANCH);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
-        // TODO: Add API call to update branch details
-        setOpen(false);
+        setFormValidation({});
+
+        const { data, error } = await upsertBranch({
+            variables: {
+                input: {
+                    ...formData,
+                    publicId: ctx.branch?.publicId,
+                    companyPublicId: ctx.branch?.company.publicId!,
+                }
+            },
+            errorPolicy: "all",
+        });
+
+        if (hasGraphQLError(error)) {
+            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+
+            if (gqlError) {
+                const err = gqlError.extensions?.originalError as Record<string, any> | undefined;
+
+                if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                    setFormValidation(
+                        convertErrorMessageListToObject(Object.keys(formData), err.message)
+                    );
+                    return;
+                }
+
+                const id = err?.id;
+
+                if (err?.statusCode === 409 && id === "BRANCH_CODE_ALREADY_EXISTS") {
+                    setFormValidation({
+                        code: ["A branch with this code already exists."]
+                    });
+                    return;
+                }
+            }
+        }
+
+        if (data) {
+            client.refetchQueries({ include: ["GetBranchDetail"] });
+            toast.success("Branch updated successfully!", { position: "top-center" });
+            setOpen(false);
+        }
     };
 
     const resetForm = () => {
+        setFormValidation({});
         setFormData({
-            branchName: ctx.branch?.name || '',
-            branchCode: ctx.branch?.code || '',
+            name: ctx.branch?.name || '',
+            code: ctx.branch?.code || '',
             email: ctx.branch?.email || '',
-            status: ctx.branch?.isActive || false
+            isActive: ctx.branch?.isActive ?? false
         });
     };
+
+    if (ctx.loading) return <Skeleton className="aspect-video rounded-xl" />
 
     return (
         <Drawer open={open} onOpenChange={(isOpen) => { setOpen(isOpen); if (isOpen) resetForm(); }} direction={isMobile ? "bottom" : "right"}>
@@ -67,7 +137,7 @@ export default function CompanyBranchDetailCard() {
                                 <IconCode className="size-3.5 shrink-0" /> Branch Code
                             </div>
                             <div className='text-muted-foreground text-xs'>
-                                #{ctx.branch?.code.slice(0, 8)}
+                                {ctx.branch?.code.slice(0, 8)}
                             </div>
                         </div>
                         <div className='flex justify-between items-center border-b px-1 py-2'>
@@ -122,49 +192,39 @@ export default function CompanyBranchDetailCard() {
                                 <Label htmlFor="branchName">Branch Name</Label>
                                 <Input
                                     id="branchName"
-                                    value={formData.branchName}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, branchName: e.target.value }))}
+                                    value={formData.name}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                                     placeholder="Enter branch name"
-                                    required
+                                    autoComplete='off'
                                 />
+                                <ShowErrorText error={formValidation} field="name" />
                             </div>
 
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="branchCode">Branch Code</Label>
                                 <Input
                                     id="branchCode"
-                                    value={formData.branchCode}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, branchCode: e.target.value }))}
+                                    value={formData.code}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
                                     placeholder="Enter branch code"
-                                    required
+                                    autoComplete='off'
                                 />
+                                <ShowErrorText error={formValidation} field="code" />
                             </div>
-
                             <Separator />
-
-                            {/* <div className="flex flex-col gap-2">
-                                <Label htmlFor="phone">Phone Number</Label>
-                                <Input
-                                    id="phone"
-                                    value={formData.phone}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                                    placeholder="Enter phone number"
-                                    required
-                                />
-                            </div> */}
-
                             <div className="flex flex-col gap-2">
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input
                                     id="email"
                                     type="email"
-                                    value={formData.email}
+                                    value={formData.email ?? ""}
                                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                                     placeholder="Enter email address"
-                                    required
+                                    autoComplete='off'
                                 />
+                                <ShowErrorText error={formValidation} field="email" />
                             </div>
-
+                            <Separator />
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
                                     <Label htmlFor="status" className="cursor-pointer">Active Status</Label>
@@ -174,15 +234,16 @@ export default function CompanyBranchDetailCard() {
                                 </div>
                                 <Switch
                                     id="status"
-                                    checked={formData.status}
-                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, status: checked }))}
+                                    checked={formData.isActive}
+                                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
                                 />
                             </div>
                         </div>
                     </div>
-
                     <DrawerFooter className="mt-auto">
-                        <Button type="submit">Save Changes</Button>
+                        <Button type="submit" disabled={submitting}>
+                            {submitting ? "Saving..." : "Save Changes"}
+                        </Button>
                         <DrawerClose asChild>
                             <Button type="button" variant="outline">Cancel</Button>
                         </DrawerClose>

@@ -6,8 +6,10 @@ import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { Branch, BranchEventPaginationInput, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
 import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
-import { usePathname } from "next/navigation";
+import { hasGraphQLError } from "@repo/commons/utils/graphql";
+import { usePathname, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 
 type ExtendedBranch = Branch & {
@@ -167,9 +169,15 @@ const CompanyBranchDetailContext = createContext<CompanyBranchDetailContext | un
 
 export default function CompanyBranchDetailContainer({ children, companyId, branchId }: Readonly<{ children: React.ReactNode, companyId: string, branchId: string }>) {
     const pathName = usePathname();
+    const router = useRouter();
+    // ['my-account', 'company', '1', 'branch', '101']
+    const companyURL = pathName.split(new RegExp(/\//g))
+        .filter(Boolean)
+        .splice(0, 3)
+        .join("/");
 
     const { updateBreadcrumbList } = useDashboard01();
-    const { data, loading } = useQuery(GET_COMPANY_DETAIL, {
+    const { data, loading, error } = useQuery(GET_COMPANY_DETAIL, {
         variables: {
             companyPublicId: companyId,
             branchPublicId: branchId,
@@ -192,11 +200,7 @@ export default function CompanyBranchDetailContainer({ children, companyId, bran
         setBranch(data?.getBranchDetail);
 
         if (data?.getBranchDetail) {
-            // ['my-account', 'company', '1', 'branch', '101']
-            const companyURL = pathName.split(new RegExp(/\//g))
-                .filter(Boolean)
-                .splice(0, 3)
-                .join("/");
+
 
             updateBreadcrumbList([
                 {
@@ -213,6 +217,30 @@ export default function CompanyBranchDetailContainer({ children, companyId, bran
             }
         }
     }, [data])
+
+    useEffect(() => {
+        if (hasGraphQLError(error)) {
+            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0]
+
+            if (gqlError) {
+                const err = gqlError.extensions?.originalError as Record<string, any> | undefined
+
+                const id = err?.id;
+
+                if (id === "BRANCH_NOT_FOUND") {
+                    toast.error("Branch not found", {
+                        position: "top-center",
+                    });
+                    router.replace("/" + companyURL);
+                    return;
+                }
+
+                toast.error(err?.message || gqlError.message || "Something went wrong", {
+                    position: "top-center",
+                });
+            }
+        }
+    }, [error, router])
 
     const contextValue = useMemo(() => ({
         branch,
