@@ -74,6 +74,7 @@ export default function CreateBranchDialog() {
                 companyPublicId: ctx.company.publicId,
                 name,
                 code,
+                isActive: true
             };
 
             const { data, error } = await upsertBranch({
