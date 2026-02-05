@@ -82,12 +82,12 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                 data {
                     publicId
                     status
+                    position
                     joinedAt
                     branchPublicId
                     companyEmployee{
                         phoneCode
                         phoneNumber
-                        position
                         internalId
                         user {
                             publicId

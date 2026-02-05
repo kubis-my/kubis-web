@@ -28,12 +28,12 @@ const GET_COMPANY_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse, GetUs
             data {
                 publicId
                 status
+                position
                 joinedAt
                 branchPublicId
                 companyEmployee{
                     phoneCode
                     phoneNumber
-                    position
                     internalId
                     user {
                         publicId

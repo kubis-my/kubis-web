@@ -101,10 +101,10 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
                 data {
                     publicId
                     status
+                    position
                     joinedAt
                     branchPublicId
                     companyEmployee{
-                        position
                         phoneCode
                         phoneNumber
                         internalId

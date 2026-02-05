@@ -42,7 +42,7 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         cell: ({ row }) => {
             return (
                 <div className="text-sm">
-                    {row.original.companyEmployee.position || "-"}
+                    {row.original.position || "-"}
                 </div>
             );
         },

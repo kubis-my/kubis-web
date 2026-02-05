@@ -191,7 +191,6 @@ export interface Company {
 export interface CompanyEmployee {
   publicId: string;
   internalId: number;
-  position: string;
   phoneCode?: Nullable<string>;
   phoneNumber?: Nullable<string>;
   dateOfBirth?: Nullable<DateTime>;
@@ -265,6 +264,7 @@ export interface Branch {
 
 export interface UserAccount {
   publicId: string;
+  position: string;
   status: UserAccountStatus;
   joinedAt?: Nullable<DateTime>;
   companyEmployeePublicId: string;
