@@ -1,10 +1,10 @@
 "use client";
 
-import { AUDIT_LOG_PAGINATION_SIZE, BRANCH_PAGINATION_SIZE, ROUTE, USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
+import { AUDIT_LOG_PAGINATION_SIZE, BRANCH_PAGINATION_SIZE, COMPANY_EMPLOYEE_PAGINATION_SIZE, ROUTE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
-import { BranchPaginationInput, Company, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
+import { BranchPaginationInput, Company, CompanyEmployeePaginationInput } from "@repo/commons/types/account-service-schema.type";
 import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
 import { hasGraphQLError } from "@repo/commons/utils/graphql";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ interface GetCompanyDetailResponse {
 interface GetCompanyDetailVariables {
     companyPublicId: string;
     branchPaginationInput: BranchPaginationInput
-    userAccountPaginationInput: UserAccountPaginationInput
+    companyEmployeePaginationInput: CompanyEmployeePaginationInput
     auditLogPaginationInput: AuditLogPaginationInput
 }
 
@@ -30,7 +30,7 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
     query GetCompanyDetail(
         $companyPublicId:String!,
         $branchPaginationInput:BranchPaginationInput!,
-        $userAccountPaginationInput:UserAccountPaginationInput!,
+        $companyEmployeePaginationInput:CompanyEmployeePaginationInput!,
         $auditLogPaginationInput:AuditLogPaginationInput!,
         ){
         getCompanyDetail(companyPublicId:$companyPublicId){
@@ -68,7 +68,7 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
                 updatedAt
             }
             branches(pagination:$branchPaginationInput) {
-                data { 
+                data {
                     publicId
                     name
                     code
@@ -97,22 +97,19 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
                     totalPages
                 }
             }
-            userAccounts (pagination:$userAccountPaginationInput){
+            companyEmployees (pagination:$companyEmployeePaginationInput){
                 data {
                     publicId
-                    status
-                    position
-                    joinedAt
-                    branchPublicId
-                    companyEmployee{
-                        phoneCode
-                        phoneNumber
-                        internalId
-                        user {
-                            publicId
-                            firstName
-                            lastName
-                            nickname
+                    internalId
+                    phoneCode
+                    phoneNumber
+                    user {
+                        publicId
+                        firstName
+                        lastName
+                        nickname
+                        credential {
+                            email
                         }
                     }
                 }
@@ -180,8 +177,8 @@ export default function CompanyDetailContainer({ children, id }: Readonly<{ chil
             branchPaginationInput: {
                 take: BRANCH_PAGINATION_SIZE
             },
-            userAccountPaginationInput: {
-                take: USER_ACCOUNT_PAGINATION_SIZE
+            companyEmployeePaginationInput: {
+                take: COMPANY_EMPLOYEE_PAGINATION_SIZE
             },
             auditLogPaginationInput: {
                 take: AUDIT_LOG_PAGINATION_SIZE

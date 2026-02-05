@@ -6,40 +6,37 @@ import { UserColumn } from "./components/user-column";
 import { UserSkeletonRow } from "./components/user-skeleton-row";
 import { useCallback, useEffect, useState } from "react";
 import { gql, TypedDocumentNode } from "@apollo/client";
-import { PaginatedUserAccount, UserAccount, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
+import { CompanyEmployee, CompanyEmployeePaginationInput, PaginatedCompanyEmployee } from "@repo/commons/types/account-service-schema.type";
 import { useLazyQuery } from "@apollo/client/react";
-import { USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
+import { COMPANY_EMPLOYEE_PAGINATION_SIZE } from "@/root/libs/constants";
 import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
 import { DataTable } from "@repo/shadcn-ui/components/data-table";
 import { useRouter } from "next/navigation";
 
-interface GetUserAccountResponse {
-    getCompanyUserAccounts: PaginatedUserAccount;
+interface GetCompanyEmployeesResponse {
+    getCompanyEmployees: PaginatedCompanyEmployee;
 }
 
-interface GetUserAccountVariables {
-    pagination: UserAccountPaginationInput;
+interface GetCompanyEmployeesVariables {
+    pagination: CompanyEmployeePaginationInput;
     companyPublicId: string
 }
 
-const GET_COMPANY_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse, GetUserAccountVariables> = gql`
-    query GetCompanyUserAccounts($pagination:UserAccountPaginationInput!,$companyPublicId:String!) { 
-        getCompanyUserAccounts(pagination:$pagination,companyPublicId:$companyPublicId){
+const GET_COMPANY_EMPLOYEES: TypedDocumentNode<GetCompanyEmployeesResponse, GetCompanyEmployeesVariables> = gql`
+    query GetCompanyEmployees($pagination:CompanyEmployeePaginationInput!,$companyPublicId:String!) {
+        getCompanyEmployees(pagination:$pagination,companyPublicId:$companyPublicId){
             data {
                 publicId
-                status
-                position
-                joinedAt
-                branchPublicId
-                companyEmployee{
-                    phoneCode
-                    phoneNumber
-                    internalId
-                    user {
-                        publicId
-                        firstName
-                        lastName
-                        nickname
+                internalId
+                phoneCode
+                phoneNumber
+                user {
+                    publicId
+                    firstName
+                    lastName
+                    nickname
+                    credential {
+                        email
                     }
                 }
             }
@@ -50,33 +47,33 @@ const GET_COMPANY_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse, GetUs
                 currentPage
                 totalPages
             }
-        }  
+        }
     }
 `
 
 export default function UsersTab() {
     const ctx = useCompanyDetail();
     const router = useRouter();
-    const [GetCompanyUserAccounts, { data, loading }] = useLazyQuery(GET_COMPANY_USER_ACCOUNTS);
+    const [getCompanyEmployees, { data, loading }] = useLazyQuery(GET_COMPANY_EMPLOYEES);
 
-    const [pageSize, setPageSize] = useState(USER_ACCOUNT_PAGINATION_SIZE)
-    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedUserAccount>(createInitialPaginatedData())
+    const [pageSize, setPageSize] = useState(COMPANY_EMPLOYEE_PAGINATION_SIZE)
+    const [paginatedCompanyEmployee, setPaginatedCompanyEmployee] = useState<PaginatedCompanyEmployee>(createInitialPaginatedData())
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
-        if (paginatedUserAccount.pageInfo.hasNextPage && paginatedUserAccount.pageInfo.endCursor !== null) {
-            setCursorHistory(prev => [...prev, paginatedUserAccount.pageInfo.endCursor]);
-            GetCompanyUserAccounts({
+        if (paginatedCompanyEmployee.pageInfo.hasNextPage && paginatedCompanyEmployee.pageInfo.endCursor !== null) {
+            setCursorHistory(prev => [...prev, paginatedCompanyEmployee.pageInfo.endCursor]);
+            getCompanyEmployees({
                 variables: {
                     companyPublicId: ctx.company?.publicId ?? "-1",
                     pagination: {
-                        cursor: paginatedUserAccount.pageInfo.endCursor,
+                        cursor: paginatedCompanyEmployee.pageInfo.endCursor,
                         take: pageSize
                     }
                 }
             });
         }
-    }, [paginatedUserAccount, pageSize, GetCompanyUserAccounts]);
+    }, [paginatedCompanyEmployee, pageSize, getCompanyEmployees]);
 
     const goToPreviousPage = useCallback(() => {
         if (cursorHistory.length > 1) {
@@ -84,7 +81,7 @@ export default function UsersTab() {
             newHistory.pop();
             const previousCursor = newHistory[newHistory.length - 1];
             setCursorHistory(newHistory);
-            GetCompanyUserAccounts({
+            getCompanyEmployees({
                 variables: {
                     companyPublicId: ctx.company?.publicId ?? "-1",
                     pagination: {
@@ -94,22 +91,22 @@ export default function UsersTab() {
                 }
             });
         }
-    }, [cursorHistory, pageSize, GetCompanyUserAccounts]);
+    }, [cursorHistory, pageSize, getCompanyEmployees]);
 
-    const handleRowClick = useCallback((user: UserAccount) => {
-        router.push(`/my-account/company/${ctx.company?.publicId}/user/${user.publicId}`);
+    const handleRowClick = useCallback((employee: CompanyEmployee) => {
+        router.push(`/my-account/company/${ctx.company?.publicId}/user/${employee.publicId}`);
     }, [router, ctx.company?.publicId]);
 
     useEffect(() => {
-        setPaginatedUserAccount(data?.getCompanyUserAccounts ?? ctx.company?.userAccounts ?? createInitialPaginatedData())
-    }, [ctx.company?.userAccounts, data?.getCompanyUserAccounts])
+        setPaginatedCompanyEmployee(data?.getCompanyEmployees ?? ctx.company?.companyEmployees ?? createInitialPaginatedData())
+    }, [ctx.company?.companyEmployees, data?.getCompanyEmployees])
 
     return (
         <TabsContent value="users">
             <DataTable
                 columns={UserColumn}
-                data={paginatedUserAccount.data}
-                pageInfo={paginatedUserAccount.pageInfo}
+                data={paginatedCompanyEmployee.data}
+                pageInfo={paginatedCompanyEmployee.pageInfo}
                 isLoading={loading}
                 pageSize={pageSize}
                 onPageSizeChange={setPageSize}
