@@ -11,6 +11,7 @@ import UsersTab from "./users-tab";
 import EventsTab from "./events-tab";
 import SettingsTab from "./settings-tab";
 import ActivityLogsTab from "./activity-logs-tab";
+import AddUserDialog from "./add-user-dialog";
 
 export default function TabContainer() {
     const ctx = useCompanyBranchDetail();
@@ -21,10 +22,6 @@ export default function TabContainer() {
 
     const handleAddEvent = () => {
         router.push(`/my-account/company/${ctx.branch?.company.publicId}/branch/${ctx.branch?.publicId}/event/new`);
-    };
-
-    const handleAddUser = () => {
-        router.push(`/my-account/company/${ctx.branch?.company.publicId}/branch/${ctx.branch?.publicId}/user/new`);
     };
 
     return (
@@ -44,10 +41,7 @@ export default function TabContainer() {
                         </Button>
                     )}
                     {activeTab === "users" && (
-                        <Button variant="outline" size="sm" onClick={handleAddUser}>
-                            <IconPlus />
-                            <span className="hidden lg:inline">Add User</span>
-                        </Button>
+                        <AddUserDialog />
                     )}
                     {/* Settings tab doesn't need an add button */}
                 </div>

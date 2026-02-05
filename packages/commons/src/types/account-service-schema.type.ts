@@ -47,6 +47,11 @@ export interface BranchEventPaginationInput {
   branchPublicId?: Nullable<string>;
 }
 
+export interface SearchCredentialsForBranchInput {
+  branchPublicId: string;
+  email: string;
+}
+
 export interface CompanyPaginationInput {
   cursor?: Nullable<number>;
   take: number;
@@ -270,8 +275,6 @@ export interface UserAccount {
 
 export interface Credential {
   publicId: string;
-  email: string;
-  username?: Nullable<string>;
 }
 
 export interface User {
@@ -338,6 +341,7 @@ export interface PaginatedBranch {
 
 export interface IQuery {
   getAuthUser(): User | Promise<User>;
+  searchCredentialsForBranch(input: SearchCredentialsForBranchInput): User[] | Promise<User[]>;
   getUserCompanies(pagination: CompanyPaginationInput): PaginatedCompany | Promise<PaginatedCompany>;
   getCompanyDetail(companyPublicId: string): Company | Promise<Company>;
   getCompanyUserAccounts(companyPublicId: string, pagination: UserAccountPaginationInput): PaginatedUserAccount | Promise<PaginatedUserAccount>;
