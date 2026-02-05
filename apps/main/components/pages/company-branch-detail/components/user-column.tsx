@@ -1,5 +1,6 @@
 import { Badge } from "@/shadcn/components/badge";
 import { UserAccount, UserAccountStatus } from "@repo/commons/types/account-service-schema.type";
+import { Credential } from "@repo/commons/types/auth-service-schema.type";
 import { ColumnDef } from "@tanstack/react-table";
 
 export const UserColumn: ColumnDef<UserAccount>[] = [
@@ -21,12 +22,14 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         header: "Full Name",
         cell: ({ row }) => {
             const fullName = `${row.original.companyEmployee.user.firstName} ${row.original.companyEmployee.user.lastName}`;
+            const credential = row.original.companyEmployee.user.credential as Credential
+
             return (
                 <div className="flex flex-col">
                     <span className="font-medium">{fullName}</span>
                     {row.original.companyEmployee.user.nickname && (
                         <span className="text-sm text-muted-foreground">
-                            &quot;{row.original.companyEmployee.user.nickname}&quot;
+                            {credential.email}
                         </span>
                     )}
                 </div>

@@ -94,6 +94,9 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                             firstName
                             lastName
                             nickname
+                            credential {
+                                email
+                            }
                         }
                     }
                 }

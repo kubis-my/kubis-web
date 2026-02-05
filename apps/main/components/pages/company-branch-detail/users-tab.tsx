@@ -67,6 +67,9 @@ const GET_COMPANY_BRANCH_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse
                         firstName
                         lastName
                         nickname
+                        credential {
+                            email
+                        }
                     }
                 }
             }
