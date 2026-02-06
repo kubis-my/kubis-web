@@ -32,8 +32,8 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
                 branch: Branch
             }
 
-            if (!author) {
-                return <span className="text-xs text-muted-foreground">Unknown</span>;
+            if (!author?.branch) {
+                return <span className="text-xs text-muted-foreground">-</span>;
             }
 
             return (
@@ -58,8 +58,8 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
                 }
             }
 
-            if (!author) {
-                return <span className="text-xs text-muted-foreground">Unknown</span>;
+            if (!author?.user) {
+                return <span className="text-xs text-muted-foreground">-</span>;
             }
 
             return (
@@ -81,7 +81,7 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
             const resource = row.original.auditLogResource;
 
             if (!resource) {
-                return <span className="text-xs text-muted-foreground">Unknown</span>;
+                return <span className="text-xs text-muted-foreground">-</span>;
             }
 
             return (
