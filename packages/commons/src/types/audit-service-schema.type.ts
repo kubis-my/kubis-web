@@ -57,10 +57,16 @@ export interface AuditLogResource {
     parentId?: Nullable<string>;
 }
 
+export interface AuditLogMetaDataEntry {
+    key: string;
+    type: string;
+    value: string;
+}
+
 export interface AuditLogMetaData {
     publicId: string;
-    before?: Nullable<JSON>;
-    after?: Nullable<JSON>;
+    before?: Nullable<AuditLogMetaDataEntry[]>;
+    after?: Nullable<AuditLogMetaDataEntry[]>;
     additional?: Nullable<JSON>;
 }
 
