@@ -7,6 +7,7 @@ import { useSocket } from "@/shadcn/providers/socket-provider";
 import { NotificationEvent } from "@repo/commons/constant/web-socket";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { Credential } from "@repo/commons/types/auth-service-schema.type";
 
 export default function DashboardContainer({ children }: Readonly<{ children: React.ReactNode; }>) {
     const currentPathname = usePathname();
@@ -21,7 +22,7 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
         } else {
             updateUser({
                 name: authUser.nickname!,
-                email: authUser.credential?.email || "",
+                email: (authUser.credential as Credential)?.email || "",
                 avatar: authUser.profilePicture || "",
                 avatarFallbackText: authUser.nickname!.at(0)?.toUpperCase() ?? ""
             })
