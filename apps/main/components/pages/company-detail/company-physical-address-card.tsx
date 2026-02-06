@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useFormDirty } from '@repo/commons/hooks/use-form-dirty';
 import { Skeleton } from '@/shadcn/components/skeleton';
 import { useCompanyDetail } from './company-detail-container';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/shadcn/components/card';
@@ -56,6 +57,7 @@ export default function CompanyPhysicalAddressCard() {
     const isMobile = useIsMobile();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState(initialFormData);
+    const { isDirty, setOriginal } = useFormDirty(formData);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
 
     const client = useApolloClient();
@@ -104,7 +106,7 @@ export default function CompanyPhysicalAddressCard() {
 
     const resetForm = () => {
         setFormValidation({});
-        setFormData({
+        const data = {
             street: ctx.company?.companyPhysicalAddresses?.street || '',
             city: ctx.company?.companyPhysicalAddresses?.city || '',
             state: ctx.company?.companyPhysicalAddresses?.state || '',
@@ -112,7 +114,9 @@ export default function CompanyPhysicalAddressCard() {
             country: ctx.company?.companyPhysicalAddresses?.country || '',
             phoneCode: ctx.company?.companyPhysicalAddresses?.phoneCode || '',
             phoneNumber: ctx.company?.companyPhysicalAddresses?.phoneNumber || ''
-        });
+        };
+        setFormData(data);
+        setOriginal(data);
     };
 
     return (
@@ -286,7 +290,7 @@ export default function CompanyPhysicalAddressCard() {
                     </div>
 
                     <DrawerFooter className="mt-auto">
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={!isDirty || loading}>
                             {loading ? "Saving..." : "Save Changes"}
                         </Button>
                         <DrawerClose asChild>

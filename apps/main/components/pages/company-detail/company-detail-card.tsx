@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useFormDirty } from '@repo/commons/hooks/use-form-dirty';
 import { Skeleton } from '@/shadcn/components/skeleton';
 import { useCompanyDetail } from './company-detail-container';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/shadcn/components/card';
@@ -48,6 +49,7 @@ export default function CompanyDetailCard() {
     const isMobile = useIsMobile();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState(initialFormData);
+    const { isDirty, setOriginal } = useFormDirty(formData);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({})
 
     const client = useApolloClient()
@@ -105,11 +107,13 @@ export default function CompanyDetailCard() {
 
     const resetForm = () => {
         setFormValidation({})
-        setFormData({
+        const data = {
             name: ctx.company?.name || '',
             registrationNo: ctx.company?.registrationNo || '',
             isActive: ctx.company?.isActive ?? false
-        });
+        };
+        setFormData(data);
+        setOriginal(data);
     };
 
     if (ctx.isFetchingCompany) return <Skeleton className="aspect-video rounded-xl" />
@@ -244,7 +248,7 @@ export default function CompanyDetailCard() {
                     </div>
 
                     <DrawerFooter className="mt-auto">
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={!isDirty || loading}>
                             {loading ? "Saving..." : "Save Changes"}
                         </Button>
                         <DrawerClose asChild>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useFormDirty } from '@repo/commons/hooks/use-form-dirty';
 import { Skeleton } from '@/shadcn/components/skeleton';
 import { useCompanyBranchDetail } from './company-branch-detail-container';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/shadcn/components/card';
@@ -50,6 +51,7 @@ export default function CompanyBranchDetailCard() {
     const isMobile = useIsMobile();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState(initialFormData);
+    const { isDirty, setOriginal } = useFormDirty(formData);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
 
     const client = useApolloClient();
@@ -103,12 +105,14 @@ export default function CompanyBranchDetailCard() {
 
     const resetForm = () => {
         setFormValidation({});
-        setFormData({
+        const data = {
             name: ctx.branch?.name || '',
             code: ctx.branch?.code || '',
             email: ctx.branch?.email || '',
             isActive: ctx.branch?.isActive ?? false
-        });
+        };
+        setFormData(data);
+        setOriginal(data);
     };
 
     if (ctx.loading) return <Skeleton className="aspect-video rounded-xl" />
@@ -241,7 +245,7 @@ export default function CompanyBranchDetailCard() {
                         </div>
                     </div>
                     <DrawerFooter className="mt-auto">
-                        <Button type="submit" disabled={submitting}>
+                        <Button type="submit" disabled={!isDirty || submitting}>
                             {submitting ? "Saving..." : "Save Changes"}
                         </Button>
                         <DrawerClose asChild>

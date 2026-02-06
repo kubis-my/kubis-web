@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useFormDirty } from '@repo/commons/hooks/use-form-dirty';
 import { Skeleton } from '@/shadcn/components/skeleton';
 import { useCompanyDetail } from './company-detail-container';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/shadcn/components/card';
@@ -56,6 +57,7 @@ export default function CompanyBillingAddressCard() {
     const isMobile = useIsMobile();
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState(initialFormData);
+    const { isDirty, setOriginal } = useFormDirty(formData);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
 
     const client = useApolloClient();
@@ -104,7 +106,7 @@ export default function CompanyBillingAddressCard() {
 
     const resetForm = () => {
         setFormValidation({});
-        setFormData({
+        const data = {
             street: ctx.company?.companyBillingAddress?.street || '',
             city: ctx.company?.companyBillingAddress?.city || '',
             state: ctx.company?.companyBillingAddress?.state || '',
@@ -112,7 +114,9 @@ export default function CompanyBillingAddressCard() {
             country: ctx.company?.companyBillingAddress?.country || '',
             phoneCode: ctx.company?.companyBillingAddress?.phoneCode || '',
             phoneNumber: ctx.company?.companyBillingAddress?.phoneNumber || ''
-        });
+        };
+        setFormData(data);
+        setOriginal(data);
     };
 
     return (
@@ -286,7 +290,7 @@ export default function CompanyBillingAddressCard() {
                     </div>
 
                     <DrawerFooter className="mt-auto">
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={!isDirty || loading}>
                             {loading ? "Saving..." : "Save Changes"}
                         </Button>
                         <DrawerClose asChild>
