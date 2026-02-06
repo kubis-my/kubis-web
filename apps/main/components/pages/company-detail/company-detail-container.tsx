@@ -148,6 +148,19 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetCompanyDetailResponse, Get
                         publicId
                         type
                     }
+                    auditLogMetaData {
+                        before {
+                            key
+                            type
+                            value
+                        }
+                        after {
+                            key
+                            type
+                            value
+                        }
+                        additional
+                    }
                 }
                 pageInfo {
                     endCursor

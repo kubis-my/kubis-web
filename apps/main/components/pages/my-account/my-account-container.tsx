@@ -39,6 +39,19 @@ export const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLog
                     publicId
                     type
                 }
+                auditLogMetaData {
+                    before {
+                        key
+                        type
+                        value
+                    }
+                    after {
+                        key
+                        type
+                        value
+                    }
+                    additional
+                }
             }
             pageInfo {
                 endCursor

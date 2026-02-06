@@ -1,3 +1,4 @@
+import AuditLogMetaViewer from "@/root/components/container/audit-log-meta-viewer";
 import { activityTypeConfig } from "@/root/libs/constants";
 import { Badge } from "@/shadcn/components/badge";
 import { Branch, CompanyEmployee, User } from "@repo/commons/types/account-service-schema.type";
@@ -121,11 +122,7 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
         accessorKey: "description",
         header: "Details",
         cell: ({ row }) => {
-            return (
-                <div className="max-w-md text-sm text-muted-foreground">
-                    {row.original.description}
-                </div>
-            );
+            return <AuditLogMetaViewer audit={row.original} />
         },
         enableHiding: false,
     },
