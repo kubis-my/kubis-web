@@ -1,14 +1,24 @@
 "use client";
 
+import { CurrentDeviceCard } from "@/root/components/pages/your-device/current-device-card";
+import { TotalDevicesCard } from "@/root/components/pages/your-device/total-devices-card";
+import { SecurityStatusCard } from "@/root/components/pages/your-device/security-status-card";
+import DeviceTable from "@/root/components/pages/your-device/device-table";
+import YourDeviceContainer from "@/root/components/pages/your-device/your-device-container";
+
 export default function page() {
     return (
-        <div className="flex flex-1 flex-col gap-4 p-4">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div className="bg-muted/50 aspect-video rounded-xl" />
-                <div className="bg-muted/50 aspect-video rounded-xl" />
-                <div className="bg-muted/50 aspect-video rounded-xl" />
+        <YourDeviceContainer>
+            <div className="flex flex-1 flex-col gap-4 p-4">
+                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+                    <CurrentDeviceCard />
+                    <TotalDevicesCard />
+                    <SecurityStatusCard />
+                </div>
+                <div className="mt-2">
+                    <DeviceTable />
+                </div>
             </div>
-            <div className="bg-muted/50 min-h-screen flex-1 rounded-xl md:min-h-min" />
-        </div>
-    )
+        </YourDeviceContainer>
+    );
 }

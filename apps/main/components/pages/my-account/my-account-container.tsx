@@ -1,12 +1,13 @@
 "use client";
 
-import { AUDIT_LOG_PAGINATION_SIZE, COMPANY_PAGINATION_SIZE } from "@/root/libs/constants";
+import { AUDIT_LOG_PAGINATION_SIZE, COMPANY_PAGINATION_SIZE, CREDENTIAL_DEVICE_PAGINATION_SIZE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { useAuth } from "@/shadcn/providers/auth-provider";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { CompaniesOverview, CompanyPaginationInput, PaginatedCompany } from "@repo/commons/types/account-service-schema.type";
 import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
+import { CredentialDeviceOverview, CredentialDevicePaginationInput, PaginatedCredentialDevice } from "@repo/commons/types/auth-service-schema.type";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 interface GetAuditLogsResponse {
@@ -101,19 +102,41 @@ const GET_USER_COMPANY_OVERVIEW: TypedDocumentNode<GetUserCompaniesResponse, Get
     }
 `
 
-type DeviceOverviewCard = {
-    totalDevices: number;
-    lastActiveDevice: string;
-    lastActiveTime: string;
-    allDevicesVerified: boolean
+interface GetCredentialDevicesResponse {
+    getCredentialDevices: PaginatedCredentialDevice;
 }
+
+interface GetCredentialDeviceVariables {
+    pagination: CredentialDevicePaginationInput;
+}
+
+const GET_CREDENTIAL_DEVICE_OVERVIEW: TypedDocumentNode<GetCredentialDevicesResponse, GetCredentialDeviceVariables> = gql`
+    query GetCredentialDevices($pagination: CredentialDevicePaginationInput!) {
+        getCredentialDevices(pagination: $pagination) {
+            overview {
+                currentDevice {
+                    os
+                    browser
+                    deviceType
+                    deviceLabel
+                }
+                totalDevices
+                activeInLast24h
+                deviceTypeCount
+                isEnable2FA
+            }
+        }
+    }
+`
 
 export type CompanyDetailContext = {
     auditLog?: PaginatedAuditLog
     isFetchingAuditLog: boolean
+    isFetchingCompanyOverview: boolean
+    isFetchingCredentialDeviceOverview: boolean
     credentialPublicId: string
     companyOverviewCard?: CompaniesOverview
-    deviceOverviewCard: DeviceOverviewCard
+    deviceOverviewCard?: CredentialDeviceOverview
 }
 
 const MyAccountContext = createContext<CompanyDetailContext | undefined>(undefined);
@@ -124,12 +147,7 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
 
     const [auditLog, setAuditLog] = useState<PaginatedAuditLog | undefined>(undefined)
     const [companyOverviewCard, setCompanyOverviewCard] = useState<CompaniesOverview | undefined>()
-    const [deviceOverviewCard, setDeviceOverviewCard] = useState<DeviceOverviewCard>({
-        totalDevices: 3,
-        lastActiveDevice: "MacBook Pro",
-        lastActiveTime: "Active now",
-        allDevicesVerified: true,
-    })
+    const [deviceOverviewCard, setDeviceOverviewCard] = useState<CredentialDeviceOverview | undefined>()
 
     const auditLogResult = useQuery(GET_AUDIT_LOGS, {
         variables: {
@@ -144,6 +162,14 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
         variables: {
             pagination: {
                 take: COMPANY_PAGINATION_SIZE
+            }
+        }
+    });
+
+    const credentialDeviceOverview = useQuery(GET_CREDENTIAL_DEVICE_OVERVIEW, {
+        variables: {
+            pagination: {
+                take: CREDENTIAL_DEVICE_PAGINATION_SIZE
             }
         }
     });
@@ -172,9 +198,19 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
         }
     }, [companyOverview.data])
 
+    useEffect(() => {
+        if (credentialDeviceOverview.data?.getCredentialDevices?.overview) {
+            setDeviceOverviewCard(credentialDeviceOverview.data?.getCredentialDevices?.overview)
+        } else {
+            setDeviceOverviewCard(undefined)
+        }
+    }, [credentialDeviceOverview.data])
+
     const contextValue = useMemo(() => ({
         auditLog,
         isFetchingAuditLog: auditLogResult.loading,
+        isFetchingCompanyOverview: companyOverview.loading,
+        isFetchingCredentialDeviceOverview: credentialDeviceOverview.loading,
         credentialPublicId: auth.authUser?.credential.publicId ?? "-1",
         companyOverviewCard,
         deviceOverviewCard,

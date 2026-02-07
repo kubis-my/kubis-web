@@ -1,24 +1,24 @@
 "use client";
 
-import { IconShieldCheck } from "@tabler/icons-react"
+import { IconShieldCheck } from "@tabler/icons-react";
 import {
     Card,
     CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/shadcn/components/card"
-import { useMyAccount } from "./my-account-container";
-import { Skeleton } from "@/shadcn/components/skeleton";
+} from "@/shadcn/components/card";
 import { Badge } from "@/shadcn/components/badge";
+import { useYourDevice } from "./your-device-container";
+import { Skeleton } from "@/shadcn/components/skeleton";
 
-export function DeviceCard() {
-    const ctx = useMyAccount();
+export function SecurityStatusCard() {
+    const { paginatedCredentialDevice, isFetchingCredentialDevice } = useYourDevice();
 
     const is2FAEnabled =
-        ctx.deviceOverviewCard?.isEnable2FA ?? false;
+        paginatedCredentialDevice?.overview?.isEnable2FA ?? false;
 
-    if (ctx.isFetchingCredentialDeviceOverview) return <Skeleton className="aspect-video rounded-xl" />
+    if (isFetchingCredentialDevice) return <Skeleton className="aspect-video rounded-xl" />
 
     return (
         <Card className="@container/card">

@@ -8,9 +8,12 @@ import {
     CardTitle,
 } from "@/shadcn/components/card"
 import { useMyAccount } from "./my-account-container";
+import { Skeleton } from "@/shadcn/components/skeleton";
 
 export function CompaniesCard() {
     const ctx = useMyAccount()
+
+    if (ctx.isFetchingCompanyOverview) return <Skeleton className="aspect-video rounded-xl" />
 
     return (
         <Card className="@container/card">

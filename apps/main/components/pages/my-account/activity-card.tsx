@@ -9,9 +9,12 @@ import {
     CardTitle,
 } from "@/shadcn/components/card"
 import { useMyAccount } from "./my-account-container";
+import { Skeleton } from "@/shadcn/components/skeleton";
 
 export function ActivityCard() {
     const ctx = useMyAccount()
+
+    if (ctx.isFetchingAuditLog) return <Skeleton className="aspect-video rounded-xl" />
 
     return (
         <Card className="@container/card">

@@ -8,6 +8,7 @@ import { GET_AUDIT_LOGS, useMyAccount } from "./my-account-container";
 import { ActivityColumn } from "./components/activity-column";
 import { ActivitySkeletonRow } from "./components/activity-skeleton-row";
 import { DataTable } from "@repo/shadcn-ui/components/data-table";
+import { Skeleton } from "@/shadcn/components/skeleton";
 
 const initialPaginationData = {
     data: [],
@@ -69,6 +70,8 @@ export default function CredentialActivityTable() {
     useEffect(() => {
         setPaginatedAuditLog(data?.getAuditLogs ?? ctx.auditLog ?? initialPaginationData)
     }, [ctx.auditLog, data?.getAuditLogs])
+
+    if (ctx.isFetchingAuditLog) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
 
     return (
         <DataTable
