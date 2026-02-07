@@ -1,7 +1,6 @@
 "use client";
 
 import { AUDIT_LOG_PAGINATION_SIZE } from "@/root/libs/constants";
-import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
 import { useLazyQuery } from "@apollo/client/react";
 import { PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
 import { useCallback, useEffect, useState } from "react";
@@ -10,12 +9,28 @@ import { ActivityColumn } from "./components/activity-column";
 import { ActivitySkeletonRow } from "./components/activity-skeleton-row";
 import { DataTable } from "@repo/shadcn-ui/components/data-table";
 
+const initialPaginationData = {
+    data: [],
+    pageInfo: {
+        endCursor: null,
+        hasNextPage: false,
+        total: 0,
+        currentPage: 1,
+        totalPages: 1
+    },
+    overview: {
+        totalAction: 0,
+        totalWeekAction: 0,
+        lastActivity: null
+    }
+}
+
 export default function CredentialActivityTable() {
     const ctx = useMyAccount()
     const [getAuditLogs, { data, loading }] = useLazyQuery(GET_AUDIT_LOGS);
 
     const [pageSize, setPageSize] = useState(AUDIT_LOG_PAGINATION_SIZE);
-    const [paginatedAuditLog, setPaginatedAuditLog] = useState<PaginatedAuditLog>(createInitialPaginatedData());
+    const [paginatedAuditLog, setPaginatedAuditLog] = useState<PaginatedAuditLog>(initialPaginationData);
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
@@ -52,7 +67,7 @@ export default function CredentialActivityTable() {
     }, [cursorHistory, pageSize, getAuditLogs, ctx.auditLog]);
 
     useEffect(() => {
-        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.auditLog ?? createInitialPaginatedData())
+        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.auditLog ?? initialPaginationData)
     }, [ctx.auditLog, data?.getAuditLogs])
 
     return (

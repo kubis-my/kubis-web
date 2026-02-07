@@ -1,15 +1,13 @@
 "use client";
 
-import { IconDeviceDesktop, IconShieldCheck, IconClock } from "@tabler/icons-react"
+import { IconDeviceDesktop, IconClock } from "@tabler/icons-react"
 import {
     Card,
-    CardAction,
     CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
 } from "@/shadcn/components/card"
-import { Badge } from "@/shadcn/components/badge"
 import { useMyAccount } from "./my-account-container";
 
 export function DeviceCard() {
@@ -22,12 +20,6 @@ export function DeviceCard() {
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
                     {ctx.deviceOverviewCard.totalDevices} devices
                 </CardTitle>
-                <CardAction>
-                    <Badge variant={ctx.deviceOverviewCard.allDevicesVerified ? "outline" : "destructive"}>
-                        <IconShieldCheck className="size-4" />
-                        {ctx.deviceOverviewCard.allDevicesVerified ? "Verified" : "Action Required"}
-                    </Badge>
-                </CardAction>
             </CardHeader>
             <CardFooter className="flex-col items-start gap-1.5 text-sm">
                 <div className="line-clamp-1 flex gap-2 font-medium">

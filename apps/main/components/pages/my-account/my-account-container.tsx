@@ -1,10 +1,11 @@
 "use client";
 
-import { AUDIT_LOG_PAGINATION_SIZE } from "@/root/libs/constants";
+import { AUDIT_LOG_PAGINATION_SIZE, COMPANY_PAGINATION_SIZE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { useAuth } from "@/shadcn/providers/auth-provider";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
+import { CompaniesOverview, CompanyPaginationInput, PaginatedCompany } from "@repo/commons/types/account-service-schema.type";
 import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
@@ -60,24 +61,45 @@ export const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLog
                 currentPage
                 totalPages
             }
+            overview {
+                totalAction
+                totalWeekAction
+                lastActivity
+            }
         }
     }
 `
 
-type ActivityOverviewCard = {
-    recentActivityCount: number
-    trendPercentage: number
-    lastActivityTime: string
-    activityThisWeek: number
+interface GetUserCompaniesResponse {
+    getUserCompanies: PaginatedCompany;
 }
 
-type CompanyOverviewCard = {
-    totalCompanies: number;
-    activeCompanies: number;
-    inactiveCompanies: number;
-    recentJoins: number;
-    recentJoinTimeframe: string
+interface GetUserCompaniesVariables {
+    pagination: CompanyPaginationInput;
 }
+
+const GET_USER_COMPANY_OVERVIEW: TypedDocumentNode<GetUserCompaniesResponse, GetUserCompaniesVariables> = gql`
+    query GetUserCompanies($pagination: CompanyPaginationInput!) {
+        getUserCompanies(pagination: $pagination) {
+            overview {
+                activeCompanies
+                totalCompanies
+                deactivatedCompanies
+                companiesDeactivatedThisMonth
+                retentionRate
+                deactivationRate
+                totalBranches
+                newBranchesThisQuarter
+                branchGrowthRate
+                totalStaff
+                newStaffThisQuarter
+                staffGrowthRate
+                averageStaffPerBranch
+                newBranchesThisMonth
+            }
+        }
+    }
+`
 
 type DeviceOverviewCard = {
     totalDevices: number;
@@ -90,8 +112,7 @@ export type CompanyDetailContext = {
     auditLog?: PaginatedAuditLog
     isFetchingAuditLog: boolean
     credentialPublicId: string
-    activityOverviewCard: ActivityOverviewCard
-    companyOverviewCard: CompanyOverviewCard
+    companyOverviewCard?: CompaniesOverview
     deviceOverviewCard: DeviceOverviewCard
 }
 
@@ -102,19 +123,7 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
     const { updateBreadcrumbList } = useDashboard01();
 
     const [auditLog, setAuditLog] = useState<PaginatedAuditLog | undefined>(undefined)
-    const [activityOverviewCard, setActivityOverviewCard] = useState<ActivityOverviewCard>({
-        recentActivityCount: 12,
-        trendPercentage: 23.5,
-        lastActivityTime: "2 hours ago",
-        activityThisWeek: 12,
-    })
-    const [companyOverviewCard, setCompanyOverviewCard] = useState<CompanyOverviewCard>({
-        totalCompanies: 5,
-        activeCompanies: 4,
-        inactiveCompanies: 1,
-        recentJoins: 1,
-        recentJoinTimeframe: "this month",
-    })
+    const [companyOverviewCard, setCompanyOverviewCard] = useState<CompaniesOverview | undefined>()
     const [deviceOverviewCard, setDeviceOverviewCard] = useState<DeviceOverviewCard>({
         totalDevices: 3,
         lastActiveDevice: "MacBook Pro",
@@ -122,11 +131,19 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
         allDevicesVerified: true,
     })
 
-    const { data, loading: isFetchingAuditLog } = useQuery(GET_AUDIT_LOGS, {
+    const auditLogResult = useQuery(GET_AUDIT_LOGS, {
         variables: {
             pagination: {
                 take: AUDIT_LOG_PAGINATION_SIZE,
                 credentialId: auth.authUser?.credential.publicId ?? "-1"
+            }
+        }
+    });
+
+    const companyOverview = useQuery(GET_USER_COMPANY_OVERVIEW, {
+        variables: {
+            pagination: {
+                take: COMPANY_PAGINATION_SIZE
             }
         }
     });
@@ -144,17 +161,24 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
     }, [updateBreadcrumbList]);
 
     useEffect(() => {
-        setAuditLog(data?.getAuditLogs)
-    }, [data])
+        setAuditLog(auditLogResult.data?.getAuditLogs)
+    }, [auditLogResult.data])
+
+    useEffect(() => {
+        if (companyOverview.data?.getUserCompanies?.overview) {
+            setCompanyOverviewCard(companyOverview.data?.getUserCompanies?.overview)
+        } else {
+            setCompanyOverviewCard(undefined)
+        }
+    }, [companyOverview.data])
 
     const contextValue = useMemo(() => ({
         auditLog,
-        isFetchingAuditLog,
+        isFetchingAuditLog: auditLogResult.loading,
         credentialPublicId: auth.authUser?.credential.publicId ?? "-1",
-        activityOverviewCard,
         companyOverviewCard,
-        deviceOverviewCard
-    }), [auditLog, isFetchingAuditLog, auth]);
+        deviceOverviewCard,
+    }), [auditLog, auditLogResult.loading, auth]);
 
     return (
         <MyAccountContext.Provider value={contextValue}>

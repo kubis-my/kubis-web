@@ -81,9 +81,16 @@ export interface AuditLog {
     auditLogMetaData?: Nullable<AuditLogMetaData>;
 }
 
+export interface AuditLogOverview {
+    totalAction: number;
+    totalWeekAction: number;
+    lastActivity?: Nullable<string>;
+}
+
 export interface PaginatedAuditLog {
     data: AuditLog[];
     pageInfo: PageInfo;
+    overview: AuditLogOverview;
 }
 
 export interface IQuery {
