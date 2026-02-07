@@ -41,7 +41,7 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
                 <div className="flex flex-col">
                     <span className="font-medium">{author.branch.name}</span>
                     <span className="font-mono text-xs text-muted-foreground">
-                        {author.branch.code}
+                        {author.branch.code.slice(0, 8)}
                     </span>
                 </div>
             );
