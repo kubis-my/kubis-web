@@ -71,7 +71,7 @@ export default function CredentialActivityTable() {
         setPaginatedAuditLog(data?.getAuditLogs ?? ctx.auditLog ?? initialPaginationData)
     }, [ctx.auditLog, data?.getAuditLogs])
 
-    if (ctx.isFetchingAuditLog) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
+    if (ctx.isLoading) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
 
     return (
         <DataTable

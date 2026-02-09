@@ -8,7 +8,7 @@ import { useQuery } from "@apollo/client/react";
 import { CompaniesOverview, CompanyPaginationInput, PaginatedCompany } from "@repo/commons/types/account-service-schema.type";
 import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
 import { CredentialDeviceOverview, CredentialDevicePaginationInput, PaginatedCredentialDevice } from "@repo/commons/types/auth-service-schema.type";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 
 interface GetAuditLogsResponse {
     getAuditLogs: PaginatedAuditLog;
@@ -131,9 +131,7 @@ const GET_CREDENTIAL_DEVICE_OVERVIEW: TypedDocumentNode<GetCredentialDevicesResp
 
 export type CompanyDetailContext = {
     auditLog?: PaginatedAuditLog
-    isFetchingAuditLog: boolean
-    isFetchingCompanyOverview: boolean
-    isFetchingCredentialDeviceOverview: boolean
+    isLoading: boolean
     credentialPublicId: string
     companyOverviewCard?: CompaniesOverview
     deviceOverviewCard?: CredentialDeviceOverview
@@ -144,10 +142,6 @@ const MyAccountContext = createContext<CompanyDetailContext | undefined>(undefin
 export default function MyAccountContainer({ children }: Readonly<{ children: React.ReactNode; }>) {
     const auth = useAuth();
     const { updateBreadcrumbList } = useDashboard01();
-
-    const [auditLog, setAuditLog] = useState<PaginatedAuditLog | undefined>(undefined)
-    const [companyOverviewCard, setCompanyOverviewCard] = useState<CompaniesOverview | undefined>()
-    const [deviceOverviewCard, setDeviceOverviewCard] = useState<CredentialDeviceOverview | undefined>()
 
     const auditLogResult = useQuery(GET_AUDIT_LOGS, {
         variables: {
@@ -186,35 +180,13 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
         }
     }, [updateBreadcrumbList]);
 
-    useEffect(() => {
-        setAuditLog(auditLogResult.data?.getAuditLogs)
-    }, [auditLogResult.data])
-
-    useEffect(() => {
-        if (companyOverview.data?.getUserCompanies?.overview) {
-            setCompanyOverviewCard(companyOverview.data?.getUserCompanies?.overview)
-        } else {
-            setCompanyOverviewCard(undefined)
-        }
-    }, [companyOverview.data])
-
-    useEffect(() => {
-        if (credentialDeviceOverview.data?.getCredentialDevices?.overview) {
-            setDeviceOverviewCard(credentialDeviceOverview.data?.getCredentialDevices?.overview)
-        } else {
-            setDeviceOverviewCard(undefined)
-        }
-    }, [credentialDeviceOverview.data])
-
     const contextValue = useMemo(() => ({
-        auditLog,
-        isFetchingAuditLog: auditLogResult.loading,
-        isFetchingCompanyOverview: companyOverview.loading,
-        isFetchingCredentialDeviceOverview: credentialDeviceOverview.loading,
+        auditLog: auditLogResult.data?.getAuditLogs,
+        isLoading: auditLogResult.loading || companyOverview.loading || credentialDeviceOverview.loading,
         credentialPublicId: auth.authUser?.credential.publicId ?? "-1",
-        companyOverviewCard,
-        deviceOverviewCard,
-    }), [auditLog, auditLogResult.loading, auth]);
+        companyOverviewCard: companyOverview.data?.getUserCompanies?.overview,
+        deviceOverviewCard: credentialDeviceOverview.data?.getCredentialDevices?.overview,
+    }), [auditLogResult, companyOverview, credentialDeviceOverview, auth]);
 
     return (
         <MyAccountContext.Provider value={contextValue}>

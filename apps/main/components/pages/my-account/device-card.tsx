@@ -18,7 +18,7 @@ export function DeviceCard() {
     const is2FAEnabled =
         ctx.deviceOverviewCard?.isEnable2FA ?? false;
 
-    if (ctx.isFetchingCredentialDeviceOverview) return <Skeleton className="aspect-video rounded-xl" />
+    if (ctx.isLoading) return <Skeleton className="aspect-video rounded-xl" />
 
     return (
         <Card className="@container/card">
