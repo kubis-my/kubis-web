@@ -20,7 +20,8 @@ export const activityTypeConfig = {
     create: { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", label: "Create" },
     update: { variant: "default" as const, className: "bg-blue-500 hover:bg-blue-600", label: "Update" },
     delete: { variant: "destructive" as const, className: "", label: "Delete" },
-    login: { variant: "default" as const, className: "bg-purple-500 hover:bg-purple-600", label: "Login" }
+    login: { variant: "default" as const, className: "bg-purple-500 hover:bg-purple-600", label: "Login" },
+    revoke: { variant: "destructive" as const, className: "", label: "Revoke Access" },
 };
 
 export const PHONE_CODES = [

@@ -19,6 +19,10 @@ export interface CredentialDevicePaginationInput {
     take: number;
 }
 
+export interface RevokeAccessInput {
+    accessTokenPublicId: string;
+}
+
 export interface PageInfo {
     endCursor?: Nullable<number>;
     hasNextPage: boolean;
@@ -67,6 +71,10 @@ export interface PaginatedCredentialDevice {
 export interface IQuery {
     getCredential(publicId: string): Nullable<Credential> | Promise<Nullable<Credential>>;
     getCredentialDevices(pagination: CredentialDevicePaginationInput): PaginatedCredentialDevice | Promise<PaginatedCredentialDevice>;
+}
+
+export interface IMutation {
+    revokeAccess(input: RevokeAccessInput): CredentialDevice | Promise<CredentialDevice>;
 }
 
 export type DateTime = any;

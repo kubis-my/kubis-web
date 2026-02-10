@@ -3,8 +3,9 @@
 import { CREDENTIAL_DEVICE_PAGINATION_SIZE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { gql, TypedDocumentNode } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
-import { CredentialDevicePaginationInput, PaginatedCredentialDevice } from "@repo/commons/types/auth-service-schema.type";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import { CredentialDevice, CredentialDevicePaginationInput, PaginatedCredentialDevice, RevokeAccessInput } from "@repo/commons/types/auth-service-schema.type";
+import { hasGraphQLError } from "@repo/commons/utils/graphql";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +15,14 @@ interface GetCredentialDevicesResponse {
 
 interface GetCredentialDeviceVariables {
     pagination: CredentialDevicePaginationInput;
+}
+
+interface RevokeAccessResponse {
+    revokeAccess: CredentialDevice;
+}
+
+interface RevokeAccessVariables {
+    input: RevokeAccessInput;
 }
 
 const GET_CREDENTIAL_DEVICES: TypedDocumentNode<GetCredentialDevicesResponse, GetCredentialDeviceVariables> = gql`
@@ -55,6 +64,15 @@ const GET_CREDENTIAL_DEVICES: TypedDocumentNode<GetCredentialDevicesResponse, Ge
     }
 `
 
+const REVOKE_ACCESS: TypedDocumentNode<RevokeAccessResponse, RevokeAccessVariables> = gql`
+    mutation RevokeAccess($input: RevokeAccessInput!) {
+        revokeAccess(input: $input) {
+            publicId
+            status
+        }
+    }
+`
+
 export type YourDeviceContextType = {
     paginatedCredentialDevice?: PaginatedCredentialDevice;
     isFetchingCredentialDevice: boolean;
@@ -68,6 +86,8 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
     const { updateBreadcrumbList } = useDashboard01();
 
     const [paginatedCredentialDevice, setPaginatedCredentialDevice] = useState<PaginatedCredentialDevice | undefined>(undefined);
+
+    const client = useApolloClient();
 
     const { data, loading: isFetchingCredentialDevice } = useQuery(GET_CREDENTIAL_DEVICES, {
         variables: {
@@ -91,9 +111,31 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
         };
     }, [updateBreadcrumbList]);
 
-    const signOutDevice = useCallback((id: string) => {
-        toast.success(`Signed out from device`);
-    }, [paginatedCredentialDevice?.data]);
+    const [revokeAccess] = useMutation(REVOKE_ACCESS);
+
+    const signOutDevice = useCallback(async (id: string) => {
+        try {
+            const { data, error } = await revokeAccess({
+                variables: { input: { accessTokenPublicId: id } },
+                errorPolicy: "all",
+            });
+
+            if (hasGraphQLError(error)) {
+                toast.error("Failed to sign out from device", { position: "top-center" });
+                return;
+            }
+
+            if (data) {
+                client.refetchQueries({ include: ["GetCredentialDevices"] });
+                toast.success("Signed out from device", { position: "top-center" });
+                return;
+            }
+
+            toast.error("An unexpected error occurred. Please try again.", { position: "top-center" });
+        } catch {
+            toast.error("Network error occurred. Please check your connection.", { position: "top-center" });
+        }
+    }, [revokeAccess, client]);
 
     const signOutAllOtherDevices = useCallback(() => {
         const count = 1
