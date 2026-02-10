@@ -25,6 +25,10 @@ interface RevokeAccessVariables {
     input: RevokeAccessInput;
 }
 
+interface SignOutAllOtherDevicesResponse {
+    signOutAllOtherDevices: CredentialDevice[];
+}
+
 const GET_CREDENTIAL_DEVICES: TypedDocumentNode<GetCredentialDevicesResponse, GetCredentialDeviceVariables> = gql`
     query GetCredentialDevices($pagination: CredentialDevicePaginationInput!) {
         getCredentialDevices(pagination: $pagination) {
@@ -73,6 +77,15 @@ const REVOKE_ACCESS: TypedDocumentNode<RevokeAccessResponse, RevokeAccessVariabl
     }
 `
 
+const SIGN_OUT_ALL_OTHER_DEVICES: TypedDocumentNode<SignOutAllOtherDevicesResponse> = gql`
+    mutation SignOutAllOtherDevices {
+        signOutAllOtherDevices {
+            publicId
+            status
+        }
+    }
+`
+
 export type YourDeviceContextType = {
     paginatedCredentialDevice?: PaginatedCredentialDevice;
     isFetchingCredentialDevice: boolean;
@@ -112,6 +125,7 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
     }, [updateBreadcrumbList]);
 
     const [revokeAccess] = useMutation(REVOKE_ACCESS);
+    const [signOutAllOtherDevicesMutation] = useMutation(SIGN_OUT_ALL_OTHER_DEVICES);
 
     const signOutDevice = useCallback(async (id: string) => {
         try {
@@ -137,10 +151,29 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
         }
     }, [revokeAccess, client]);
 
-    const signOutAllOtherDevices = useCallback(() => {
-        const count = 1
-        toast.success(`Signed out from ${count} ${count === 1 ? "device" : "devices"}`);
-    }, [paginatedCredentialDevice?.data]);
+    const signOutAllOtherDevices = useCallback(async () => {
+        try {
+            const { data, error } = await signOutAllOtherDevicesMutation({
+                errorPolicy: "all",
+            });
+
+            if (hasGraphQLError(error)) {
+                toast.error("Failed to sign out from other devices", { position: "top-center" });
+                return;
+            }
+
+            if (data) {
+                const count = data.signOutAllOtherDevices.length;
+                client.refetchQueries({ include: ["GetCredentialDevices"] });
+                toast.success(`Signed out from ${count} ${count === 1 ? "device" : "devices"}`, { position: "top-center" });
+                return;
+            }
+
+            toast.error("An unexpected error occurred. Please try again.", { position: "top-center" });
+        } catch {
+            toast.error("Network error occurred. Please check your connection.", { position: "top-center" });
+        }
+    }, [signOutAllOtherDevicesMutation, client]);
 
     const contextValue = useMemo(() => (
         {

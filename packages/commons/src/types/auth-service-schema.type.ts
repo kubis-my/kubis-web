@@ -74,6 +74,7 @@ export interface IQuery {
 }
 
 export interface IMutation {
+    signOutAllOtherDevices(): CredentialDevice[] | Promise<CredentialDevice[]>;
     revokeAccess(input: RevokeAccessInput): CredentialDevice | Promise<CredentialDevice>;
 }
 
