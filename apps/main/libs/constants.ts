@@ -15,6 +15,7 @@ export const BRANCH_EVENT_PAGINATION_SIZE = 10;
 export const AUDIT_LOG_PAGINATION_SIZE = 10;
 export const COMPANY_PAGINATION_SIZE = 10;
 export const CREDENTIAL_DEVICE_PAGINATION_SIZE = 10;
+export const INVITATION_PAGINATION_SIZE = 10;
 
 export const activityTypeConfig = {
     create: { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", label: "Create" },
