@@ -22,6 +22,7 @@ export enum UserAccountStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
   PENDING_INVITATION = "PENDING_INVITATION",
+  REJECT_INVITATION = "REJECT_INVITATION",
   EXPIRED_INVITATION = "EXPIRED_INVITATION"
 }
 
@@ -55,6 +56,12 @@ export interface SearchCredentialsForBranchInput {
 export interface CompanyPaginationInput {
   cursor?: Nullable<number>;
   take: number;
+}
+
+export interface CredentialInvitationPaginationInput {
+  cursor?: Nullable<number>;
+  take: number;
+  status?: Nullable<UserAccountStatus>;
 }
 
 export interface CompleteProfileInput {
@@ -267,6 +274,9 @@ export interface UserAccount {
   position: string;
   status: UserAccountStatus;
   joinedAt?: Nullable<DateTime>;
+  expiredAt?: Nullable<DateTime>;
+  createdAt: DateTime;
+  createdBy: User;
   companyEmployeePublicId: string;
   branchPublicId: string;
   companyEmployee: CompanyEmployee;
@@ -339,12 +349,26 @@ export interface PaginatedBranch {
   pageInfo: PageInfo;
 }
 
+export interface CredentialInvitationOverview {
+  pendingCount: number;
+  acceptedCount: number;
+  rejectedCount: number;
+  expiredCount: number;
+}
+
+export interface PaginatedCredentialInvitation {
+  data: UserAccount[];
+  pageInfo: PageInfo;
+  overview: CredentialInvitationOverview;
+}
+
 export interface IQuery {
   getAuthUser(): User | Promise<User>;
   searchCredentialsForBranch(input: SearchCredentialsForBranchInput): User[] | Promise<User[]>;
   getUserCompanies(pagination: CompanyPaginationInput): PaginatedCompany | Promise<PaginatedCompany>;
   getCompanyDetail(companyPublicId: string): Company | Promise<Company>;
   getCompanyUserAccounts(companyPublicId: string, pagination: UserAccountPaginationInput): PaginatedUserAccount | Promise<PaginatedUserAccount>;
+  getCredentialInvitations(pagination: CredentialInvitationPaginationInput): PaginatedCredentialInvitation | Promise<PaginatedCredentialInvitation>;
   getCompanyEmployees(companyPublicId: string, pagination: CompanyEmployeePaginationInput): PaginatedCompanyEmployee | Promise<PaginatedCompanyEmployee>;
   getCompanyBranches(companyPublicId: string, pagination: BranchPaginationInput): PaginatedBranch | Promise<PaginatedBranch>;
   getBranchDetail(branchPublicId: string): Branch | Promise<Branch>;

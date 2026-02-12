@@ -16,14 +16,12 @@ export function PendingInvitationsCard() {
 
     if (isLoading) return <Skeleton className="aspect-video rounded-xl" />;
 
-    const count = paginatedInvitation.overview.pendingCount;
-
     return (
         <Card className="@container/card">
             <CardHeader>
                 <CardDescription>Pending Invitations</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                    {count} {count === 1 ? "invitation" : "invitations"}
+                    {paginatedInvitation?.overview?.pendingCount ?? 0} {paginatedInvitation?.overview?.pendingCount === 1 ? "invitation" : "invitations"}
                 </CardTitle>
             </CardHeader>
             <CardFooter className="flex flex-col items-start gap-1.5 text-sm">

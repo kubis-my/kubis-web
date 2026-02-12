@@ -70,6 +70,7 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
                 [UserAccountStatus.ACTIVE]: { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", label: "Active" },
                 [UserAccountStatus.INACTIVE]: { variant: "secondary" as const, className: "", label: "Inactive" },
                 [UserAccountStatus.PENDING_INVITATION]: { variant: "default" as const, className: "bg-amber-500 hover:bg-amber-600", label: "Pending Invitation" },
+                [UserAccountStatus.REJECT_INVITATION]: { variant: "destructive" as const, className: "bg-orange-500 hover:bg-orange-600", label: "Rejected" },
                 [UserAccountStatus.EXPIRED_INVITATION]: { variant: "destructive" as const, className: "", label: "Expired Invitation" },
             };
 
