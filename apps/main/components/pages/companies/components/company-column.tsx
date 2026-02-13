@@ -42,7 +42,7 @@ export const CompanyColumn: ColumnDef<Company>[] = [
         accessorKey: "employees",
         header: () => <div className="text-right">Employees</div>,
         cell: ({ row }) => (
-            <div className="text-right font-medium tabular-nums">
+            <div className="text-left font-medium tabular-nums">
                 {row.original.totalActiveEmployee}
             </div>
         ),
@@ -52,21 +52,22 @@ export const CompanyColumn: ColumnDef<Company>[] = [
         accessorKey: "branches",
         header: () => <div className="text-right">Branches</div>,
         cell: ({ row }) => (
-            <div className="text-right font-medium tabular-nums">
+            <div className="text-left font-medium tabular-nums">
                 {row.original.totalActiveBranch}
             </div>
         ),
         size: 100,
     },
-    {
-        accessorKey: "tokenUsage",
-        header: () => <div className="text-right">Token Usage</div>,
-        cell: () => (
-            <div className="text-right tabular-nums">
-                {/* TODO:FIX THIS */}
-                <div className="font-medium">0.00</div>
-            </div>
-        ),
-        size: 130,
-    }
+    // TODO: IMPLEMENT THIS
+    // {
+    //     accessorKey: "tokenUsage",
+    //     header: () => <div className="text-right">Token Usage</div>,
+    //     cell: () => (
+    //         <div className="text-right tabular-nums">
+
+    //             <div className="font-medium">0.00</div>
+    //         </div>
+    //     ),
+    //     size: 130,
+    // }
 ]
