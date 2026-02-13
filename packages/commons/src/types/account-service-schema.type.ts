@@ -381,6 +381,8 @@ export interface IMutation {
   upsertCompanyPhysicalAddress(companyPublicId: string, input: UpsertCompanyPhysicalAddressInput): Company | Promise<Company>;
   upsertCompanyBillingAddress(companyPublicId: string, input: UpsertCompanyBillingAddressInput): Company | Promise<Company>;
   createUserAccounts(input: CreateUserAccountInput): UserAccount[] | Promise<UserAccount[]>;
+  acceptInvitation(userAccountPublicId: string): UserAccount | Promise<UserAccount>;
+  declineInvitation(userAccountPublicId: string): UserAccount | Promise<UserAccount>;
   upsertBranch(input: UpsertBranchInput): Branch | Promise<Branch>;
   upsertBranchPhysicalAddress(branchPublicId: string, input: UpsertBranchPhysicalAddressInput): Branch | Promise<Branch>;
   upsertBranchBillingAddress(branchPublicId: string, input: UpsertBranchBillingAddressInput): Branch | Promise<Branch>;
