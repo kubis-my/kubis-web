@@ -48,51 +48,22 @@ export const navigationList: NavigationItem[] = [
                 isActive: false
             },
         ]
-    },
-    {
-        id: "footer",
-        props: {
-            className: "mt-auto"
-        },
-        items: [
-            {
-                id: "footer-setting",
-                title: "Settings",
-                url: "#",
-                icon: <IconSettings />,
-                isActive: false
-            },
-            {
-                id: "footer-help",
-                title: "Get Help",
-                url: "#",
-                icon: <IconHelp />,
-                isActive: false
-            },
-            {
-                id: "footer-search",
-                title: "Search",
-                url: "#",
-                icon: <IconSearch />,
-                isActive: false
-            },
-        ]
     }
 ];
 
 export const navigationUserItemList: NavUserItem[] = [
     {
-        id: "Billing",
-        name: "Billing",
-        icon: <IconCreditCard />,
+        id: "Settings",
+        name: "Settings",
+        icon: <IconSettings />,
         async action(e) {
 
         },
     },
     {
-        id: "Notifications",
-        name: "Notifications",
-        icon: <IconNotification />,
+        id: "help",
+        name: "Get Help",
+        icon: <IconHelp />,
         async action(e) {
 
         },
