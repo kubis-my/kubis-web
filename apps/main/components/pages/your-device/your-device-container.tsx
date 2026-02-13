@@ -4,10 +4,11 @@ import { CREDENTIAL_DEVICE_PAGINATION_SIZE } from "@/root/libs/constants";
 import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
-import { CredentialDevice, CredentialDevicePaginationInput, PaginatedCredentialDevice, RevokeAccessInput } from "@repo/commons/types/auth-service-schema.type";
+import { CredentialDevice, CredentialDevicePaginationInput, CredentialDeviceStatus, PaginatedCredentialDevice, RevokeAccessInput } from "@repo/commons/types/auth-service-schema.type";
 import { hasGraphQLError } from "@repo/commons/utils/graphql";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import DeviceHeaderAction from "./device-header-action";
 
 interface GetCredentialDevicesResponse {
     getCredentialDevices: PaginatedCredentialDevice;
@@ -96,7 +97,7 @@ export type YourDeviceContextType = {
 const YourDeviceContext = createContext<YourDeviceContextType | undefined>(undefined);
 
 export default function YourDeviceContainer({ children }: Readonly<{ children: React.ReactNode }>) {
-    const { updateBreadcrumbList } = useDashboard01();
+    const { updateBreadcrumbList, updateHeaderAction } = useDashboard01();
 
     const [paginatedCredentialDevice, setPaginatedCredentialDevice] = useState<PaginatedCredentialDevice | undefined>(undefined);
 
@@ -114,16 +115,6 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
         setPaginatedCredentialDevice(data?.getCredentialDevices);
     }, [data]);
 
-    useEffect(() => {
-        updateBreadcrumbList([
-            { name: "Your Devices" },
-        ]);
-
-        return () => {
-            updateBreadcrumbList([]);
-        };
-    }, [updateBreadcrumbList]);
-
     const [revokeAccess] = useMutation(REVOKE_ACCESS);
     const [signOutAllOtherDevicesMutation] = useMutation(SIGN_OUT_ALL_OTHER_DEVICES);
 
@@ -135,13 +126,13 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
             });
 
             if (hasGraphQLError(error)) {
-                toast.error("Failed to sign out from device", { position: "top-center" });
+                toast.error("Failed to revoke device access", { position: "top-center" });
                 return;
             }
 
             if (data) {
                 client.refetchQueries({ include: ["GetCredentialDevices"] });
-                toast.success("Signed out from device", { position: "top-center" });
+                toast.success("Device access revoked", { position: "top-center" });
                 return;
             }
 
@@ -158,14 +149,14 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
             });
 
             if (hasGraphQLError(error)) {
-                toast.error("Failed to sign out from other devices", { position: "top-center" });
+                toast.error("Failed to revoke access from other devices", { position: "top-center" });
                 return;
             }
 
             if (data) {
                 const count = data.signOutAllOtherDevices.length;
                 client.refetchQueries({ include: ["GetCredentialDevices"] });
-                toast.success(`Signed out from ${count} ${count === 1 ? "device" : "devices"}`, { position: "top-center" });
+                toast.success(`Revoked access from ${count} ${count === 1 ? "device" : "devices"}`, { position: "top-center" });
                 return;
             }
 
@@ -174,6 +165,24 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
             toast.error("Network error occurred. Please check your connection.", { position: "top-center" });
         }
     }, [signOutAllOtherDevicesMutation, client]);
+
+    const otherDevicesCount = useMemo(() => {
+        return paginatedCredentialDevice?.data.filter(
+            (d) => d.status !== CredentialDeviceStatus.CURRENT
+        ).length ?? 0;
+    }, [paginatedCredentialDevice?.data]);
+
+    useEffect(() => {
+        updateBreadcrumbList([
+            { name: "Your Devices" },
+        ]);
+        updateHeaderAction(<DeviceHeaderAction otherDevicesCount={otherDevicesCount} onSignOutAll={signOutAllOtherDevices} />);
+
+        return () => {
+            updateBreadcrumbList([]);
+            updateHeaderAction(undefined);
+        };
+    }, [updateBreadcrumbList, updateHeaderAction, otherDevicesCount, signOutAllOtherDevices]);
 
     const contextValue = useMemo(() => (
         {

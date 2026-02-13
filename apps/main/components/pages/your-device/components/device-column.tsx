@@ -39,10 +39,10 @@ const DeviceIcon = ({ type }: { type: string }) => {
 
 function DeviceActionsCell({
     device,
-    onSignOut,
+    onRevokeAccess,
 }: {
     device: CredentialDevice;
-    onSignOut: (id: string) => void;
+    onRevokeAccess: (id: string) => void;
 }) {
     const [open, setOpen] = useState(false);
 
@@ -63,16 +63,16 @@ function DeviceActionsCell({
                     <AlertDialogTrigger asChild>
                         <DropdownMenuItem>
                             <IconLogout className="size-4" />
-                            Sign out
+                            Revoke access
                         </DropdownMenuItem>
                     </AlertDialogTrigger>
                 </DropdownMenuContent>
             </DropdownMenu>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Sign out device</AlertDialogTitle>
+                    <AlertDialogTitle>Revoke device access</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to sign out of this device? This will immediately end its session.
+                        Are you sure you want to revoke access for this device? This will immediately end its session.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -80,11 +80,11 @@ function DeviceActionsCell({
                     <Button
                         variant="destructive"
                         onClick={() => {
-                            onSignOut(device.publicId);
+                            onRevokeAccess(device.publicId);
                             setOpen(false);
                         }}
                     >
-                        Sign out
+                        Revoke access
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>
@@ -203,7 +203,7 @@ export function createDeviceColumns(
             id: "actions",
             header: "",
             cell: ({ row }) => (
-                <DeviceActionsCell device={row.original} onSignOut={signOutDevice} />
+                <DeviceActionsCell device={row.original} onRevokeAccess={signOutDevice} />
             ),
             size: 50,
             enableHiding: false,
