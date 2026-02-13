@@ -238,5 +238,41 @@ export const authClient = {
                 raw: {}
             }
         }
+    },
+    async signOut(props: {
+        refreshToken: string,
+        driver?: AxiosInstance
+    }) {
+        const driver = props.driver || axios
+
+        try {
+            const { data } = await driver.delete(AUTH_SERVICE_ROUTE.AUTH.SIGN_OUT, {
+                headers: {
+                    "Authorization": `Bearer ${props.refreshToken}`,
+                }
+            })
+
+            return {
+                code: 200,
+                raw: data
+            }
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response
+                const data = response.data;
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data
+                    }
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {}
+            }
+        }
     }
 }

@@ -2,6 +2,8 @@
 
 import { NavigationItem, NavUserItem } from "@/shadcn/dashboards/dashboard-01/types"
 import { IconCreditCard, IconHome, IconBuilding, IconLogout, IconNotification, IconIdBadge2, IconDeviceDesktopCheck, IconSettings, IconHelp, IconSearch, IconUserPlus } from "@tabler/icons-react"
+import { getCsrfHeaders } from "@repo/commons/utils/csrf-client"
+import { toast } from "sonner"
 import { ROUTE } from "./constants";
 
 export const APP_NAME = "My Account";
@@ -101,7 +103,17 @@ export const navigationUserItemList: NavUserItem[] = [
         icon: <IconLogout />,
         separator: true,
         async action(e) {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: getCsrfHeaders(),
+                credentials: 'include',
+            });
 
+            if (response.ok) {
+                window.location.href = '/';
+            } else {
+                toast.error("Failed to sign out. Please try again.");
+            }
         },
     },
 ]

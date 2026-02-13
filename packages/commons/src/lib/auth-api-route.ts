@@ -61,8 +61,31 @@ const auth = new Elysia({ prefix: '/api/auth' })
     )
     .post(
         "/logout",
-        async ({ set }) => {
+        async ({ set, request }) => {
             try {
+                const refreshToken = await getRefreshTokenCookie();
+
+                if (refreshToken) {
+                    const forwardedHeaders = createForwardedHeaders(request);
+                    const driver = axios.create({
+                        headers: forwardedHeaders,
+                    });
+
+                    const { code, raw } = await authClient.signOut({
+                        refreshToken,
+                        driver,
+                    });
+
+                    if (code !== 200) {
+                        set.status = code === 400 ? 400 : 500
+
+                        return {
+                            error: 'Sign out failed',
+                            details: raw,
+                        }
+                    }
+                }
+
                 await clearAuthCookies();
                 await clearCsrfTokenCookie();
 

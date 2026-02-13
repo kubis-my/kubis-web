@@ -23,6 +23,7 @@ export const activityTypeConfig = {
     delete: { variant: "destructive" as const, className: "", label: "Delete" },
     login: { variant: "default" as const, className: "bg-purple-500 hover:bg-purple-600", label: "Login" },
     revoke: { variant: "destructive" as const, className: "", label: "Revoke Access" },
+    logout: { variant: "default" as const, className: "bg-orange-500 hover:bg-orange-600", label: "Logout" },
 };
 
 export const PHONE_CODES = [
