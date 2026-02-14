@@ -1,41 +1,55 @@
-"use client";
+'use client';
 
-import { AUDIT_LOG_PAGINATION_SIZE, BRANCH_EVENT_PAGINATION_SIZE, USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
-import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
-import { gql, TypedDocumentNode } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
-import { Branch, BranchEventPaginationInput, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
-import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
-import { hasGraphQLError } from "@repo/commons/utils/graphql";
-import { usePathname, useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-
+import {
+    AUDIT_LOG_PAGINATION_SIZE,
+    BRANCH_EVENT_PAGINATION_SIZE,
+    USER_ACCOUNT_PAGINATION_SIZE,
+} from '@/root/libs/constants';
+import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
+import {
+    Branch,
+    BranchEventPaginationInput,
+    UserAccountPaginationInput,
+} from '@repo/commons/types/account-service-schema.type';
+import {
+    AuditLogPaginationInput,
+    PaginatedAuditLog,
+} from '@repo/commons/types/audit-service-schema.type';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { usePathname, useRouter } from 'next/navigation';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 type ExtendedBranch = Branch & {
-    auditLogs?: PaginatedAuditLog
-}
+    auditLogs?: PaginatedAuditLog;
+};
 
 interface GetBranchDetailResponse {
-    getBranchDetail: ExtendedBranch
+    getBranchDetail: ExtendedBranch;
 }
 
 interface GetBranchDetailVariables {
     companyPublicId: string;
     branchPublicId: string;
-    userAccountPaginationInput: UserAccountPaginationInput
-    branchEventPaginationInput: BranchEventPaginationInput
-    auditLogPaginationInput: AuditLogPaginationInput
+    userAccountPaginationInput: UserAccountPaginationInput;
+    branchEventPaginationInput: BranchEventPaginationInput;
+    auditLogPaginationInput: AuditLogPaginationInput;
 }
 
-export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetBranchDetailVariables> = gql`
+export const GET_COMPANY_DETAIL: TypedDocumentNode<
+    GetBranchDetailResponse,
+    GetBranchDetailVariables
+> = gql`
     query GetBranchDetail(
-        $branchPublicId:String!,$companyPublicId:String!,
-        $userAccountPaginationInput:UserAccountPaginationInput!,
-        $branchEventPaginationInput:BranchEventPaginationInput!,
-        $auditLogPaginationInput:AuditLogPaginationInput!,
-        ){
-        getBranchDetail(branchPublicId:$branchPublicId){ 
+        $branchPublicId: String!
+        $companyPublicId: String!
+        $userAccountPaginationInput: UserAccountPaginationInput!
+        $branchEventPaginationInput: BranchEventPaginationInput!
+        $auditLogPaginationInput: AuditLogPaginationInput!
+    ) {
+        getBranchDetail(branchPublicId: $branchPublicId) {
             publicId
             name
             code
@@ -78,14 +92,17 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                 closeTime
                 isClosed
             }
-            userAccounts (companyPublicId:$companyPublicId,pagination:$userAccountPaginationInput){
+            userAccounts(
+                companyPublicId: $companyPublicId
+                pagination: $userAccountPaginationInput
+            ) {
                 data {
                     publicId
                     status
                     position
                     joinedAt
                     branchPublicId
-                    companyEmployee{
+                    companyEmployee {
                         phoneCode
                         phoneNumber
                         internalId
@@ -107,8 +124,11 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                     currentPage
                     totalPages
                 }
-            },
-            branchEvents (companyPublicId:$companyPublicId,pagination:$branchEventPaginationInput){
+            }
+            branchEvents(
+                companyPublicId: $companyPublicId
+                pagination: $branchEventPaginationInput
+            ) {
                 data {
                     publicId
                     name
@@ -127,7 +147,7 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                     totalPages
                 }
             }
-            auditLogs(pagination:$auditLogPaginationInput){
+            auditLogs(pagination: $auditLogPaginationInput) {
                 data {
                     publicId
                     emittedAt
@@ -141,7 +161,7 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
                             firstName
                             lastName
                             nickname
-                            companyEmployee(companyPublicId:$companyPublicId){
+                            companyEmployee(companyPublicId: $companyPublicId) {
                                 internalId
                             }
                         }
@@ -174,23 +194,24 @@ export const GET_COMPANY_DETAIL: TypedDocumentNode<GetBranchDetailResponse, GetB
             }
         }
     }
-`
+`;
 
 export type CompanyBranchDetailContext = {
-    branch?: ExtendedBranch
-    loading: boolean
-}
+    branch?: ExtendedBranch;
+    loading: boolean;
+};
 
 const CompanyBranchDetailContext = createContext<CompanyBranchDetailContext | undefined>(undefined);
 
-export default function CompanyBranchDetailContainer({ children, companyId, branchId }: Readonly<{ children: React.ReactNode, companyId: string, branchId: string }>) {
+export default function CompanyBranchDetailContainer({
+    children,
+    companyId,
+    branchId,
+}: Readonly<{ children: React.ReactNode; companyId: string; branchId: string }>) {
     const pathName = usePathname();
     const router = useRouter();
     // ['my-account', 'company', '1', 'branch', '101']
-    const companyURL = pathName.split(new RegExp(/\//g))
-        .filter(Boolean)
-        .splice(0, 3)
-        .join("/");
+    const companyURL = pathName.split(new RegExp(/\//g)).filter(Boolean).splice(0, 3).join('/');
 
     const { updateBreadcrumbList } = useDashboard01();
     const { data, loading, error } = useQuery(GET_COMPANY_DETAIL, {
@@ -202,13 +223,13 @@ export default function CompanyBranchDetailContainer({ children, companyId, bran
                 branchPublicId: branchId,
             },
             branchEventPaginationInput: {
-                take: BRANCH_EVENT_PAGINATION_SIZE
+                take: BRANCH_EVENT_PAGINATION_SIZE,
             },
             auditLogPaginationInput: {
-                take: AUDIT_LOG_PAGINATION_SIZE
-            }
-        }
-    })
+                take: AUDIT_LOG_PAGINATION_SIZE,
+            },
+        },
+    });
 
     const [branch, setBranch] = useState<Branch | undefined>(undefined);
 
@@ -216,65 +237,67 @@ export default function CompanyBranchDetailContainer({ children, companyId, bran
         setBranch(data?.getBranchDetail);
 
         if (data?.getBranchDetail) {
-
-
             updateBreadcrumbList([
                 {
                     name: data?.getBranchDetail.company.name,
-                    url: "/" + companyURL
+                    url: '/' + companyURL,
                 },
                 {
-                    name: data?.getBranchDetail.code.slice(0, 8)
+                    name: data?.getBranchDetail.code.slice(0, 8),
                 },
             ]);
 
             return () => {
                 updateBreadcrumbList([]);
-            }
+            };
         }
-    }, [data])
+    }, [data]);
 
     useEffect(() => {
         if (hasGraphQLError(error)) {
-            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0]
+            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
 
             if (gqlError) {
-                const err = gqlError.extensions?.originalError as Record<string, any> | undefined
+                const err = gqlError.extensions?.originalError as Record<string, any> | undefined;
 
                 const id = err?.id;
 
-                if (id === "BRANCH_NOT_FOUND") {
-                    toast.error("Branch not found", {
-                        position: "top-center",
+                if (id === 'BRANCH_NOT_FOUND') {
+                    toast.error('Branch not found', {
+                        position: 'top-center',
                     });
-                    router.replace("/" + companyURL);
+                    router.replace('/' + companyURL);
                     return;
                 }
 
-                toast.error(err?.message || gqlError.message || "Something went wrong", {
-                    position: "top-center",
+                toast.error(err?.message || gqlError.message || 'Something went wrong', {
+                    position: 'top-center',
                 });
             }
         }
-    }, [error, router])
+    }, [error, router]);
 
-    const contextValue = useMemo(() => ({
-        branch,
-        loading
-    }), [branch, loading]);
+    const contextValue = useMemo(
+        () => ({
+            branch,
+            loading,
+        }),
+        [branch, loading],
+    );
 
     return (
         <CompanyBranchDetailContext.Provider value={contextValue}>
             {children}
         </CompanyBranchDetailContext.Provider>
-    )
+    );
 }
-
 
 export function useCompanyBranchDetail() {
     const context = useContext(CompanyBranchDetailContext);
     if (context === undefined) {
-        throw new Error('useCompanyBranchDetail must be used within an CompanyBranchDetailProvider');
+        throw new Error(
+            'useCompanyBranchDetail must be used within an CompanyBranchDetailProvider',
+        );
     }
     return context;
 }

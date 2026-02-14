@@ -1,4 +1,4 @@
-import { AuditLogMetaDataEntry } from "@repo/commons/types/audit-service-schema.type";
+import { AuditLogMetaDataEntry } from '@repo/commons/types/audit-service-schema.type';
 
 export interface DiffEntryData {
     key: string;
@@ -10,12 +10,8 @@ export function buildDiffEntries(
     before?: AuditLogMetaDataEntry[] | null,
     after?: AuditLogMetaDataEntry[] | null,
 ): DiffEntryData[] {
-    const beforeMap = new Map(
-        (before ?? []).map((e) => [e.key, e.value]),
-    );
-    const afterMap = new Map(
-        (after ?? []).map((e) => [e.key, e.value]),
-    );
+    const beforeMap = new Map((before ?? []).map((e) => [e.key, e.value]));
+    const afterMap = new Map((after ?? []).map((e) => [e.key, e.value]));
 
     const allKeys = new Set([...beforeMap.keys(), ...afterMap.keys()]);
     const entries: DiffEntryData[] = [];

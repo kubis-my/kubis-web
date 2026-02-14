@@ -1,15 +1,9 @@
-"use client";
+'use client';
 
-import { IconCheck } from "@tabler/icons-react";
-import {
-    Card,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/shadcn/components/card";
-import { Skeleton } from "@/shadcn/components/skeleton";
-import { useInvitation } from "./invitation-container";
+import { IconCheck } from '@tabler/icons-react';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/card';
+import { Skeleton } from '@/shadcn/components/skeleton';
+import { useInvitation } from './invitation-container';
 
 export function AcceptedInvitationsCard() {
     const { paginatedInvitation, isLoading } = useInvitation();
@@ -21,7 +15,10 @@ export function AcceptedInvitationsCard() {
             <CardHeader>
                 <CardDescription>Accepted Invitations</CardDescription>
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                    {paginatedInvitation?.overview?.acceptedCount ?? 0} {paginatedInvitation?.overview?.acceptedCount === 1 ? "invitation" : "invitations"}
+                    {paginatedInvitation?.overview?.acceptedCount ?? 0}{' '}
+                    {paginatedInvitation?.overview?.acceptedCount === 1
+                        ? 'invitation'
+                        : 'invitations'}
                 </CardTitle>
             </CardHeader>
             <CardFooter className="flex flex-col items-start gap-1.5 text-sm">
@@ -29,9 +26,7 @@ export function AcceptedInvitationsCard() {
                     <IconCheck className="size-4" />
                     Successfully joined
                 </div>
-                <div className="text-muted-foreground">
-                    Active memberships
-                </div>
+                <div className="text-muted-foreground">Active memberships</div>
             </CardFooter>
         </Card>
     );

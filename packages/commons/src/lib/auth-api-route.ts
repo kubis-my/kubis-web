@@ -1,7 +1,15 @@
-import { Elysia, t } from 'elysia'
+import { Elysia, t } from 'elysia';
 import axios from 'axios';
 import { authClient } from './auth-client';
-import { clearAuthCookies, clearCsrfTokenCookie, getAccessTokenCookie, getRefreshTokenCookie, setAccessTokenCookie, setAuthCookies, setCsrfTokenCookie } from '../utils/cookie-helpers';
+import {
+    clearAuthCookies,
+    clearCsrfTokenCookie,
+    getAccessTokenCookie,
+    getRefreshTokenCookie,
+    setAccessTokenCookie,
+    setAuthCookies,
+    setCsrfTokenCookie,
+} from '../utils/cookie-helpers';
 import { generateCsrfToken } from '../utils/csrf';
 import { csrfProtection } from './csrf-plugin';
 import { createForwardedHeaders } from '../utils/client-ip';
@@ -32,22 +40,22 @@ const auth = new Elysia({ prefix: '/api/auth' })
                     return {
                         success: true,
                         message: 'Tokens exchanged and stored successfully',
-                    }
+                    };
                 }
 
-                set.status = code === 400 ? 400 : 500
+                set.status = code === 400 ? 400 : 500;
 
                 return {
                     error: 'Token exchange failed',
                     details: raw,
-                }
+                };
             } catch (e) {
-                set.status = 500
+                set.status = 500;
 
                 return {
                     error: 'Internal server error',
-                    details: (e as Error).message
-                }
+                    details: (e as Error).message,
+                };
             }
         },
         {
@@ -57,185 +65,173 @@ const auth = new Elysia({ prefix: '/api/auth' })
                 redirectUri: t.String(),
                 codeVerifier: t.String(),
             }),
-        }
+        },
     )
-    .post(
-        "/logout",
-        async ({ set, request }) => {
-            try {
-                const refreshToken = await getRefreshTokenCookie();
+    .post('/logout', async ({ set, request }) => {
+        try {
+            const refreshToken = await getRefreshTokenCookie();
 
-                if (refreshToken) {
-                    const forwardedHeaders = createForwardedHeaders(request);
-                    const driver = axios.create({
-                        headers: forwardedHeaders,
-                    });
-
-                    const { code, raw } = await authClient.signOut({
-                        refreshToken,
-                        driver,
-                    });
-
-                    if (code !== 200) {
-                        set.status = code === 400 ? 400 : 500
-
-                        return {
-                            error: 'Sign out failed',
-                            details: raw,
-                        }
-                    }
-                }
-
-                await clearAuthCookies();
-                await clearCsrfTokenCookie();
-
-                return {
-                    success: true,
-                    message: 'Logged out successfully',
-                }
-            } catch (e) {
-                set.status = 500
-
-                return {
-                    error: 'Internal server error',
-                    details: (e as Error).message
-                }
-            }
-        }
-    )
-    .post(
-        "refresh",
-        async ({ set, request }) => {
-            try {
-                const refreshToken = await getRefreshTokenCookie() ?? "invalid-token";
+            if (refreshToken) {
                 const forwardedHeaders = createForwardedHeaders(request);
                 const driver = axios.create({
                     headers: forwardedHeaders,
                 });
 
-                const { code, raw } = await authClient.refresh({
+                const { code, raw } = await authClient.signOut({
                     refreshToken,
                     driver,
                 });
 
-                if (code === 200 && raw.token) {
-                    if (raw.refreshToken) {
-                        await setAuthCookies(raw.token, raw.refreshToken);
-                    } else {
-                        await setAccessTokenCookie(raw.token);
-                    }
-
-                    // Rotate CSRF token on refresh
-                    const csrfToken = generateCsrfToken();
-                    await setCsrfTokenCookie(csrfToken);
+                if (code !== 200) {
+                    set.status = code === 400 ? 400 : 500;
 
                     return {
-                        success: true,
-                        message: 'Tokens refreshed successfully',
-                    }
-                }
-
-                await clearAuthCookies();
-
-                set.status = code === 400 ? 400 : 500
-
-                return {
-                    error: 'Token refresh failed',
-                    details: raw,
-                }
-            } catch (e) {
-                set.status = 500
-
-                return {
-                    error: 'Internal server error',
-                    details: (e as Error).message
+                        error: 'Sign out failed',
+                        details: raw,
+                    };
                 }
             }
+
+            await clearAuthCookies();
+            await clearCsrfTokenCookie();
+
+            return {
+                success: true,
+                message: 'Logged out successfully',
+            };
+        } catch (e) {
+            set.status = 500;
+
+            return {
+                error: 'Internal server error',
+                details: (e as Error).message,
+            };
         }
-    )
-    .get(
-        "session",
-        async ({ set, request }) => {
-            try {
-                const accessToken = await getAccessTokenCookie() ?? "invalid-token";
-                const forwardedHeaders = createForwardedHeaders(request);
-                const driver = axios.create({
-                    headers: forwardedHeaders,
-                });
+    })
+    .post('refresh', async ({ set, request }) => {
+        try {
+            const refreshToken = (await getRefreshTokenCookie()) ?? 'invalid-token';
+            const forwardedHeaders = createForwardedHeaders(request);
+            const driver = axios.create({
+                headers: forwardedHeaders,
+            });
 
-                const { code, raw } = await authClient.validate({
-                    token: accessToken,
-                    driver,
-                });
+            const { code, raw } = await authClient.refresh({
+                refreshToken,
+                driver,
+            });
 
-                if (code === 200 && raw.valid) {
-                    return {
-                        authenticated: true,
-                        message: 'Session valid',
-                    }
+            if (code === 200 && raw.token) {
+                if (raw.refreshToken) {
+                    await setAuthCookies(raw.token, raw.refreshToken);
+                } else {
+                    await setAccessTokenCookie(raw.token);
                 }
+
+                // Rotate CSRF token on refresh
+                const csrfToken = generateCsrfToken();
+                await setCsrfTokenCookie(csrfToken);
 
                 return {
-                    authenticated: false,
-                    message: 'Invalid or expired token',
-                }
-            } catch (e) {
-                set.status = 500
-
-                return {
-                    error: 'Internal server error',
-                    details: (e as Error).message
-                }
+                    success: true,
+                    message: 'Tokens refreshed successfully',
+                };
             }
+
+            await clearAuthCookies();
+
+            set.status = code === 400 ? 400 : 500;
+
+            return {
+                error: 'Token refresh failed',
+                details: raw,
+            };
+        } catch (e) {
+            set.status = 500;
+
+            return {
+                error: 'Internal server error',
+                details: (e as Error).message,
+            };
         }
-    )
-    .get(
-        "socket-token",
-        async ({ set, request }) => {
-            try {
-                const accessToken = await getAccessTokenCookie();
+    })
+    .get('session', async ({ set, request }) => {
+        try {
+            const accessToken = (await getAccessTokenCookie()) ?? 'invalid-token';
+            const forwardedHeaders = createForwardedHeaders(request);
+            const driver = axios.create({
+                headers: forwardedHeaders,
+            });
 
-                if (!accessToken) {
-                    set.status = 401;
-                    return {
-                        error: 'Not authenticated',
-                        token: null,
-                    }
-                }
+            const { code, raw } = await authClient.validate({
+                token: accessToken,
+                driver,
+            });
 
-                const forwardedHeaders = createForwardedHeaders(request);
-                const driver = axios.create({
-                    headers: forwardedHeaders,
-                });
+            if (code === 200 && raw.valid) {
+                return {
+                    authenticated: true,
+                    message: 'Session valid',
+                };
+            }
 
-                // Validate the token before returning it
-                const { code, raw } = await authClient.validate({
-                    token: accessToken,
-                    driver,
-                });
+            return {
+                authenticated: false,
+                message: 'Invalid or expired token',
+            };
+        } catch (e) {
+            set.status = 500;
 
-                if (code === 200 && raw.valid) {
-                    return {
-                        token: accessToken,
-                    }
-                }
+            return {
+                error: 'Internal server error',
+                details: (e as Error).message,
+            };
+        }
+    })
+    .get('socket-token', async ({ set, request }) => {
+        try {
+            const accessToken = await getAccessTokenCookie();
 
+            if (!accessToken) {
                 set.status = 401;
                 return {
-                    error: 'Invalid or expired token',
+                    error: 'Not authenticated',
                     token: null,
-                }
-            } catch (e) {
-                set.status = 500
-
-                return {
-                    error: 'Internal server error',
-                    details: (e as Error).message,
-                    token: null,
-                }
+                };
             }
-        }
-    )
 
-export const GET = auth.fetch
-export const POST = auth.fetch
+            const forwardedHeaders = createForwardedHeaders(request);
+            const driver = axios.create({
+                headers: forwardedHeaders,
+            });
+
+            // Validate the token before returning it
+            const { code, raw } = await authClient.validate({
+                token: accessToken,
+                driver,
+            });
+
+            if (code === 200 && raw.valid) {
+                return {
+                    token: accessToken,
+                };
+            }
+
+            set.status = 401;
+            return {
+                error: 'Invalid or expired token',
+                token: null,
+            };
+        } catch (e) {
+            set.status = 500;
+
+            return {
+                error: 'Internal server error',
+                details: (e as Error).message,
+                token: null,
+            };
+        }
+    });
+
+export const GET = auth.fetch;
+export const POST = auth.fetch;

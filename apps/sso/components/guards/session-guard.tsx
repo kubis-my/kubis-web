@@ -1,9 +1,8 @@
-"use client";
+'use client';
 
-import { MAIN_APP_BASE_URL } from "@repo/commons/constant/base";
-import Loader from "@repo/shadcn-ui/custom-components/loader";
-import { useEffect, useState } from "react";
-
+import { MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
+import Loader from '@repo/shadcn-ui/custom-components/loader';
+import { useEffect, useState } from 'react';
 
 export default function SessionGuard({ children }: { children: React.ReactNode }) {
     const [isAuthenticating, setIsAuthenticating] = useState(true);
@@ -19,7 +18,7 @@ export default function SessionGuard({ children }: { children: React.ReactNode }
                 const data = await response.json();
 
                 if (response.ok && data.authenticated === false) {
-                    window.location.replace(MAIN_APP_BASE_URL)
+                    window.location.replace(MAIN_APP_BASE_URL);
                     return;
                 }
             } catch (error) {
@@ -27,12 +26,12 @@ export default function SessionGuard({ children }: { children: React.ReactNode }
             }
 
             setIsAuthenticating(false);
-        }
+        };
 
-        guard()
-    }, [])
+        guard();
+    }, []);
 
-    if (isAuthenticating) return <Loader />
+    if (isAuthenticating) return <Loader />;
 
-    return children
+    return children;
 }

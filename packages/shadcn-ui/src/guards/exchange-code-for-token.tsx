@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import Loader from '../custom-components/loader';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 
@@ -18,7 +18,7 @@ export default function ExchangeCodeForToken({ children }: { children: React.Rea
         const pkce_verifier = sessionStorage.getItem('pkce_verifier');
 
         return hashParams.get('verifier') ?? pkce_verifier ?? undefined;
-    }
+    };
 
     useEffect(() => {
         if (hasRun.current) return;
@@ -27,9 +27,9 @@ export default function ExchangeCodeForToken({ children }: { children: React.Rea
         const exchangeHandler = async () => {
             const hashParams = new URLSearchParams(window.location.hash.slice(1));
             const codeVerifier = getCodeVerifier(hashParams);
-            const code = params.get("code");
-            const clientId = params.get("clientId")
-            const redirectUri = params.get("redirectUri")
+            const code = params.get('code');
+            const clientId = params.get('clientId');
+            const redirectUri = params.get('redirectUri');
 
             if (!codeVerifier || !code || !clientId || !redirectUri) {
                 setInitial(false);
@@ -71,11 +71,10 @@ export default function ExchangeCodeForToken({ children }: { children: React.Rea
             setIsChecking(false);
         };
 
-        exchangeHandler()
-    }, [params, pathname, router])
+        exchangeHandler();
+    }, [params, pathname, router]);
 
+    if (isInitial || isChecking) return <Loader />;
 
-    if (isInitial || isChecking) return <Loader />
-
-    return children
+    return children;
 }

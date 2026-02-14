@@ -9,11 +9,13 @@ Kubis Web is a monorepo workspace application built with Turborepo. It consists 
 ## Development Commands
 
 ### Setup
+
 ```bash
 pnpm install              # Install all dependencies
 ```
 
 ### Development
+
 ```bash
 pnpm dev                  # Run all apps in development mode
 turbo dev --filter=main   # Run only main app (localhost:3001)
@@ -21,6 +23,7 @@ turbo dev --filter=sso    # Run only SSO app (localhost:3000)
 ```
 
 ### Build & Quality
+
 ```bash
 pnpm build                # Build all apps
 turbo build --filter=main # Build specific app
@@ -57,26 +60,27 @@ The project implements **httpOnly cookie-based authentication** using OAuth 2.0 
 #### Key Components
 
 - **API Route Handlers**: Both apps use Elysia.js for API routes
-  - `/api/auth` - Authentication endpoints (exchange, refresh, logout, session)
-  - `/api/graphql` - GraphQL proxy with automatic token injection
+    - `/api/auth` - Authentication endpoints (exchange, refresh, logout, session)
+    - `/api/graphql` - GraphQL proxy with automatic token injection
 
 - **Cookie Management** (`packages/commons/src/utils/cookie-helpers.ts`):
-  - Access tokens: 30 minutes (httpOnly, secure in production)
-  - Refresh tokens: 7 days (httpOnly, secure in production)
-  - All cookies use `sameSite: 'strict'` for security
+    - Access tokens: 30 minutes (httpOnly, secure in production)
+    - Refresh tokens: 7 days (httpOnly, secure in production)
+    - All cookies use `sameSite: 'strict'` for security
 
 - **Auth Client** (`packages/commons/src/lib/auth-client.ts`):
-  - Handles OAuth code exchange, token refresh, and validation
-  - Used by API routes to communicate with auth backend
+    - Handles OAuth code exchange, token refresh, and validation
+    - Used by API routes to communicate with auth backend
 
 - **Apollo Client** (`packages/commons/src/lib/apollo-client.ts`):
-  - Uses `/api/graphql` proxy endpoint for authenticated requests
-  - Tokens handled server-side (not exposed to client)
-  - Cache management utilities included
+    - Uses `/api/graphql` proxy endpoint for authenticated requests
+    - Tokens handled server-side (not exposed to client)
+    - Cache management utilities included
 
 ### GraphQL Integration
 
 Both apps use Apollo Client for GraphQL queries. The authentication flow:
+
 1. Client makes GraphQL request to `/api/graphql`
 2. API route extracts access token from httpOnly cookie
 3. API route forwards request to backend with `Authorization: Bearer {token}` header
@@ -85,6 +89,7 @@ Both apps use Apollo Client for GraphQL queries. The authentication flow:
 ### Environment Variables
 
 Required environment variables (see `packages/commons/src/constant/env.ts`):
+
 - `NEXT_PUBLIC_AUTH_URL` - OAuth provider URL
 - `NEXT_PUBLIC_MAIN_APP_BASE_URL` - Main app URL
 - `NEXT_PUBLIC_SSO_APP_BASE_URL` - SSO app URL
@@ -96,6 +101,7 @@ Example values in `apps/main/.env` and `apps/sso/.env`
 ### Package Exports
 
 The `@repo/commons` package exports modules via path-based exports:
+
 ```typescript
 import { ... } from "@repo/commons/lib/apollo-client"
 import { ... } from "@repo/commons/utils/cookie-helpers"
@@ -106,6 +112,7 @@ import { ... } from "@repo/commons/types/..."
 ### Next.js Configuration
 
 Both apps use:
+
 - Turbopack for faster builds and dev mode
 - Monorepo root configuration (`turbopack.root` set to `../../`)
 - Custom headers via `getDefaultHeaders()` from commons
@@ -114,24 +121,29 @@ Both apps use:
 ## Key Patterns
 
 ### API Routes
+
 Both apps use Elysia.js (not Next.js route handlers) for API routes. Example pattern:
+
 ```typescript
 // apps/{app}/app/api/auth/[[...slugs]]/route.ts
-export * from "@repo/commons/lib/auth-api-route";
+export * from '@repo/commons/lib/auth-api-route';
 ```
 
 The actual implementation is in `packages/commons/src/lib/*-api-route.ts`
 
 ### Authentication Guards
+
 The main app wraps the application with:
+
 - `ExchangeCodeForToken` - Handles OAuth code exchange on callback
 - `ApolloProvider` - Provides Apollo Client instance
 - `AuthProvider` - Manages auth state
 
 ### Component Organization
+
 - `apps/main/components/` - App-specific components
-  - `container/` - Layout containers
-  - `pages/` - Page-level components
+    - `container/` - Layout containers
+    - `pages/` - Page-level components
 - `packages/shadcn-ui/` - Shared UI components built with shadcn/ui
 
 ## Technology Stack

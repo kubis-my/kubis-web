@@ -3,11 +3,11 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Loader from '../custom-components/loader';
-import { hasGraphQLError } from "@repo/commons/utils/graphql"
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { User } from '@repo/commons/types/account-service-schema.type';
 import { useQuery } from '@apollo/client/react';
-import { getCsrfHeaders } from "@repo/commons/utils/csrf-client";
+import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 
 const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
     query GetAuthUser {
@@ -22,7 +22,7 @@ const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
                 publicId
                 name
             }
-            credential{
+            credential {
                 publicId
                 email
                 username
@@ -33,13 +33,13 @@ const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    authUser: User | undefined
+    authUser: User | undefined;
     isLoading: boolean;
-    hasIncompleteProfile: boolean
+    hasIncompleteProfile: boolean;
     logout: () => Promise<void>;
-    authorize: () => Promise<void>
-    updateAuthUser: (user: User | undefined) => void
-    profileSetupCompleted: () => void
+    authorize: () => Promise<void>;
+    updateAuthUser: (user: User | undefined) => void;
+    profileSetupCompleted: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,7 +53,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     // Fetch user data from GraphQL only when authenticated
-    const { data: userData, error: userError } = useQuery(GET_AUTH_USER, { skip: !isAuthenticated });
+    const { data: userData, error: userError } = useQuery(GET_AUTH_USER, {
+        skip: !isAuthenticated,
+    });
 
     // Track ongoing authorization to prevent race conditions
     const authorizationPromiseRef = useRef<Promise<void> | null>(null);
@@ -90,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 if (refreshResponse.ok) {
                     // Small delay to ensure cookies are set
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await new Promise((resolve) => setTimeout(resolve, 500));
 
                     // Validate session via API endpoint
                     const sessionResponse = await fetch('/api/auth/session', {
@@ -127,12 +129,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const updateAuthUser = (user: User | undefined) => {
-        setAuthUser(user)
-    }
+        setAuthUser(user);
+    };
 
     const profileSetupCompleted = () => {
-        setHasIncompleteProfile(false)
-    }
+        setHasIncompleteProfile(false);
+    };
 
     // Set user data from GraphQL when available
     useEffect(() => {
@@ -147,13 +149,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (hasGraphQLError(userError)) {
             // Check both 'errors' and 'graphQLErrors' properties
-            const gqlError = (userError.errors?.[0] || userError.graphQLErrors?.[0]);
+            const gqlError = userError.errors?.[0] || userError.graphQLErrors?.[0];
 
             if (gqlError) {
                 const errorCode = gqlError.extensions?.code as string | undefined;
 
                 if (errorCode === 'AUTH_USER_NOT_FOUND') {
-                    setHasIncompleteProfile(true)
+                    setHasIncompleteProfile(true);
                 }
             }
         }
@@ -197,13 +199,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const initAuth = async () => {
             // Check if we just completed token exchange (SSR-safe)
-            const justExchanged = typeof window !== 'undefined'
-                ? sessionStorage.getItem('token_exchange_complete')
-                : null;
+            const justExchanged =
+                typeof window !== 'undefined'
+                    ? sessionStorage.getItem('token_exchange_complete')
+                    : null;
 
             if (justExchanged) {
                 // Wait for token storage to complete after OAuth exchange
-                await new Promise(resolve => setTimeout(resolve, 500));
+                await new Promise((resolve) => setTimeout(resolve, 500));
                 if (typeof window !== 'undefined') {
                     sessionStorage.removeItem('token_exchange_complete');
                 }
@@ -233,11 +236,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 clearTimeout(timeoutId);
             }
         };
-    }, [authorize])
+    }, [authorize]);
 
     return (
-        <AuthContext.Provider value={
-            {
+        <AuthContext.Provider
+            value={{
                 isAuthenticated,
                 isLoading,
                 authUser,
@@ -245,9 +248,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 logout,
                 authorize,
                 updateAuthUser,
-                profileSetupCompleted
-            }
-        }>
+                profileSetupCompleted,
+            }}
+        >
             {isLoading ? <Loader /> : children}
         </AuthContext.Provider>
     );

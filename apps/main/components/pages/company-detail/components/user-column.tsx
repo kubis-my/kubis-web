@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { CompanyEmployee } from "@repo/commons/types/account-service-schema.type";
-import { Credential } from "@repo/commons/types/auth-service-schema.type";
-import { ColumnDef } from "@tanstack/react-table";
+import { CompanyEmployee } from '@repo/commons/types/account-service-schema.type';
+import { Credential } from '@repo/commons/types/auth-service-schema.type';
+import { ColumnDef } from '@tanstack/react-table';
 
 export const UserColumn: ColumnDef<CompanyEmployee>[] = [
     {
-        accessorKey: "code",
-        header: "ID",
+        accessorKey: 'code',
+        header: 'ID',
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm font-medium">
-                    #{row.original.internalId.toString().padStart(5, "0")}
+                    #{row.original.internalId.toString().padStart(5, '0')}
                 </div>
             );
         },
@@ -19,8 +19,8 @@ export const UserColumn: ColumnDef<CompanyEmployee>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "fullName",
-        header: "Full Name",
+        accessorKey: 'fullName',
+        header: 'Full Name',
         cell: ({ row }) => {
             const fullName = `${row.original.user.firstName} ${row.original.user.lastName}`;
             return (
@@ -33,38 +33,32 @@ export const UserColumn: ColumnDef<CompanyEmployee>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "nickname",
-        header: "Nick Name",
+        accessorKey: 'nickname',
+        header: 'Nick Name',
         cell: ({ row }) => {
-            return (
-                <div className="text-sm">
-                    {row.original.user.nickname ?? "-"}
-                </div>
-            );
+            return <div className="text-sm">{row.original.user.nickname ?? '-'}</div>;
         },
         size: 150,
     },
     {
-        accessorKey: "email",
-        header: "Email",
+        accessorKey: 'email',
+        header: 'Email',
         cell: ({ row }) => {
-            const credential = row.original.user.credential as Credential
+            const credential = row.original.user.credential as Credential;
 
-            return (
-                <div className="text-sm">
-                    {credential?.email ?? "-"}
-                </div>
-            );
+            return <div className="text-sm">{credential?.email ?? '-'}</div>;
         },
         size: 200,
     },
     {
-        accessorKey: "phone",
-        header: "Phone",
+        accessorKey: 'phone',
+        header: 'Phone',
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm">
-                    {row.original.phoneCode && row.original.phoneNumber ? `${row.original.phoneCode} ${row.original.phoneNumber}` : "-"}
+                    {row.original.phoneCode && row.original.phoneNumber
+                        ? `${row.original.phoneCode} ${row.original.phoneNumber}`
+                        : '-'}
                 </div>
             );
         },

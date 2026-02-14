@@ -1,8 +1,8 @@
-import { ActivityCard } from "@/root/components/pages/my-account/activity-card";
-import { CompaniesCard } from "@/root/components/pages/my-account/companies-card";
-import CredentialActivityTable from "@/root/components/pages/my-account/credential-activity-table";
-import { DeviceCard } from "@/root/components/pages/my-account/device-card";
-import MyAccountContainer from "@/root/components/pages/my-account/my-account-container";
+import { ActivityCard } from '@/root/components/pages/my-account/activity-card';
+import { CompaniesCard } from '@/root/components/pages/my-account/companies-card';
+import CredentialActivityTable from '@/root/components/pages/my-account/credential-activity-table';
+import { DeviceCard } from '@/root/components/pages/my-account/device-card';
+import MyAccountContainer from '@/root/components/pages/my-account/my-account-container';
 
 export default function page() {
     return (
@@ -17,5 +17,5 @@ export default function page() {
                 <CredentialActivityTable />
             </div>
         </MyAccountContainer>
-    )
+    );
 }

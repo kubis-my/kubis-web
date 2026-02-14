@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export function InfoRow({
     icon: Icon,
@@ -11,11 +11,11 @@ export function InfoRow({
 }) {
     return (
         <div className="flex items-center gap-3 text-sm">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted">
-                <Icon className="size-3.5 text-muted-foreground" />
+            <div className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-md">
+                <Icon className="text-muted-foreground size-3.5" />
             </div>
             <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">{label}</p>
+                <p className="text-muted-foreground text-xs">{label}</p>
                 <div className="truncate font-medium">{children}</div>
             </div>
         </div>

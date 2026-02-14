@@ -1,31 +1,30 @@
-"use client";
+'use client';
 
-import { Button } from "@repo/shadcn-ui/components/button"
-import { CardContent } from "@repo/shadcn-ui/components/card"
-import { Input } from "@repo/shadcn-ui/components/input"
-import { Label } from "@repo/shadcn-ui/components/label"
-import { GalleryVerticalEnd, Loader2Icon, } from "lucide-react"
-import Image from "next/image";
-import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
-import ShowErrorText from "@repo/shadcn-ui/custom-components/show-error-text";
-import { errorDict } from "@/root/libs/dict/error-dict";
-import { toast } from "sonner";
-import { MAIN_CLIENT_ID } from "@repo/commons/constant/client-id";
-import { MAIN_APP_BASE_URL } from "@repo/commons/constant/base";
-import { useSearchParams } from "next/navigation";
-import { getCsrfHeaders } from "@repo/commons/utils/csrf-client";
-
+import { Button } from '@repo/shadcn-ui/components/button';
+import { CardContent } from '@repo/shadcn-ui/components/card';
+import { Input } from '@repo/shadcn-ui/components/input';
+import { Label } from '@repo/shadcn-ui/components/label';
+import { GalleryVerticalEnd, Loader2Icon } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+import ShowErrorText from '@repo/shadcn-ui/custom-components/show-error-text';
+import { errorDict } from '@/root/libs/dict/error-dict';
+import { toast } from 'sonner';
+import { MAIN_CLIENT_ID } from '@repo/commons/constant/client-id';
+import { MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
+import { useSearchParams } from 'next/navigation';
+import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 
 export default function SignInWithIdentifierForm() {
-    const [identifier, setIdentifier] = useState("");
-    const [password, setPassword] = useState("");
-    const [clientId, setClientId] = useState("");
-    const [redirectUri, setRedirectUri] = useState("");
-    const [formValidation, setFormValidation] = useState<Record<string, string[]>>({})
+    const [identifier, setIdentifier] = useState('');
+    const [password, setPassword] = useState('');
+    const [clientId, setClientId] = useState('');
+    const [redirectUri, setRedirectUri] = useState('');
+    const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const [isSignIn, setIsSignIn] = useState(false);
 
-    const param = useSearchParams()
+    const param = useSearchParams();
 
     const signInHandler = useCallback(async () => {
         setFormValidation({});
@@ -60,63 +59,56 @@ export default function SignInWithIdentifierForm() {
 
                 window.location.href = finalRedirectUrl.toString();
             } else if (response.status === 400 && data.details) {
-                setFormValidation(data.details)
+                setFormValidation(data.details);
             } else if (!response.ok && data.details?.id) {
-                const statusKey = data.details?.id || "-1";
+                const statusKey = data.details?.id || '-1';
 
                 if (statusKey in errorDict) {
-                    toast.error(errorDict[statusKey as keyof typeof errorDict],
-                        {
-                            position: "top-center"
-                        }
-                    );
+                    toast.error(errorDict[statusKey as keyof typeof errorDict], {
+                        position: 'top-center',
+                    });
                 } else {
                     toast.error(
-                        "An unexpected error occurred. Please contact our support team for assistance.",
+                        'An unexpected error occurred. Please contact our support team for assistance.',
                         {
-                            position: "top-center",
-                        }
+                            position: 'top-center',
+                        },
                     );
                 }
             } else {
                 toast.error(
-                    "An unexpected error occurred. Please contact our support team for assistance.",
+                    'An unexpected error occurred. Please contact our support team for assistance.',
                     {
-                        position: "top-center",
-                    }
+                        position: 'top-center',
+                    },
                 );
             }
         } catch (error) {
             console.error('Sign in error:', error);
             toast.error(
-                "An unexpected error occurred. Please contact our support team for assistance.",
+                'An unexpected error occurred. Please contact our support team for assistance.',
                 {
-                    position: "top-center",
-                }
+                    position: 'top-center',
+                },
             );
         }
 
         setIsSignIn(false);
-    }, [
-        identifier,
-        password,
-        clientId,
-        redirectUri,
-    ])
+    }, [identifier, password, clientId, redirectUri]);
 
     useEffect(() => {
-        setClientId(param.get("client_id") || MAIN_CLIENT_ID)
-        setRedirectUri(param.get("redirect_uri") || MAIN_APP_BASE_URL)
-    }, [param])
+        setClientId(param.get('client_id') || MAIN_CLIENT_ID);
+        setRedirectUri(param.get('redirect_uri') || MAIN_APP_BASE_URL);
+    }, [param]);
 
     return (
-        <CardContent className="grid p-0 md:grid-cols-2 h-[500px]">
-            <div className="relative hidden md:flex border-r justify-center items-center">
-                <div className="relative w-full max-w-sm aspect-square">
+        <CardContent className="grid h-[500px] p-0 md:grid-cols-2">
+            <div className="relative hidden items-center justify-center border-r md:flex">
+                <div className="relative aspect-square w-full max-w-sm">
                     <Image
                         priority
                         src="/sign-in.svg"
-                        alt={"Sign in illustration"}
+                        alt={'Sign in illustration'}
                         fill
                         className="object-contain dark:brightness-[0.2] dark:grayscale"
                     />
@@ -137,7 +129,7 @@ export default function SignInWithIdentifierForm() {
                         </p>
                     </div>
                     <div className="grid gap-3">
-                        <Label >Identifier</Label>
+                        <Label>Identifier</Label>
                         <Input
                             placeholder="Enter your username or email"
                             value={identifier}
@@ -170,26 +162,23 @@ export default function SignInWithIdentifierForm() {
                         onClick={signInHandler}
                         disabled={isSignIn}
                     >
-                        {
-                            !isSignIn
-                                ? <>Login</>
-                                : (
-                                    <>
-                                        <Loader2Icon className="animate-spin" />
-                                        Please wait
-                                    </>
-                                )
-                        }
+                        {!isSignIn ? (
+                            <>Login</>
+                        ) : (
+                            <>
+                                <Loader2Icon className="animate-spin" />
+                                Please wait
+                            </>
+                        )}
                     </Button>
                     <div className="text-center text-sm">
-                        Don&apos;t have an account?{" "}
-                        {/* TODO: Add sign-up page route */}
-                        <Link href={""} className="underline underline-offset-4">
+                        Don&apos;t have an account? {/* TODO: Add sign-up page route */}
+                        <Link href={''} className="underline underline-offset-4">
                             Register
                         </Link>
                     </div>
                 </div>
             </div>
         </CardContent>
-    )
+    );
 }

@@ -1,23 +1,23 @@
-import { getDefaultHeaders } from "@repo/commons/utils/request";
-import type { NextConfig } from "next";
-import path from "node:path";
+import { getDefaultHeaders } from '@repo/commons/utils/request';
+import type { NextConfig } from 'next';
+import path from 'node:path';
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: path.join(__dirname, "../../"),
-  },
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/sign-in',
-        permanent: true,
-      },
-    ]
-  },
-  async headers() {
-    return getDefaultHeaders([])
-  },
+    turbopack: {
+        root: path.join(__dirname, '../../'),
+    },
+    async redirects() {
+        return [
+            {
+                source: '/',
+                destination: '/sign-in',
+                permanent: true,
+            },
+        ];
+    },
+    async headers() {
+        return getDefaultHeaders([]);
+    },
 };
 
 export default nextConfig;

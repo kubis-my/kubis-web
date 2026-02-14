@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { CurrentDeviceCard } from "@/root/components/pages/your-device/current-device-card";
-import { TotalDevicesCard } from "@/root/components/pages/your-device/total-devices-card";
-import { SecurityStatusCard } from "@/root/components/pages/your-device/security-status-card";
-import DeviceTable from "@/root/components/pages/your-device/device-table";
-import YourDeviceContainer from "@/root/components/pages/your-device/your-device-container";
+import { CurrentDeviceCard } from '@/root/components/pages/your-device/current-device-card';
+import { TotalDevicesCard } from '@/root/components/pages/your-device/total-devices-card';
+import { SecurityStatusCard } from '@/root/components/pages/your-device/security-status-card';
+import DeviceTable from '@/root/components/pages/your-device/device-table';
+import YourDeviceContainer from '@/root/components/pages/your-device/your-device-container';
 
 export default function page() {
     return (

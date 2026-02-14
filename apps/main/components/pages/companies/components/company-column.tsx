@@ -1,45 +1,45 @@
-import { Company } from "@repo/commons/types/account-service-schema.type"
-import { ColumnDef } from "@tanstack/react-table"
-import TableCellViewer from "./table-cell-viewer"
+import { Company } from '@repo/commons/types/account-service-schema.type';
+import { ColumnDef } from '@tanstack/react-table';
+import TableCellViewer from './table-cell-viewer';
 
 export const CompanyColumn: ColumnDef<Company>[] = [
     {
-        accessorKey: "companyName",
-        header: "Company",
+        accessorKey: 'companyName',
+        header: 'Company',
         cell: ({ row }) => {
-            return <TableCellViewer item={row.original} />
+            return <TableCellViewer item={row.original} />;
         },
         enableHiding: false,
     },
     {
-        accessorKey: "registrationNumber",
-        header: "Registration Number",
+        accessorKey: 'registrationNumber',
+        header: 'Registration Number',
         cell: ({ row }) => (
-            <div className="font-mono text-sm text-muted-foreground">
+            <div className="text-muted-foreground font-mono text-sm">
                 {row.original.registrationNo.slice(0, 8)}
             </div>
         ),
         size: 170,
     },
     {
-        accessorKey: "registeredAt",
-        header: "Registered Date",
+        accessorKey: 'registeredAt',
+        header: 'Registered Date',
         cell: ({ row }) => {
-            const date = new Date(row.original.createdAt)
+            const date = new Date(row.original.createdAt);
             return (
                 <div className="text-muted-foreground">
-                    {date.toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
+                    {date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
                     })}
                 </div>
-            )
+            );
         },
         size: 140,
     },
     {
-        accessorKey: "employees",
+        accessorKey: 'employees',
         header: () => <div className="text-right">Employees</div>,
         cell: ({ row }) => (
             <div className="text-left font-medium tabular-nums">
@@ -49,7 +49,7 @@ export const CompanyColumn: ColumnDef<Company>[] = [
         size: 110,
     },
     {
-        accessorKey: "branches",
+        accessorKey: 'branches',
         header: () => <div className="text-right">Branches</div>,
         cell: ({ row }) => (
             <div className="text-left font-medium tabular-nums">
@@ -70,4 +70,4 @@ export const CompanyColumn: ColumnDef<Company>[] = [
     //     ),
     //     size: 130,
     // }
-]
+];

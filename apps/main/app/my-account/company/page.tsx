@@ -1,6 +1,6 @@
-import { OverviewCard } from "@/root/components/pages/companies/overview-card";
-import { CompanyDataTable } from "@/root/components/pages/companies/data-table";
-import CompanyContainer from "@/root/components/pages/companies/company-container";
+import { OverviewCard } from '@/root/components/pages/companies/overview-card';
+import { CompanyDataTable } from '@/root/components/pages/companies/data-table';
+import CompanyContainer from '@/root/components/pages/companies/company-container';
 
 export default function page() {
     return (
@@ -16,6 +16,5 @@ export default function page() {
                 </div>
             </div>
         </CompanyContainer>
-
-    )
+    );
 }

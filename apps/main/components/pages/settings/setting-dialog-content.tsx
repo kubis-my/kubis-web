@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { Separator } from "@/shadcn/components/separator";
-import PersonalInformationSection from "./components/personal-information-section";
-import CredentialInformationSection from "./components/credential-information-section";
-import SecurityInformationSection from "./components/security-information-section";
+import { Separator } from '@/shadcn/components/separator';
+import PersonalInformationSection from './components/personal-information-section';
+import CredentialInformationSection from './components/credential-information-section';
+import SecurityInformationSection from './components/security-information-section';
 
 export default function SettingDialogContent({ activeTab }: { activeTab: string }) {
     const tabTitles: Record<string, string> = {
-        "personal-information": "Personal Information",
-        "credential": "Credential",
-        "security": "Security",
+        'personal-information': 'Personal Information',
+        credential: 'Credential',
+        security: 'Security',
     };
 
     return (

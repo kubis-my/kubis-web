@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
     flexRender,
@@ -6,16 +6,16 @@ import {
     getSortedRowModel,
     SortingState,
     useReactTable,
-} from "@tanstack/react-table";
-import { Button } from "@repo/shadcn-ui/components/button";
-import { Label } from "@repo/shadcn-ui/components/label";
+} from '@tanstack/react-table';
+import { Button } from '@repo/shadcn-ui/components/button';
+import { Label } from '@repo/shadcn-ui/components/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "@repo/shadcn-ui/components/select";
+} from '@repo/shadcn-ui/components/select';
 import {
     Table,
     TableBody,
@@ -23,22 +23,22 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@repo/shadcn-ui/components/table";
+} from '@repo/shadcn-ui/components/table';
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import { TabsContent } from '@/shadcn/components/tabs';
+import { useCompanyBranchDetail } from './company-branch-detail-container';
+import { useCallback, useEffect, useState } from 'react';
+import { UserColumn } from './components/user-column';
+import UserRow from './components/user-row';
+import { gql, TypedDocumentNode } from '@apollo/client';
 import {
-    IconChevronLeft,
-    IconChevronRight,
-} from "@tabler/icons-react";
-import { TabsContent } from "@/shadcn/components/tabs";
-import { useCompanyBranchDetail } from "./company-branch-detail-container";
-import { useCallback, useEffect, useState } from "react";
-import { UserColumn } from "./components/user-column";
-import UserRow from "./components/user-row";
-import { gql, TypedDocumentNode } from "@apollo/client";
-import { PaginatedUserAccount, UserAccountPaginationInput } from "@repo/commons/types/account-service-schema.type";
-import { useLazyQuery } from "@apollo/client/react";
-import { UserSkeletonRow } from "./components/user-skeleton-row";
-import { USER_ACCOUNT_PAGINATION_SIZE } from "@/root/libs/constants";
-import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
+    PaginatedUserAccount,
+    UserAccountPaginationInput,
+} from '@repo/commons/types/account-service-schema.type';
+import { useLazyQuery } from '@apollo/client/react';
+import { UserSkeletonRow } from './components/user-skeleton-row';
+import { USER_ACCOUNT_PAGINATION_SIZE } from '@/root/libs/constants';
+import { createInitialPaginatedData } from '@repo/commons/utils/pagination-helpers';
 
 interface GetUserAccountResponse {
     getCompanyUserAccounts: PaginatedUserAccount;
@@ -49,16 +49,22 @@ interface GetUserAccountVariables {
     companyPublicId: string;
 }
 
-const GET_COMPANY_BRANCH_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse, GetUserAccountVariables> = gql`
-    query GetCompanyUserAccounts($pagination:UserAccountPaginationInput!,$companyPublicId:String!) {
-        getCompanyUserAccounts(pagination:$pagination,companyPublicId:$companyPublicId){
+const GET_COMPANY_BRANCH_USER_ACCOUNTS: TypedDocumentNode<
+    GetUserAccountResponse,
+    GetUserAccountVariables
+> = gql`
+    query GetCompanyUserAccounts(
+        $pagination: UserAccountPaginationInput!
+        $companyPublicId: String!
+    ) {
+        getCompanyUserAccounts(pagination: $pagination, companyPublicId: $companyPublicId) {
             data {
                 publicId
                 status
                 position
                 joinedAt
                 branchPublicId
-                companyEmployee{
+                companyEmployee {
                     phoneCode
                     phoneNumber
                     internalId
@@ -82,29 +88,36 @@ const GET_COMPANY_BRANCH_USER_ACCOUNTS: TypedDocumentNode<GetUserAccountResponse
             }
         }
     }
-`
+`;
 
 export default function UsersTab() {
     const ctx = useCompanyBranchDetail();
-    const [getCompanyUserAccounts, { data, loading }] = useLazyQuery(GET_COMPANY_BRANCH_USER_ACCOUNTS);
+    const [getCompanyUserAccounts, { data, loading }] = useLazyQuery(
+        GET_COMPANY_BRANCH_USER_ACCOUNTS,
+    );
 
     const [sorting, setSorting] = useState<SortingState>([]);
     const [pageSize, setPageSize] = useState(USER_ACCOUNT_PAGINATION_SIZE);
-    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedUserAccount>(createInitialPaginatedData());
+    const [paginatedUserAccount, setPaginatedUserAccount] = useState<PaginatedUserAccount>(
+        createInitialPaginatedData(),
+    );
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
-        if (paginatedUserAccount.pageInfo.hasNextPage && paginatedUserAccount.pageInfo.endCursor !== null) {
-            setCursorHistory(prev => [...prev, paginatedUserAccount.pageInfo.endCursor]);
+        if (
+            paginatedUserAccount.pageInfo.hasNextPage &&
+            paginatedUserAccount.pageInfo.endCursor !== null
+        ) {
+            setCursorHistory((prev) => [...prev, paginatedUserAccount.pageInfo.endCursor]);
             getCompanyUserAccounts({
                 variables: {
-                    companyPublicId: ctx.branch?.company.publicId ?? "-1",
+                    companyPublicId: ctx.branch?.company.publicId ?? '-1',
                     pagination: {
                         cursor: paginatedUserAccount.pageInfo.endCursor,
                         take: pageSize,
-                        branchPublicId: ctx.branch?.publicId ?? "-1",
-                    }
-                }
+                        branchPublicId: ctx.branch?.publicId ?? '-1',
+                    },
+                },
             });
         }
     }, [paginatedUserAccount, pageSize, getCompanyUserAccounts, ctx.branch]);
@@ -117,13 +130,13 @@ export default function UsersTab() {
             setCursorHistory(newHistory);
             getCompanyUserAccounts({
                 variables: {
-                    companyPublicId: ctx.branch?.company.publicId ?? "-1",
+                    companyPublicId: ctx.branch?.company.publicId ?? '-1',
                     pagination: {
                         cursor: previousCursor,
                         take: pageSize,
-                        branchPublicId: ctx.branch?.publicId ?? "-1",
-                    }
-                }
+                        branchPublicId: ctx.branch?.publicId ?? '-1',
+                    },
+                },
             });
         }
     }, [cursorHistory, pageSize, getCompanyUserAccounts, ctx.branch]);
@@ -143,8 +156,12 @@ export default function UsersTab() {
     });
 
     useEffect(() => {
-        setPaginatedUserAccount(data?.getCompanyUserAccounts ?? ctx.branch?.userAccounts ?? createInitialPaginatedData())
-    }, [ctx.branch?.userAccounts, data?.getCompanyUserAccounts])
+        setPaginatedUserAccount(
+            data?.getCompanyUserAccounts ??
+                ctx.branch?.userAccounts ??
+                createInitialPaginatedData(),
+        );
+    }, [ctx.branch?.userAccounts, data?.getCompanyUserAccounts]);
 
     return (
         <TabsContent value="users">
@@ -162,17 +179,17 @@ export default function UsersTab() {
                                                 colSpan={header.colSpan}
                                                 style={{
                                                     width:
-                                                        header.column.id === "fullName"
-                                                            ? "auto"
+                                                        header.column.id === 'fullName'
+                                                            ? 'auto'
                                                             : `${header.getSize()}px`,
                                                 }}
                                             >
                                                 {header.isPlaceholder
                                                     ? null
                                                     : flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
+                                                          header.column.columnDef.header,
+                                                          header.getContext(),
+                                                      )}
                                             </TableHead>
                                         );
                                     })}
@@ -185,14 +202,16 @@ export default function UsersTab() {
                                     <UserSkeletonRow key={`skeleton-${index}`} />
                                 ))
                             ) : table.getRowModel().rows?.length ? (
-                                table.getRowModel().rows.map((row) => (
-                                    <UserRow
-                                        key={row.id}
-                                        row={row}
-                                        companyId={ctx.branch?.company.publicId ?? "-1"}
-                                        branchId={ctx.branch?.publicId ?? "-1"}
-                                    />
-                                ))
+                                table
+                                    .getRowModel()
+                                    .rows.map((row) => (
+                                        <UserRow
+                                            key={row.id}
+                                            row={row}
+                                            companyId={ctx.branch?.company.publicId ?? '-1'}
+                                            branchId={ctx.branch?.publicId ?? '-1'}
+                                        />
+                                    ))
                             ) : (
                                 <TableRow>
                                     <TableCell
@@ -209,22 +228,22 @@ export default function UsersTab() {
 
                 <div className="flex items-center justify-between px-4">
                     {/* Left: Showing count */}
-                    <div className="text-sm text-muted-foreground">
-                        Showing{" "}
-                        <span className="font-medium text-foreground">
+                    <div className="text-muted-foreground text-sm">
+                        Showing{' '}
+                        <span className="text-foreground font-medium">
                             {paginatedUserAccount.pageInfo.total === 0
                                 ? 0
                                 : (cursorHistory.length - 1) * pageSize + 1}
                         </span>
-                        {" - "}
-                        <span className="font-medium text-foreground">
+                        {' - '}
+                        <span className="text-foreground font-medium">
                             {Math.min(
                                 cursorHistory.length * pageSize,
-                                paginatedUserAccount.pageInfo.total
+                                paginatedUserAccount.pageInfo.total,
                             )}
                         </span>
-                        {" of "}
-                        <span className="font-medium text-foreground">
+                        {' of '}
+                        <span className="text-foreground font-medium">
                             {paginatedUserAccount.pageInfo.total}
                         </span>
                     </div>
@@ -266,7 +285,7 @@ export default function UsersTab() {
                         <Select
                             value={String(pageSize)}
                             onValueChange={(value) => {
-                                setPageSize(Number(value))
+                                setPageSize(Number(value));
                             }}
                             disabled={loading}
                         >

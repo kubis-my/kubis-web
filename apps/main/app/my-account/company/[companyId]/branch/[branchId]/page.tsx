@@ -4,7 +4,11 @@ import CompanyBranchDetailContainer from '@/root/components/pages/company-branch
 import CompanyBranchPhysicalAddressCard from '@/root/components/pages/company-branch-detail/company-branch-physical-address-card';
 import TabContainer from '@/root/components/pages/company-branch-detail/tab-container';
 
-export default async function BranchPage({ params }: { params: Promise<{ companyId: string; branchId: string }> }) {
+export default async function BranchPage({
+    params,
+}: {
+    params: Promise<{ companyId: string; branchId: string }>;
+}) {
     const { companyId, branchId } = await params;
 
     return (
@@ -18,5 +22,5 @@ export default async function BranchPage({ params }: { params: Promise<{ company
                 <TabContainer />
             </div>
         </CompanyBranchDetailContainer>
-    )
+    );
 }

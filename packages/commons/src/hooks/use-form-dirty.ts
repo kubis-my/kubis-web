@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 
 export function useFormDirty<T>(formData: T) {
     const originalRef = useRef<T>(formData);

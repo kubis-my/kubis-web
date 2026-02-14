@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { IconTrendingUp, IconTrendingDown } from "@tabler/icons-react"
+import { IconTrendingUp, IconTrendingDown } from '@tabler/icons-react';
 import {
     Card,
     CardAction,
@@ -8,9 +8,9 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/shadcn/components/card"
-import { Badge } from "@/shadcn/components/badge"
-import { useCompany } from "./company-container";
+} from '@/shadcn/components/card';
+import { Badge } from '@/shadcn/components/badge';
+import { useCompany } from './company-container';
 
 export function OverviewCard() {
     const ctx = useCompany();
@@ -40,10 +40,12 @@ export function OverviewCard() {
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        {(overview?.retentionRate ?? 0).toFixed(2)}% retention rate <IconTrendingDown className="size-4" />
+                        {(overview?.retentionRate ?? 0).toFixed(2)}% retention rate{' '}
+                        <IconTrendingDown className="size-4" />
                     </div>
                     <div className="text-muted-foreground">
-                        {overview?.companiesDeactivatedThisMonth ?? 0} companies deactivated this month
+                        {overview?.companiesDeactivatedThisMonth ?? 0} companies deactivated this
+                        month
                     </div>
                 </CardFooter>
             </Card>
@@ -69,9 +71,12 @@ export function OverviewCard() {
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        {overview?.newBranchesThisQuarter ?? 0} new branches this quarter <IconTrendingUp className="size-4" />
+                        {overview?.newBranchesThisQuarter ?? 0} new branches this quarter{' '}
+                        <IconTrendingUp className="size-4" />
                     </div>
-                    <div className="text-muted-foreground">{overview?.newBranchesThisMonth ?? 0} branches opened this month</div>
+                    <div className="text-muted-foreground">
+                        {overview?.newBranchesThisMonth ?? 0} branches opened this month
+                    </div>
                 </CardFooter>
             </Card>
             {/*
@@ -97,11 +102,14 @@ export function OverviewCard() {
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        {overview?.newStaffThisQuarter ?? 0} employees this quarter <IconTrendingUp className="size-4" />
+                        {overview?.newStaffThisQuarter ?? 0} employees this quarter{' '}
+                        <IconTrendingUp className="size-4" />
                     </div>
-                    <div className="text-muted-foreground">Average {overview?.averageStaffPerBranch ?? 0} staff per branch</div>
+                    <div className="text-muted-foreground">
+                        Average {overview?.averageStaffPerBranch ?? 0} staff per branch
+                    </div>
                 </CardFooter>
             </Card>
         </>
-    )
+    );
 }

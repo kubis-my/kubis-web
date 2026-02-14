@@ -1,16 +1,16 @@
-import { Badge } from "@/shadcn/components/badge";
-import { UserAccount, UserAccountStatus } from "@repo/commons/types/account-service-schema.type";
-import { Credential } from "@repo/commons/types/auth-service-schema.type";
-import { ColumnDef } from "@tanstack/react-table";
+import { Badge } from '@/shadcn/components/badge';
+import { UserAccount, UserAccountStatus } from '@repo/commons/types/account-service-schema.type';
+import { Credential } from '@repo/commons/types/auth-service-schema.type';
+import { ColumnDef } from '@tanstack/react-table';
 
 export const UserColumn: ColumnDef<UserAccount>[] = [
     {
-        accessorKey: "code",
-        header: "ID",
+        accessorKey: 'code',
+        header: 'ID',
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm font-medium">
-                    #{row.original.companyEmployee.internalId.toString().padStart(5, "0")}
+                    #{row.original.companyEmployee.internalId.toString().padStart(5, '0')}
                 </div>
             );
         },
@@ -18,19 +18,17 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "fullName",
-        header: "Full Name",
+        accessorKey: 'fullName',
+        header: 'Full Name',
         cell: ({ row }) => {
             const fullName = `${row.original.companyEmployee.user.firstName} ${row.original.companyEmployee.user.lastName}`;
-            const credential = row.original.companyEmployee.user.credential as Credential
+            const credential = row.original.companyEmployee.user.credential as Credential;
 
             return (
                 <div className="flex flex-col">
                     <span className="font-medium">{fullName}</span>
                     {row.original.companyEmployee.user.nickname && (
-                        <span className="text-sm text-muted-foreground">
-                            {credential.email}
-                        </span>
+                        <span className="text-muted-foreground text-sm">{credential.email}</span>
                     )}
                 </div>
             );
@@ -38,49 +36,65 @@ export const UserColumn: ColumnDef<UserAccount>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "position",
-        header: "Position",
+        accessorKey: 'position',
+        header: 'Position',
         cell: ({ row }) => {
-            return (
-                <div className="text-sm">
-                    {row.original.position || "-"}
-                </div>
-            );
+            return <div className="text-sm">{row.original.position || '-'}</div>;
         },
         size: 150,
     },
     {
-        accessorKey: "phone",
-        header: "Phone",
+        accessorKey: 'phone',
+        header: 'Phone',
         cell: ({ row }) => {
             return (
                 <div className="font-mono text-sm">
-                    {(row.original.companyEmployee.phoneCode && row.original.companyEmployee.phoneNumber) ? `${row.original.companyEmployee.phoneCode} ${row.original.companyEmployee.phoneNumber}` : "-"}
+                    {row.original.companyEmployee.phoneCode &&
+                    row.original.companyEmployee.phoneNumber
+                        ? `${row.original.companyEmployee.phoneCode} ${row.original.companyEmployee.phoneNumber}`
+                        : '-'}
                 </div>
             );
         },
         size: 140,
     },
     {
-        accessorKey: "status",
-        header: "Status",
+        accessorKey: 'status',
+        header: 'Status',
         cell: ({ row }) => {
             const status = row.original.status;
             const statusConfig = {
-                [UserAccountStatus.ACTIVE]: { variant: "default" as const, className: "bg-green-500 hover:bg-green-600", label: "Active" },
-                [UserAccountStatus.INACTIVE]: { variant: "secondary" as const, className: "", label: "Inactive" },
-                [UserAccountStatus.PENDING_INVITATION]: { variant: "default" as const, className: "bg-amber-500 hover:bg-amber-600", label: "Pending Invitation" },
-                [UserAccountStatus.REJECT_INVITATION]: { variant: "destructive" as const, className: "bg-orange-500 hover:bg-orange-600", label: "Rejected" },
-                [UserAccountStatus.EXPIRED_INVITATION]: { variant: "destructive" as const, className: "", label: "Expired Invitation" },
+                [UserAccountStatus.ACTIVE]: {
+                    variant: 'default' as const,
+                    className: 'bg-green-500 hover:bg-green-600',
+                    label: 'Active',
+                },
+                [UserAccountStatus.INACTIVE]: {
+                    variant: 'secondary' as const,
+                    className: '',
+                    label: 'Inactive',
+                },
+                [UserAccountStatus.PENDING_INVITATION]: {
+                    variant: 'default' as const,
+                    className: 'bg-amber-500 hover:bg-amber-600',
+                    label: 'Pending Invitation',
+                },
+                [UserAccountStatus.REJECT_INVITATION]: {
+                    variant: 'destructive' as const,
+                    className: 'bg-orange-500 hover:bg-orange-600',
+                    label: 'Rejected',
+                },
+                [UserAccountStatus.EXPIRED_INVITATION]: {
+                    variant: 'destructive' as const,
+                    className: '',
+                    label: 'Expired Invitation',
+                },
             };
 
             const config = statusConfig[status];
 
             return (
-                <Badge
-                    variant={config.variant}
-                    className={config.className}
-                >
+                <Badge variant={config.variant} className={config.className}>
                     {config.label}
                 </Badge>
             );

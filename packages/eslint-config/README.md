@@ -12,7 +12,7 @@ To use these configurations in a package or app, install this package and extend
 
 ```js
 module.exports = {
-  extends: ["@repo/eslint-config/next.js"],
+    extends: ['@repo/eslint-config/next.js'],
 };
 ```
 

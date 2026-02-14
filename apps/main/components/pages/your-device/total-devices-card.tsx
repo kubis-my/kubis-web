@@ -1,15 +1,9 @@
-"use client";
+'use client';
 
-import { IconDevices } from "@tabler/icons-react";
-import {
-    Card,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/shadcn/components/card";
-import { useYourDevice } from "./your-device-container";
-import { Skeleton } from "@/shadcn/components/skeleton";
+import { IconDevices } from '@tabler/icons-react';
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shadcn/components/card';
+import { useYourDevice } from './your-device-container';
+import { Skeleton } from '@/shadcn/components/skeleton';
 
 export function TotalDevicesCard() {
     const { paginatedCredentialDevice, isFetchingCredentialDevice } = useYourDevice();
@@ -20,7 +14,7 @@ export function TotalDevicesCard() {
     const activeLast24h = overview?.activeInLast24h ?? 0;
     const deviceTypeCount = overview?.deviceTypeCount ?? 0;
 
-    if (isFetchingCredentialDevice) return <Skeleton className="aspect-video rounded-xl" />
+    if (isFetchingCredentialDevice) return <Skeleton className="aspect-video rounded-xl" />;
 
     return (
         <Card className="@container/card">
@@ -28,7 +22,7 @@ export function TotalDevicesCard() {
                 <CardDescription>Total Devices</CardDescription>
 
                 <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                    {totalDevices} {totalDevices === 1 ? "device" : "devices"}
+                    {totalDevices} {totalDevices === 1 ? 'device' : 'devices'}
                 </CardTitle>
             </CardHeader>
 
@@ -39,7 +33,7 @@ export function TotalDevicesCard() {
                 </div>
 
                 <div className="text-muted-foreground">
-                    Across {deviceTypeCount} device {deviceTypeCount === 1 ? "type" : "types"}
+                    Across {deviceTypeCount} device {deviceTypeCount === 1 ? 'type' : 'types'}
                 </div>
             </CardFooter>
         </Card>

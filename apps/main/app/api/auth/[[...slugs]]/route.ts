@@ -1,1 +1,1 @@
-export * from "@repo/commons/lib/auth-api-route";
+export * from '@repo/commons/lib/auth-api-route';

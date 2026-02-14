@@ -1,18 +1,20 @@
-"use client";
+'use client';
 
-import { SSO_APP_BASE_URL } from "@repo/commons/constant/base";
-import { getCsrfHeaders } from "@repo/commons/utils/csrf-client";
-import React, { useEffect } from "react";
+import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
+import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
+import React, { useEffect } from 'react';
 
-export default function RedirectAuthorize({ children, ...input }: {
-    clientId: string
-    redirectUri: string
-    codeChallenge: string
-    scope?: string
-    state?: string,
-    children: React.ReactNode
+export default function RedirectAuthorize({
+    children,
+    ...input
+}: {
+    clientId: string;
+    redirectUri: string;
+    codeChallenge: string;
+    scope?: string;
+    state?: string;
+    children: React.ReactNode;
 }) {
-
     useEffect(() => {
         const authorize = async () => {
             try {
@@ -60,7 +62,7 @@ export default function RedirectAuthorize({ children, ...input }: {
         };
 
         authorize();
-    }, [input])
+    }, [input]);
 
-    return children
+    return children;
 }

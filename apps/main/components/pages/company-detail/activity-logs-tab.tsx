@@ -1,17 +1,20 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { TabsContent } from "@/shadcn/components/tabs";
-import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
-import { AUDIT_LOG_PAGINATION_SIZE } from "@/root/libs/constants";
-import { createInitialPaginatedData } from "@repo/commons/utils/pagination-helpers";
-import { gql, TypedDocumentNode } from "@apollo/client";
-import { useLazyQuery } from "@apollo/client/react";
-import { useCallback, useEffect, useState } from "react";
-import { ActivityColumn } from "./components/activity-column";
-import { ActivitySkeletonRow } from "./components/activity-skeleton-row";
-import { useCompanyDetail } from "./company-detail-container";
-import { DataTable } from "@repo/shadcn-ui/components/data-table";
+import * as React from 'react';
+import { TabsContent } from '@/shadcn/components/tabs';
+import {
+    AuditLogPaginationInput,
+    PaginatedAuditLog,
+} from '@repo/commons/types/audit-service-schema.type';
+import { AUDIT_LOG_PAGINATION_SIZE } from '@/root/libs/constants';
+import { createInitialPaginatedData } from '@repo/commons/utils/pagination-helpers';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client/react';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityColumn } from './components/activity-column';
+import { ActivitySkeletonRow } from './components/activity-skeleton-row';
+import { useCompanyDetail } from './company-detail-container';
+import { DataTable } from '@repo/shadcn-ui/components/data-table';
 
 interface GetAuditLogsResponse {
     getAuditLogs: PaginatedAuditLog;
@@ -23,10 +26,7 @@ interface GetAuditLogsVariables {
 }
 
 const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLogsVariables> = gql`
-    query GetAuditLogs(
-        $companyPublicId:String!
-        $pagination: AuditLogPaginationInput!
-        ) {
+    query GetAuditLogs($companyPublicId: String!, $pagination: AuditLogPaginationInput!) {
         getAuditLogs(pagination: $pagination) {
             data {
                 publicId
@@ -41,11 +41,11 @@ const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLogsVariab
                         firstName
                         lastName
                         nickname
-                        companyEmployee(companyPublicId: $companyPublicId){
+                        companyEmployee(companyPublicId: $companyPublicId) {
                             internalId
                         }
                     }
-                    branch{
+                    branch {
                         name
                         code
                     }
@@ -77,28 +77,33 @@ const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLogsVariab
             }
         }
     }
-`
+`;
 
 export default function ActivityLogsTab() {
     const ctx = useCompanyDetail();
     const [getAuditLogs, { data, loading }] = useLazyQuery(GET_AUDIT_LOGS);
 
     const [pageSize, setPageSize] = useState(AUDIT_LOG_PAGINATION_SIZE);
-    const [paginatedAuditLog, setPaginatedAuditLog] = useState<Omit<PaginatedAuditLog, "overview">>(createInitialPaginatedData());
+    const [paginatedAuditLog, setPaginatedAuditLog] = useState<Omit<PaginatedAuditLog, 'overview'>>(
+        createInitialPaginatedData(),
+    );
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
-        if (paginatedAuditLog.pageInfo.hasNextPage && paginatedAuditLog.pageInfo.endCursor !== null) {
-            setCursorHistory(prev => [...prev, paginatedAuditLog.pageInfo.endCursor]);
+        if (
+            paginatedAuditLog.pageInfo.hasNextPage &&
+            paginatedAuditLog.pageInfo.endCursor !== null
+        ) {
+            setCursorHistory((prev) => [...prev, paginatedAuditLog.pageInfo.endCursor]);
             getAuditLogs({
                 variables: {
-                    companyPublicId: ctx.company?.publicId ?? "-1",
+                    companyPublicId: ctx.company?.publicId ?? '-1',
                     pagination: {
                         cursor: paginatedAuditLog.pageInfo.endCursor,
                         take: pageSize,
-                        companyId: ctx.company?.publicId ?? "-1",
-                    }
-                }
+                        companyId: ctx.company?.publicId ?? '-1',
+                    },
+                },
             });
         }
     }, [paginatedAuditLog, pageSize, getAuditLogs, ctx.company]);
@@ -111,20 +116,22 @@ export default function ActivityLogsTab() {
             setCursorHistory(newHistory);
             getAuditLogs({
                 variables: {
-                    companyPublicId: ctx.company?.publicId ?? "-1",
+                    companyPublicId: ctx.company?.publicId ?? '-1',
                     pagination: {
                         cursor: previousCursor,
                         take: pageSize,
-                        companyId: ctx.company?.publicId ?? "-1",
-                    }
-                }
+                        companyId: ctx.company?.publicId ?? '-1',
+                    },
+                },
             });
         }
     }, [cursorHistory, pageSize, getAuditLogs, ctx.company]);
 
     useEffect(() => {
-        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.company?.auditLogs ?? createInitialPaginatedData())
-    }, [ctx.company?.auditLogs, data?.getAuditLogs])
+        setPaginatedAuditLog(
+            data?.getAuditLogs ?? ctx.company?.auditLogs ?? createInitialPaginatedData(),
+        );
+    }, [ctx.company?.auditLogs, data?.getAuditLogs]);
 
     return (
         <TabsContent value="activity-logs">

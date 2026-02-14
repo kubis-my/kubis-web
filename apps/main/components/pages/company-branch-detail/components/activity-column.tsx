@@ -1,23 +1,23 @@
-import AuditLogMetaViewer from "@/root/components/container/audit-log-meta-viewer";
-import { activityTypeConfig } from "@/root/libs/constants";
-import { Badge } from "@/shadcn/components/badge";
-import { CompanyEmployee, User } from "@repo/commons/types/account-service-schema.type";
-import { AuditLog, AuditLogAuthor } from "@repo/commons/types/audit-service-schema.type";
-import { formatDateTime } from "@repo/commons/utils/date";
-import { ColumnDef } from "@tanstack/react-table";
+import AuditLogMetaViewer from '@/root/components/container/audit-log-meta-viewer';
+import { activityTypeConfig } from '@/root/libs/constants';
+import { Badge } from '@/shadcn/components/badge';
+import { CompanyEmployee, User } from '@repo/commons/types/account-service-schema.type';
+import { AuditLog, AuditLogAuthor } from '@repo/commons/types/audit-service-schema.type';
+import { formatDateTime } from '@repo/commons/utils/date';
+import { ColumnDef } from '@tanstack/react-table';
 
 export const ActivityColumn: ColumnDef<AuditLog>[] = [
     {
-        accessorKey: "emittedAt",
-        header: "Time",
+        accessorKey: 'emittedAt',
+        header: 'Time',
         cell: ({ row }) => {
             return (
                 <div className="text-sm">
                     <div className="font-medium">
-                        {formatDateTime(row.original.emittedAt, { format: "dd MMM yyyy" })}
+                        {formatDateTime(row.original.emittedAt, { format: 'dd MMM yyyy' })}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                        {formatDateTime(row.original.emittedAt, { format: "hh:mm a" })}
+                    <div className="text-muted-foreground text-xs">
+                        {formatDateTime(row.original.emittedAt, { format: 'hh:mm a' })}
                     </div>
                 </div>
             );
@@ -26,24 +26,27 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "auditLogAuthor",
-        header: "User",
+        accessorKey: 'auditLogAuthor',
+        header: 'User',
         cell: ({ row }) => {
             const author = row.original.auditLogAuthor as AuditLogAuthor & {
                 user: User & {
-                    companyEmployee?: CompanyEmployee
-                }
-            }
+                    companyEmployee?: CompanyEmployee;
+                };
+            };
 
             if (!author) {
-                return <span className="text-xs text-muted-foreground">-</span>;
+                return <span className="text-muted-foreground text-xs">-</span>;
             }
 
             return (
                 <div className="flex flex-col">
-                    <span className="font-medium">{author.user.firstName} {author.user.lastName}</span>
-                    <span className="font-mono text-xs text-muted-foreground">
-                        #{(author.user.companyEmployee?.internalId ?? 0).toString().padStart(5, "0")}
+                    <span className="font-medium">
+                        {author.user.firstName} {author.user.lastName}
+                    </span>
+                    <span className="text-muted-foreground font-mono text-xs">
+                        #
+                        {(author.user.companyEmployee?.internalId ?? 0).toString().padStart(5, '0')}
                     </span>
                 </div>
             );
@@ -52,19 +55,19 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "auditLogResource",
-        header: "Resource",
+        accessorKey: 'auditLogResource',
+        header: 'Resource',
         cell: ({ row }) => {
             const resource = row.original.auditLogResource;
 
             if (!resource) {
-                return <span className="text-xs text-muted-foreground">-</span>;
+                return <span className="text-muted-foreground text-xs">-</span>;
             }
 
             return (
                 <div className="flex flex-col">
                     <span className="font-medium">{resource.type}</span>
-                    <span className="font-mono text-xs text-muted-foreground">
+                    <span className="text-muted-foreground font-mono text-xs">
                         #{resource.publicId.slice(0, 8)}
                     </span>
                 </div>
@@ -73,21 +76,18 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
         size: 110,
     },
     {
-        accessorKey: "type",
-        header: "Type",
+        accessorKey: 'type',
+        header: 'Type',
         cell: ({ row }) => {
             const type = row.original.type.toLowerCase();
             const config = activityTypeConfig[type as keyof typeof activityTypeConfig] || {
-                variant: "default" as const,
-                className: "",
-                label: "Unknown"
+                variant: 'default' as const,
+                className: '',
+                label: 'Unknown',
             };
 
             return (
-                <Badge
-                    variant={config.variant}
-                    className={config.className}
-                >
+                <Badge variant={config.variant} className={config.className}>
                     {config.label}
                 </Badge>
             );
@@ -95,10 +95,10 @@ export const ActivityColumn: ColumnDef<AuditLog>[] = [
         size: 80,
     },
     {
-        accessorKey: "description",
-        header: "Details",
+        accessorKey: 'description',
+        header: 'Details',
         cell: ({ row }) => {
-            return <AuditLogMetaViewer audit={row.original} />
+            return <AuditLogMetaViewer audit={row.original} />;
         },
         enableHiding: false,
     },

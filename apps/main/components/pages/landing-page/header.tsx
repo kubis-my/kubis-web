@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import Link from 'next/link';
-import React, { useState } from 'react'
-import Image from "next/image";
+import React, { useState } from 'react';
+import Image from 'next/image';
 import { Button } from '@repo/shadcn-ui/components/button';
 import { ChevronDown } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@repo/shadcn-ui/components/avatar';
@@ -11,65 +11,69 @@ import { useAuth } from '@repo/shadcn-ui/providers/auth-provider';
 // TODO: replace with actual data later
 const serviceCategories = [
     {
-        title: "Productivity",
+        title: 'Productivity',
         services: [
-            { name: "Mail", href: "/mail" },
-            { name: "Calendar", href: "/calendar" },
-            { name: "Drive", href: "/drive" },
-            { name: "Docs", href: "/docs" },
-            { name: "Sheets", href: "/sheets" },
-            { name: "Slides", href: "/slides" },
+            { name: 'Mail', href: '/mail' },
+            { name: 'Calendar', href: '/calendar' },
+            { name: 'Drive', href: '/drive' },
+            { name: 'Docs', href: '/docs' },
+            { name: 'Sheets', href: '/sheets' },
+            { name: 'Slides', href: '/slides' },
         ],
     },
     {
-        title: "Communication",
+        title: 'Communication',
         services: [
-            { name: "Chat", href: "/chat" },
-            { name: "Meet", href: "/meet" },
-            { name: "Video Calls", href: "/video" },
-            { name: "Groups", href: "/groups" },
+            { name: 'Chat', href: '/chat' },
+            { name: 'Meet', href: '/meet' },
+            { name: 'Video Calls', href: '/video' },
+            { name: 'Groups', href: '/groups' },
         ],
     },
     {
-        title: "Business",
+        title: 'Business',
         services: [
-            { name: "Business Hub", href: "/business" },
-            { name: "Analytics", href: "/analytics" },
-            { name: "CRM", href: "/crm" },
-            { name: "Projects", href: "/projects" },
-            { name: "Invoicing", href: "/invoicing" },
+            { name: 'Business Hub', href: '/business' },
+            { name: 'Analytics', href: '/analytics' },
+            { name: 'CRM', href: '/crm' },
+            { name: 'Projects', href: '/projects' },
+            { name: 'Invoicing', href: '/invoicing' },
         ],
     },
     {
-        title: "Tools",
+        title: 'Tools',
         services: [
-            { name: "Storage", href: "/storage" },
-            { name: "Photos", href: "/photos" },
-            { name: "Maps", href: "/maps" },
-            { name: "Search", href: "/search" },
-            { name: "News", href: "/news" },
+            { name: 'Storage', href: '/storage' },
+            { name: 'Photos', href: '/photos' },
+            { name: 'Maps', href: '/maps' },
+            { name: 'Search', href: '/search' },
+            { name: 'News', href: '/news' },
         ],
-    }
+    },
 ];
 
 export default function Header() {
     const [showApps, setShowApps] = useState(false);
-    const auth = useAuth()
+    const auth = useAuth();
 
     const getAvatarFallback = (): string => {
-        return [
-            auth.authUser?.displayName,
-            auth.authUser?.nickname,
-            auth.authUser?.firstName,
-            auth.authUser?.lastName,
-        ].filter(Boolean)[0]?.at(0) ?? "K"
-    }
+        return (
+            [
+                auth.authUser?.displayName,
+                auth.authUser?.nickname,
+                auth.authUser?.firstName,
+                auth.authUser?.lastName,
+            ]
+                .filter(Boolean)[0]
+                ?.at(0) ?? 'K'
+        );
+    };
 
     return (
         <>
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-                <div className="max-w-7xl mx-auto px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
+            <header className="fixed top-0 right-0 left-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-gray-950/80">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="flex h-16 items-center justify-between">
                         {/* Logo */}
                         <Link href="/" className="flex items-center space-x-3">
                             <Image
@@ -77,7 +81,7 @@ export default function Header() {
                                 alt="KUBIS Logo"
                                 width={32}
                                 height={32}
-                                className="w-8 h-8"
+                                className="h-8 w-8"
                             />
                             <span className="text-xl font-semibold text-gray-900 dark:text-white">
                                 KUBIS
@@ -96,8 +100,9 @@ export default function Header() {
                             >
                                 <span className="text-sm">All Leaf</span>
                                 <ChevronDown
-                                    className={`w-4 h-4 transition-transform ${showApps ? "rotate-180" : ""
-                                        }`}
+                                    className={`h-4 w-4 transition-transform ${
+                                        showApps ? 'rotate-180' : ''
+                                    }`}
                                 />
                             </Button>
 
@@ -105,8 +110,8 @@ export default function Header() {
                                 <Link href="/my-account">Account</Link>
                             </Button>
 
-                            <Avatar className="w-9 h-9 cursor-pointer">
-                                <AvatarFallback className="bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] text-white font-medium uppercase">
+                            <Avatar className="h-9 w-9 cursor-pointer">
+                                <AvatarFallback className="bg-gradient-to-br from-[#66BB6A] to-[#4CAF50] font-medium text-white uppercase">
                                     {getAvatarFallback()}
                                 </AvatarFallback>
                             </Avatar>
@@ -117,18 +122,15 @@ export default function Header() {
             {showApps && (
                 <>
                     {/* Backdrop */}
-                    <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setShowApps(false)}
-                    />
+                    <div className="fixed inset-0 z-40" onClick={() => setShowApps(false)} />
 
                     {/* Mega Menu Dropdown */}
-                    <div className="fixed left-0 right-0 top-16 z-50 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-lg">
-                        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                    <div className="fixed top-16 right-0 left-0 z-50 border-b border-gray-200 bg-gray-50 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+                        <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
+                            <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-5">
                                 {serviceCategories.map((category, index) => (
                                     <div key={index}>
-                                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                                        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                                             {category.title}
                                         </h3>
                                         <ul className="space-y-3">
@@ -137,7 +139,7 @@ export default function Header() {
                                                     <Link
                                                         href={service.href}
                                                         onClick={() => setShowApps(false)}
-                                                        className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors block"
+                                                        className="block text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                                     >
                                                         {service.name}
                                                     </Link>
@@ -152,5 +154,5 @@ export default function Header() {
                 </>
             )}
         </>
-    )
+    );
 }

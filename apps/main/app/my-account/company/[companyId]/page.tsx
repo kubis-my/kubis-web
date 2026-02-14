@@ -2,7 +2,7 @@ import CompanyDetailCard from '@/root/components/pages/company-detail/company-de
 import CompanyPhysicalAddressCard from '@/root/components/pages/company-detail/company-physical-address-card';
 import CompanyBillingAddressCard from '@/root/components/pages/company-detail/company-billing-address-card';
 import CompanyDetailContainer from '@/root/components/pages/company-detail/company-detail-container';
-import React from 'react'
+import React from 'react';
 import TabContainer from '@/root/components/pages/company-detail/tab-container';
 
 export default async function page({ params }: { params: Promise<{ companyId: string }> }) {
@@ -19,5 +19,5 @@ export default async function page({ params }: { params: Promise<{ companyId: st
                 <TabContainer />
             </div>
         </CompanyDetailContainer>
-    )
+    );
 }

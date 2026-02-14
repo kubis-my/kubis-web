@@ -1,19 +1,19 @@
-import axios, { AxiosError, AxiosInstance } from "axios"
-import { AUTH_SERVICE_ROUTE } from "../constant/auth-service"
-import { convertErrorMessageListToObject } from "../utils/error-message"
-import { generateCodeChallenge, generateCodeVerifier } from "../utils/pkce"
+import axios, { AxiosError, AxiosInstance } from 'axios';
+import { AUTH_SERVICE_ROUTE } from '../constant/auth-service';
+import { convertErrorMessageListToObject } from '../utils/error-message';
+import { generateCodeChallenge, generateCodeVerifier } from '../utils/pkce';
 
 export const authClient = {
     async signIn(props: {
-        identifier: string,
-        password: string,
-        clientId: string,
-        redirectUri: string,
-        scope?: string,
-        state?: string,
-        driver?: AxiosInstance
+        identifier: string;
+        password: string;
+        clientId: string;
+        redirectUri: string;
+        scope?: string;
+        state?: string;
+        driver?: AxiosInstance;
     }) {
-        const driver = props.driver || axios
+        const driver = props.driver || axios;
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = await generateCodeChallenge(codeVerifier);
         const input = {
@@ -23,256 +23,247 @@ export const authClient = {
             redirectUri: props.redirectUri,
             scope: props.scope,
             state: props.state,
-            codeChallenge
-        }
+            codeChallenge,
+        };
 
         try {
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN, input)
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN, input);
 
             return {
                 code: 200,
                 raw: {
                     ...data,
-                    verifier: codeVerifier
-                }
-            }
+                    verifier: codeVerifier,
+                },
+            };
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
-                const response = error.response
+                const response = error.response;
                 const data = response.data;
 
                 if (response.status === 400) {
                     return {
                         code: 400,
-                        raw: convertErrorMessageListToObject(Object.keys(input), data.message)
-                    }
+                        raw: convertErrorMessageListToObject(Object.keys(input), data.message),
+                    };
                 }
 
                 if (data.id) {
                     return {
                         code: response.status,
-                        raw: data
-                    }
+                        raw: data,
+                    };
                 }
             }
 
             return {
                 code: 500,
-                raw: {}
-            }
+                raw: {},
+            };
         }
     },
-    async refresh(props: {
-        refreshToken: string,
-        driver?: AxiosInstance
-    }) {
-        const driver = props.driver || axios
+    async refresh(props: { refreshToken: string; driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
 
         try {
             const { data } = await driver.get(AUTH_SERVICE_ROUTE.AUTH.REFRESH, {
                 headers: {
-                    "Authorization": `Bearer ${props.refreshToken}`,
-                }
-            })
+                    Authorization: `Bearer ${props.refreshToken}`,
+                },
+            });
 
             return {
                 code: 200,
-                raw: data
-            }
+                raw: data,
+            };
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
-                const response = error.response
+                const response = error.response;
                 const data = response.data;
 
                 if (data.id) {
                     return {
                         code: response.status,
-                        raw: data
-                    }
+                        raw: data,
+                    };
                 }
             }
 
             return {
                 code: 500,
-                raw: {}
-            }
+                raw: {},
+            };
         }
     },
-    async validate(props: {
-        token: string,
-        driver?: AxiosInstance
-    }) {
-        const driver = props.driver || axios
+    async validate(props: { token: string; driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
 
         try {
             const { data } = await driver.get(AUTH_SERVICE_ROUTE.AUTH.VALIDATE, {
                 headers: {
-                    "Authorization": `Bearer ${props.token}`,
-                }
-            })
+                    Authorization: `Bearer ${props.token}`,
+                },
+            });
 
             return {
                 code: 200,
-                raw: data
-            }
+                raw: data,
+            };
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
-                const response = error.response
+                const response = error.response;
                 const data = response.data;
 
                 if (data.id) {
                     return {
                         code: response.status,
-                        raw: data
-                    }
+                        raw: data,
+                    };
                 }
             }
 
             return {
                 code: 500,
-                raw: {}
-            }
+                raw: {},
+            };
         }
     },
     async exchangeCodeForTokens(props: {
-        code: string
-        clientId: string
-        redirectUri: string
-        codeVerifier: string
-        driver?: AxiosInstance
+        code: string;
+        clientId: string;
+        redirectUri: string;
+        codeVerifier: string;
+        driver?: AxiosInstance;
     }) {
-        const driver = props.driver || axios
+        const driver = props.driver || axios;
         const input = {
             code: props.code,
             clientId: props.clientId,
             redirectUri: props.redirectUri,
             codeVerifier: props.codeVerifier,
-            grantType: 'authorization_code'
-        }
+            grantType: 'authorization_code',
+        };
 
         try {
             const { data } = await driver.post(AUTH_SERVICE_ROUTE.OAUTH.EXCHANGE_TOKEN, input);
 
             return {
                 code: 200,
-                raw: data
-            }
+                raw: data,
+            };
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
-                const response = error.response
+                const response = error.response;
                 const data = response.data;
 
                 if (response.status === 400) {
                     return {
                         code: 400,
-                        raw: convertErrorMessageListToObject(Object.keys(input), data.message)
-                    }
+                        raw: convertErrorMessageListToObject(Object.keys(input), data.message),
+                    };
                 }
 
                 if (data.id) {
                     return {
                         code: response.status,
-                        raw: data
-                    }
+                        raw: data,
+                    };
                 }
             }
 
             return {
                 code: 500,
-                raw: {}
-            }
+                raw: {},
+            };
         }
     },
     async redirectAuthorize(props: {
-        sessionToken: string
-        clientId: string
-        redirectUri: string
-        codeChallenge: string
-        scope?: string
-        state?: string
-        driver?: AxiosInstance
+        sessionToken: string;
+        clientId: string;
+        redirectUri: string;
+        codeChallenge: string;
+        scope?: string;
+        state?: string;
+        driver?: AxiosInstance;
     }) {
-        const driver = props.driver || axios
+        const driver = props.driver || axios;
         const input = {
             clientId: props.clientId,
             redirectUri: props.redirectUri,
             codeChallenge: props.codeChallenge,
             scope: props.scope,
-            state: props.state
-        }
+            state: props.state,
+        };
 
         try {
             const { data } = await driver.get(AUTH_SERVICE_ROUTE.OAUTH.AUTHORIZE, {
                 headers: {
-                    "Authorization": `Bearer ${props.sessionToken}`,
+                    Authorization: `Bearer ${props.sessionToken}`,
                 },
-                params: input
+                params: input,
             });
 
             return {
                 code: 200,
-                raw: data
-            }
+                raw: data,
+            };
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
-                const response = error.response
+                const response = error.response;
                 const data = response.data;
 
                 if (response.status === 400) {
                     return {
                         code: 400,
-                        raw: convertErrorMessageListToObject(Object.keys(input), data.message)
-                    }
+                        raw: convertErrorMessageListToObject(Object.keys(input), data.message),
+                    };
                 }
 
                 if (data.id) {
                     return {
                         code: response.status,
-                        raw: data
-                    }
+                        raw: data,
+                    };
                 }
             }
 
             return {
                 code: 500,
-                raw: {}
-            }
+                raw: {},
+            };
         }
     },
-    async signOut(props: {
-        refreshToken: string,
-        driver?: AxiosInstance
-    }) {
-        const driver = props.driver || axios
+    async signOut(props: { refreshToken: string; driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
 
         try {
             const { data } = await driver.delete(AUTH_SERVICE_ROUTE.AUTH.SIGN_OUT, {
                 headers: {
-                    "Authorization": `Bearer ${props.refreshToken}`,
-                }
-            })
+                    Authorization: `Bearer ${props.refreshToken}`,
+                },
+            });
 
             return {
                 code: 200,
-                raw: data
-            }
+                raw: data,
+            };
         } catch (error) {
             if (error instanceof AxiosError && error.response) {
-                const response = error.response
+                const response = error.response;
                 const data = response.data;
 
                 if (data.id) {
                     return {
                         code: response.status,
-                        raw: data
-                    }
+                        raw: data,
+                    };
                 }
             }
 
             return {
                 code: 500,
-                raw: {}
-            }
+                raw: {},
+            };
         }
-    }
-}
+    },
+};

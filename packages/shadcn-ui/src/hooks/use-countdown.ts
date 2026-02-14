@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from 'react';
 
 export const useCountdown = (expiresAt: number, onExpire?: (isExpired: boolean) => void) => {
     const getLeft = () => Math.max(0, expiresAt - Date.now());
@@ -31,9 +31,9 @@ export const useCountdown = (expiresAt: number, onExpire?: (isExpired: boolean) 
 
     /** 02:04:05  (always HH:MM:SS, even if HH = 00) */
     const formatted =
-        `${hours.toString().padStart(2, "0")}:` +
-        `${minutes.toString().padStart(2, "0")}:` +
-        `${seconds.toString().padStart(2, "0")}`;
+        `${hours.toString().padStart(2, '0')}:` +
+        `${minutes.toString().padStart(2, '0')}:` +
+        `${seconds.toString().padStart(2, '0')}`;
 
     return { timeLeft, hours, minutes, seconds, formatted, expired: timeLeft === 0 };
 };

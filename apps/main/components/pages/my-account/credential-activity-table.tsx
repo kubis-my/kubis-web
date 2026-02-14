@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { AUDIT_LOG_PAGINATION_SIZE } from "@/root/libs/constants";
-import { useLazyQuery } from "@apollo/client/react";
-import { PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
-import { useCallback, useEffect, useState } from "react";
-import { GET_AUDIT_LOGS, useMyAccount } from "./my-account-container";
-import { ActivityColumn } from "./components/activity-column";
-import { ActivitySkeletonRow } from "./components/activity-skeleton-row";
-import { DataTable } from "@repo/shadcn-ui/components/data-table";
-import { Skeleton } from "@/shadcn/components/skeleton";
+import { AUDIT_LOG_PAGINATION_SIZE } from '@/root/libs/constants';
+import { useLazyQuery } from '@apollo/client/react';
+import { PaginatedAuditLog } from '@repo/commons/types/audit-service-schema.type';
+import { useCallback, useEffect, useState } from 'react';
+import { GET_AUDIT_LOGS, useMyAccount } from './my-account-container';
+import { ActivityColumn } from './components/activity-column';
+import { ActivitySkeletonRow } from './components/activity-skeleton-row';
+import { DataTable } from '@repo/shadcn-ui/components/data-table';
+import { Skeleton } from '@/shadcn/components/skeleton';
 
 const initialPaginationData = {
     data: [],
@@ -17,34 +17,38 @@ const initialPaginationData = {
         hasNextPage: false,
         total: 0,
         currentPage: 1,
-        totalPages: 1
+        totalPages: 1,
     },
     overview: {
         totalAction: 0,
         totalWeekAction: 0,
-        lastActivity: null
-    }
-}
+        lastActivity: null,
+    },
+};
 
 export default function CredentialActivityTable() {
-    const ctx = useMyAccount()
+    const ctx = useMyAccount();
     const [getAuditLogs, { data, loading }] = useLazyQuery(GET_AUDIT_LOGS);
 
     const [pageSize, setPageSize] = useState(AUDIT_LOG_PAGINATION_SIZE);
-    const [paginatedAuditLog, setPaginatedAuditLog] = useState<PaginatedAuditLog>(initialPaginationData);
+    const [paginatedAuditLog, setPaginatedAuditLog] =
+        useState<PaginatedAuditLog>(initialPaginationData);
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
-        if (paginatedAuditLog.pageInfo.hasNextPage && paginatedAuditLog.pageInfo.endCursor !== null) {
-            setCursorHistory(prev => [...prev, paginatedAuditLog.pageInfo.endCursor]);
+        if (
+            paginatedAuditLog.pageInfo.hasNextPage &&
+            paginatedAuditLog.pageInfo.endCursor !== null
+        ) {
+            setCursorHistory((prev) => [...prev, paginatedAuditLog.pageInfo.endCursor]);
             getAuditLogs({
                 variables: {
                     pagination: {
                         cursor: paginatedAuditLog.pageInfo.endCursor,
                         take: pageSize,
-                        credentialId: ctx.credentialPublicId
-                    }
-                }
+                        credentialId: ctx.credentialPublicId,
+                    },
+                },
             });
         }
     }, [paginatedAuditLog, pageSize, getAuditLogs, ctx.auditLog]);
@@ -60,18 +64,18 @@ export default function CredentialActivityTable() {
                     pagination: {
                         cursor: previousCursor,
                         take: pageSize,
-                        credentialId: ctx.credentialPublicId
-                    }
-                }
+                        credentialId: ctx.credentialPublicId,
+                    },
+                },
             });
         }
     }, [cursorHistory, pageSize, getAuditLogs, ctx.auditLog]);
 
     useEffect(() => {
-        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.auditLog ?? initialPaginationData)
-    }, [ctx.auditLog, data?.getAuditLogs])
+        setPaginatedAuditLog(data?.getAuditLogs ?? ctx.auditLog ?? initialPaginationData);
+    }, [ctx.auditLog, data?.getAuditLogs]);
 
-    if (ctx.isLoading) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />
+    if (ctx.isLoading) return <Skeleton className="min-h-screen flex-1 rounded-xl md:min-h-min" />;
 
     return (
         <DataTable

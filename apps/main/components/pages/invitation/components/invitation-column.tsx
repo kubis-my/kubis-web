@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Badge } from "@/shadcn/components/badge";
-import { Button } from "@repo/shadcn-ui/components/button";
+import { Badge } from '@/shadcn/components/badge';
+import { Button } from '@repo/shadcn-ui/components/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/shadcn/components/dropdown-menu";
+} from '@/shadcn/components/dropdown-menu';
 import {
     AlertDialog,
     AlertDialogCancel,
@@ -16,39 +16,35 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@repo/shadcn-ui/components/alert-dialog";
-import {
-    IconCheck,
-    IconDots,
-    IconX,
-} from "@tabler/icons-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@repo/shadcn-ui/components/avatar";
-import { formatDateTime } from "@repo/commons/utils/date";
-import { ColumnDef } from "@tanstack/react-table";
-import { useState } from "react";
-import { UserAccount, UserAccountStatus } from "@repo/commons/types/account-service-schema.type";
-import { Credential } from "@repo/commons/types/auth-service-schema.type";
+} from '@repo/shadcn-ui/components/alert-dialog';
+import { IconCheck, IconDots, IconX } from '@tabler/icons-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@repo/shadcn-ui/components/avatar';
+import { formatDateTime } from '@repo/commons/utils/date';
+import { ColumnDef } from '@tanstack/react-table';
+import { useState } from 'react';
+import { UserAccount, UserAccountStatus } from '@repo/commons/types/account-service-schema.type';
+import { Credential } from '@repo/commons/types/auth-service-schema.type';
 
 const statusConfig: Record<UserAccountStatus, { label: string; className: string }> = {
     [UserAccountStatus.PENDING_INVITATION]: {
-        label: "Pending",
-        className: "text-yellow-600 border-yellow-600",
+        label: 'Pending',
+        className: 'text-yellow-600 border-yellow-600',
     },
     [UserAccountStatus.ACTIVE]: {
-        label: "Accepted",
-        className: "text-green-600 border-green-600",
+        label: 'Accepted',
+        className: 'text-green-600 border-green-600',
     },
     [UserAccountStatus.EXPIRED_INVITATION]: {
-        label: "Expired",
-        className: "text-red-600 border-red-600",
+        label: 'Expired',
+        className: 'text-red-600 border-red-600',
     },
     [UserAccountStatus.REJECT_INVITATION]: {
-        label: "Rejected",
-        className: "text-orange-600 border-orange-600",
+        label: 'Rejected',
+        className: 'text-orange-600 border-orange-600',
     },
     [UserAccountStatus.INACTIVE]: {
-        label: "Deactivated",
-        className: "text-red-600 border-red-600",
+        label: 'Deactivated',
+        className: 'text-red-600 border-red-600',
     },
 };
 
@@ -94,9 +90,11 @@ function InvitationActionsCell({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Accept invitation</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to accept the invitation from{" "}
-                            <span className="font-medium">{invitation.companyEmployee.company.name}</span> as{" "}
-                            <span className="font-medium">{invitation.position}</span>?
+                            Are you sure you want to accept the invitation from{' '}
+                            <span className="font-medium">
+                                {invitation.companyEmployee.company.name}
+                            </span>{' '}
+                            as <span className="font-medium">{invitation.position}</span>?
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -118,8 +116,11 @@ function InvitationActionsCell({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Decline invitation</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to decline the invitation from{" "}
-                            <span className="font-medium">{invitation.companyEmployee.company.name}</span>? This action cannot be undone.
+                            Are you sure you want to decline the invitation from{' '}
+                            <span className="font-medium">
+                                {invitation.companyEmployee.company.name}
+                            </span>
+                            ? This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -146,26 +147,26 @@ export function createInvitationColumns(
 ): ColumnDef<UserAccount>[] {
     return [
         {
-            accessorKey: "companyName",
-            header: "Company / Branch",
+            accessorKey: 'companyName',
+            header: 'Company / Branch',
             cell: ({ row }) => {
                 const company = row.original.companyEmployee.company;
                 const initials = company.name
-                    .split(" ")
+                    .split(' ')
                     .map((word) => word[0])
-                    .join("")
+                    .join('')
                     .slice(0, 2)
                     .toUpperCase();
 
                 return (
                     <div className="flex items-center gap-3">
                         <Avatar className="size-8 rounded-lg">
-                            <AvatarImage src={company.logo || ""} alt={company.name} />
+                            <AvatarImage src={company.logo || ''} alt={company.name} />
                             <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
                             <span className="font-medium">{company.name}</span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-muted-foreground text-xs">
                                 {row.original.branch.name} ({row.original.branch.code.slice(0, 8)})
                             </span>
                         </div>
@@ -176,64 +177,62 @@ export function createInvitationColumns(
             enableHiding: false,
         },
         {
-            accessorKey: "position",
-            header: "Position",
-            cell: ({ row }) => (
-                <span className="text-sm">{row.original.position}</span>
-            ),
+            accessorKey: 'position',
+            header: 'Position',
+            cell: ({ row }) => <span className="text-sm">{row.original.position}</span>,
             size: 150,
         },
         {
-            accessorKey: "invitedBy",
-            header: "Invited By",
+            accessorKey: 'invitedBy',
+            header: 'Invited By',
             cell: ({ row }) => {
                 const user = row.original.createdBy;
                 const credential = user.credential as Credential;
                 const isSelf = row.original.companyEmployee.user.publicId === user.publicId;
 
                 if (isSelf) {
-                    return <span className="text-sm text-muted-foreground">-</span>;
+                    return <span className="text-muted-foreground text-sm">-</span>;
                 }
 
                 return (
                     <div className="flex flex-col">
                         <span className="text-sm font-medium">{user.firstName}</span>
-                        <span className="text-xs text-muted-foreground">{credential.email}</span>
+                        <span className="text-muted-foreground text-xs">{credential.email}</span>
                     </div>
-                )
+                );
             },
             size: 180,
         },
         {
-            accessorKey: "invitedAt",
-            header: "Date",
+            accessorKey: 'invitedAt',
+            header: 'Date',
             cell: ({ row }) => (
                 <div className="text-sm">
                     <div className="font-medium">
-                        {formatDateTime(row.original.createdAt, { format: "dd MMM yyyy" })}
+                        {formatDateTime(row.original.createdAt, { format: 'dd MMM yyyy' })}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                        {formatDateTime(row.original.createdAt, { format: "hh:mm a" })}
+                    <div className="text-muted-foreground text-xs">
+                        {formatDateTime(row.original.createdAt, { format: 'hh:mm a' })}
                     </div>
                 </div>
             ),
             size: 120,
         },
         {
-            accessorKey: "expiredAt",
-            header: "Expired At",
+            accessorKey: 'expiredAt',
+            header: 'Expired At',
             cell: ({ row }) => {
                 const expiredAt = row.original.expiredAt;
                 if (!expiredAt) {
-                    return <span className="text-sm text-muted-foreground">-</span>;
+                    return <span className="text-muted-foreground text-sm">-</span>;
                 }
                 return (
                     <div className="text-sm">
                         <div className="font-medium">
-                            {formatDateTime(expiredAt, { format: "dd MMM yyyy" })}
+                            {formatDateTime(expiredAt, { format: 'dd MMM yyyy' })}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                            {formatDateTime(expiredAt, { format: "hh:mm a" })}
+                        <div className="text-muted-foreground text-xs">
+                            {formatDateTime(expiredAt, { format: 'hh:mm a' })}
                         </div>
                     </div>
                 );
@@ -241,8 +240,8 @@ export function createInvitationColumns(
             size: 120,
         },
         {
-            accessorKey: "status",
-            header: "Status",
+            accessorKey: 'status',
+            header: 'Status',
             cell: ({ row }) => {
                 const config = statusConfig[row.original.status];
                 return (
@@ -254,8 +253,8 @@ export function createInvitationColumns(
             size: 100,
         },
         {
-            id: "actions",
-            header: "",
+            id: 'actions',
+            header: '',
             cell: ({ row }) => (
                 <InvitationActionsCell
                     invitation={row.original}

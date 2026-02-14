@@ -15,30 +15,33 @@ import { compareTokens } from '../utils/csrf';
  * Usage: .use(csrfProtection())
  */
 export function csrfProtection() {
-  return new Elysia()
-    .onRequest(async ({ request, set }) => {
-      // Only validate POST requests (GET is read-only and safe)
-      if (request.method !== 'POST') {
-        return;
-      }
+    return new Elysia().onRequest(async ({ request, set }) => {
+        // Only validate POST requests (GET is read-only and safe)
+        if (request.method !== 'POST') {
+            return;
+        }
 
-      // Extract CSRF token from header (support both cases)
-      const headerToken = (request.headers.get('X-CSRF-Token') ||
-        request.headers.get('x-csrf-token')) ?? undefined;
+        // Extract CSRF token from header (support both cases)
+        const headerToken =
+            (request.headers.get('X-CSRF-Token') || request.headers.get('x-csrf-token')) ??
+            undefined;
 
-      // Extract CSRF token from cookie
-      const cookieToken = await getCsrfTokenCookie();
+        // Extract CSRF token from cookie
+        const cookieToken = await getCsrfTokenCookie();
 
-      // Validate tokens exist and match using constant-time comparison
-      if (!compareTokens(cookieToken, headerToken)) {
-        set.status = 403;
-        return new Response(JSON.stringify({
-          error: 'CSRF token validation failed',
-          code: 'CSRF_VALIDATION_FAILED',
-        }), {
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
+        // Validate tokens exist and match using constant-time comparison
+        if (!compareTokens(cookieToken, headerToken)) {
+            set.status = 403;
+            return new Response(
+                JSON.stringify({
+                    error: 'CSRF token validation failed',
+                    code: 'CSRF_VALIDATION_FAILED',
+                }),
+                {
+                    status: 403,
+                    headers: { 'Content-Type': 'application/json' },
+                },
+            );
+        }
     });
 }

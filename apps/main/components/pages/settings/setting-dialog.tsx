@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shadcn/components/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/shadcn/components/dialog';
 import { Tabs, TabsList, TabsTrigger } from '@/shadcn/components/tabs';
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 import { IconUser, IconKey, IconShieldCheck } from '@tabler/icons-react';
 import SettingDialogContent from './setting-dialog-content';
 import ProfileContainer from './profile-container';
 
-export const OPEN_SETTINGS_EVENT = "open-settings-dialog";
+export const OPEN_SETTINGS_EVENT = 'open-settings-dialog';
 
 export function openSettingsDialog() {
     window.dispatchEvent(new CustomEvent(OPEN_SETTINGS_EVENT));
@@ -15,7 +15,7 @@ export function openSettingsDialog() {
 
 export default function SettingDialog() {
     const [open, setOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState("personal-information");
+    const [activeTab, setActiveTab] = useState('personal-information');
 
     useEffect(() => {
         const handler = () => setOpen(true);
@@ -24,31 +24,50 @@ export default function SettingDialog() {
     }, []);
 
     return (
-        <Dialog open={open} onOpenChange={(value) => {
-            setOpen(value);
+        <Dialog
+            open={open}
+            onOpenChange={(value) => {
+                setOpen(value);
 
-            if (!value) {
-                setActiveTab("personal-information")
-            }
-        }}>
-            <DialogContent className="sm:max-w-3xl p-0 gap-0 overflow-hidden">
+                if (!value) {
+                    setActiveTab('personal-information');
+                }
+            }}
+        >
+            <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-3xl">
                 <ProfileContainer>
-                    <Tabs value={activeTab} onValueChange={setActiveTab} orientation="vertical" className="flex min-h-[500px]">
+                    <Tabs
+                        value={activeTab}
+                        onValueChange={setActiveTab}
+                        orientation="vertical"
+                        className="flex min-h-[500px]"
+                    >
                         <div className="flex w-56 shrink-0 flex-col border-r p-4">
                             <div className="mb-4 px-2">
                                 <DialogTitle>Settings</DialogTitle>
-                                <DialogDescription className="text-xs mt-1">Manage your account settings</DialogDescription>
+                                <DialogDescription className="mt-1 text-xs">
+                                    Manage your account settings
+                                </DialogDescription>
                             </div>
-                            <TabsList className="flex flex-col w-full gap-1 bg-transparent">
-                                <TabsTrigger value="personal-information" className="justify-start gap-2 px-2 py-1.5 text-sm data-[state=active]:border-border">
+                            <TabsList className="flex w-full flex-col gap-1 bg-transparent">
+                                <TabsTrigger
+                                    value="personal-information"
+                                    className="data-[state=active]:border-border justify-start gap-2 px-2 py-1.5 text-sm"
+                                >
                                     <IconUser className="size-4" />
                                     Personal Information
                                 </TabsTrigger>
-                                <TabsTrigger value="credential" className="justify-start gap-2 px-2 py-1.5 text-sm data-[state=active]:border-border">
+                                <TabsTrigger
+                                    value="credential"
+                                    className="data-[state=active]:border-border justify-start gap-2 px-2 py-1.5 text-sm"
+                                >
                                     <IconKey className="size-4" />
                                     Credential
                                 </TabsTrigger>
-                                <TabsTrigger value="security" className="justify-start gap-2 px-2 py-1.5 text-sm data-[state=active]:border-border">
+                                <TabsTrigger
+                                    value="security"
+                                    className="data-[state=active]:border-border justify-start gap-2 px-2 py-1.5 text-sm"
+                                >
                                     <IconShieldCheck className="size-4" />
                                     Security
                                 </TabsTrigger>
@@ -61,5 +80,5 @@ export default function SettingDialog() {
                 </ProfileContainer>
             </DialogContent>
         </Dialog>
-    )
+    );
 }

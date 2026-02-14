@@ -1,6 +1,12 @@
-import { DateTime } from "luxon";
+import { DateTime } from 'luxon';
 
-export const formatDateTime = (dateString: string | undefined | null, config: { zone?: string, format: string } = { zone: 'Asia/Kuala_Lumpur', format: 'dd MMM yyyy, hh:mm a' }): string => {
+export const formatDateTime = (
+    dateString: string | undefined | null,
+    config: { zone?: string; format: string } = {
+        zone: 'Asia/Kuala_Lumpur',
+        format: 'dd MMM yyyy, hh:mm a',
+    },
+): string => {
     if (!dateString) return '-';
     const dt = DateTime.fromISO(dateString, { zone: config.zone });
     if (!dt.isValid) return dateString;
@@ -20,4 +26,4 @@ export const getDuration = (startDate: Date, endDate: Date) => {
     if (minutes > 0 && days === 0) parts.push(`${minutes} M`);
 
     return parts.length > 0 ? parts.join(' ') : '0 M';
-}
+};

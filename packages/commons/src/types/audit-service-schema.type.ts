@@ -1,4 +1,3 @@
-
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -94,7 +93,9 @@ export interface PaginatedAuditLog {
 }
 
 export interface IQuery {
-    getAuditLogs(pagination: AuditLogPaginationInput): PaginatedAuditLog | Promise<PaginatedAuditLog>;
+    getAuditLogs(
+        pagination: AuditLogPaginationInput,
+    ): PaginatedAuditLog | Promise<PaginatedAuditLog>;
 }
 
 export type JSON = any;

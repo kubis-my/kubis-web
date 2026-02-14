@@ -1,23 +1,23 @@
-import Link from "next/link";
-import { Button } from "@repo/shadcn-ui/components/button";
-import { Globe } from "lucide-react";
+import Link from 'next/link';
+import { Button } from '@repo/shadcn-ui/components/button';
+import { Globe } from 'lucide-react';
 
 export default function Footer() {
     return (
-        <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
-            <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        <footer className="border-t border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-900">
+            <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
                 {/* Footer Links Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-12">
+                <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6">
                     {/* What's new */}
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                             What&apos;s new
                         </h3>
                         <ul className="space-y-3">
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Latest features
                                 </Link>
@@ -25,7 +25,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Product updates
                                 </Link>
@@ -33,7 +33,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Roadmap
                                 </Link>
@@ -43,14 +43,14 @@ export default function Footer() {
 
                     {/* Products */}
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                             Products
                         </h3>
                         <ul className="space-y-3">
                             <li>
                                 <Link
                                     href="/drive"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Drive
                                 </Link>
@@ -58,7 +58,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="/mail"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Mail
                                 </Link>
@@ -66,7 +66,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="/calendar"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Calendar
                                 </Link>
@@ -74,7 +74,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="/meet"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Meet
                                 </Link>
@@ -84,14 +84,14 @@ export default function Footer() {
 
                     {/* Resources */}
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                             Resources
                         </h3>
                         <ul className="space-y-3">
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Documentation
                                 </Link>
@@ -99,7 +99,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     API Reference
                                 </Link>
@@ -107,7 +107,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Tutorials
                                 </Link>
@@ -115,7 +115,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Community
                                 </Link>
@@ -125,14 +125,14 @@ export default function Footer() {
 
                     {/* Business */}
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                             Business
                         </h3>
                         <ul className="space-y-3">
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Enterprise
                                 </Link>
@@ -140,7 +140,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Plans & Pricing
                                 </Link>
@@ -148,7 +148,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     For Teams
                                 </Link>
@@ -158,14 +158,14 @@ export default function Footer() {
 
                     {/* Support */}
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                             Support
                         </h3>
                         <ul className="space-y-3">
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Help Center
                                 </Link>
@@ -173,7 +173,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Contact Us
                                 </Link>
@@ -181,7 +181,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Status
                                 </Link>
@@ -191,14 +191,14 @@ export default function Footer() {
 
                     {/* Company */}
                     <div>
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
                             Company
                         </h3>
                         <ul className="space-y-3">
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     About
                                 </Link>
@@ -206,7 +206,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Blog
                                 </Link>
@@ -214,7 +214,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Careers
                                 </Link>
@@ -222,7 +222,7 @@ export default function Footer() {
                             <li>
                                 <Link
                                     href="#"
-                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                                    className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                                 >
                                     Press
                                 </Link>
@@ -232,12 +232,12 @@ export default function Footer() {
                 </div>
 
                 {/* Footer Bottom */}
-                <div className="pt-8 border-t border-gray-200 dark:border-gray-800">
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="border-t border-gray-200 pt-8 dark:border-gray-800">
+                    <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                         {/* Left side */}
                         <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
                             <Button variant="ghost" size="sm" className="h-auto p-0">
-                                <Globe className="w-4 h-4 mr-2" />
+                                <Globe className="mr-2 h-4 w-4" />
                                 <span>English (Malaysia)</span>
                             </Button>
                             <Button variant="link" size="sm" className="h-auto p-0" asChild>
@@ -259,5 +259,5 @@ export default function Footer() {
                 </div>
             </div>
         </footer>
-    )
+    );
 }

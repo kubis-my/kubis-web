@@ -1,12 +1,24 @@
-"use client";
+'use client';
 
-import { TabsContent } from "@/shadcn/components/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/shadcn-ui/components/card";
-import { Label } from "@repo/shadcn-ui/components/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/shadcn-ui/components/select";
-import { Switch } from "@repo/shadcn-ui/components/switch";
-import { Button } from "@repo/shadcn-ui/components/button";
-import { Input } from "@repo/shadcn-ui/components/input";
+import { TabsContent } from '@/shadcn/components/tabs';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@repo/shadcn-ui/components/card';
+import { Label } from '@repo/shadcn-ui/components/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@repo/shadcn-ui/components/select';
+import { Switch } from '@repo/shadcn-ui/components/switch';
+import { Button } from '@repo/shadcn-ui/components/button';
+import { Input } from '@repo/shadcn-ui/components/input';
 import {
     AlertDialog,
     AlertDialogCancel,
@@ -16,53 +28,53 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@repo/shadcn-ui/components/alert-dialog";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@repo/shadcn-ui/components/input-otp";
-import { Separator } from "@repo/shadcn-ui/components/separator";
-import { IconClock, IconTrash, IconDeviceFloppy, IconAlertTriangle } from "@tabler/icons-react";
-import { useCompanyBranchDetail } from "./company-branch-detail-container";
-import { useState } from "react";
-import { DayOfWeek } from "@repo/commons/types/account-service-schema.type";
-import { DateTime } from "luxon";
+} from '@repo/shadcn-ui/components/alert-dialog';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@repo/shadcn-ui/components/input-otp';
+import { Separator } from '@repo/shadcn-ui/components/separator';
+import { IconClock, IconTrash, IconDeviceFloppy, IconAlertTriangle } from '@tabler/icons-react';
+import { useCompanyBranchDetail } from './company-branch-detail-container';
+import { useState } from 'react';
+import { DayOfWeek } from '@repo/commons/types/account-service-schema.type';
+import { DateTime } from 'luxon';
 
 const DAYS_OF_WEEK = [
-    { key: DayOfWeek.MONDAY, label: "Monday" },
-    { key: DayOfWeek.TUESDAY, label: "Tuesday" },
-    { key: DayOfWeek.WEDNESDAY, label: "Wednesday" },
-    { key: DayOfWeek.THURSDAY, label: "Thursday" },
-    { key: DayOfWeek.FRIDAY, label: "Friday" },
-    { key: DayOfWeek.SATURDAY, label: "Saturday" },
-    { key: DayOfWeek.SUNDAY, label: "Sunday" },
+    { key: DayOfWeek.MONDAY, label: 'Monday' },
+    { key: DayOfWeek.TUESDAY, label: 'Tuesday' },
+    { key: DayOfWeek.WEDNESDAY, label: 'Wednesday' },
+    { key: DayOfWeek.THURSDAY, label: 'Thursday' },
+    { key: DayOfWeek.FRIDAY, label: 'Friday' },
+    { key: DayOfWeek.SATURDAY, label: 'Saturday' },
+    { key: DayOfWeek.SUNDAY, label: 'Sunday' },
 ] as const;
 
 const TIMEZONES = [
-    { value: "America/Los_Angeles", label: "Pacific Time (PT)" },
-    { value: "America/Denver", label: "Mountain Time (MT)" },
-    { value: "America/Chicago", label: "Central Time (CT)" },
-    { value: "America/New_York", label: "Eastern Time (ET)" },
-    { value: "America/Phoenix", label: "Arizona Time (AZ)" },
-    { value: "America/Anchorage", label: "Alaska Time (AKT)" },
-    { value: "Pacific/Honolulu", label: "Hawaii Time (HT)" },
+    { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+    { value: 'America/Denver', label: 'Mountain Time (MT)' },
+    { value: 'America/Chicago', label: 'Central Time (CT)' },
+    { value: 'America/New_York', label: 'Eastern Time (ET)' },
+    { value: 'America/Phoenix', label: 'Arizona Time (AZ)' },
+    { value: 'America/Anchorage', label: 'Alaska Time (AKT)' },
+    { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' },
 ];
 
 const CURRENCIES = [
-    { value: "USD", label: "US Dollar (USD)", symbol: "$" },
-    { value: "EUR", label: "Euro (EUR)", symbol: "€" },
-    { value: "GBP", label: "British Pound (GBP)", symbol: "£" },
-    { value: "JPY", label: "Japanese Yen (JPY)", symbol: "¥" },
-    { value: "CAD", label: "Canadian Dollar (CAD)", symbol: "$" },
-    { value: "AUD", label: "Australian Dollar (AUD)", symbol: "$" },
-    { value: "CNY", label: "Chinese Yuan (CNY)", symbol: "¥" },
-    { value: "INR", label: "Indian Rupee (INR)", symbol: "₹" },
+    { value: 'USD', label: 'US Dollar (USD)', symbol: '$' },
+    { value: 'EUR', label: 'Euro (EUR)', symbol: '€' },
+    { value: 'GBP', label: 'British Pound (GBP)', symbol: '£' },
+    { value: 'JPY', label: 'Japanese Yen (JPY)', symbol: '¥' },
+    { value: 'CAD', label: 'Canadian Dollar (CAD)', symbol: '$' },
+    { value: 'AUD', label: 'Australian Dollar (AUD)', symbol: '$' },
+    { value: 'CNY', label: 'Chinese Yuan (CNY)', symbol: '¥' },
+    { value: 'INR', label: 'Indian Rupee (INR)', symbol: '₹' },
 ];
 
 export default function SettingsTab() {
     const ctx = useCompanyBranchDetail();
 
-    const [timezone, setTimezone] = useState("America/Los_Angeles");
-    const [currency, setCurrency] = useState("USD");
-    const [invoicePrefix, setInvoicePrefix] = useState("INV");
-    const [taxRate, setTaxRate] = useState("10");
+    const [timezone, setTimezone] = useState('America/Los_Angeles');
+    const [currency, setCurrency] = useState('USD');
+    const [invoicePrefix, setInvoicePrefix] = useState('INV');
+    const [taxRate, setTaxRate] = useState('10');
     const [notifications, setNotifications] = useState({
         newUsers: true,
         upcomingEvents: true,
@@ -71,9 +83,9 @@ export default function SettingsTab() {
 
     // Delete branch state
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [deleteStep, setDeleteStep] = useState<"code" | "otp">("code");
-    const [branchCodeInput, setBranchCodeInput] = useState("");
-    const [otpValue, setOtpValue] = useState("");
+    const [deleteStep, setDeleteStep] = useState<'code' | 'otp'>('code');
+    const [branchCodeInput, setBranchCodeInput] = useState('');
+    const [otpValue, setOtpValue] = useState('');
     const [isRequestingOtp, setIsRequestingOtp] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -86,8 +98,8 @@ export default function SettingsTab() {
 
     const handleTimeChange = (
         day: DayOfWeek,
-        timeType: "openTime" | "closeTime",
-        value: string
+        timeType: 'openTime' | 'closeTime',
+        value: string,
     ) => {
         // setWeekSchedule((prev) => ({
         //     ...prev,
@@ -97,7 +109,7 @@ export default function SettingsTab() {
 
     const handleSaveGeneralSettings = async () => {
         // TODO: Implement GraphQL mutation to save all general settings
-        console.log("Saving general settings:", {
+        console.log('Saving general settings:', {
             timezone,
             currency,
             invoicePrefix,
@@ -116,13 +128,13 @@ export default function SettingsTab() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         setIsRequestingOtp(false);
-        setDeleteStep("otp");
+        setDeleteStep('otp');
     };
 
     const handleDeleteBranch = async () => {
         setIsDeleting(true);
         // TODO: Implement GraphQL mutation to delete branch
-        console.log("Deleting branch with OTP:", otpValue);
+        console.log('Deleting branch with OTP:', otpValue);
 
         // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -135,15 +147,14 @@ export default function SettingsTab() {
     };
 
     const resetDeleteDialog = () => {
-        setDeleteStep("code");
-        setBranchCodeInput("");
-        setOtpValue("");
+        setDeleteStep('code');
+        setBranchCodeInput('');
+        setOtpValue('');
         setDeleteDialogOpen(false);
     };
 
     const isBranchCodeValid = branchCodeInput === ctx.branch?.code;
     const isOtpValid = otpValue.length === 6;
-
 
     return (
         <TabsContent value="settings" className="space-y-6">
@@ -160,7 +171,9 @@ export default function SettingsTab() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {DAYS_OF_WEEK.map(({ key, label }) => {
-                        const schedule = ctx.branch?.branchOperationHours?.find(row => row.dayOfWeek === key);
+                        const schedule = ctx.branch?.branchOperationHours?.find(
+                            (row) => row.dayOfWeek === key,
+                        );
 
                         return (
                             <div
@@ -178,18 +191,22 @@ export default function SettingsTab() {
                                     <div className="flex items-center gap-2">
                                         <Input
                                             type="time"
-                                            value={DateTime.fromISO(schedule?.openTime).toFormat("hh:mm")}
+                                            value={DateTime.fromISO(schedule?.openTime).toFormat(
+                                                'hh:mm',
+                                            )}
                                             onChange={(e) =>
-                                                handleTimeChange(key, "openTime", e.target.value)
+                                                handleTimeChange(key, 'openTime', e.target.value)
                                             }
                                             className="w-[130px]"
                                         />
                                         <span className="text-muted-foreground">to</span>
                                         <Input
                                             type="time"
-                                            value={DateTime.fromISO(schedule?.closeTime).toFormat("hh:mm")}
+                                            value={DateTime.fromISO(schedule?.closeTime).toFormat(
+                                                'hh:mm',
+                                            )}
                                             onChange={(e) =>
-                                                handleTimeChange(key, "closeTime", e.target.value)
+                                                handleTimeChange(key, 'closeTime', e.target.value)
                                             }
                                             className="w-[130px]"
                                         />
@@ -300,14 +317,15 @@ export default function SettingsTab() {
                             <div className="flex items-center justify-between gap-2">
                                 <div className="space-y-0.5">
                                     <Label className="text-sm font-normal">Upcoming Events</Label>
-                                    <p className="text-muted-foreground text-xs">
-                                        Event reminders
-                                    </p>
+                                    <p className="text-muted-foreground text-xs">Event reminders</p>
                                 </div>
                                 <Switch
                                     checked={notifications.upcomingEvents}
                                     onCheckedChange={(checked) =>
-                                        setNotifications((prev) => ({ ...prev, upcomingEvents: checked }))
+                                        setNotifications((prev) => ({
+                                            ...prev,
+                                            upcomingEvents: checked,
+                                        }))
                                     }
                                 />
                             </div>
@@ -321,7 +339,10 @@ export default function SettingsTab() {
                                 <Switch
                                     checked={notifications.branchUpdates}
                                     onCheckedChange={(checked) =>
-                                        setNotifications((prev) => ({ ...prev, branchUpdates: checked }))
+                                        setNotifications((prev) => ({
+                                            ...prev,
+                                            branchUpdates: checked,
+                                        }))
                                     }
                                 />
                             </div>
@@ -343,7 +364,7 @@ export default function SettingsTab() {
             {/* Danger Zone - Delete Branch */}
             <Card className="border-destructive">
                 <CardHeader>
-                    <div className="flex items-center gap-2 text-destructive">
+                    <div className="text-destructive flex items-center gap-2">
                         <IconAlertTriangle className="size-5" />
                         <CardTitle>Danger Zone</CardTitle>
                     </div>
@@ -352,17 +373,20 @@ export default function SettingsTab() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-start justify-between rounded-lg border border-destructive/50 bg-destructive/5 p-4">
+                    <div className="border-destructive/50 bg-destructive/5 flex items-start justify-between rounded-lg border p-4">
                         <div className="space-y-1">
                             <p className="font-medium">Delete this branch</p>
                             <p className="text-muted-foreground text-sm">
-                                Once you delete a branch, there is no going back. This will delete all
-                                users and events associated with this branch.
+                                Once you delete a branch, there is no going back. This will delete
+                                all users and events associated with this branch.
                             </p>
                         </div>
                         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                             <AlertDialogTrigger asChild>
-                                <Button variant="destructive" onClick={() => setDeleteDialogOpen(true)}>
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => setDeleteDialogOpen(true)}
+                                >
                                     <IconTrash className="size-4" />
                                     Delete Branch
                                 </Button>
@@ -370,30 +394,30 @@ export default function SettingsTab() {
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                        {deleteStep === "code"
-                                            ? "Delete Branch Confirmation"
-                                            : "Enter OTP Code"}
+                                        {deleteStep === 'code'
+                                            ? 'Delete Branch Confirmation'
+                                            : 'Enter OTP Code'}
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        {deleteStep === "code" ? (
+                                        {deleteStep === 'code' ? (
                                             <>
-                                                This action cannot be undone. This will permanently delete
-                                                the branch and remove all associated data.
+                                                This action cannot be undone. This will permanently
+                                                delete the branch and remove all associated data.
                                             </>
                                         ) : (
                                             <>
-                                                An OTP has been sent to the company owner (CEO). Please
-                                                enter the 6-digit code to confirm deletion.
+                                                An OTP has been sent to the company owner (CEO).
+                                                Please enter the 6-digit code to confirm deletion.
                                             </>
                                         )}
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
 
-                                {deleteStep === "code" ? (
+                                {deleteStep === 'code' ? (
                                     <div className="space-y-4">
-                                        <div className="rounded-lg bg-destructive/10 p-3 text-sm">
+                                        <div className="bg-destructive/10 rounded-lg p-3 text-sm">
                                             <p className="font-medium">This will delete:</p>
-                                            <ul className="ml-4 mt-2 list-disc space-y-1 text-muted-foreground">
+                                            <ul className="text-muted-foreground mt-2 ml-4 list-disc space-y-1">
                                                 <li>{1} users</li>
                                                 <li>{1} events</li>
                                                 <li>All branch settings and data</li>
@@ -401,10 +425,10 @@ export default function SettingsTab() {
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="branch-code">
-                                                Type{" "}
+                                                Type{' '}
                                                 <span className="font-mono font-bold">
                                                     {ctx.branch?.code}
-                                                </span>{" "}
+                                                </span>{' '}
                                                 to confirm
                                             </Label>
                                             <Input
@@ -440,13 +464,13 @@ export default function SettingsTab() {
                                     <AlertDialogCancel onClick={resetDeleteDialog}>
                                         Cancel
                                     </AlertDialogCancel>
-                                    {deleteStep === "code" ? (
+                                    {deleteStep === 'code' ? (
                                         <Button
                                             variant="destructive"
                                             disabled={!isBranchCodeValid || isRequestingOtp}
                                             onClick={handleRequestOtp}
                                         >
-                                            {isRequestingOtp ? "Requesting OTP..." : "Request OTP"}
+                                            {isRequestingOtp ? 'Requesting OTP...' : 'Request OTP'}
                                         </Button>
                                     ) : (
                                         <Button
@@ -454,7 +478,7 @@ export default function SettingsTab() {
                                             disabled={!isOtpValid || isDeleting}
                                             onClick={handleDeleteBranch}
                                         >
-                                            {isDeleting ? "Deleting..." : "Confirm Delete"}
+                                            {isDeleting ? 'Deleting...' : 'Confirm Delete'}
                                         </Button>
                                     )}
                                 </AlertDialogFooter>

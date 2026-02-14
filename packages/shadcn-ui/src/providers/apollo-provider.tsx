@@ -5,7 +5,7 @@ import { getApolloClient } from '@repo/commons/lib/apollo-client';
 import { ReactNode, useMemo } from 'react';
 
 interface ApolloProviderProps {
-  children: ReactNode;
+    children: ReactNode;
 }
 
 /**
@@ -19,7 +19,7 @@ interface ApolloProviderProps {
  * </ApolloProvider>
  */
 export function ApolloProvider({ children }: ApolloProviderProps) {
-  const client = useMemo(() => getApolloClient(), []);
+    const client = useMemo(() => getApolloClient(), []);
 
-  return <BaseApolloProvider client={client}>{children}</BaseApolloProvider>;
+    return <BaseApolloProvider client={client}>{children}</BaseApolloProvider>;
 }

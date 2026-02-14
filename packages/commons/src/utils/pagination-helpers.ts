@@ -5,6 +5,6 @@ export const createInitialPaginatedData = <T>() => ({
         hasNextPage: false,
         total: 0,
         currentPage: 1,
-        totalPages: 1
+        totalPages: 1,
     },
 });

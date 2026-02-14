@@ -1,4 +1,3 @@
-
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -9,9 +8,9 @@
 /* eslint-disable */
 
 export enum CredentialDeviceStatus {
-    CURRENT = "CURRENT",
-    ACTIVE = "ACTIVE",
-    INACTIVE = "INACTIVE"
+    CURRENT = 'CURRENT',
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
 }
 
 export interface CredentialDevicePaginationInput {
@@ -70,7 +69,9 @@ export interface PaginatedCredentialDevice {
 
 export interface IQuery {
     getCredential(publicId: string): Nullable<Credential> | Promise<Nullable<Credential>>;
-    getCredentialDevices(pagination: CredentialDevicePaginationInput): PaginatedCredentialDevice | Promise<PaginatedCredentialDevice>;
+    getCredentialDevices(
+        pagination: CredentialDevicePaginationInput,
+    ): PaginatedCredentialDevice | Promise<PaginatedCredentialDevice>;
 }
 
 export interface IMutation {

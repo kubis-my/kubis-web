@@ -15,11 +15,11 @@ export const CSRF_COOKIE_NAME = COOKIE_NAMES.CSRF_TOKEN;
  * Must match the configuration in cookie-helpers.ts setCsrfTokenCookie
  */
 export const CSRF_COOKIE_CONFIG = {
-  httpOnly: false, // MUST be readable by client JavaScript
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const, // Stricter than 'lax' for CSRF protection
-  path: '/',
-  maxAge: 7 * 24 * 60 * 60, // 7 days
+    httpOnly: false, // MUST be readable by client JavaScript
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const, // Stricter than 'lax' for CSRF protection
+    path: '/',
+    maxAge: 7 * 24 * 60 * 60, // 7 days
 };
 
 /**
@@ -27,7 +27,7 @@ export const CSRF_COOKIE_CONFIG = {
  * Returns 64-character hex string (32 bytes)
  */
 export function generateCsrfTokenEdge(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }

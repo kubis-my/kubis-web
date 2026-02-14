@@ -1,14 +1,29 @@
-"use client";
+'use client';
 
-import { AUDIT_LOG_PAGINATION_SIZE, COMPANY_PAGINATION_SIZE, CREDENTIAL_DEVICE_PAGINATION_SIZE } from "@/root/libs/constants";
-import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
-import { useAuth } from "@/shadcn/providers/auth-provider";
-import { gql, TypedDocumentNode } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
-import { CompaniesOverview, CompanyPaginationInput, PaginatedCompany } from "@repo/commons/types/account-service-schema.type";
-import { AuditLogPaginationInput, PaginatedAuditLog } from "@repo/commons/types/audit-service-schema.type";
-import { CredentialDeviceOverview, CredentialDevicePaginationInput, PaginatedCredentialDevice } from "@repo/commons/types/auth-service-schema.type";
-import { createContext, useContext, useEffect, useMemo } from "react";
+import {
+    AUDIT_LOG_PAGINATION_SIZE,
+    COMPANY_PAGINATION_SIZE,
+    CREDENTIAL_DEVICE_PAGINATION_SIZE,
+} from '@/root/libs/constants';
+import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { useAuth } from '@/shadcn/providers/auth-provider';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
+import {
+    CompaniesOverview,
+    CompanyPaginationInput,
+    PaginatedCompany,
+} from '@repo/commons/types/account-service-schema.type';
+import {
+    AuditLogPaginationInput,
+    PaginatedAuditLog,
+} from '@repo/commons/types/audit-service-schema.type';
+import {
+    CredentialDeviceOverview,
+    CredentialDevicePaginationInput,
+    PaginatedCredentialDevice,
+} from '@repo/commons/types/auth-service-schema.type';
+import { createContext, useContext, useEffect, useMemo } from 'react';
 
 interface GetAuditLogsResponse {
     getAuditLogs: PaginatedAuditLog;
@@ -19,7 +34,7 @@ interface GetAuditLogsVariables {
 }
 
 export const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLogsVariables> = gql`
-    query GetAuditLogs($pagination: AuditLogPaginationInput! ) {
+    query GetAuditLogs($pagination: AuditLogPaginationInput!) {
         getAuditLogs(pagination: $pagination) {
             data {
                 publicId
@@ -28,11 +43,11 @@ export const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLog
                 description
                 auditLogAuthor {
                     publicId
-                    company{
+                    company {
                         publicId
                         name
                     }
-                    branch{
+                    branch {
                         name
                         code
                     }
@@ -69,7 +84,7 @@ export const GET_AUDIT_LOGS: TypedDocumentNode<GetAuditLogsResponse, GetAuditLog
             }
         }
     }
-`
+`;
 
 interface GetUserCompaniesResponse {
     getUserCompanies: PaginatedCompany;
@@ -79,7 +94,10 @@ interface GetUserCompaniesVariables {
     pagination: CompanyPaginationInput;
 }
 
-const GET_USER_COMPANY_OVERVIEW: TypedDocumentNode<GetUserCompaniesResponse, GetUserCompaniesVariables> = gql`
+const GET_USER_COMPANY_OVERVIEW: TypedDocumentNode<
+    GetUserCompaniesResponse,
+    GetUserCompaniesVariables
+> = gql`
     query GetUserCompanies($pagination: CompanyPaginationInput!) {
         getUserCompanies(pagination: $pagination) {
             overview {
@@ -100,7 +118,7 @@ const GET_USER_COMPANY_OVERVIEW: TypedDocumentNode<GetUserCompaniesResponse, Get
             }
         }
     }
-`
+`;
 
 interface GetCredentialDevicesResponse {
     getCredentialDevices: PaginatedCredentialDevice;
@@ -110,7 +128,10 @@ interface GetCredentialDeviceVariables {
     pagination: CredentialDevicePaginationInput;
 }
 
-const GET_CREDENTIAL_DEVICE_OVERVIEW: TypedDocumentNode<GetCredentialDevicesResponse, GetCredentialDeviceVariables> = gql`
+const GET_CREDENTIAL_DEVICE_OVERVIEW: TypedDocumentNode<
+    GetCredentialDevicesResponse,
+    GetCredentialDeviceVariables
+> = gql`
     query GetCredentialDevices($pagination: CredentialDevicePaginationInput!) {
         getCredentialDevices(pagination: $pagination) {
             overview {
@@ -127,19 +148,19 @@ const GET_CREDENTIAL_DEVICE_OVERVIEW: TypedDocumentNode<GetCredentialDevicesResp
             }
         }
     }
-`
+`;
 
 export type CompanyDetailContext = {
-    auditLog?: PaginatedAuditLog
-    isLoading: boolean
-    credentialPublicId: string
-    companyOverviewCard?: CompaniesOverview
-    deviceOverviewCard?: CredentialDeviceOverview
-}
+    auditLog?: PaginatedAuditLog;
+    isLoading: boolean;
+    credentialPublicId: string;
+    companyOverviewCard?: CompaniesOverview;
+    deviceOverviewCard?: CredentialDeviceOverview;
+};
 
 const MyAccountContext = createContext<CompanyDetailContext | undefined>(undefined);
 
-export default function MyAccountContainer({ children }: Readonly<{ children: React.ReactNode; }>) {
+export default function MyAccountContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const auth = useAuth();
     const { updateBreadcrumbList } = useDashboard01();
 
@@ -147,52 +168,54 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
         variables: {
             pagination: {
                 take: AUDIT_LOG_PAGINATION_SIZE,
-                credentialId: auth.authUser?.credential.publicId ?? "-1"
-            }
-        }
+                credentialId: auth.authUser?.credential.publicId ?? '-1',
+            },
+        },
     });
 
     const companyOverview = useQuery(GET_USER_COMPANY_OVERVIEW, {
         variables: {
             pagination: {
-                take: COMPANY_PAGINATION_SIZE
-            }
-        }
+                take: COMPANY_PAGINATION_SIZE,
+            },
+        },
     });
 
     const credentialDeviceOverview = useQuery(GET_CREDENTIAL_DEVICE_OVERVIEW, {
         variables: {
             pagination: {
-                take: CREDENTIAL_DEVICE_PAGINATION_SIZE
-            }
-        }
+                take: CREDENTIAL_DEVICE_PAGINATION_SIZE,
+            },
+        },
     });
 
     useEffect(() => {
         updateBreadcrumbList([
             {
-                name: "Dashboard"
-            }
+                name: 'Dashboard',
+            },
         ]);
 
         return () => {
             updateBreadcrumbList([]);
-        }
+        };
     }, [updateBreadcrumbList]);
 
-    const contextValue = useMemo(() => ({
-        auditLog: auditLogResult.data?.getAuditLogs,
-        isLoading: auditLogResult.loading || companyOverview.loading || credentialDeviceOverview.loading,
-        credentialPublicId: auth.authUser?.credential.publicId ?? "-1",
-        companyOverviewCard: companyOverview.data?.getUserCompanies?.overview,
-        deviceOverviewCard: credentialDeviceOverview.data?.getCredentialDevices?.overview,
-    }), [auditLogResult, companyOverview, credentialDeviceOverview, auth]);
+    const contextValue = useMemo(
+        () => ({
+            auditLog: auditLogResult.data?.getAuditLogs,
+            isLoading:
+                auditLogResult.loading ||
+                companyOverview.loading ||
+                credentialDeviceOverview.loading,
+            credentialPublicId: auth.authUser?.credential.publicId ?? '-1',
+            companyOverviewCard: companyOverview.data?.getUserCompanies?.overview,
+            deviceOverviewCard: credentialDeviceOverview.data?.getCredentialDevices?.overview,
+        }),
+        [auditLogResult, companyOverview, credentialDeviceOverview, auth],
+    );
 
-    return (
-        <MyAccountContext.Provider value={contextValue}>
-            {children}
-        </MyAccountContext.Provider>
-    )
+    return <MyAccountContext.Provider value={contextValue}>{children}</MyAccountContext.Provider>;
 }
 
 export function useMyAccount() {

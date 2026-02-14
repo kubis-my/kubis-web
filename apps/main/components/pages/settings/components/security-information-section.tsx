@@ -1,18 +1,35 @@
-"use client";
+'use client';
 
-import { Badge } from '@/shadcn/components/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shadcn/components/card'
-import { Label } from '@/shadcn/components/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shadcn/components/select'
-import { Skeleton } from '@/shadcn/components/skeleton'
-import { Switch } from '@/shadcn/components/switch'
-import { TabsContent } from '@/shadcn/components/tabs'
+import { Badge } from '@/shadcn/components/badge';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/shadcn/components/card';
+import { Label } from '@/shadcn/components/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/shadcn/components/select';
+import { Skeleton } from '@/shadcn/components/skeleton';
+import { Switch } from '@/shadcn/components/switch';
+import { TabsContent } from '@/shadcn/components/tabs';
 import { useProfile } from '../profile-container';
 
 export default function SecurityInformationSection() {
     const { credential, isFetchingCredential } = useProfile();
 
-    if (isFetchingCredential) return <TabsContent value="security" className="flex-1"><Skeleton className="h-full rounded-xl" /></TabsContent>
+    if (isFetchingCredential)
+        return (
+            <TabsContent value="security" className="flex-1">
+                <Skeleton className="h-full rounded-xl" />
+            </TabsContent>
+        );
 
     return (
         <TabsContent value="security" className="space-y-4">
@@ -33,17 +50,14 @@ export default function SecurityInformationSection() {
                 <CardContent>
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label className="cursor-not-allowed text-muted-foreground">
+                            <Label className="text-muted-foreground cursor-not-allowed">
                                 Enable 2FA
                             </Label>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                                 Require a verification code when signing in
                             </p>
                         </div>
-                        <Switch
-                            checked={credential?.isEnable2FA ?? false}
-                            disabled
-                        />
+                        <Switch checked={credential?.isEnable2FA ?? false} disabled />
                     </div>
                 </CardContent>
             </Card>
@@ -51,9 +65,7 @@ export default function SecurityInformationSection() {
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle className="font-semibold">
-                                Session Preferences
-                            </CardTitle>
+                            <CardTitle className="font-semibold">Session Preferences</CardTitle>
                             <CardDescription className="text-xs">
                                 Configure your session timeout settings
                             </CardDescription>
@@ -64,10 +76,10 @@ export default function SecurityInformationSection() {
                 <CardContent>
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label className="cursor-not-allowed text-muted-foreground">
+                            <Label className="text-muted-foreground cursor-not-allowed">
                                 Session Timeout
                             </Label>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                                 How long before your session expires
                             </p>
                         </div>
@@ -85,5 +97,5 @@ export default function SecurityInformationSection() {
                 </CardContent>
             </Card>
         </TabsContent>
-    )
+    );
 }

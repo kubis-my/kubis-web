@@ -1,4 +1,4 @@
-import { AUTH_SVC_URL } from "./base";
+import { AUTH_SVC_URL } from './base';
 
 export const AUTH_SERVICE_ROUTE = {
     AUTH: {
@@ -9,6 +9,6 @@ export const AUTH_SERVICE_ROUTE = {
     },
     OAUTH: {
         EXCHANGE_TOKEN: `${AUTH_SVC_URL}/oauth/token`,
-        AUTHORIZE: `${AUTH_SVC_URL}/oauth/authorize`
-    }
-}
+        AUTHORIZE: `${AUTH_SVC_URL}/oauth/authorize`,
+    },
+};

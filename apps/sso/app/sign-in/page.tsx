@@ -1,7 +1,6 @@
-import SessionGuard from "@/root/components/guards/session-guard"
-import SignInContainer from "@/root/components/pages/sign-in/sign-in-container"
-import { Card } from "@repo/shadcn-ui/components/card"
-
+import SessionGuard from '@/root/components/guards/session-guard';
+import SignInContainer from '@/root/components/pages/sign-in/sign-in-container';
+import { Card } from '@repo/shadcn-ui/components/card';
 
 export default function LoginPage() {
     return (
@@ -14,12 +13,14 @@ export default function LoginPage() {
                         </Card>
                         <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
                             {/* //TODO: Add actual Terms of Service and Privacy Policy links */}
-                            By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+                            By clicking continue, you agree to our <a href="#">
+                                Terms of Service
+                            </a>{' '}
                             and <a href="#">Privacy Policy</a>.
                         </div>
                     </div>
                 </div>
             </div>
         </SessionGuard>
-    )
+    );
 }

@@ -1,4 +1,6 @@
-export const hasGraphQLError = (error: unknown): error is {
+export const hasGraphQLError = (
+    error: unknown,
+): error is {
     errors?: Array<{ message: string; extensions?: Record<string, unknown> }>;
     graphQLErrors?: Array<{ message: string; extensions?: Record<string, unknown> }>;
 } => {

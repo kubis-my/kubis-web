@@ -10,7 +10,7 @@ import { randomBytes } from 'crypto';
  * Returns 64-character hex string (32 bytes)
  */
 export function generateCsrfToken(): string {
-  return randomBytes(32).toString('hex');
+    return randomBytes(32).toString('hex');
 }
 
 /**
@@ -21,14 +21,14 @@ export function generateCsrfToken(): string {
  * @returns true if tokens match, false otherwise
  */
 export function compareTokens(a: string | undefined, b: string | undefined): boolean {
-  if (!a || !b || a.length !== b.length) {
-    return false;
-  }
+    if (!a || !b || a.length !== b.length) {
+        return false;
+    }
 
-  let result = 0;
-  for (let i = 0; i < a.length; i++) {
-    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  }
+    let result = 0;
+    for (let i = 0; i < a.length; i++) {
+        result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
 
-  return result === 0;
+    return result === 0;
 }

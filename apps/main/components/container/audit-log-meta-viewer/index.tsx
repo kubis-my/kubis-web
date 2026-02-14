@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { activityTypeConfig } from "@/root/libs/constants";
-import { Badge } from "@/shadcn/components/badge";
-import { Button } from "@/shadcn/components/button";
-import { Separator } from "@/shadcn/components/separator";
+import { activityTypeConfig } from '@/root/libs/constants';
+import { Badge } from '@/shadcn/components/badge';
+import { Button } from '@/shadcn/components/button';
+import { Separator } from '@/shadcn/components/separator';
 import {
     Sheet,
     SheetContent,
@@ -11,30 +11,21 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
-} from "@/shadcn/components/sheet";
-import { AuditLog } from "@repo/commons/types/audit-service-schema.type";
-import { Branch, Company } from "@repo/commons/types/account-service-schema.type";
-import { formatDateTime } from "@repo/commons/utils/date";
-import {
-    Building2,
-    Calendar,
-    Eye,
-    GitBranch,
-    Info,
-    Server,
-} from "lucide-react";
+} from '@/shadcn/components/sheet';
+import { AuditLog } from '@repo/commons/types/audit-service-schema.type';
+import { Branch, Company } from '@repo/commons/types/account-service-schema.type';
+import { formatDateTime } from '@repo/commons/utils/date';
+import { Building2, Calendar, Eye, GitBranch, Info, Server } from 'lucide-react';
 
-import { DiffEntry } from "./diff-entry";
-import { InfoRow } from "./info-row";
-import { buildDiffEntries } from "./utils";
+import { DiffEntry } from './diff-entry';
+import { InfoRow } from './info-row';
+import { buildDiffEntries } from './utils';
 
 export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
     const typeKey = audit.type.toLowerCase();
-    const typeConfig = activityTypeConfig[
-        typeKey as keyof typeof activityTypeConfig
-    ] ?? {
-        variant: "secondary" as const,
-        className: "",
+    const typeConfig = activityTypeConfig[typeKey as keyof typeof activityTypeConfig] ?? {
+        variant: 'secondary' as const,
+        className: '',
         label: audit.type,
     };
 
@@ -42,8 +33,9 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
     const diffEntries = buildDiffEntries(meta?.before, meta?.after);
     const additional = meta?.additional;
     const hasAdditional =
-        additional !== null && additional !== undefined &&
-        (typeof additional !== "object" || Object.keys(additional as object).length > 0);
+        additional !== null &&
+        additional !== undefined &&
+        (typeof additional !== 'object' || Object.keys(additional as object).length > 0);
 
     const author = audit.auditLogAuthor;
     const company = (author as typeof author & { company?: Company })?.company;
@@ -56,34 +48,28 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
                 <Button
                     size="xs"
                     variant="ghost"
-                    className="h-auto gap-1.5 px-2 py-1.5 text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground h-auto gap-1.5 px-2 py-1.5"
                 >
                     <Eye className="size-3.5" />
                     <span className="max-w-[200px] truncate text-xs">
-                        {audit.description || "View details"}
+                        {audit.description || 'View details'}
                     </span>
                 </Button>
             </SheetTrigger>
-            <SheetContent
-                side="right"
-                className="flex w-full flex-col sm:max-w-lg"
-            >
+            <SheetContent side="right" className="flex w-full flex-col sm:max-w-lg">
                 <SheetHeader className="space-y-3">
                     <div className="flex items-center gap-2">
-                        <Badge
-                            variant={typeConfig.variant}
-                            className={typeConfig.className}
-                        >
+                        <Badge variant={typeConfig.variant} className={typeConfig.className}>
                             {typeConfig.label}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-muted-foreground text-xs">
                             {formatDateTime(audit.emittedAt, {
-                                format: "dd MMM yyyy, hh:mm a",
+                                format: 'dd MMM yyyy, hh:mm a',
                             })}
                         </span>
                     </div>
                     <SheetTitle className="text-base">
-                        {audit.description || "Audit Log Detail"}
+                        {audit.description || 'Audit Log Detail'}
                     </SheetTitle>
                     <SheetDescription>
                         Review changes and additional metadata for this transaction.
@@ -94,7 +80,7 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
                     {/* Context Info */}
                     {(company || branch || resource) && (
                         <div className="space-y-3 px-4 pb-4">
-                            <div className="grid gap-3 rounded-lg border bg-muted/30 p-3">
+                            <div className="bg-muted/30 grid gap-3 rounded-lg border p-3">
                                 {company && (
                                     <InfoRow icon={Building2} label="Company">
                                         {company.name}
@@ -104,7 +90,7 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
                                     <InfoRow icon={GitBranch} label="Branch">
                                         <span className="flex items-center gap-1.5">
                                             {branch.name}
-                                            <span className="font-mono text-xs text-muted-foreground">
+                                            <span className="text-muted-foreground font-mono text-xs">
                                                 {branch.code.slice(0, 8)}
                                             </span>
                                         </span>
@@ -114,7 +100,7 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
                                     <InfoRow icon={Server} label="Resource">
                                         <span className="flex items-center gap-1.5">
                                             {resource.type}
-                                            <span className="font-mono text-xs text-muted-foreground">
+                                            <span className="text-muted-foreground font-mono text-xs">
                                                 #{resource.publicId.slice(0, 8)}
                                             </span>
                                         </span>
@@ -131,7 +117,7 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
                         <div className="flex items-center gap-2">
                             <h4 className="text-sm font-semibold">Changes</h4>
                             {diffEntries.length > 0 && (
-                                <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                                <Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
                                     {diffEntries.length}
                                 </Badge>
                             )}
@@ -152,8 +138,8 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-8 text-center">
-                                <Info className="mb-2 size-5 text-muted-foreground/50" />
-                                <p className="text-sm text-muted-foreground">
+                                <Info className="text-muted-foreground/50 mb-2 size-5" />
+                                <p className="text-muted-foreground text-sm">
                                     No field changes recorded
                                 </p>
                             </div>
@@ -165,10 +151,8 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
                         <>
                             <Separator />
                             <div className="space-y-3 px-4 py-4">
-                                <h4 className="text-sm font-semibold">
-                                    Additional Metadata
-                                </h4>
-                                <pre className="overflow-x-auto rounded-lg border bg-muted/50 p-3 font-mono text-xs leading-relaxed text-muted-foreground">
+                                <h4 className="text-sm font-semibold">Additional Metadata</h4>
+                                <pre className="bg-muted/50 text-muted-foreground overflow-x-auto rounded-lg border p-3 font-mono text-xs leading-relaxed">
                                     {JSON.stringify(additional, null, 2)}
                                 </pre>
                             </div>
@@ -178,12 +162,12 @@ export default function AuditLogMetaViewer({ audit }: { audit: AuditLog }) {
 
                 {/* Footer */}
                 <div className="border-t px-4 py-3">
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <div className="text-muted-foreground flex items-center gap-1.5 text-[11px]">
                         <Calendar className="size-3" />
                         <span>
-                            Emitted{" "}
+                            Emitted{' '}
                             {formatDateTime(audit.emittedAt, {
-                                format: "dd MMM yyyy, hh:mm a",
+                                format: 'dd MMM yyyy, hh:mm a',
                             })}
                         </span>
                     </div>

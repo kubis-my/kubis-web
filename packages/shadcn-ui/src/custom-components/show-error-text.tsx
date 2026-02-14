@@ -1,27 +1,19 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
 
-export default function ShowErrorText(
-    props: {
-        error: Record<string, string[]>
-        field: string
-    }
-) {
+export default function ShowErrorText(props: { error: Record<string, string[]>; field: string }) {
     const [text, setText] = useState<string | undefined>();
 
     useEffect(() => {
-        setText(props.error[props.field]?.at(-1))
-    }, [props.error])
+        setText(props.error[props.field]?.at(-1));
+    }, [props.error]);
 
-    if (!text) return <></>
+    if (!text) return <></>;
 
     return (
-        <span
-            className="text-xs text-red-500 -mt-2 ml-1 font-semibold"
-            role="alert"
-        >
+        <span className="-mt-2 ml-1 text-xs font-semibold text-red-500" role="alert">
             {text}
         </span>
-    )
+    );
 }

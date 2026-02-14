@@ -1,4 +1,4 @@
-import { env } from "./env"
+import { env } from './env';
 
 export const MAIN_APP_BASE_URL = env.NEXT_PUBLIC_MAIN_APP_BASE_URL;
 export const SSO_APP_BASE_URL = env.NEXT_PUBLIC_SSO_APP_BASE_URL;

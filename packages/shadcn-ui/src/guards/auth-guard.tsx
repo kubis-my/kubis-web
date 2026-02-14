@@ -1,19 +1,31 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef } from "react";
-import Loader from "../custom-components/loader";
-import { useAuth } from "../providers/auth-provider";
-import { useSocket } from "../providers/socket-provider";
-import { generateCodeChallenge, generateCodeVerifier, generateState } from "@repo/commons/utils/pkce";
-import { SSO_APP_BASE_URL } from "@repo/commons/constant/base";
-import ProfileSetup from "../custom-components/profile-setup";
+import { useEffect, useState, useRef } from 'react';
+import Loader from '../custom-components/loader';
+import { useAuth } from '../providers/auth-provider';
+import { useSocket } from '../providers/socket-provider';
+import {
+    generateCodeChallenge,
+    generateCodeVerifier,
+    generateState,
+} from '@repo/commons/utils/pkce';
+import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
+import ProfileSetup from '../custom-components/profile-setup';
 
-export default function AuthGuard({ children, baseUrl, clientId }: { children: React.ReactNode, baseUrl: string, clientId: string }) {
-    const ctx = useAuth()
-    const { connect } = useSocket()
-    const hasConnectedSocket = useRef(false)
-    const connectRef = useRef(connect)
-    connectRef.current = connect
+export default function AuthGuard({
+    children,
+    baseUrl,
+    clientId,
+}: {
+    children: React.ReactNode;
+    baseUrl: string;
+    clientId: string;
+}) {
+    const ctx = useAuth();
+    const { connect } = useSocket();
+    const hasConnectedSocket = useRef(false);
+    const connectRef = useRef(connect);
+    connectRef.current = connect;
 
     const [isAuthenticating, setIsAuthenticating] = useState(true);
 
@@ -43,16 +55,16 @@ export default function AuthGuard({ children, baseUrl, clientId }: { children: R
         });
 
         // Redirect to SSO - keep showing loader during redirect
-        window.location.href = `${SSO_APP_BASE_URL}/oauth/authorize?${params}`
+        window.location.href = `${SSO_APP_BASE_URL}/oauth/authorize?${params}`;
         // Don't set isAuthenticating to false - we're redirecting away
-    }
+    };
 
     useEffect(() => {
         // Only run SSO check after AuthProvider has finished loading
         if (!ctx.isLoading) {
             handleSSO();
         }
-    }, [ctx.isLoading, ctx.isAuthenticated, ctx.authUser, ctx.hasIncompleteProfile])
+    }, [ctx.isLoading, ctx.isAuthenticated, ctx.authUser, ctx.hasIncompleteProfile]);
 
     // Connect to socket when authenticated
     useEffect(() => {
@@ -60,14 +72,19 @@ export default function AuthGuard({ children, baseUrl, clientId }: { children: R
             hasConnectedSocket.current = true;
             connectRef.current();
         }
-    }, [ctx.isAuthenticated])
+    }, [ctx.isAuthenticated]);
 
     // Show loader while AuthProvider is loading OR while redirecting to SSO
-    if (ctx.isLoading || isAuthenticating) return <Loader />
-    if (ctx.hasIncompleteProfile) return <ProfileSetup onSuccess={(user) => {
-        ctx.updateAuthUser(user)
-        ctx.profileSetupCompleted()
-    }} />
+    if (ctx.isLoading || isAuthenticating) return <Loader />;
+    if (ctx.hasIncompleteProfile)
+        return (
+            <ProfileSetup
+                onSuccess={(user) => {
+                    ctx.updateAuthUser(user);
+                    ctx.profileSetupCompleted();
+                }}
+            />
+        );
 
     return children;
 }

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { TableCell, TableRow } from "@/shadcn/components/table";
-import { UserAccount } from "@repo/commons/types/account-service-schema.type";
-import { flexRender, Row } from "@tanstack/react-table";
-import { useRouter } from "next/navigation";
+import { TableCell, TableRow } from '@/shadcn/components/table';
+import { UserAccount } from '@repo/commons/types/account-service-schema.type';
+import { flexRender, Row } from '@tanstack/react-table';
+import { useRouter } from 'next/navigation';
 
 export function UserRow({ row, companyId }: { row: Row<UserAccount>; companyId: string }) {
     const router = useRouter();
@@ -11,11 +11,7 @@ export function UserRow({ row, companyId }: { row: Row<UserAccount>; companyId: 
     const handleRowClick = (e: React.MouseEvent) => {
         // Prevent navigation when clicking on interactive elements
         const target = e.target as HTMLElement;
-        if (
-            target.closest("button") ||
-            target.closest("input") ||
-            target.closest("a")
-        ) {
+        if (target.closest('button') || target.closest('input') || target.closest('a')) {
             return;
         }
 
@@ -25,7 +21,7 @@ export function UserRow({ row, companyId }: { row: Row<UserAccount>; companyId: 
     return (
         <TableRow
             onClick={handleRowClick}
-            className="cursor-pointer transition-colors hover:bg-muted/50"
+            className="hover:bg-muted/50 cursor-pointer transition-colors"
         >
             {row.getVisibleCells().map((cell) => {
                 return (
@@ -34,8 +30,8 @@ export function UserRow({ row, companyId }: { row: Row<UserAccount>; companyId: 
                         className="px-5 py-3"
                         style={{
                             width:
-                                cell.column.id === "fullName"
-                                    ? "auto"
+                                cell.column.id === 'fullName'
+                                    ? 'auto'
                                     : `${cell.column.getSize()}px`,
                         }}
                     >

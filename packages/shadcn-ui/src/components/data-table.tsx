@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import * as React from "react"
+import * as React from 'react';
 import {
     ColumnDef,
     flexRender,
@@ -9,53 +9,40 @@ import {
     Row,
     SortingState,
     useReactTable,
-} from "@tanstack/react-table"
-import { Button } from "./button"
-import { Label } from "./label"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "./select"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "./table"
-import { Skeleton } from "./skeleton"
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
+} from '@tanstack/react-table';
+import { Button } from './button';
+import { Label } from './label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './table';
+import { Skeleton } from './skeleton';
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 
 export interface PageInfo {
-    endCursor?: number | null | undefined
-    hasNextPage: boolean
-    total: number
-    currentPage: number
-    totalPages: number
+    endCursor?: number | null | undefined;
+    hasNextPage: boolean;
+    total: number;
+    currentPage: number;
+    totalPages: number;
 }
 
 export interface DataTableProps<TData> {
-    columns: ColumnDef<TData>[]
-    data: TData[]
-    pageInfo: PageInfo
-    isLoading: boolean
-    pageSize: number
-    onPageSizeChange: (size: number) => void
-    cursorHistory: (number | null | undefined)[]
-    onNextPage: () => void
-    onPreviousPage: () => void
-    emptyMessage?: string
-    getRowId?: (row: TData) => string
-    onRowClick?: (row: TData, event: React.MouseEvent) => void
-    renderRow?: (row: Row<TData>) => React.ReactNode
-    renderSkeletonRow?: () => React.ReactNode
-    pageSizeOptions?: number[]
-    flexColumnId?: string
-    enableSorting?: boolean
+    columns: ColumnDef<TData>[];
+    data: TData[];
+    pageInfo: PageInfo;
+    isLoading: boolean;
+    pageSize: number;
+    onPageSizeChange: (size: number) => void;
+    cursorHistory: (number | null | undefined)[];
+    onNextPage: () => void;
+    onPreviousPage: () => void;
+    emptyMessage?: string;
+    getRowId?: (row: TData) => string;
+    onRowClick?: (row: TData, event: React.MouseEvent) => void;
+    renderRow?: (row: Row<TData>) => React.ReactNode;
+    renderSkeletonRow?: () => React.ReactNode;
+    pageSizeOptions?: number[];
+    flexColumnId?: string;
+    enableSorting?: boolean;
 }
 
 function DefaultSkeletonRow({ columnCount }: { columnCount: number }) {
@@ -67,7 +54,7 @@ function DefaultSkeletonRow({ columnCount }: { columnCount: number }) {
                 </TableCell>
             ))}
         </TableRow>
-    )
+    );
 }
 
 function DefaultRow<TData>({
@@ -75,29 +62,25 @@ function DefaultRow<TData>({
     flexColumnId,
     onRowClick,
 }: {
-    row: Row<TData>
-    flexColumnId?: string
-    onRowClick?: (row: TData, event: React.MouseEvent) => void
+    row: Row<TData>;
+    flexColumnId?: string;
+    onRowClick?: (row: TData, event: React.MouseEvent) => void;
 }) {
     const handleRowClick = (e: React.MouseEvent) => {
         if (onRowClick) {
             // Prevent navigation when clicking on interactive elements
-            const target = e.target as HTMLElement
-            if (
-                target.closest("button") ||
-                target.closest("input") ||
-                target.closest("a")
-            ) {
-                return
+            const target = e.target as HTMLElement;
+            if (target.closest('button') || target.closest('input') || target.closest('a')) {
+                return;
             }
-            onRowClick(row.original, e)
+            onRowClick(row.original, e);
         }
-    }
+    };
 
     return (
         <TableRow
             onClick={handleRowClick}
-            className={onRowClick ? "cursor-pointer transition-colors hover:bg-muted/50" : ""}
+            className={onRowClick ? 'hover:bg-muted/50 cursor-pointer transition-colors' : ''}
         >
             {row.getVisibleCells().map((cell) => {
                 return (
@@ -107,16 +90,16 @@ function DefaultRow<TData>({
                         style={{
                             width:
                                 flexColumnId && cell.column.id === flexColumnId
-                                    ? "auto"
+                                    ? 'auto'
                                     : `${cell.column.getSize()}px`,
                         }}
                     >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
-                )
+                );
             })}
         </TableRow>
-    )
+    );
 }
 
 export function DataTable<TData>({
@@ -129,7 +112,7 @@ export function DataTable<TData>({
     cursorHistory,
     onNextPage,
     onPreviousPage,
-    emptyMessage = "No results found.",
+    emptyMessage = 'No results found.',
     getRowId,
     onRowClick,
     renderRow,
@@ -138,7 +121,7 @@ export function DataTable<TData>({
     flexColumnId,
     enableSorting = true,
 }: DataTableProps<TData>) {
-    const [sorting, setSorting] = React.useState<SortingState>([])
+    const [sorting, setSorting] = React.useState<SortingState>([]);
 
     const table = useReactTable({
         data,
@@ -152,11 +135,11 @@ export function DataTable<TData>({
         getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
         manualPagination: true,
         pageCount: pageInfo.totalPages,
-    })
+    });
 
     const renderTableRow = (row: Row<TData>) => {
         if (renderRow) {
-            return renderRow(row)
+            return renderRow(row);
         }
         return (
             <DefaultRow
@@ -165,15 +148,15 @@ export function DataTable<TData>({
                 flexColumnId={flexColumnId}
                 onRowClick={onRowClick}
             />
-        )
-    }
+        );
+    };
 
     const renderTableSkeletonRow = (index: number) => {
         if (renderSkeletonRow) {
-            return <React.Fragment key={`skeleton-${index}`}>{renderSkeletonRow()}</React.Fragment>
+            return <React.Fragment key={`skeleton-${index}`}>{renderSkeletonRow()}</React.Fragment>;
         }
-        return <DefaultSkeletonRow key={`skeleton-${index}`} columnCount={columns.length} />
-    }
+        return <DefaultSkeletonRow key={`skeleton-${index}`} columnCount={columns.length} />;
+    };
 
     return (
         <div className="flex w-full flex-col gap-4">
@@ -190,19 +173,20 @@ export function DataTable<TData>({
                                             colSpan={header.colSpan}
                                             style={{
                                                 width:
-                                                    flexColumnId && header.column.id === flexColumnId
-                                                        ? "auto"
+                                                    flexColumnId &&
+                                                    header.column.id === flexColumnId
+                                                        ? 'auto'
                                                         : `${header.getSize()}px`,
                                             }}
                                         >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
+                                                      header.column.columnDef.header,
+                                                      header.getContext(),
+                                                  )}
                                         </TableHead>
-                                    )
+                                    );
                                 })}
                             </TableRow>
                         ))}
@@ -210,16 +194,13 @@ export function DataTable<TData>({
                     <TableBody>
                         {isLoading ? (
                             Array.from({ length: pageSize }).map((_, index) =>
-                                renderTableSkeletonRow(index)
+                                renderTableSkeletonRow(index),
                             )
                         ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => renderTableRow(row))
                         ) : (
                             <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
                                     {emptyMessage}
                                 </TableCell>
                             </TableRow>
@@ -230,17 +211,17 @@ export function DataTable<TData>({
 
             <div className="flex items-center justify-between px-4">
                 {/* Left: Showing count */}
-                <div className="text-sm text-muted-foreground">
-                    Showing{" "}
-                    <span className="font-medium text-foreground">
+                <div className="text-muted-foreground text-sm">
+                    Showing{' '}
+                    <span className="text-foreground font-medium">
                         {pageInfo.total === 0 ? 0 : (cursorHistory.length - 1) * pageSize + 1}
                     </span>
-                    {" - "}
-                    <span className="font-medium text-foreground">
+                    {' - '}
+                    <span className="text-foreground font-medium">
                         {Math.min(cursorHistory.length * pageSize, pageInfo.total)}
                     </span>
-                    {" of "}
-                    <span className="font-medium text-foreground">{pageInfo.total}</span>
+                    {' of '}
+                    <span className="text-foreground font-medium">{pageInfo.total}</span>
                 </div>
 
                 {/* Center: Pagination controls */}
@@ -280,7 +261,7 @@ export function DataTable<TData>({
                     <Select
                         value={`${pageSize}`}
                         onValueChange={(value) => {
-                            onPageSizeChange(Number(value))
+                            onPageSizeChange(Number(value));
                         }}
                         disabled={isLoading}
                     >
@@ -298,5 +279,5 @@ export function DataTable<TData>({
                 </div>
             </div>
         </div>
-    )
+    );
 }
