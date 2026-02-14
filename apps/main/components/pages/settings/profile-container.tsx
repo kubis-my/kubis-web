@@ -1,11 +1,10 @@
 "use client";
 
-import { useDashboard01 } from "@/shadcn/dashboards/dashboard-01";
 import { useAuth } from "@/shadcn/providers/auth-provider";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { Credential } from "@repo/commons/types/auth-service-schema.type";
-import { createContext, useContext, useEffect, useMemo } from "react";
+import { createContext, useContext, useMemo } from "react";
 
 interface GetCredentialResponse {
     getCredential: Credential;
@@ -32,27 +31,16 @@ export type ProfileContextType = {
     isFetchingCredential: boolean;
 };
 
-const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
+export const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
 export default function ProfileContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const auth = useAuth();
-    const { updateBreadcrumbList } = useDashboard01();
 
     const { data, loading: isFetchingCredential } = useQuery(GET_CREDENTIAL, {
         variables: {
             publicId: auth.authUser?.credential.publicId ?? "-1"
         }
     });
-
-    useEffect(() => {
-        updateBreadcrumbList([
-            { name: "Profile" },
-        ]);
-
-        return () => {
-            updateBreadcrumbList([]);
-        };
-    }, [updateBreadcrumbList]);
 
     const contextValue = useMemo(() => ({
         credential: data?.getCredential,

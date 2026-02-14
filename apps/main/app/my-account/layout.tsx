@@ -1,4 +1,5 @@
 import DashboardContainer from '@/root/components/container/dashboard-container';
+import SettingDialog from '@/root/components/pages/settings/setting-dialog';
 import { APP_NAME, navigationList, navigationUserItemList } from '@/root/libs/dashboard-data';
 import { DashboardProvider } from '@/shadcn/dashboards/dashboard-01';
 import { MAIN_APP_BASE_URL } from '@repo/commons/constant/base'
@@ -21,6 +22,7 @@ export default function layout({
                 <DashboardContainer>
                     {children}
                 </DashboardContainer>
+                <SettingDialog />
             </DashboardProvider>
         </AuthGuard>
     )

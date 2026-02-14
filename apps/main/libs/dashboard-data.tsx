@@ -5,6 +5,7 @@ import { IconCreditCard, IconHome, IconBuilding, IconLogout, IconNotification, I
 import { getCsrfHeaders } from "@repo/commons/utils/csrf-client"
 import { toast } from "sonner"
 import { ROUTE } from "./constants";
+import { openSettingsDialog } from "../components/pages/settings/setting-dialog";
 
 export const APP_NAME = "My Account";
 
@@ -17,13 +18,6 @@ export const navigationList: NavigationItem[] = [
                 title: "Home",
                 url: ROUTE.MY_ACCOUNT.HOME,
                 icon: <IconHome />,
-                isActive: false
-            },
-            {
-                id: "app-profile",
-                title: "Profile",
-                url: ROUTE.MY_ACCOUNT.PROFILE,
-                icon: <IconIdBadge2 />,
                 isActive: false
             },
             {
@@ -57,7 +51,7 @@ export const navigationUserItemList: NavUserItem[] = [
         name: "Settings",
         icon: <IconSettings />,
         async action(e) {
-
+            openSettingsDialog();
         },
     },
     {
