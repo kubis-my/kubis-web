@@ -6,7 +6,9 @@
 import { cookies } from 'next/headers';
 import {
     ACCESS_TOKEN_KEY,
+    CODE_VERIFIER_KEY,
     CSRF_TOKEN_KEY,
+    OTP_TOKEN_KEY,
     REFRESH_TOKEN_KEY,
     SESSION_TOKEN_KEY,
 } from '../constant/cookies-key';
@@ -17,6 +19,8 @@ export const COOKIE_NAMES = {
     REFRESH_TOKEN: REFRESH_TOKEN_KEY,
     SESSION_TOKEN: SESSION_TOKEN_KEY,
     CSRF_TOKEN: CSRF_TOKEN_KEY,
+    OTP_TOKEN: OTP_TOKEN_KEY,
+    CODE_VERIFIER: CODE_VERIFIER_KEY,
 } as const;
 
 // Cookie configuration
@@ -33,6 +37,10 @@ const COOKIE_CONFIG = {
     sessionTokenMaxAge: 7 * 24 * 60 * 60,
     // CSRF token: 7 days (matches session)
     csrfTokenMaxAge: 7 * 24 * 60 * 60,
+    // OTP token: 10 minutes (short-lived for OTP verification)
+    otpTokenMaxAge: 10 * 60,
+    // Code verifier: 10 minutes (short-lived, paired with OTP flow)
+    codeVerifierMaxAge: 10 * 60,
 };
 
 /**
@@ -163,4 +171,64 @@ export async function getCsrfTokenCookie(): Promise<string | undefined> {
 export async function clearCsrfTokenCookie(): Promise<void> {
     const cookieStore = await cookies();
     cookieStore.delete(COOKIE_NAMES.CSRF_TOKEN);
+}
+
+/**
+ * Set OTP token in httpOnly cookie (short-lived for OTP verification flow)
+ */
+export async function setOtpTokenCookie(token: string): Promise<void> {
+    const cookieStore = await cookies();
+    cookieStore.set(COOKIE_NAMES.OTP_TOKEN, token, {
+        httpOnly: COOKIE_CONFIG.httpOnly,
+        secure: COOKIE_CONFIG.secure,
+        sameSite: COOKIE_CONFIG.sameSite,
+        path: COOKIE_CONFIG.path,
+        maxAge: COOKIE_CONFIG.otpTokenMaxAge,
+    });
+}
+
+/**
+ * Get OTP token from cookies
+ */
+export async function getOtpTokenCookie(): Promise<string | undefined> {
+    const cookieStore = await cookies();
+    return cookieStore.get(COOKIE_NAMES.OTP_TOKEN)?.value;
+}
+
+/**
+ * Clear OTP token cookie
+ */
+export async function clearOtpTokenCookie(): Promise<void> {
+    const cookieStore = await cookies();
+    cookieStore.delete(COOKIE_NAMES.OTP_TOKEN);
+}
+
+/**
+ * Set code verifier in httpOnly cookie (short-lived for PKCE flow with OTP)
+ */
+export async function setCodeVerifierCookie(verifier: string): Promise<void> {
+    const cookieStore = await cookies();
+    cookieStore.set(COOKIE_NAMES.CODE_VERIFIER, verifier, {
+        httpOnly: COOKIE_CONFIG.httpOnly,
+        secure: COOKIE_CONFIG.secure,
+        sameSite: COOKIE_CONFIG.sameSite,
+        path: COOKIE_CONFIG.path,
+        maxAge: COOKIE_CONFIG.codeVerifierMaxAge,
+    });
+}
+
+/**
+ * Get code verifier from cookies
+ */
+export async function getCodeVerifierCookie(): Promise<string | undefined> {
+    const cookieStore = await cookies();
+    return cookieStore.get(COOKIE_NAMES.CODE_VERIFIER)?.value;
+}
+
+/**
+ * Clear code verifier cookie
+ */
+export async function clearCodeVerifierCookie(): Promise<void> {
+    const cookieStore = await cookies();
+    cookieStore.delete(COOKIE_NAMES.CODE_VERIFIER);
 }

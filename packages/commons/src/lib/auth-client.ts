@@ -266,4 +266,69 @@ export const authClient = {
             };
         }
     },
+    async verifyOTP(props: { token: string; otpCode: string; driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
+
+        try {
+            const input = {
+                token: props.token,
+                otpCode: props.otpCode,
+            };
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN_VERIFY_OTP, input);
+
+            return {
+                code: 200,
+                raw: data,
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
+    async resendOTP(props: { existingToken: string; driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
+
+        try {
+            const input = {
+                token: props.existingToken,
+            };
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN_RESEND_OTP, input);
+
+            return {
+                code: 200,
+                raw: data,
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
 };

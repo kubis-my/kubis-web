@@ -1,30 +1,62 @@
 'use client';
 
-import { Button } from '@repo/shadcn-ui/components/button';
 import { CardContent } from '@repo/shadcn-ui/components/card';
-import { Input } from '@repo/shadcn-ui/components/input';
-import { Label } from '@repo/shadcn-ui/components/label';
-import { GalleryVerticalEnd, Loader2Icon } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import ShowErrorText from '@repo/shadcn-ui/custom-components/show-error-text';
 import { errorDict } from '@/root/libs/dict/error-dict';
 import { toast } from 'sonner';
 import { MAIN_CLIENT_ID } from '@repo/commons/constant/client-id';
 import { MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
 import { useSearchParams } from 'next/navigation';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
+import KubisSvg from '@repo/shadcn-ui/custom-components/kubis-svg';
+import { useCountdown } from '@repo/shadcn-ui/hooks/use-countdown';
+import SignInCredentialsStage from './sign-in-credentials-stage';
+import SignInOtpStage from './sign-in-otp-stage';
+
+type SignInStage = 'CREDENTIAL' | 'OTP';
+
+const FALLBACK_OTP_EXPIRE_MS = 5 * 60 * 1_000;
 
 export default function SignInWithIdentifierForm() {
+    const [stage, setStage] = useState<SignInStage>('CREDENTIAL');
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
+    const [otp, setOtp] = useState('');
+    const [otpEmail, setOtpEmail] = useState('');
     const [clientId, setClientId] = useState('');
     const [redirectUri, setRedirectUri] = useState('');
+    const [otpExpiresAt, setOtpExpiresAt] = useState<number>(Date.now());
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const [isSignIn, setIsSignIn] = useState(false);
+    const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+    const [isResendingOtp, setIsResendingOtp] = useState(false);
+    const { expired: isOtpExpired } = useCountdown(otpExpiresAt);
 
     const param = useSearchParams();
+
+    const parseOtpExpiredAt = (expiredAt: unknown) => {
+        if (typeof expiredAt === 'number') {
+            return expiredAt;
+        }
+        if (typeof expiredAt === 'string') {
+            const parsed = Date.parse(expiredAt);
+            if (!Number.isNaN(parsed)) {
+                return parsed;
+            }
+        }
+        return Date.now() + FALLBACK_OTP_EXPIRE_MS;
+    };
+
+    const redirectToClient = (redirectUrl: string, verifier?: string) => {
+        const finalRedirectUrl = new URL(redirectUrl);
+
+        if (verifier) {
+            finalRedirectUrl.hash = `verifier=${verifier}`;
+        }
+
+        window.location.href = finalRedirectUrl.toString();
+    };
 
     const signInHandler = useCallback(async () => {
         setFormValidation({});
@@ -45,23 +77,23 @@ export default function SignInWithIdentifierForm() {
                 }),
             });
 
-            const data = await response.json();
+            const raw = await response.json();
 
-            if (response.ok && data.success) {
-                const { redirectUrl, verifier } = data.data;
+            if (response.ok && raw.success) {
+                const { twoFactorEnabled, ...data } = raw.data;
 
-                // Redirect with verifier in URL hash
-                const finalRedirectUrl = new URL(redirectUrl);
-
-                if (verifier) {
-                    finalRedirectUrl.hash = `verifier=${verifier}`;
+                if (twoFactorEnabled === true) {
+                    setStage('OTP');
+                    setOtp('');
+                    setOtpEmail(data.email || '');
+                    setOtpExpiresAt(parseOtpExpiredAt(data.expiredAt));
+                } else {
+                    redirectToClient(data.redirectUrl, data.verifier);
                 }
-
-                window.location.href = finalRedirectUrl.toString();
-            } else if (response.status === 400 && data.details) {
-                setFormValidation(data.details);
-            } else if (!response.ok && data.details?.id) {
-                const statusKey = data.details?.id || '-1';
+            } else if (response.status === 400 && raw.details) {
+                setFormValidation(raw.details);
+            } else if (!response.ok && raw.details?.id) {
+                const statusKey = raw.details?.id || '-1';
 
                 if (statusKey in errorDict) {
                     toast.error(errorDict[statusKey as keyof typeof errorDict], {
@@ -96,6 +128,112 @@ export default function SignInWithIdentifierForm() {
         setIsSignIn(false);
     }, [identifier, password, clientId, redirectUri]);
 
+    const verifyOtpHandler = async () => {
+        setFormValidation({});
+        setIsVerifyingOtp(true);
+
+        try {
+            const response = await fetch('/api/auth/verify-otp', {
+                method: 'POST',
+                headers: getCsrfHeaders({
+                    'Content-Type': 'application/json',
+                }),
+                credentials: 'include',
+                body: JSON.stringify({
+                    code: otp,
+                }),
+            });
+
+            const raw = await response.json();
+
+            if (response.ok && raw.success) {
+                redirectToClient(raw.data.redirectUrl, raw.data.verifier);
+                return;
+            }
+
+            if (response.status === 400 && raw.details) {
+                setFormValidation(raw.details);
+                return;
+            }
+
+            const statusKey = raw.details?.id || '-1';
+            if (statusKey in errorDict) {
+                toast.error(errorDict[statusKey as keyof typeof errorDict], {
+                    position: 'top-center',
+                });
+                return;
+            }
+
+            toast.error(
+                'An unexpected error occurred. Please contact our support team for assistance.',
+                {
+                    position: 'top-center',
+                },
+            );
+        } catch (error) {
+            console.error('OTP verify error:', error);
+            toast.error(
+                'An unexpected error occurred. Please contact our support team for assistance.',
+                {
+                    position: 'top-center',
+                },
+            );
+        } finally {
+            setIsVerifyingOtp(false);
+        }
+    };
+
+    const resendOtpHandler = async () => {
+        setIsResendingOtp(true);
+
+        try {
+            const response = await fetch('/api/auth/resend-otp', {
+                method: 'POST',
+                headers: getCsrfHeaders({
+                    'Content-Type': 'application/json',
+                }),
+                credentials: 'include',
+            });
+
+            const raw = await response.json();
+
+            if (response.ok && raw.success) {
+                setOtp('');
+                setOtpEmail(raw.data.email || otpEmail);
+                setOtpExpiresAt(parseOtpExpiredAt(raw.data.expiredAt));
+                toast.success('Verification code resent successfully', {
+                    position: 'top-center',
+                });
+                return;
+            }
+
+            const statusKey = raw.details?.id || '-1';
+            if (statusKey in errorDict) {
+                toast.error(errorDict[statusKey as keyof typeof errorDict], {
+                    position: 'top-center',
+                });
+                return;
+            }
+
+            toast.error(
+                'An unexpected error occurred. Please contact our support team for assistance.',
+                {
+                    position: 'top-center',
+                },
+            );
+        } catch (error) {
+            console.error('Resend OTP error:', error);
+            toast.error(
+                'An unexpected error occurred. Please contact our support team for assistance.',
+                {
+                    position: 'top-center',
+                },
+            );
+        } finally {
+            setIsResendingOtp(false);
+        }
+    };
+
     useEffect(() => {
         setClientId(param.get('client_id') || MAIN_CLIENT_ID);
         setRedirectUri(param.get('redirect_uri') || MAIN_APP_BASE_URL);
@@ -108,7 +246,7 @@ export default function SignInWithIdentifierForm() {
                     <Image
                         priority
                         src="/sign-in.svg"
-                        alt={'Sign in illustration'}
+                        alt="Sign in illustration"
                         fill
                         className="object-contain dark:brightness-[0.2] dark:grayscale"
                     />
@@ -117,66 +255,57 @@ export default function SignInWithIdentifierForm() {
             <div className="p-6 md:p-8">
                 <div className="flex flex-col gap-6">
                     <a href="#" className="flex items-center gap-2 self-center font-medium">
-                        <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-                            <GalleryVerticalEnd className="size-4" />
+                        <div className="text-primary-foreground flex items-center justify-center rounded-md">
+                            <KubisSvg className="size-15" />
                         </div>
-                        Acme Inc.
                     </a>
                     <div className="flex flex-col items-center text-center">
-                        <h1 className="text-xl font-bold">Welcome back</h1>
-                        <p className="text-muted-foreground text-balance">
-                            Login to your Workspace account
-                        </p>
-                    </div>
-                    <div className="grid gap-3">
-                        <Label>Identifier</Label>
-                        <Input
-                            placeholder="Enter your username or email"
-                            value={identifier}
-                            onChange={(e) => setIdentifier(e.target.value)}
-                        />
-                        <ShowErrorText error={formValidation} field="identifier" />
-                    </div>
-                    <div className="grid gap-3">
-                        <div className="flex items-center">
-                            <Label>Password</Label>
-                            {/* TODO: Add forgot password flow/page */}
-                            <a
-                                href="#"
-                                className="ml-auto text-xs underline-offset-2 hover:underline"
-                            >
-                                Forgot your password?
-                            </a>
-                        </div>
-                        <Input
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        <ShowErrorText error={formValidation} field="password" />
-                    </div>
-                    <Button
-                        type="button"
-                        className="w-full"
-                        onClick={signInHandler}
-                        disabled={isSignIn}
-                    >
-                        {!isSignIn ? (
-                            <>Login</>
+                        {stage === 'CREDENTIAL' ? (
+                            <>
+                                <h1 className="text-xl font-bold">Welcome back</h1>
+                                <p className="text-muted-foreground text-balance">
+                                    Login to your Kubis account
+                                </p>
+                            </>
                         ) : (
                             <>
-                                <Loader2Icon className="animate-spin" />
-                                Please wait
+                                <h1 className="text-xl font-bold">Verify your login</h1>
+                                <p className="text-muted-foreground text-sm">
+                                    Enter the verification code we sent to your email address:{" "}
+                                    <span className="font-medium">{otpEmail}</span>.
+                                </p>
                             </>
                         )}
-                    </Button>
-                    <div className="text-center text-sm">
-                        Don&apos;t have an account? {/* TODO: Add sign-up page route */}
-                        <Link href={''} className="underline underline-offset-4">
-                            Register
-                        </Link>
                     </div>
+                    {stage === 'CREDENTIAL' ? (
+                        <>
+                            <SignInCredentialsStage
+                                identifier={identifier}
+                                password={password}
+                                formValidation={formValidation}
+                                isSubmitting={isSignIn}
+                                onIdentifierChange={setIdentifier}
+                                onPasswordChange={setPassword}
+                                onSubmit={signInHandler}
+                            />
+                        </>
+                    ) : (
+                        <SignInOtpStage
+                            otp={otp}
+                            formValidation={formValidation}
+                            isVerifying={isVerifyingOtp}
+                            isResending={isResendingOtp}
+                            isOtpExpired={isOtpExpired}
+                            onOtpChange={setOtp}
+                            onVerify={verifyOtpHandler}
+                            onResend={resendOtpHandler}
+                            onBack={() => {
+                                setStage('CREDENTIAL');
+                                setOtp('');
+                                setFormValidation({});
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         </CardContent>

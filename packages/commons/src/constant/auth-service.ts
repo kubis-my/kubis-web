@@ -6,6 +6,8 @@ export const AUTH_SERVICE_ROUTE = {
         REFRESH: `${AUTH_SVC_URL}/auth/refresh`,
         VALIDATE: `${AUTH_SVC_URL}/auth/validate`,
         SIGN_OUT: `${AUTH_SVC_URL}/auth/sign-out`,
+        SIGN_IN_VERIFY_OTP: `${AUTH_SVC_URL}/sign-in/verify-otp`,
+        SIGN_IN_RESEND_OTP: `${AUTH_SVC_URL}/sign-in/resend-otp`,
     },
     OAUTH: {
         EXCHANGE_TOKEN: `${AUTH_SVC_URL}/oauth/token`,

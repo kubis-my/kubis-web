@@ -2,10 +2,16 @@ import { Elysia, t } from 'elysia';
 import axios from 'axios';
 import { authClient } from '@repo/commons/lib/auth-client';
 import {
+    clearCodeVerifierCookie,
     clearCsrfTokenCookie,
+    clearOtpTokenCookie,
     clearSessionCookies,
+    getCodeVerifierCookie,
+    getOtpTokenCookie,
     getSessionTokenCookie,
     setCsrfTokenCookie,
+    setCodeVerifierCookie,
+    setOtpTokenCookie,
     setSessionTokenCookie,
 } from '@repo/commons/utils/cookie-helpers';
 import { generateCsrfToken } from '@repo/commons/utils/csrf';
@@ -28,23 +34,40 @@ const auth = new Elysia({ prefix: '/api/auth' })
                     driver,
                 });
 
-                if (code === 200 && raw.sessionToken) {
-                    await setSessionTokenCookie(raw.sessionToken);
+                if (code === 200) {
+                    if (raw.twoFactorEnabled && raw.token) {
+                        // Store OTP token and PKCE code verifier in httpOnly cookies
+                        await setOtpTokenCookie(raw.token);
+                        await setCodeVerifierCookie(raw.verifier);
 
-                    // Generate CSRF token for new session
-                    const csrfToken = generateCsrfToken();
-                    await setCsrfTokenCookie(csrfToken);
+                        return {
+                            success: true,
+                            message: 'Sign in with otp successful',
+                            data: {
+                                twoFactorEnabled: true,
+                                expiredAt: raw.expiredAt,
+                                email: raw.email,
+                            },
+                        };
+                    } else if (!raw.twoFactorEnabled && raw.sessionToken) {
+                        await setSessionTokenCookie(raw.sessionToken);
 
-                    await new Promise((resolve) => setTimeout(resolve, 500));
+                        // Generate CSRF token for new session
+                        const csrfToken = generateCsrfToken();
+                        await setCsrfTokenCookie(csrfToken);
 
-                    return {
-                        success: true,
-                        message: 'Sign in successful',
-                        data: {
-                            redirectUrl: raw.redirectUrl,
-                            verifier: raw.verifier,
-                        },
-                    };
+                        await new Promise((resolve) => setTimeout(resolve, 500));
+
+                        return {
+                            success: true,
+                            message: 'Sign in successful',
+                            data: {
+                                twoFactorEnabled: false,
+                                redirectUrl: raw.redirectUrl,
+                                verifier: raw.verifier,
+                            },
+                        };
+                    }
                 }
 
                 set.status = code === 400 ? 400 : 500;
@@ -122,6 +145,126 @@ const auth = new Elysia({ prefix: '/api/auth' })
             }),
         },
     )
+    .post(
+        '/verify-otp',
+        async ({ body, set, request }) => {
+            try {
+                const otpToken = await getOtpTokenCookie();
+                const codeVerifier = await getCodeVerifierCookie();
+
+                if (!otpToken || !codeVerifier) {
+                    set.status = 400;
+                    return {
+                        error: 'OTP session expired',
+                        details: { id: 'otp_session_expired' },
+                    };
+                }
+
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                const { code, raw } = await authClient.verifyOTP({
+                    token: otpToken,
+                    otpCode: body.code,
+                    driver,
+                });
+
+                if (code === 200 && raw.sessionToken) {
+                    await setSessionTokenCookie(raw.sessionToken);
+
+                    const csrfToken = generateCsrfToken();
+                    await setCsrfTokenCookie(csrfToken);
+
+                    // Clean up OTP-related cookies
+                    await clearOtpTokenCookie();
+                    await clearCodeVerifierCookie();
+
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+
+                    return {
+                        success: true,
+                        message: 'OTP verification successful',
+                        data: {
+                            redirectUrl: raw.redirectUrl,
+                            verifier: codeVerifier,
+                        },
+                    };
+                }
+
+                set.status = code === 400 ? 400 : 500;
+
+                return {
+                    error: 'OTP verification failed',
+                    details: raw,
+                };
+            } catch (e) {
+                set.status = 500;
+
+                return {
+                    error: 'Internal server error',
+                    details: (e as Error).message,
+                };
+            }
+        },
+        {
+            body: t.Object({
+                code: t.String(),
+            }),
+        },
+    )
+    .post('/resend-otp', async ({ set, request }) => {
+        try {
+            const otpToken = await getOtpTokenCookie();
+
+            if (!otpToken) {
+                set.status = 400;
+                return {
+                    error: 'OTP session expired',
+                    details: { id: 'otp_session_expired' },
+                };
+            }
+
+            const forwardedHeaders = createForwardedHeaders(request);
+            const driver = axios.create({
+                headers: forwardedHeaders,
+            });
+
+            const { code, raw } = await authClient.resendOTP({
+                existingToken: otpToken,
+                driver,
+            });
+
+            if (code === 200 && raw.token) {
+                // Update OTP token cookie with the new token
+                await setOtpTokenCookie(raw.token);
+
+                return {
+                    success: true,
+                    message: 'OTP resent successfully',
+                    data: {
+                        expiredAt: raw.expiredAt,
+                        email: raw.email,
+                    },
+                };
+            }
+
+            set.status = code === 400 ? 400 : 500;
+
+            return {
+                error: 'Resend OTP failed',
+                details: raw,
+            };
+        } catch (e) {
+            set.status = 500;
+
+            return {
+                error: 'Internal server error',
+                details: (e as Error).message,
+            };
+        }
+    })
     .get('/session', async ({ set, request }) => {
         try {
             const sessionToken = (await getSessionTokenCookie()) ?? 'invalid-token';
