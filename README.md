@@ -1,37 +1,38 @@
 # Kubis Web
 
-Your all in one workspace - A modern monorepo powered by Turborepo.
+Kubis Web is a Turborepo monorepo containing the main product app, an SSO app, and shared UI/utility packages.
 
-## What's inside?
+## Tech Stack
 
-This Turborepo includes the following packages and apps:
+- Next.js 16 (apps)
+- React 19 + TypeScript
+- Turborepo
+- pnpm workspaces
+- Tailwind CSS v4
+- ESLint + Prettier
 
-### Apps and Packages
+## Monorepo Layout
 
-- `main`: Main application built with [Next.js](https://nextjs.org/)
-- `sso`: Single Sign-On (SSO) application built with [Next.js](https://nextjs.org/)
-- `@repo/eslint-config`: Shared ESLint configurations used throughout the monorepo
-- `@repo/typescript-config`: Shared TypeScript configuration files
+```txt
+apps/
+  main/  Main product app (dashboard/workspace) - default dev port 3001
+  sso/   Authentication and OAuth app - default dev port 3000
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+packages/
+  commons/            Shared constants, API clients, utilities, typed helpers
+  shadcn-ui/          Shared UI components, guards, providers, dashboard blocks
+  ui/                 Additional shared UI package and generators
+  tailwind-config/    Shared Tailwind/PostCSS setup
+  eslint-config/      Shared ESLint config package
+  typescript-config/  Shared TS config package
+```
 
-### Development Tools
+## Requirements
 
-This workspace has the following tools configured:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-- [Turborepo](https://turborepo.com/) for build orchestration
+- Node.js >= 18 (Dockerfile uses Node 22.13)
+- pnpm 9.x
 
 ## Getting Started
-
-### Prerequisites
-
-- Node.js >= 18
-- pnpm 9.0.0
-
-### Installation
 
 Install dependencies:
 
@@ -39,74 +40,72 @@ Install dependencies:
 pnpm install
 ```
 
-### Development
-
-To develop all apps and packages:
+Run all workspace `dev` tasks with Turborepo:
 
 ```bash
 pnpm dev
 ```
 
-To develop a specific app:
+Run a single app:
 
 ```bash
-# Develop main app
-turbo dev --filter=main
-
-# Develop SSO app
+# SSO app on http://localhost:3000
 turbo dev --filter=sso
+
+# Main app on http://localhost:3001
+turbo dev --filter=main
 ```
 
-### Build
+## Environment Variables
 
-To build all apps and packages:
+The workspace validates env values via `@repo/commons` (`packages/commons/src/constant/env.ts`).
+
+Create `.env.local` files for app development with at least:
 
 ```bash
-pnpm build
+APP_ENV=development
+NEXT_PUBLIC_AUTH_URL=http://localhost:3000/api/auth
+NEXT_PUBLIC_MAIN_APP_BASE_URL=http://localhost:3001
+NEXT_PUBLIC_SSO_APP_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_MAIN_CLIENT_ID=main-web
+NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL=http://localhost:4000/graphql
 ```
 
-To build a specific app:
+Notes:
+
+- All `NEXT_PUBLIC_*` variables must be valid URLs/strings or startup will fail due to schema validation.
+- `NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL` is used by the main app GraphQL proxy and socket setup.
+
+## Scripts
+
+From repo root:
 
 ```bash
-# Build main app
+pnpm dev          # turbo run dev
+pnpm build        # turbo run build
+pnpm lint         # turbo run lint
+pnpm check-types  # turbo run check-types
+pnpm format       # prettier write
+pnpm format:check # prettier check
+```
+
+Useful filtered commands:
+
+```bash
 turbo build --filter=main
-
-# Build SSO app
 turbo build --filter=sso
+turbo lint --filter=main
+turbo lint --filter=sso
 ```
 
-### Other Commands
+## Deployment Notes
 
-```bash
-# Lint all packages
-pnpm lint
+- The repo includes a multi-stage `Dockerfile` that supports app-scoped builds via `APP_NAME`.
+- Fly.io templates are provided:
+    - `fly.prod.toml` for main branch/production
+    - `fly.staging.toml` for non-main/staging-like deployments
 
-# Format code
-pnpm format
+## Reference Docs
 
-# Type check all packages
-pnpm check-types
-```
-
-## Project Structure
-
-```
-kubis-web/
-├── apps/
-│   ├── main/          # Main application
-│   └── sso/           # SSO application
-├── packages/
-│   ├── eslint-config/ # Shared ESLint configs
-│   └── typescript-config/ # Shared TypeScript configs
-└── package.json
-```
-
-## Turborepo
-
-Learn more about Turborepo:
-
-- [Documentation](https://turborepo.com/docs)
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
+- `apps/main/README.md`
+- `apps/sso/README.md`

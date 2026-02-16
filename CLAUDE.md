@@ -2,168 +2,97 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
-
-Kubis Web is a monorepo workspace application built with Turborepo. It consists of two Next.js applications (main and SSO) with shared packages for common functionality, UI components, and configuration.
-
-## Development Commands
-
-### Setup
+## Commands
 
 ```bash
-pnpm install              # Install all dependencies
+pnpm install              # Install all workspace dependencies
+pnpm dev                  # Run all apps in dev mode
+pnpm build                # Build all packages/apps
+pnpm lint                 # Lint all packages/apps
+pnpm check-types          # TypeScript type checking
+pnpm format               # Prettier format (write)
+pnpm format:check         # Prettier check (CI)
+
+turbo dev --filter=main   # Main app only (port 3001)
+turbo dev --filter=sso    # SSO app only (port 3000)
+turbo build --filter=main
+turbo lint --filter=main
 ```
 
-### Development
-
-```bash
-pnpm dev                  # Run all apps in development mode
-turbo dev --filter=main   # Run only main app (localhost:3001)
-turbo dev --filter=sso    # Run only SSO app (localhost:3000)
-```
-
-### Build & Quality
-
-```bash
-pnpm build                # Build all apps
-turbo build --filter=main # Build specific app
-pnpm lint                 # Lint all packages
-pnpm format               # Format code with Prettier
-pnpm check-types          # Type check all packages
-```
+No test framework is configured in this repo.
 
 ## Architecture
 
-### Monorepo Structure
+**Turborepo monorepo** with pnpm workspaces, Next.js 16 (App Router + Turbopack), React 19, TypeScript.
 
-```
-apps/
-  main/          # Main application (port 3001)
-  sso/           # Single Sign-On application (port 3000)
-packages/
-  commons/       # Shared utilities, types, API clients
-  shadcn-ui/     # UI components and providers
-  ui/            # Additional UI components
-  tailwind-config/   # Shared Tailwind configuration
-  typescript-config/ # Shared TypeScript configuration
-  eslint-config/     # Shared ESLint configuration
-```
+### Apps
 
-### Authentication Architecture
+- **`apps/main`** (port 3001) — Main product dashboard/workspace app. Protected routes under `/my-account` use `AuthGuard`.
+- **`apps/sso`** (port 3000) — SSO/OAuth app handling sign-in and OAuth authorization flows.
 
-The project implements **httpOnly cookie-based authentication** using OAuth 2.0 with PKCE flow:
+### Packages
 
-1. **SSO App** (`apps/sso`): Handles OAuth authorization and sign-in flow
-2. **Main App** (`apps/main`): Protected application that requires authentication
-3. **Commons Package** (`packages/commons`): Contains shared authentication logic
+- **`packages/commons`** — Shared API clients (Apollo, Axios, Elysia route handlers), constants, env validation (`@t3-oss/env-core` + Zod), types, utilities, hooks, server actions.
+- **`packages/shadcn-ui`** — Shared UI: shadcn/ui primitives (new-york style), custom components, guards (`AuthGuard`, `ExchangeCodeForToken`), providers (`AuthProvider`, `ApolloProvider`, `SocketProvider`), dashboard layout, hooks.
+- **`packages/tailwind-config`**, **`packages/eslint-config`**, **`packages/typescript-config`** — Shared config packages.
 
-#### Key Components
+### Key Patterns
 
-- **API Route Handlers**: Both apps use Elysia.js for API routes
-    - `/api/auth` - Authentication endpoints (exchange, refresh, logout, session)
-    - `/api/graphql` - GraphQL proxy with automatic token injection
+**Page → Container → Components**: Pages are thin wrappers that import a container component. Containers are `'use client'` components that own data fetching (Apollo `useQuery`/`useMutation`), define a local React Context, and expose a `useXxx()` hook. Sub-components consume the context.
 
-- **Cookie Management** (`packages/commons/src/utils/cookie-helpers.ts`):
-    - Access tokens: 30 minutes (httpOnly, secure in production)
-    - Refresh tokens: 7 days (httpOnly, secure in production)
-    - All cookies use `sameSite: 'strict'` for security
+**GraphQL**: Apollo Client 4. Queries use `TypedDocumentNode<Response, Variables>` with inline `gql` template literals co-located in the container file. All queries proxy through `/api/graphql` (Elysia route handler injects httpOnly access token cookie).
 
-- **Auth Client** (`packages/commons/src/lib/auth-client.ts`):
-    - Handles OAuth code exchange, token refresh, and validation
-    - Used by API routes to communicate with auth backend
+**Auth**: Custom OAuth 2.0 PKCE flow (no NextAuth). SSO app handles credentials → issues auth code → main app exchanges for tokens stored in httpOnly cookies. Token refresh every 25 minutes. CSRF tokens seeded by middleware (`proxy.ts`) and validated on mutating routes.
 
-- **Apollo Client** (`packages/commons/src/lib/apollo-client.ts`):
-    - Uses `/api/graphql` proxy endpoint for authenticated requests
-    - Tokens handled server-side (not exposed to client)
-    - Cache management utilities included
+**API routes**: Built with Elysia (not raw Next.js handlers). Both `auth-api-route.ts` and `graphql-api-route.ts` export `.fetch` as the route handler.
 
-### GraphQL Integration
+**State management**: React Context API only (no Redux/Zustand). Key contexts: `AuthContext`, `DashboardContext`, `SocketContext`, plus per-feature contexts in containers.
 
-Both apps use Apollo Client for GraphQL queries. The authentication flow:
+**Server actions**: `useBaseAction()` factory from `@repo/commons/utils/base-action.ts` provides cookie access, Axios instance with forwarded headers, and form helpers.
 
-1. Client makes GraphQL request to `/api/graphql`
-2. API route extracts access token from httpOnly cookie
-3. API route forwards request to backend with `Authorization: Bearer {token}` header
-4. Response returned to client
+### Styling
 
-### Environment Variables
+- Tailwind CSS v4 with oklch CSS custom properties for theming (dark mode via `.dark` class)
+- `cn()` utility from `@repo/shadcn-ui/lib/utils` (clsx + tailwind-merge)
+- Prettier enforces Tailwind class ordering via `prettier-plugin-tailwindcss`
 
-Required environment variables (see `packages/commons/src/constant/env.ts`):
-
-- `NEXT_PUBLIC_AUTH_URL` - OAuth provider URL
-- `NEXT_PUBLIC_MAIN_APP_BASE_URL` - Main app URL
-- `NEXT_PUBLIC_SSO_APP_BASE_URL` - SSO app URL
-- `NEXT_PUBLIC_MAIN_CLIENT_ID` - OAuth client ID
-- `NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL` - GraphQL backend URL
-
-Example values in `apps/main/.env` and `apps/sso/.env`
-
-### Package Exports
-
-The `@repo/commons` package exports modules via path-based exports:
+### Import Conventions
 
 ```typescript
-import { ... } from "@repo/commons/lib/apollo-client"
-import { ... } from "@repo/commons/utils/cookie-helpers"
-import { ... } from "@repo/commons/constant/env"
-import { ... } from "@repo/commons/types/..."
+// Shared UI
+import { Button } from '@repo/shadcn-ui/components/button';
+import { useAuth } from '@repo/shadcn-ui/providers/auth-provider';
+
+// Shared utilities
+import { env } from '@repo/commons/constant/env';
+
+// App-local (main app path aliases)
+// @/*           → ./app/*
+// @/root/*      → ./*
+// @/component/* → ./components/*
+// @/shadcn/*    → ../../packages/shadcn-ui/src/*
 ```
 
-### Next.js Configuration
+**Icons**: `@tabler/icons-react` (primary), `lucide-react` (secondary).
 
-Both apps use:
+### Formatting
 
-- Turbopack for faster builds and dev mode
-- Monorepo root configuration (`turbopack.root` set to `../../`)
-- Custom headers via `getDefaultHeaders()` from commons
-- SSO app redirects `/` to `/sign-in`
+- Prettier: 4 spaces, single quotes, 100 char width, LF line endings
+- Vertical spacing: one blank line between logical operations, before/after block comments, between declarations and operations; no blank line between closely related operations
 
-## Key Patterns
+## Environment Variables
 
-### API Routes
+Validated at startup via `packages/commons/src/constant/env.ts`. All `NEXT_PUBLIC_*` must be valid URLs or startup fails. Create `.env.local` in each app:
 
-Both apps use Elysia.js (not Next.js route handlers) for API routes. Example pattern:
-
-```typescript
-// apps/{app}/app/api/auth/[[...slugs]]/route.ts
-export * from '@repo/commons/lib/auth-api-route';
+```bash
+APP_ENV=development
+NEXT_PUBLIC_AUTH_URL=http://localhost:3000/api/auth
+NEXT_PUBLIC_MAIN_APP_BASE_URL=http://localhost:3001
+NEXT_PUBLIC_SSO_APP_BASE_URL=http://localhost:3000
+NEXT_PUBLIC_MAIN_CLIENT_ID=main-web
+NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL=http://localhost:4000/graphql
 ```
 
-The actual implementation is in `packages/commons/src/lib/*-api-route.ts`
+## Deployment
 
-### Authentication Guards
-
-The main app wraps the application with:
-
-- `ExchangeCodeForToken` - Handles OAuth code exchange on callback
-- `ApolloProvider` - Provides Apollo Client instance
-- `AuthProvider` - Manages auth state
-
-### Component Organization
-
-- `apps/main/components/` - App-specific components
-    - `container/` - Layout containers
-    - `pages/` - Page-level components
-- `packages/shadcn-ui/` - Shared UI components built with shadcn/ui
-
-## Technology Stack
-
-- **Framework**: Next.js 16 with App Router
-- **Build Tool**: Turborepo with Turbopack
-- **Package Manager**: pnpm 9.0.0
-- **Language**: TypeScript 5.9.2
-- **Styling**: Tailwind CSS 4
-- **UI Components**: shadcn/ui, Radix UI primitives
-- **GraphQL**: Apollo Client
-- **API Layer**: Elysia.js
-- **Validation**: Zod
-- **Icons**: Tabler Icons, Lucide React
-- **Notifications**: Sonner (toast notifications)
-
-## Important Notes
-
-- Node.js >= 18 required
-- Both apps must run simultaneously for full functionality (SSO for auth, main for app)
-- Authentication tokens are stored in httpOnly cookies and never exposed to client JavaScript
-- All GraphQL requests must go through `/api/graphql` proxy to inject auth tokens
-- Use `turbo dev --filter={app}` to run individual apps during development
+Multi-stage Dockerfile with `APP_NAME` build arg. Deployed to Fly.io via GitHub Actions (`fly.prod.toml` for production, `fly.staging.toml` for staging).
