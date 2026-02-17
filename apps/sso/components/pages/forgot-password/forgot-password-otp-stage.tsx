@@ -10,23 +10,21 @@ type Props = {
     otp: string;
     formValidation: Record<string, string[]>;
     isVerifying: boolean;
-    isResending: boolean;
     isOtpExpired: boolean;
+    countdownFormatted: string;
     onOtpChange: (value: string) => void;
     onVerify: () => void;
-    onResend: () => void;
     onBack: () => void;
 };
 
-export default function SignInOtpStage({
+export default function ForgotPasswordOtpStage({
     otp,
     formValidation,
     isVerifying,
-    isResending,
     isOtpExpired,
+    countdownFormatted,
     onOtpChange,
     onVerify,
-    onResend,
     onBack,
 }: Props) {
     return (
@@ -34,14 +32,9 @@ export default function SignInOtpStage({
             <Field>
                 <div className="flex items-center justify-between">
                     <FieldLabel htmlFor="otp-verification">Verification code</FieldLabel>
-                    <button
-                        type="button"
-                        className="ml-auto text-xs underline-offset-2 hover:underline disabled:no-underline disabled:opacity-50"
-                        onClick={onResend}
-                        disabled={isResending || !isOtpExpired}
-                    >
-                        {isResending ? 'Sending...' : 'Resend Code'}
-                    </button>
+                    {!isOtpExpired && (
+                        <span className="text-muted-foreground text-xs">{countdownFormatted}</span>
+                    )}
                 </div>
                 <Input
                     id="otp-verification"
@@ -51,27 +44,36 @@ export default function SignInOtpStage({
                     onChange={(e) => onOtpChange(e.target.value)}
                     autoComplete="off"
                     type="password"
+                    disabled={isOtpExpired}
                 />
                 <ShowErrorText error={formValidation} field="code" />
             </Field>
             <Field>
-                <Button
-                    className="w-full"
-                    onClick={onVerify}
-                    disabled={isVerifying || otp.length < 6}
-                >
-                    {isVerifying ? (
-                        <>
-                            <Loader2Icon className="animate-spin" />
-                            Verifying
-                        </>
-                    ) : (
-                        'Verify'
-                    )}
-                </Button>
-                <Button variant="outline" className="w-full" onClick={onBack}>
-                    Back to Sign In
-                </Button>
+                {isOtpExpired ? (
+                    <Button className="w-full" onClick={onBack}>
+                        Start Over
+                    </Button>
+                ) : (
+                    <>
+                        <Button
+                            className="w-full"
+                            onClick={onVerify}
+                            disabled={isVerifying || otp.length < 6}
+                        >
+                            {isVerifying ? (
+                                <>
+                                    <Loader2Icon className="animate-spin" />
+                                    Verifying
+                                </>
+                            ) : (
+                                'Verify'
+                            )}
+                        </Button>
+                        <Button variant="outline" className="w-full" onClick={onBack}>
+                            Back to Reset Password
+                        </Button>
+                    </>
+                )}
             </Field>
         </>
     );

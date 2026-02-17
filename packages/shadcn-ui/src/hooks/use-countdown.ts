@@ -8,7 +8,10 @@ export const useCountdown = (expiresAt: number, onExpire?: (isExpired: boolean) 
     const expiredRef = useRef<boolean>(false);
 
     useEffect(() => {
-        if (timeLeft === 0) return;
+        const left = getLeft();
+        setTimeLeft(left);
+
+        if (left === 0) return;
         const id = setInterval(() => setTimeLeft(getLeft()), 1_000);
         return () => clearInterval(id);
     }, [expiresAt]);

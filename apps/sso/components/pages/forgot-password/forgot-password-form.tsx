@@ -8,56 +8,51 @@ import { Loader2Icon } from 'lucide-react';
 import Link from 'next/link';
 
 type Props = {
-    identifier: string;
+    email: string;
     password: string;
     formValidation: Record<string, string[]>;
     isSubmitting: boolean;
-    onIdentifierChange: (value: string) => void;
+    onEmailChange: (value: string) => void;
     onPasswordChange: (value: string) => void;
     onSubmit: () => void;
 };
 
-export default function SignInCredentialsStage({
-    identifier,
+export default function ForgotPasswordForm({
+    email,
     password,
     formValidation,
     isSubmitting,
-    onIdentifierChange,
+    onEmailChange,
     onPasswordChange,
     onSubmit,
 }: Props) {
     return (
         <>
             <div className="grid gap-3">
-                <Label>Identifier</Label>
+                <Label>Email</Label>
                 <Input
-                    placeholder="Enter your username or email"
-                    value={identifier}
-                    onChange={(e) => onIdentifierChange(e.target.value)}
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => onEmailChange(e.target.value)}
                 />
-                <ShowErrorText error={formValidation} field="identifier" />
+                <ShowErrorText error={formValidation} field="email" />
             </div>
+
             <div className="grid gap-3">
-                <div className="flex items-center">
-                    <Label>Password</Label>
-                    <Link
-                        href="/forgot-password"
-                        className="ml-auto text-xs underline-offset-2 hover:underline"
-                    >
-                        Forgot your password?
-                    </Link>
-                </div>
+                <Label>New Password</Label>
                 <Input
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder="Enter your new password"
                     value={password}
                     onChange={(e) => onPasswordChange(e.target.value)}
                 />
-                <ShowErrorText error={formValidation} field="password" />
+                <ShowErrorText error={formValidation} field="newPassword" />
             </div>
+
             <Button type="button" className="w-full" onClick={onSubmit} disabled={isSubmitting}>
                 {!isSubmitting ? (
-                    <>Login</>
+                    <>Reset Password</>
                 ) : (
                     <>
                         <Loader2Icon className="animate-spin" />
@@ -65,10 +60,11 @@ export default function SignInCredentialsStage({
                     </>
                 )}
             </Button>
+
             <div className="text-center text-sm">
-                Don&apos;t have an account? {/* TODO: Add sign-up page route */}
-                <Link href={'#'} className="underline underline-offset-4">
-                    Register
+                Remember your password?{' '}
+                <Link href={'/sign-in'} className="underline underline-offset-4">
+                    Sign in
                 </Link>
             </div>
         </>

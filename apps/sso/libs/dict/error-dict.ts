@@ -5,4 +5,6 @@ export const errorDict = {
     INVALID_2FA_TOKEN: 'Your verification session is invalid. Please sign in again.',
     SIGN_IN_2FA_EXPIRED: 'Your verification code has expired. Please request a new one.',
     otp_session_expired: 'Your OTP session has expired. Please sign in again.',
+    INVALID_FORGOT_PASSWORD_TOKEN: 'Your verification session is invalid. Please start over.',
+    FORGOT_PASSWORD_OTP_EXPIRED: 'Your verification code has expired. Please start over.',
 };

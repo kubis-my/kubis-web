@@ -1,6 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
+
 `kubis-web` is a pnpm/Turborepo monorepo.
 
 - `apps/main`: main product app (Next.js, default dev port `3001`)
@@ -12,6 +13,7 @@
 Use `app/` for routes, `components/` for UI composition, and `libs/` for app-local helpers.
 
 ## Build, Test, and Development Commands
+
 Run commands from repo root:
 
 - `pnpm install`: install workspace dependencies
@@ -23,6 +25,7 @@ Run commands from repo root:
 - `pnpm format` / `pnpm format:check`: write/check Prettier formatting
 
 ## Coding Style & Naming Conventions
+
 - Language: TypeScript + React (Next.js App Router)
 - Formatting: Prettier (`.prettierrc.json`) with 4-space indentation, semicolons, single quotes, trailing commas, and `printWidth: 100`
 - Linting: shared ESLint config from `@repo/eslint-config`
@@ -30,6 +33,7 @@ Run commands from repo root:
 - Vertical spacing: keep one blank line between logical operations, around block comments, and between declarations and later operations
 
 ## Development Workflow Rules
+
 Follow `.claude/rules/code-rules.md` for all changes.
 
 - Apply KISS, YAGNI, and SOLID; avoid over-engineering
@@ -39,6 +43,7 @@ Follow `.claude/rules/code-rules.md` for all changes.
 - Share a short plan and wait for approval before coding
 
 ## Testing Guidelines
+
 There is no dedicated test framework configured yet. Before opening a PR, validate with:
 
 - `pnpm lint`
@@ -48,6 +53,7 @@ There is no dedicated test framework configured yet. Before opening a PR, valida
 When adding tests, place them near the feature (`*.test.ts` / `*.test.tsx`) or in a nearby `__tests__/` folder.
 
 ## Commit & Pull Request Guidelines
+
 Recent history follows Conventional Commit style (`feat:`, `fix:`, `misc:`). Example:
 
 - `feat: add invitation decline mutation`

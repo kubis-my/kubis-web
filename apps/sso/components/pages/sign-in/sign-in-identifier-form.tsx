@@ -271,7 +271,7 @@ export default function SignInWithIdentifierForm() {
                             <>
                                 <h1 className="text-xl font-bold">Verify your login</h1>
                                 <p className="text-muted-foreground text-sm">
-                                    Enter the verification code we sent to your email address:{" "}
+                                    Enter the verification code we sent to your email address:{' '}
                                     <span className="font-medium">{otpEmail}</span>.
                                 </p>
                             </>

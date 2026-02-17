@@ -299,6 +299,111 @@ const auth = new Elysia({ prefix: '/api/auth' })
             };
         }
     })
+    .post(
+        '/forgot-password',
+        async ({ body, set, request }) => {
+            try {
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                const { code, raw } = await authClient.forgotPassword({
+                    email: body.email,
+                    newPassword: body.newPassword,
+                    driver,
+                });
+
+                if (code === 200 && raw.token) {
+                    await setOtpTokenCookie(raw.token);
+
+                    return {
+                        success: true,
+                        message: 'Forgot password request submitted',
+                        data: {
+                            expiredAt: raw.expiredAt,
+                            email: raw.email,
+                        },
+                    };
+                }
+
+                set.status = code ?? 500;
+
+                return {
+                    error: 'Forgot password failed',
+                    details: raw,
+                };
+            } catch (e) {
+                set.status = 500;
+
+                return {
+                    error: 'Internal server error',
+                    details: (e as Error).message,
+                };
+            }
+        },
+        {
+            body: t.Object({
+                email: t.String(),
+                newPassword: t.String(),
+            }),
+        },
+    )
+    .post(
+        '/forgot-password/verify-otp',
+        async ({ body, set, request }) => {
+            try {
+                const otpToken = await getOtpTokenCookie();
+
+                if (!otpToken) {
+                    set.status = 400;
+                    return {
+                        error: 'OTP session expired',
+                        details: { id: 'otp_session_expired' },
+                    };
+                }
+
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: forwardedHeaders,
+                });
+
+                const { code, raw } = await authClient.forgotPasswordVerifyOTP({
+                    token: otpToken,
+                    otpCode: body.code,
+                    driver,
+                });
+
+                if (code === 200) {
+                    await clearOtpTokenCookie();
+
+                    return {
+                        success: true,
+                        message: 'Password reset successful',
+                    };
+                }
+
+                set.status = code === 400 ? 400 : 500;
+
+                return {
+                    error: 'OTP verification failed',
+                    details: raw,
+                };
+            } catch (e) {
+                set.status = 500;
+
+                return {
+                    error: 'Internal server error',
+                    details: (e as Error).message,
+                };
+            }
+        },
+        {
+            body: t.Object({
+                code: t.String(),
+            }),
+        },
+    )
     .post('/logout', async ({ set }) => {
         try {
             await clearSessionCookies();
