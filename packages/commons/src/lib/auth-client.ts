@@ -27,7 +27,7 @@ export const authClient = {
         };
 
         try {
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN, input);
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.SIGN_IN.WITH_IDENTIFIER, input);
 
             return {
                 code: 200,
@@ -274,7 +274,7 @@ export const authClient = {
                 token: props.token,
                 otpCode: props.otpCode,
             };
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN_VERIFY_OTP, input);
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.SIGN_IN.VERIFY_OTP, input);
 
             return {
                 code: 200,
@@ -306,7 +306,7 @@ export const authClient = {
             const input = {
                 token: props.existingToken,
             };
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.SIGN_IN_RESEND_OTP, input);
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.SIGN_IN.RESEND_OTP, input);
 
             return {
                 code: 200,
@@ -339,7 +339,7 @@ export const authClient = {
         };
 
         try {
-            const { data } = await driver.post(AUTH_SERVICE_ROUTE.AUTH.FORGOT_PASSWORD, input);
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.SIGN_IN.FORGOT_PASSWORD, input);
 
             return {
                 code: 200,
@@ -385,9 +385,89 @@ export const authClient = {
             };
 
             const { data } = await driver.post(
-                AUTH_SERVICE_ROUTE.AUTH.FORGOT_PASSWORD_VERIFY_OTP,
+                AUTH_SERVICE_ROUTE.SIGN_IN.FORGOT_PASSWORD_VERIFY_OTP,
                 input,
             );
+
+            return {
+                code: 200,
+                raw: data,
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
+    async signUpWithIdentifier(props: {
+        driver?: AxiosInstance;
+        email: string;
+        username?: string;
+        password: string;
+    }) {
+        const driver = props.driver || axios;
+        const input = {
+            email: props.email,
+            username: props.username ?? '',
+            password: props.password,
+        };
+
+        try {
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.SIGN_UP.WITH_IDENTIFIER, input);
+
+            return {
+                code: 200,
+                raw: data,
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (response.status === 400) {
+                    return {
+                        code: 400,
+                        raw: convertErrorMessageListToObject(Object.keys(input), data.message),
+                    };
+                }
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
+    async signUpVerifyOTP(props: { token: string; otpCode: string; driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
+
+        try {
+            const input = {
+                token: props.token,
+                otpCode: props.otpCode,
+            };
+
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.SIGN_UP.VERIFY_OTP, input);
 
             return {
                 code: 200,
