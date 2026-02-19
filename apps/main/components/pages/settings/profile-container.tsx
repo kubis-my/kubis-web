@@ -38,7 +38,7 @@ export default function ProfileContainer({ children }: Readonly<{ children: Reac
 
     const { data, loading: isFetchingCredential } = useQuery(GET_CREDENTIAL, {
         variables: {
-            publicId: auth.authUser?.credential.publicId ?? '-1',
+            publicId: auth.authUser?.credential?.publicId ?? '-1',
         },
     });
 

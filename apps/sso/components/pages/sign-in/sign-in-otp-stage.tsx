@@ -12,6 +12,7 @@ type Props = {
     isVerifying: boolean;
     isResending: boolean;
     isOtpExpired: boolean;
+    countdownFormatted: string;
     onOtpChange: (value: string) => void;
     onVerify: () => void;
     onResend: () => void;
@@ -24,6 +25,7 @@ export default function SignInOtpStage({
     isVerifying,
     isResending,
     isOtpExpired,
+    countdownFormatted,
     onOtpChange,
     onVerify,
     onResend,
@@ -34,14 +36,18 @@ export default function SignInOtpStage({
             <Field>
                 <div className="flex items-center justify-between">
                     <FieldLabel htmlFor="otp-verification">Verification code</FieldLabel>
-                    <button
-                        type="button"
-                        className="ml-auto text-xs underline-offset-2 hover:underline disabled:no-underline disabled:opacity-50"
-                        onClick={onResend}
-                        disabled={isResending || !isOtpExpired}
-                    >
-                        {isResending ? 'Sending...' : 'Resend Code'}
-                    </button>
+                    {isOtpExpired ? (
+                        <button
+                            type="button"
+                            className="ml-auto text-xs underline-offset-2 hover:underline disabled:no-underline disabled:opacity-50"
+                            onClick={onResend}
+                            disabled={isResending}
+                        >
+                            {isResending ? 'Sending...' : 'Resend Code'}
+                        </button>
+                    ) : (
+                        <span className="text-muted-foreground text-xs">{countdownFormatted}</span>
+                    )}
                 </div>
                 <Input
                     id="otp-verification"
@@ -51,6 +57,7 @@ export default function SignInOtpStage({
                     onChange={(e) => onOtpChange(e.target.value)}
                     autoComplete="off"
                     type="password"
+                    disabled={isOtpExpired}
                 />
                 <ShowErrorText error={formValidation} field="code" />
             </Field>

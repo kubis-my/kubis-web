@@ -1,6 +1,6 @@
 'use client';
 
-import { GalleryVerticalEnd, Loader2Icon } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '../../components/field';
 import { Input } from '../../components/input';
 import { Button } from '../../components/button';
@@ -9,9 +9,11 @@ import ShowErrorText from '../show-error-text';
 import { toast } from 'sonner';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
+import { APP_NAME } from '@repo/commons/constant/base';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { CompleteProfileInput, User } from '@repo/commons/types/account-service-schema.type';
 import { useMutation } from '@apollo/client/react';
+import KubisSvg from '../kubis-svg';
 
 const COMPLETE_PROFILE: TypedDocumentNode<
     { completeProfile: User },
@@ -87,10 +89,11 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                 }
 
                 if (data) {
-                    onSuccess(data.completeProfile);
                     toast.success('Profile setup completed successfully!', {
                         position: 'top-center',
                     });
+
+                    window.location.reload();
 
                     return;
                 }
@@ -119,11 +122,11 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                                     className="flex flex-col items-center gap-2 font-medium"
                                 >
                                     <div className="flex size-8 items-center justify-center rounded-md">
-                                        <GalleryVerticalEnd className="size-6" />
+                                        <KubisSvg className="size-12" />
                                     </div>
-                                    <span className="sr-only">Kubis</span>
+                                    <span className="sr-only">{APP_NAME}</span>
                                 </a>
-                                <h1 className="text-xl font-bold">Welcome to Kubis</h1>
+                                <h1 className="text-xl font-bold">Welcome to {APP_NAME}</h1>
                                 <FieldDescription>
                                     Complete your profile to continue
                                 </FieldDescription>

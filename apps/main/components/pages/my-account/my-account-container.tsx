@@ -168,7 +168,7 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
         variables: {
             pagination: {
                 take: AUDIT_LOG_PAGINATION_SIZE,
-                credentialId: auth.authUser?.credential.publicId ?? '-1',
+                credentialId: auth.authUser?.credential?.publicId ?? '-1',
             },
         },
     });
@@ -208,7 +208,7 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
                 auditLogResult.loading ||
                 companyOverview.loading ||
                 credentialDeviceOverview.loading,
-            credentialPublicId: auth.authUser?.credential.publicId ?? '-1',
+            credentialPublicId: auth.authUser?.credential?.publicId ?? '-1',
             companyOverviewCard: companyOverview.data?.getUserCompanies?.overview,
             deviceOverviewCard: credentialDeviceOverview.data?.getCredentialDevices?.overview,
         }),

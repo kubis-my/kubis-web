@@ -7,4 +7,7 @@ export const errorDict = {
     otp_session_expired: 'Your OTP session has expired. Please sign in again.',
     INVALID_FORGOT_PASSWORD_TOKEN: 'Your verification session is invalid. Please start over.',
     FORGOT_PASSWORD_OTP_EXPIRED: 'Your verification code has expired. Please start over.',
+    CLIENT_NOT_REGISTERED:
+        'This application is not registered for OAuth access. Please contact support.',
+    REDIRECT_URI_NOT_ALLOWED: 'This redirect URL is not authorized for the application.',
 };

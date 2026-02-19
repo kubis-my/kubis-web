@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { errorDict } from '@/root/libs/dict/error-dict';
 import { toast } from 'sonner';
 import { MAIN_CLIENT_ID } from '@repo/commons/constant/client-id';
-import { MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
+import { APP_NAME, MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
 import { useSearchParams } from 'next/navigation';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import KubisSvg from '@repo/shadcn-ui/custom-components/kubis-svg';
@@ -31,7 +31,7 @@ export default function SignInWithIdentifierForm() {
     const [isSignIn, setIsSignIn] = useState(false);
     const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
     const [isResendingOtp, setIsResendingOtp] = useState(false);
-    const { expired: isOtpExpired } = useCountdown(otpExpiresAt);
+    const { expired: isOtpExpired, formatted: countdownFormatted } = useCountdown(otpExpiresAt);
 
     const param = useSearchParams();
 
@@ -264,7 +264,7 @@ export default function SignInWithIdentifierForm() {
                             <>
                                 <h1 className="text-xl font-bold">Welcome back</h1>
                                 <p className="text-muted-foreground text-balance">
-                                    Login to your Kubis account
+                                    Login to your {APP_NAME} account
                                 </p>
                             </>
                         ) : (
@@ -296,6 +296,7 @@ export default function SignInWithIdentifierForm() {
                             isVerifying={isVerifyingOtp}
                             isResending={isResendingOtp}
                             isOtpExpired={isOtpExpired}
+                            countdownFormatted={countdownFormatted}
                             onOtpChange={setOtp}
                             onVerify={verifyOtpHandler}
                             onResend={resendOtpHandler}
