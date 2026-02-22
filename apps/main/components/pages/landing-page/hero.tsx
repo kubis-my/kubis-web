@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
 import { Button } from '@repo/shadcn-ui/components/button';
@@ -5,18 +7,20 @@ import { Zap, Lock, Palette } from 'lucide-react';
 import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
 import {
     Card,
-    CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
 } from '@repo/shadcn-ui/components/card';
 import Link from 'next/link';
+import { useAuth } from '@repo/shadcn-ui/providers/auth-provider';
 
 export default function Hero() {
+    const auth = useAuth();
+    const isAuthenticated = auth.isAuthenticated;
+
     return (
-        <main className="mx-auto max-w-6xl px-6 pt-32 pb-20 lg:px-8">
-            {/* Hero Section */}
-            <div className="mb-24 flex flex-col items-center text-center">
+        <main className="flex min-h-screen flex-col items-center justify-center gap-16 bg-[#ecf0f1] px-6 text-center dark:bg-gray-950">
+            <div className="flex flex-col items-center">
                 <Image
                     src="/logo.png"
                     alt="KUBIS Logo"
@@ -33,23 +37,28 @@ export default function Hero() {
                 </p>
                 <div className="flex gap-4">
                     <Button size="lg" asChild className="bg-[#4CAF50] hover:bg-[#43A047]">
-                        <Link href={SSO_APP_BASE_URL}>Get Started</Link>
+                        <Link
+                            href={
+                                isAuthenticated ? '/my-account' : `${SSO_APP_BASE_URL}/sign-in`
+                            }
+                        >
+                            {isAuthenticated ? 'Go to Account' : 'Sign In Now'}
+                        </Link>
                     </Button>
-                    <Button size="lg" variant="secondary">
+                    <Button size="lg" variant="outline">
                         Explore Apps
                     </Button>
                 </div>
             </div>
-
             {/* Features Grid */}
-            <div className="mb-24 grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="grid w-full max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
                 <Card>
                     <CardHeader>
                         <Zap className="mb-4 h-10 w-10 text-[#4CAF50]" />
                         <CardTitle>Fast & Efficient</CardTitle>
                         <CardDescription>
-                            Built for speed and performance. Access all your tools instantly without
-                            any lag.
+                            Built for speed and performance. Access all your tools instantly
+                            without any lag.
                         </CardDescription>
                     </CardHeader>
                 </Card>
@@ -72,21 +81,6 @@ export default function Hero() {
                     </CardHeader>
                 </Card>
             </div>
-
-            {/* CTA Section */}
-            <Card className="text-center">
-                <CardHeader>
-                    <CardTitle className="text-3xl">Ready to get started?</CardTitle>
-                    <CardDescription className="text-lg">
-                        Join thousands of users who trust KUBIS for their daily workflow
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Button size="lg" className="bg-[#4CAF50] hover:bg-[#43A047]" asChild>
-                        <Link href={SSO_APP_BASE_URL}>Sign In Now</Link>
-                    </Button>
-                </CardContent>
-            </Card>
         </main>
     );
 }
