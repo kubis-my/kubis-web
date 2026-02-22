@@ -45,8 +45,8 @@ export default function Hero() {
                             {isAuthenticated ? 'Go to Account' : 'Sign In Now'}
                         </Link>
                     </Button>
-                    <Button size="lg" variant="outline">
-                        Explore Apps
+                    <Button size="lg" variant="outline" asChild>
+                        <Link href="/explore-apps">Explore Apps</Link>
                     </Button>
                 </div>
             </div>
