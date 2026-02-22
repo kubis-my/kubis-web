@@ -69,6 +69,12 @@ export interface CompleteProfileInput {
     nickname: string;
 }
 
+export interface UpdateUserInput {
+    firstName: string;
+    lastName: string;
+    nickname: string;
+}
+
 export interface UpsertCompanyInput {
     publicId?: Nullable<string>;
     name: string;
@@ -392,6 +398,7 @@ export interface IQuery {
 
 export interface IMutation {
     completeProfile(input: CompleteProfileInput): User | Promise<User>;
+    updateProfile(input: UpdateUserInput): User | Promise<User>;
     upsertCompany(input: UpsertCompanyInput): Company | Promise<Company>;
     upsertCompanyPhysicalAddress(
         companyPublicId: string,
