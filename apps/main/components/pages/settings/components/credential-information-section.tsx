@@ -41,6 +41,7 @@ import { IconLock, IconMail, IconUser } from '@tabler/icons-react';
 import { useApolloClient } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { useProfile } from '../profile-container';
+import { errorDict } from '@/root/libs/dict/error-dict';
 
 type CredentialFormData = {
     email: string;
@@ -256,9 +257,19 @@ export default function CredentialInformationSection() {
                 return;
             }
 
-            if (response.status === 400 && raw.details && typeof raw.details === 'object') {
-                setOtpValidation(raw.details);
+            if (response.status === 400 && raw.details) {
+                setFormValidation(raw.details);
                 return;
+            }
+
+            if (raw?.details?.id) {
+                const statusKey = raw.details.id;
+                if (statusKey in errorDict) {
+                    toast.error(errorDict[statusKey as keyof typeof errorDict], {
+                        position: 'top-center',
+                    });
+                    return;
+                }
             }
 
             toast.error('Failed to verify code. Please try again.', {
