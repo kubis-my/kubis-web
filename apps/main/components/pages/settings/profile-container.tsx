@@ -19,6 +19,7 @@ const GET_CREDENTIAL: TypedDocumentNode<GetCredentialResponse, GetCredentialVari
         getCredential(publicId: $publicId) {
             publicId
             email
+            username
             isEnable2FA
             createdAt
             updatedAt

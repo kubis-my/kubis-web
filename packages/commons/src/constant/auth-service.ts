@@ -21,4 +21,8 @@ export const AUTH_SERVICE_ROUTE = {
         EXCHANGE_TOKEN: `${AUTH_SVC_URL}/oauth/token`,
         AUTHORIZE: `${AUTH_SVC_URL}/oauth/authorize`,
     },
+    CREDENTIAL: {
+        UPDATE: `${AUTH_SVC_URL}/credential/update`,
+        UPDATE_VERIFY_OTP: `${AUTH_SVC_URL}/credential/update/verify-otp`,
+    },
 };

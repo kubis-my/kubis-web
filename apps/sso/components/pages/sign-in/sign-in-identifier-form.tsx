@@ -236,7 +236,7 @@ export default function SignInWithIdentifierForm() {
 
     useEffect(() => {
         setClientId(param.get('client_id') || MAIN_CLIENT_ID);
-        setRedirectUri(param.get('redirect_uri') || MAIN_APP_BASE_URL);
+        setRedirectUri(param.get('redirect_uri') || `${MAIN_APP_BASE_URL}/my-account`);
     }, [param]);
 
     return (

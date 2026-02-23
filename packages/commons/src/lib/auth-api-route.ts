@@ -231,7 +231,125 @@ const auth = new Elysia({ prefix: '/api/auth' })
                 token: null,
             };
         }
-    });
+    })
+    .post(
+        '/credential/update',
+        async ({ body, set, request }) => {
+            try {
+                const accessToken = await getAccessTokenCookie();
+
+                if (!accessToken) {
+                    set.status = 401;
+                    return {
+                        error: 'Not authenticated',
+                        details: { id: 'NOT_AUTHENTICATED' },
+                    };
+                }
+
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: {
+                        ...forwardedHeaders,
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                const { code, raw } = await authClient.updateCredential({
+                    email: body.email ?? undefined,
+                    username: body.username ?? undefined,
+                    password: body.password ?? undefined,
+                    driver,
+                });
+
+                if (code === 200) {
+                    return {
+                        success: true,
+                        message: 'Credential update request submitted',
+                        data: raw,
+                    };
+                }
+
+                set.status = code ?? 500;
+
+                return {
+                    error: 'Credential update failed',
+                    details: raw,
+                };
+            } catch (e) {
+                set.status = 500;
+
+                return {
+                    error: 'Internal server error',
+                    details: (e as Error).message,
+                };
+            }
+        },
+        {
+            body: t.Object({
+                email: t.Optional(t.Union([t.String(), t.Null()])),
+                username: t.Optional(t.Union([t.String(), t.Null()])),
+                password: t.Optional(t.Union([t.String(), t.Null()])),
+            }),
+        },
+    )
+    .post(
+        '/credential/update/verify-otp',
+        async ({ body, set, request }) => {
+            try {
+                const accessToken = await getAccessTokenCookie();
+
+                if (!accessToken) {
+                    set.status = 401;
+                    return {
+                        error: 'Not authenticated',
+                        details: { id: 'NOT_AUTHENTICATED' },
+                    };
+                }
+
+                const forwardedHeaders = createForwardedHeaders(request);
+                const driver = axios.create({
+                    headers: {
+                        ...forwardedHeaders,
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                const { code, raw } = await authClient.updateCredentialVerifyOTP({
+                    token: body.token,
+                    otpCode: body.otpCode,
+                    driver,
+                });
+
+                if (code === 200) {
+                    return {
+                        success: true,
+                        message: 'Credential updated successfully',
+                        data: raw,
+                    };
+                }
+
+                set.status = code ?? 500;
+
+                return {
+                    error: 'Credential OTP verification failed',
+                    details: raw,
+                };
+            } catch (e) {
+                set.status = 500;
+
+                return {
+                    error: 'Internal server error',
+                    details: (e as Error).message,
+                };
+            }
+        },
+        {
+            body: t.Object({
+                token: t.String(),
+                otpCode: t.String(),
+            }),
+        },
+    );
 
 export const GET = auth.fetch;
 export const POST = auth.fetch;

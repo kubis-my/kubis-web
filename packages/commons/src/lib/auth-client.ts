@@ -492,4 +492,97 @@ export const authClient = {
             };
         }
     },
+    async updateCredential(props: {
+        driver?: AxiosInstance;
+        email?: string;
+        username?: string;
+        password?: string;
+    }) {
+        const driver = props.driver || axios;
+        const input = {
+            email: props.email ?? undefined,
+            username: props.username ?? undefined,
+            password: props.password ?? undefined,
+        };
+
+        try {
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.CREDENTIAL.UPDATE, input);
+
+            return {
+                code: 200,
+                raw: data,
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (response.status === 400) {
+                    return {
+                        code: 400,
+                        raw: convertErrorMessageListToObject(Object.keys(input), data.message),
+                    };
+                }
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
+    async updateCredentialVerifyOTP(props: {
+        token: string;
+        otpCode: string;
+        driver?: AxiosInstance;
+    }) {
+        const driver = props.driver || axios;
+        const input = {
+            token: props.token,
+            otpCode: props.otpCode,
+        };
+
+        try {
+            const { data } = await driver.post(
+                AUTH_SERVICE_ROUTE.CREDENTIAL.UPDATE_VERIFY_OTP,
+                input,
+            );
+
+            return {
+                code: 200,
+                raw: data,
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (response.status === 400) {
+                    return {
+                        code: 400,
+                        raw: convertErrorMessageListToObject(Object.keys(input), data.message),
+                    };
+                }
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
 };
