@@ -17,8 +17,8 @@ export const getDefaultHeaders = (endpoints: string[]) => {
     // Script CSP - allow inline scripts for Next.js
     const scriptSrc =
         process.env.NODE_ENV === 'development'
-            ? "script-src 'self' 'unsafe-eval' 'unsafe-inline'" // Dev: Allow for Next.js hot reload
-            : "script-src 'self' 'unsafe-inline'"; // Production: Allow inline scripts
+            ? "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com" // Dev: Allow for Next.js hot reload
+            : "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com"; // Production: Allow inline scripts
 
     return [
         {
