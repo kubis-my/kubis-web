@@ -1,18 +1,17 @@
-name: Development Deploy
+name: Production Deploy
 
 on:
   push:
     branches:
-      - "**"
-      - "!main" # Exclude main branch
+      - release
 
 jobs:
-  deploy-sso-dev:
+  deploy-sso-prod:
     uses: ./.github/workflows/deploy-app.yml
     with:
-      app_name: sso-dev
+      app_name: sso
       service_name: sso
-      environment: development
+      environment: production
     secrets:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       FLY_ORG: ${{ vars.FLY_ORG }}
@@ -22,13 +21,13 @@ jobs:
       NEXT_PUBLIC_MAIN_CLIENT_ID: ${{ vars.NEXT_PUBLIC_MAIN_CLIENT_ID }}
       NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL }}
 
-  deploy-main-dev:
+  deploy-main-prod:
     uses: ./.github/workflows/deploy-app.yml
-    needs: [deploy-sso-dev]
+    needs: [deploy-sso-prod]
     with:
-      app_name: kubis-dev
+      app_name: kubis
       service_name: main
-      environment: development
+      environment: production
     secrets:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
       FLY_ORG: ${{ vars.FLY_ORG }}

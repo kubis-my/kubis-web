@@ -57,7 +57,7 @@ jobs:
 
       - name: Generate fly.toml from template
         run: |
-          cp fly.staging.toml fly.toml
+          cp fly.prod.toml fly.toml
           sed -i.bak "s/APP_NAME_PLACEHOLDER/${{ inputs.app_name }}/g" fly.toml
           sed -i.bak "s/SERVICE_NAME_PLACEHOLDER/${{ inputs.service_name }}/g" fly.toml
           sed -i.bak "s/REGION_PLACEHOLDER/${{ vars.FLY_REGION }}/g" fly.toml
