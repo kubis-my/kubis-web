@@ -65,7 +65,7 @@ jobs:
 
       - name: Create fly app
         if: steps.check-app.outputs.APP_EXISTS == 'false'
-        run: flyctl launch --no-deploy --copy-config --yes --name "${{ inputs.app_name }}" --org "${{ secrets.FLY_ORG }}"
+        run: flyctl apps create --name "${{ inputs.app_name }}" --org "${{ secrets.FLY_ORG }}"
 
       - name: Set application secrets
         run: |
