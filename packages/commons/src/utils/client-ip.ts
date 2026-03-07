@@ -1,11 +1,17 @@
 /**
  * Extracts the client's IP address from an Elysia request context
- * Checks X-Forwarded-For header first (from proxies), then falls back to direct connection
+ * Checks Cloudflare's CF-Connecting-IP first (most reliable behind Cloudflare),
+ * then falls back to X-Forwarded-For and X-Real-IP.
  */
 export function getClientIP(request: Request): string | undefined {
+    // CF-Connecting-IP is set by Cloudflare to the real visitor IP (most reliable)
+    const cfConnectingIP = request.headers.get('cf-connecting-ip');
+    if (cfConnectingIP) {
+        return cfConnectingIP.trim();
+    }
+
     // Check X-Forwarded-For header (set by proxies/load balancers)
     const forwardedFor = request.headers.get('x-forwarded-for');
-
     if (forwardedFor) {
         // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2, ...)
         // The first IP is the original client
@@ -18,8 +24,6 @@ export function getClientIP(request: Request): string | undefined {
         return realIP.trim();
     }
 
-    // For Next.js API routes, we might not have direct access to socket
-    // Return undefined if no IP headers are present
     return undefined;
 }
 
@@ -77,6 +81,10 @@ export function createForwardedHeaders(request: Request): Record<string, string>
             : clientIP;
 
         headers['X-Forwarded-For'] = forwardedFor;
+
+        // Forward as a custom header that Cloudflare will not overwrite on the
+        // outbound Next.js → BE leg. The BE should check this first.
+        headers['x-real-client-ip'] = clientIP;
     }
 
     // Add device and client information headers
