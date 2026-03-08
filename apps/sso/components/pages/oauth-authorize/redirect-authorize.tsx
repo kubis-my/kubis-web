@@ -57,7 +57,10 @@ export default function RedirectAuthorize({
                     console.error('Logout error:', logoutError);
                 }
 
-                window.location.replace(`${SSO_APP_BASE_URL}/sign-in`);
+                const signInUrl = new URL(`${SSO_APP_BASE_URL}/sign-in`);
+                signInUrl.searchParams.set('client_id', input.clientId);
+                signInUrl.searchParams.set('redirect_uri', input.redirectUri);
+                window.location.replace(signInUrl.toString());
             }
         };
 

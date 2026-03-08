@@ -1,0 +1,52 @@
+'use client';
+
+import { NavigationItem, NavUserItem } from '@/shadcn/dashboards/dashboard-01/types';
+import { IconHome, IconLogout, IconHelp } from '@tabler/icons-react';
+import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
+import { toast } from 'sonner';
+import { ROUTE } from './constants';
+
+export const APP_NAME = 'Kubis Ops';
+
+export const navigationList: NavigationItem[] = [
+    {
+        id: 'app',
+        items: [
+            {
+                id: 'app-home',
+                title: 'Home',
+                url: ROUTE.OPS.HOME,
+                icon: <IconHome />,
+                isActive: false,
+            },
+        ],
+    },
+];
+
+export const navigationUserItemList: NavUserItem[] = [
+    {
+        id: 'help',
+        name: 'Get Help',
+        icon: <IconHelp />,
+        async action(e) {},
+    },
+    {
+        id: 'log-out',
+        name: 'Log out',
+        icon: <IconLogout />,
+        separator: true,
+        async action(e) {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: getCsrfHeaders(),
+                credentials: 'include',
+            });
+
+            if (response.ok) {
+                window.location.href = '/';
+            } else {
+                toast.error('Failed to sign out. Please try again.');
+            }
+        },
+    },
+];

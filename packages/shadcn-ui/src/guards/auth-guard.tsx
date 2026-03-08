@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { toast } from 'sonner';
 import Loader from '../custom-components/loader';
 import { useAuth } from '../providers/auth-provider';
 import { useSocket } from '../providers/socket-provider';
@@ -37,6 +38,16 @@ export default function AuthGuard({
                 setIsAuthenticating(false);
             }
             return;
+        }
+
+        // Don't redirect if we already returned from SSO (exchange in-flight or failed)
+        // Show a toast after 5s so the user knows something went wrong
+        if (new URLSearchParams(window.location.search).has('code')) {
+            const timeout = setTimeout(() => {
+                toast.error('Authentication failed. Please refresh the page or try again.', { position: "top-center" });
+            }, 5000);
+
+            return () => clearTimeout(timeout);
         }
 
         // User is not authenticated, prepare SSO redirect

@@ -161,6 +161,21 @@ In-app notification center.
 
 ---
 
+## TODO — Build Order
+
+- [x] 1. App Scaffold        — `apps/ops` setup, auth, layout, routing
+- [ ] 2. Product Catalog     — standalone, referenced by everything else
+- [ ] 3. Customer Mgmt       — standalone foundation
+- [ ] 4. Campaign            — needs Products
+- [ ] 5. Orders              — needs Products + Campaigns + Customers
+- [ ] 6. Workflow Builder    — needs Products
+- [ ] 7. Production Board    — needs Workflows + Orders
+- [ ] 8. Team & Roles
+- [ ] 9. Dashboard & Reports
+- [ ] 10. Notifications
+
+---
+
 ## App Ecosystem
 
 Kubis is a SaaS platform with multiple products. `apps/main` is the account hub — not part of the ops system.

@@ -169,6 +169,11 @@ export const authClient = {
                         raw: data,
                     };
                 }
+
+                return {
+                    code: 500,
+                    raw: data,
+                };
             }
 
             return {
