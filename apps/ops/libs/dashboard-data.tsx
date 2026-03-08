@@ -1,7 +1,7 @@
 'use client';
 
 import { NavigationItem, NavUserItem } from '@/shadcn/dashboards/dashboard-01/types';
-import { IconHome, IconLogout, IconHelp } from '@tabler/icons-react';
+import { IconHome, IconLogout, IconHelp, IconPackage } from '@tabler/icons-react';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
@@ -18,6 +18,13 @@ export const navigationList: NavigationItem[] = [
                 title: 'Home',
                 url: ROUTE.OPS.HOME,
                 icon: <IconHome />,
+                isActive: false,
+            },
+            {
+                id: 'app-catalog',
+                title: 'Catalog',
+                url: ROUTE.OPS.CATALOG,
+                icon: <IconPackage />,
                 isActive: false,
             },
         ],
