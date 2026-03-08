@@ -1,10 +1,10 @@
 import CatalogContainer from '@/root/components/pages/catalog/catalog-container';
-import ProductList from '@/root/components/pages/catalog/product-list';
+import CatalogList from '@/root/components/pages/catalog/catalog-list';
 
 export default function page() {
     return (
         <CatalogContainer>
-            <ProductList />
+            <CatalogList />
         </CatalogContainer>
     );
 }

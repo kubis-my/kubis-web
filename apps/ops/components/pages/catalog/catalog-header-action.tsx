@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { Button } from '@repo/shadcn-ui/components/button';
 import {
     DropdownMenu,
@@ -16,7 +15,6 @@ import {
     IconTools,
     IconStack2,
 } from '@tabler/icons-react';
-import { ROUTE } from '@/root/libs/constants';
 import type { ProductType } from './catalog-container';
 
 const TYPE_OPTIONS: { type: ProductType; label: string; icon: React.ReactNode }[] = [
@@ -27,9 +25,11 @@ const TYPE_OPTIONS: { type: ProductType; label: string; icon: React.ReactNode }[
     { type: 'bundle', label: 'Bundle', icon: <IconStack2 className="size-4" /> },
 ];
 
-export default function CatalogHeaderAction() {
-    const router = useRouter();
-
+export default function CatalogHeaderAction({
+    onSelect,
+}: {
+    onSelect: (type: ProductType) => void;
+}) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -41,7 +41,7 @@ export default function CatalogHeaderAction() {
                 {TYPE_OPTIONS.map((option) => (
                     <DropdownMenuItem
                         key={option.type}
-                        onClick={() => router.push(`${ROUTE.OPS.CATALOG}/new/${option.type}`)}
+                        onClick={() => onSelect(option.type)}
                     >
                         {option.icon}
                         {option.label}

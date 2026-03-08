@@ -2,69 +2,31 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { CatalogNewSheet } from '../catalog-new/catalog-new-sheet';
+import { CatalogNewVariantDialog } from '../catalog-new/catalog-new-variant-dialog';
 import CatalogHeaderAction from './catalog-header-action';
+import { DUMMY_CATEGORIES, DUMMY_PRODUCTS } from './catalog-dummy-data';
 
 export type ProductType = 'simple' | 'variant' | 'digital' | 'service' | 'bundle';
+export type ProductStatus = 'draft' | 'active' | 'inactive' | 'archived';
 
 export type Product = {
     publicId: string;
     name: string;
+    category: string;
     type: ProductType;
     sku?: string;
     price?: number;
-    defaultMinQty?: number;
-    defaultMaxQty?: number;
-    isActive: boolean;
+    status: ProductStatus;
+    archivedAt?: string;
 };
 
-const DUMMY_PRODUCTS: Product[] = [
-    {
-        publicId: '1',
-        name: 'Classic T-Shirt',
-        type: 'variant',
-        sku: undefined,
-        price: undefined,
-        defaultMinQty: 10,
-        defaultMaxQty: 100,
-        isActive: true,
-    },
-    {
-        publicId: '2',
-        name: 'Design Consultation',
-        type: 'service',
-        sku: 'SVC-001',
-        price: 150000,
-        isActive: true,
-    },
-    {
-        publicId: '3',
-        name: 'Logo Pack',
-        type: 'digital',
-        sku: 'DIG-001',
-        price: 75000,
-        isActive: true,
-    },
-    {
-        publicId: '4',
-        name: 'Starter Bundle',
-        type: 'bundle',
-        sku: 'BDL-001',
-        price: 200000,
-        isActive: false,
-    },
-    {
-        publicId: '5',
-        name: 'Plain Mug',
-        type: 'simple',
-        sku: 'MUG-001',
-        price: 45000,
-        defaultMinQty: 5,
-        isActive: true,
-    },
-];
+export { DUMMY_PRODUCTS };
 
 type CatalogContextType = {
     products: Product[];
+    categories: string[];
+    addCategory: (category: string) => void;
     isLoading: boolean;
 };
 
@@ -82,11 +44,17 @@ export function useCatalog() {
 
 export default function CatalogContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const [products] = useState<Product[]>(DUMMY_PRODUCTS);
+    const [categories, setCategories] = useState<string[]>(DUMMY_CATEGORIES);
+
+    function addCategory(category: string) {
+        setCategories((prev) => [...prev, category]);
+    }
+    const [openType, setOpenType] = useState<ProductType | null>(null);
     const { updateBreadcrumbList, updateHeaderAction } = useDashboard01();
 
     useEffect(() => {
         updateBreadcrumbList([{ name: 'Product Catalog' }]);
-        updateHeaderAction(<CatalogHeaderAction />);
+        updateHeaderAction(<CatalogHeaderAction onSelect={setOpenType} />);
 
         return () => {
             updateBreadcrumbList([]);
@@ -94,9 +62,26 @@ export default function CatalogContainer({ children }: Readonly<{ children: Reac
         };
     }, [updateBreadcrumbList, updateHeaderAction]);
 
+    const drawerType =
+        openType !== null && openType !== 'variant'
+            ? (openType as Exclude<ProductType, 'variant'>)
+            : null;
+
     return (
-        <CatalogContext.Provider value={{ products, isLoading: false }}>
+        <CatalogContext.Provider value={{ products, categories, addCategory, isLoading: false }}>
             {children}
+
+            <CatalogNewSheet
+                type={drawerType}
+                isDirty={false}
+                onClose={() => setOpenType(null)}
+            />
+
+            <CatalogNewVariantDialog
+                open={openType === 'variant'}
+                isDirty={false}
+                onClose={() => setOpenType(null)}
+            />
         </CatalogContext.Provider>
     );
 }

@@ -9,7 +9,7 @@ import {
     TableHeader,
     TableRow,
 } from '@repo/shadcn-ui/components/table';
-import { useCatalog, type ProductType } from './catalog-container';
+import { useCatalog, type ProductStatus, type ProductType } from './catalog-container';
 
 const TYPE_LABELS: Record<ProductType, string> = {
     simple: 'Simple',
@@ -27,12 +27,36 @@ const TYPE_BADGE_VARIANT: Record<ProductType, 'default' | 'secondary' | 'outline
     bundle: 'secondary',
 };
 
+const STATUS_LABELS: Record<ProductStatus, string> = {
+    draft: 'Draft',
+    active: 'Active',
+    inactive: 'Inactive',
+    archived: 'Archived',
+};
+
+const STATUS_BADGE_VARIANT: Record<ProductStatus, 'default' | 'secondary' | 'outline'> = {
+    draft: 'outline',
+    active: 'default',
+    inactive: 'secondary',
+    archived: 'secondary',
+};
+
 function formatPrice(price?: number) {
     if (price === undefined) return '—';
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(price);
+    return new Intl.NumberFormat('en-MY', {
+        style: 'currency',
+        currency: 'MYR',
+        maximumFractionDigits: 0,
+    }).format(price);
 }
 
-export default function ProductList() {
+function formatDate(value?: string) {
+    if (!value) return '—';
+
+    return new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' }).format(new Date(value));
+}
+
+export default function CatalogList() {
     const { products } = useCatalog();
 
     return (
@@ -42,12 +66,12 @@ export default function ProductList() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Name</TableHead>
+                            <TableHead>Category</TableHead>
                             <TableHead>Type</TableHead>
                             <TableHead>SKU</TableHead>
                             <TableHead>Price</TableHead>
-                            <TableHead className="text-center">Min Qty</TableHead>
-                            <TableHead className="text-center">Max Qty</TableHead>
                             <TableHead>Status</TableHead>
+                            <TableHead>Archived At</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -61,6 +85,7 @@ export default function ProductList() {
                             products.map((product) => (
                                 <TableRow key={product.publicId}>
                                     <TableCell className="font-medium">{product.name}</TableCell>
+                                    <TableCell className="text-muted-foreground">{product.category}</TableCell>
                                     <TableCell>
                                         <Badge variant={TYPE_BADGE_VARIANT[product.type]}>
                                             {TYPE_LABELS[product.type]}
@@ -70,16 +95,13 @@ export default function ProductList() {
                                         {product.sku ?? '—'}
                                     </TableCell>
                                     <TableCell>{formatPrice(product.price)}</TableCell>
-                                    <TableCell className="text-center">
-                                        {product.defaultMinQty ?? '—'}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {product.defaultMaxQty ?? '—'}
-                                    </TableCell>
                                     <TableCell>
-                                        <Badge variant={product.isActive ? 'default' : 'secondary'}>
-                                            {product.isActive ? 'Active' : 'Inactive'}
+                                        <Badge variant={STATUS_BADGE_VARIANT[product.status]}>
+                                            {STATUS_LABELS[product.status]}
                                         </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground">
+                                        {formatDate(product.archivedAt)}
                                     </TableCell>
                                 </TableRow>
                             ))
