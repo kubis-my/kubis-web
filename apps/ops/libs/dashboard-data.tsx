@@ -5,8 +5,9 @@ import { IconHome, IconLogout, IconHelp } from '@tabler/icons-react';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
+import { env } from '@repo/commons/constant/env';
 
-export const APP_NAME = 'Kubis Ops';
+export const APP_NAME = 'Process Management';
 
 export const navigationList: NavigationItem[] = [
     {
@@ -28,7 +29,7 @@ export const navigationUserItemList: NavUserItem[] = [
         id: 'help',
         name: 'Get Help',
         icon: <IconHelp />,
-        async action(e) {},
+        async action(e) { },
     },
     {
         id: 'log-out',
@@ -43,7 +44,7 @@ export const navigationUserItemList: NavUserItem[] = [
             });
 
             if (response.ok) {
-                window.location.href = '/';
+                window.location.href = env.NEXT_PUBLIC_MAIN_APP_BASE_URL;
             } else {
                 toast.error('Failed to sign out. Please try again.');
             }
