@@ -37,6 +37,7 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
                         '--header-height': 'calc(var(--spacing) * 12)',
                     } as React.CSSProperties
                 }
+                defaultOpen={false}
             >
                 <AppSidebar
                     variant="inset"

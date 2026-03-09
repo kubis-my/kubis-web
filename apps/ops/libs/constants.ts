@@ -1,6 +1,6 @@
 export const ROUTE = {
     OPS: {
-        HOME: '/ops',
+        HOME: '/',
         CATALOG: '/catalog',
     },
 };
