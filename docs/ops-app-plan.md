@@ -142,11 +142,14 @@ In-app notification center.
 
 ## Tech Notes
 
-- New app: `apps/ops` in the turborepo monorepo
+- App: `apps/ops` in the turborepo monorepo
 - Shared packages: `@repo/shadcn-ui`, `@repo/commons` (auth, Apollo, Elysia)
 - Auth: same SSO flow as `apps/main` (PKCE, httpOnly cookies)
 - Real-time: `SocketProvider` already available in shared packages
 - Pattern: Page → Container → Components (same as `apps/main`)
+- Table: TanStack React Table v8
+- Product types supported: Simple, Variant (with cartesian attribute builder), Digital, Service, Bundle
+- Currency/locale: MYR, `en-MY`
 
 ---
 
@@ -164,15 +167,23 @@ In-app notification center.
 ## TODO — Build Order
 
 - [x] 1. App Scaffold        — `apps/ops` setup, auth, layout, routing
-- [ ] 2. Product Catalog     — standalone, referenced by everything else
-- [ ] 3. Customer Mgmt       — standalone foundation
-- [ ] 4. Campaign            — needs Products
-- [ ] 5. Orders              — needs Products + Campaigns + Customers
-- [ ] 6. Workflow Builder    — needs Products
-- [ ] 7. Production Board    — needs Workflows + Orders
-- [ ] 8. Team & Roles
-- [ ] 9. Dashboard & Reports
-- [ ] 10. Notifications
+- [~] 2. Product Catalog     — UI shell built (list, add forms for all 5 types, variant builder); no backend persistence yet
+- [ ] 3. Customer Management — standalone foundation
+- [ ] 4. Workflow Builder    — standalone; defines stages & roles per product type
+- [ ] 5. Product Catalog     — complete backend + workflow link (needs Workflow Builder)
+- [ ] 6. Campaign            — needs Products
+- [ ] 7. Orders              — needs Products + Campaigns + Customers
+- [ ] 8. Production Board    — needs Workflows + Orders
+- [ ] 9. Team & Roles
+- [ ] 10. Dashboard & Reports
+- [ ] 11. Notifications
+
+### Catalog — Remaining Work
+- [ ] Wire up GraphQL mutations (create / update / archive product)
+- [ ] Product edit flow (open existing product in sheet/dialog)
+- [ ] Search + filter in catalog list
+- [ ] Link product to a workflow (needs Workflow Builder — step 4)
+- [ ] Set default min/max qty per product
 
 ---
 
