@@ -14,6 +14,7 @@ import {
     IconDownload,
     IconTools,
     IconStack2,
+    IconHammer,
 } from '@tabler/icons-react';
 import type { ProductType } from './catalog-container';
 
@@ -23,6 +24,7 @@ const TYPE_OPTIONS: { type: ProductType; label: string; icon: React.ReactNode }[
     { type: 'digital', label: 'Digital', icon: <IconDownload className="size-4" /> },
     { type: 'service', label: 'Service', icon: <IconTools className="size-4" /> },
     { type: 'bundle', label: 'Bundle', icon: <IconStack2 className="size-4" /> },
+    { type: 'custom', label: 'Custom', icon: <IconHammer className="size-4" /> },
 ];
 
 export default function CatalogHeaderAction({

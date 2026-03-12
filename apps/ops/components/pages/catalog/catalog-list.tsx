@@ -17,6 +17,7 @@ const TYPE_LABELS: Record<ProductType, string> = {
     digital: 'Digital',
     service: 'Service',
     bundle: 'Bundle',
+    custom: 'Custom',
 };
 
 const TYPE_BADGE_VARIANT: Record<ProductType, 'default' | 'secondary' | 'outline'> = {
@@ -25,6 +26,7 @@ const TYPE_BADGE_VARIANT: Record<ProductType, 'default' | 'secondary' | 'outline
     digital: 'outline',
     service: 'outline',
     bundle: 'secondary',
+    custom: 'default',
 };
 
 const STATUS_LABELS: Record<ProductStatus, string> = {

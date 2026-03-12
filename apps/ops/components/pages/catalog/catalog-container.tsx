@@ -7,7 +7,7 @@ import { CatalogNewVariantDialog } from '../catalog-new/catalog-new-variant-dial
 import CatalogHeaderAction from './catalog-header-action';
 import { DUMMY_CATEGORIES, DUMMY_PRODUCTS } from './catalog-dummy-data';
 
-export type ProductType = 'simple' | 'variant' | 'digital' | 'service' | 'bundle';
+export type ProductType = 'simple' | 'variant' | 'digital' | 'service' | 'bundle' | 'custom';
 export type ProductStatus = 'draft' | 'active' | 'inactive' | 'archived';
 
 export type Product = {

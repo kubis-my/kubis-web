@@ -1,6 +1,13 @@
 import type { Product } from './catalog-container';
 
-export const DUMMY_CATEGORIES: string[] = ['Apparel', 'Services', 'Digital Assets', 'Bundles', 'Merchandise'];
+export const DUMMY_CATEGORIES: string[] = [
+    'Apparel',
+    'Services',
+    'Digital Assets',
+    'Bundles',
+    'Merchandise',
+    'Fabrication',
+];
 
 export const DUMMY_PRODUCTS: Product[] = [
     {
@@ -48,5 +55,13 @@ export const DUMMY_PRODUCTS: Product[] = [
         price: 45000,
         status: 'archived',
         archivedAt: '2026-02-20T00:00:00.000Z',
+    },
+    {
+        publicId: '6',
+        name: 'House Gate (Custom)',
+        category: 'Fabrication',
+        type: 'custom',
+        price: 350000,
+        status: 'active',
     },
 ];

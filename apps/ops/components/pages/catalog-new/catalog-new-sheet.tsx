@@ -25,6 +25,7 @@ import { SimpleProductForm } from './types/simple-product';
 import { DigitalProductForm } from './types/digital-product';
 import { ServiceProductForm } from './types/service-product';
 import { BundleProductForm } from './types/bundle-product';
+import { CustomProductForm } from './types/custom-product';
 
 type DrawerProductType = Exclude<ProductType, 'variant'>;
 
@@ -33,6 +34,7 @@ const TYPE_LABELS: Record<DrawerProductType, string> = {
     digital: 'Digital',
     service: 'Service',
     bundle: 'Bundle',
+    custom: 'Custom',
 };
 
 const TYPE_SUBTITLES: Record<DrawerProductType, string> = {
@@ -40,6 +42,7 @@ const TYPE_SUBTITLES: Record<DrawerProductType, string> = {
     digital: 'For downloadable or license-based products.',
     service: 'For labor, consulting, or appointment-based offerings.',
     bundle: 'Combine multiple products into one sellable package with controlled production mode.',
+    custom: 'For made-to-order work where specs and pricing are defined per job.',
 };
 
 const FORM_IDS: Record<DrawerProductType, string> = {
@@ -47,6 +50,7 @@ const FORM_IDS: Record<DrawerProductType, string> = {
     digital: 'digital-product-form',
     service: 'service-product-form',
     bundle: 'bundle-product-form',
+    custom: 'custom-product-form',
 };
 
 type Props = {
@@ -95,6 +99,7 @@ export function CatalogNewSheet({ type, isDirty, onClose }: Props) {
                                 {type === 'digital' && <DigitalProductForm onClose={onClose} />}
                                 {type === 'service' && <ServiceProductForm onClose={onClose} />}
                                 {type === 'bundle' && <BundleProductForm onClose={onClose} />}
+                                {type === 'custom' && <CustomProductForm onClose={onClose} />}
                             </div>
 
                             <SheetFooter className="border-t pt-4">
