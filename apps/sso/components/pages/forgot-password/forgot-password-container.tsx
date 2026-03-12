@@ -88,12 +88,10 @@ export default function ForgotPasswordContainer() {
                 return;
             }
 
-            if (response.status === 404 && raw?.details?.id === "CREDENTIAL_NOT_FOUND") {
+            if (response.status === 404 && raw?.details?.id === 'CREDENTIAL_NOT_FOUND') {
                 setFormValidation({
-                    email: [
-                        "No account found with this email address"
-                    ]
-                })
+                    email: ['No account found with this email address'],
+                });
                 return;
             }
 

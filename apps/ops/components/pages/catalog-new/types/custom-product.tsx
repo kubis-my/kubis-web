@@ -117,8 +117,6 @@ export function CustomProductForm({ onClose }: { onClose: () => void }) {
                         />
                     </InputGroup>
                 </div>
-
-
             </section>
 
             <Separator />

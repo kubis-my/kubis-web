@@ -26,9 +26,7 @@ export function AppSidebar({
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton
-                            className="data-[slot=sidebar-menu-button]:p-1.5! hover:bg-transparent hover:text-current"
-                        >
+                        <SidebarMenuButton className="hover:bg-transparent hover:text-current data-[slot=sidebar-menu-button]:p-1.5!">
                             <KubisSvg className="size-5!" />
                             <span className="text-base font-semibold">{appName}</span>
                         </SidebarMenuButton>

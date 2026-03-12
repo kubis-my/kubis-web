@@ -94,24 +94,24 @@ export default function SignUpContainer() {
                 return;
             }
 
-            if (raw?.details?.id === "EMAIL_ALREADY_EXISTS") {
+            if (raw?.details?.id === 'EMAIL_ALREADY_EXISTS') {
                 setFormValidation({
-                    email: ["This email is already in use"]
-                })
+                    email: ['This email is already in use'],
+                });
                 return;
             }
 
-            if (raw?.details?.id === "USERNAME_ALREADY_EXISTS") {
+            if (raw?.details?.id === 'USERNAME_ALREADY_EXISTS') {
                 setFormValidation({
-                    username: ["This username is already in use"]
-                })
+                    username: ['This username is already in use'],
+                });
                 return;
             }
 
-            if (raw?.details?.id === "INVALID_EMAIL") {
+            if (raw?.details?.id === 'INVALID_EMAIL') {
                 setFormValidation({
-                    email: ["This email address is not valid"]
-                })
+                    email: ['This email address is not valid'],
+                });
                 return;
             }
 

@@ -71,7 +71,12 @@ export function VariantProductForm({ onClose }: { onClose: () => void }) {
 
         setAttributes((prev) => [
             ...prev,
-            { id: `attr-${Date.now()}`, name: `Attribute ${nextIndex}`, values: [], valueInput: '' },
+            {
+                id: `attr-${Date.now()}`,
+                name: `Attribute ${nextIndex}`,
+                values: [],
+                valueInput: '',
+            },
         ]);
     }
 
@@ -144,7 +149,11 @@ export function VariantProductForm({ onClose }: { onClose: () => void }) {
         return combinations.map((combination, index) => {
             const suffix = String(index + 1).padStart(3, '0');
 
-            return { id: `variant-${index + 1}`, label: combination.join(' / '), sku: `VAR-${suffix}` };
+            return {
+                id: `variant-${index + 1}`,
+                label: combination.join(' / '),
+                sku: `VAR-${suffix}`,
+            };
         });
     }, [attributes]);
 
@@ -188,7 +197,6 @@ export function VariantProductForm({ onClose }: { onClose: () => void }) {
                         onChange={(e) => patch({ description: e.target.value })}
                     />
                 </div>
-
             </section>
 
             <Separator />
@@ -225,7 +233,9 @@ export function VariantProductForm({ onClose }: { onClose: () => void }) {
                                         <Input
                                             value={attribute.name}
                                             onChange={(e) =>
-                                                patchAttribute(attribute.id, { name: e.target.value })
+                                                patchAttribute(attribute.id, {
+                                                    name: e.target.value,
+                                                })
                                             }
                                             placeholder="Attribute name"
                                             className="h-8"

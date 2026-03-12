@@ -59,11 +59,11 @@ export function CatalogNewVariantDialog({ open, isDirty, onClose }: Props) {
                     onInteractOutside={(e) => e.preventDefault()}
                     className={cn(
                         'flex flex-col gap-0 p-0',
-                        '!inset-0 !translate-x-0 !translate-y-0 m-auto',
+                        '!inset-0 m-auto !translate-x-0 !translate-y-0',
                         'transition-[max-width,max-height,border-radius] duration-300 ease-in-out',
                         maximized
-                            ? '!max-w-screen !max-h-screen !rounded-none'
-                            : 'max-w-2xl max-h-[90vh] rounded-lg',
+                            ? '!max-h-screen !max-w-screen !rounded-none'
+                            : 'max-h-[90vh] max-w-2xl rounded-lg',
                     )}
                 >
                     <DialogHeader className="flex-row items-start justify-between border-b px-6 py-4">

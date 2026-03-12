@@ -41,10 +41,7 @@ export default function CatalogHeaderAction({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 {TYPE_OPTIONS.map((option) => (
-                    <DropdownMenuItem
-                        key={option.type}
-                        onClick={() => onSelect(option.type)}
-                    >
+                    <DropdownMenuItem key={option.type} onClick={() => onSelect(option.type)}>
                         {option.icon}
                         {option.label}
                     </DropdownMenuItem>

@@ -5,12 +5,7 @@ import Image from 'next/image';
 import { Button } from '@repo/shadcn-ui/components/button';
 import { Zap, Lock, Palette } from 'lucide-react';
 import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
-import {
-    Card,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@repo/shadcn-ui/components/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@repo/shadcn-ui/components/card';
 import Link from 'next/link';
 import { useAuth } from '@repo/shadcn-ui/providers/auth-provider';
 
@@ -38,9 +33,7 @@ export default function Hero() {
                 <div className="flex gap-4">
                     <Button size="lg" asChild className="bg-[#4CAF50] hover:bg-[#43A047]">
                         <Link
-                            href={
-                                isAuthenticated ? '/my-account' : `${SSO_APP_BASE_URL}/sign-in`
-                            }
+                            href={isAuthenticated ? '/my-account' : `${SSO_APP_BASE_URL}/sign-in`}
                         >
                             {isAuthenticated ? 'Go to Account' : 'Sign In Now'}
                         </Link>
@@ -57,8 +50,8 @@ export default function Hero() {
                         <Zap className="mb-4 h-10 w-10 text-[#4CAF50]" />
                         <CardTitle>Fast & Efficient</CardTitle>
                         <CardDescription>
-                            Built for speed and performance. Access all your tools instantly
-                            without any lag.
+                            Built for speed and performance. Access all your tools instantly without
+                            any lag.
                         </CardDescription>
                     </CardHeader>
                 </Card>

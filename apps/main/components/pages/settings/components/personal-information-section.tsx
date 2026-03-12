@@ -97,7 +97,9 @@ export default function PersonalInformationSection() {
             const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
 
             if (gqlError) {
-                const err = gqlError.extensions?.originalError as ValidationErrorPayload | undefined;
+                const err = gqlError.extensions?.originalError as
+                    | ValidationErrorPayload
+                    | undefined;
 
                 if (err?.statusCode === 400 && Array.isArray(err?.message)) {
                     setFormValidation(
@@ -160,7 +162,8 @@ export default function PersonalInformationSection() {
                         <CardContent className="flex-col items-start gap-1.5 text-sm">
                             <div className="flex items-center justify-between border-b px-1 py-2">
                                 <div className="flex items-center gap-2 text-sm font-medium">
-                                    <IconUser className="text-primary size-3.5 shrink-0" /> First Name
+                                    <IconUser className="text-primary size-3.5 shrink-0" /> First
+                                    Name
                                 </div>
                                 <div className="text-muted-foreground text-xs">
                                     {authUser?.firstName ?? '-'}

@@ -79,7 +79,10 @@ export default function CatalogList() {
                     <TableBody>
                         {products.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="text-muted-foreground py-12 text-center text-sm">
+                                <TableCell
+                                    colSpan={7}
+                                    className="text-muted-foreground py-12 text-center text-sm"
+                                >
                                     No products yet. Click "Add Product" to get started.
                                 </TableCell>
                             </TableRow>
@@ -87,7 +90,9 @@ export default function CatalogList() {
                             products.map((product) => (
                                 <TableRow key={product.publicId}>
                                     <TableCell className="font-medium">{product.name}</TableCell>
-                                    <TableCell className="text-muted-foreground">{product.category}</TableCell>
+                                    <TableCell className="text-muted-foreground">
+                                        {product.category}
+                                    </TableCell>
                                     <TableCell>
                                         <Badge variant={TYPE_BADGE_VARIANT[product.type]}>
                                             {TYPE_LABELS[product.type]}

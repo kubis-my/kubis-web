@@ -36,7 +36,7 @@ export const navigationUserItemList: NavUserItem[] = [
         id: 'help',
         name: 'Get Help',
         icon: <IconHelp />,
-        async action(e) { },
+        async action(e) {},
     },
     {
         id: 'log-out',

@@ -71,11 +71,7 @@ export default function CatalogContainer({ children }: Readonly<{ children: Reac
         <CatalogContext.Provider value={{ products, categories, addCategory, isLoading: false }}>
             {children}
 
-            <CatalogNewSheet
-                type={drawerType}
-                isDirty={false}
-                onClose={() => setOpenType(null)}
-            />
+            <CatalogNewSheet type={drawerType} isDirty={false} onClose={() => setOpenType(null)} />
 
             <CatalogNewVariantDialog
                 open={openType === 'variant'}

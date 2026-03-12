@@ -18,9 +18,7 @@ export function CategorySelect({ categories, value, onChange, onAddCategory }: P
     const inputRef = useRef<HTMLInputElement>(null);
 
     const trimmed = search.trim();
-    const filtered = categories.filter((cat) =>
-        cat.toLowerCase().includes(trimmed.toLowerCase()),
-    );
+    const filtered = categories.filter((cat) => cat.toLowerCase().includes(trimmed.toLowerCase()));
     const canCreate =
         trimmed.length > 0 &&
         !categories.some((cat) => cat.toLowerCase() === trimmed.toLowerCase());

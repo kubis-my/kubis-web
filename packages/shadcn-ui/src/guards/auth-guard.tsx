@@ -44,7 +44,9 @@ export default function AuthGuard({
         // Show a toast after 5s so the user knows something went wrong
         if (new URLSearchParams(window.location.search).has('code')) {
             const timeout = setTimeout(() => {
-                toast.error('Authentication failed. Please refresh the page or try again.', { position: "top-center" });
+                toast.error('Authentication failed. Please refresh the page or try again.', {
+                    position: 'top-center',
+                });
             }, 5000);
 
             return () => clearTimeout(timeout);

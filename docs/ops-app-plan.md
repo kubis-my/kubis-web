@@ -40,6 +40,7 @@ Each order marked fulfilled → Campaign completes when all orders done
 ## Modules
 
 ### 1. Campaign
+
 Pre-order batch container. Can be created manually by Admin or auto-created by the system when a new order comes in (configurable in Settings).
 
 - Campaign statuses: `Open` → `Funded` → `In Production` → `Completed` | `Cancelled`
@@ -49,6 +50,7 @@ Pre-order batch container. Can be created manually by Admin or auto-created by t
 - Admin/Manager decides: trigger production or cancel
 
 ### 2. Orders
+
 Individual purchases within a campaign.
 
 - Created by Sales/CS or via customer-facing intake
@@ -60,6 +62,7 @@ Individual purchases within a campaign.
 - Order status mirrors the active workflow stages
 
 **Refund Flow**
+
 - Refund request goes through: `Refund Requested` → `Pending Approval` → `Refunded` | `Rejected`
 - If approved while campaign is `Open` or `Funded` → order removed from bucket, count drops
 - If approved while campaign is `In Production` → order production stops immediately, flagged on Production Board — other orders in the same campaign continue unaffected
@@ -68,6 +71,7 @@ Individual purchases within a campaign.
 - Admin can then wait for new orders or manually assign existing orders into the campaign to bring count back up
 
 ### 3. Workflow Builder
+
 Fully configurable per business.
 
 - Define custom stages (name, color, description)
@@ -77,6 +81,7 @@ Fully configurable per business.
 - Link workflow to a product
 
 ### 4. Production Board
+
 For production staff.
 
 - Kanban or list view of orders in their assigned stage
@@ -86,44 +91,53 @@ For production staff.
 - Filter by campaign, product, assignee
 
 ### 5. Product / Service Catalog
+
 - Define orderable items with basic pricing / SKU info
 - Link each product to a workflow
 - Set default min/max qty (used when auto-creating campaign buckets)
 - Used when creating campaigns
 
 ### 6. Customer Management
+
 - Customer profiles: name, contact, address
 - Order history across campaigns
 - Customer portal: read-only order status tracking (separate app: `apps/customer-portal`)
 
 ### 7. Team & Roles
+
 - Invite members to the business account
 - Roles: `Admin`, `Sales/CS`, `Production Staff`
 - Assign staff to specific workflow stages
 
 ### 8. Dashboard & Reports
+
 - Active campaigns overview (orders collected, threshold progress)
 - Orders per stage (bottleneck visibility)
 - Production throughput
 - Basic revenue overview per campaign
 
 ### 9. Settings
+
 Business-level configuration for campaign and production behavior.
 
 **Campaign / Bucket**
+
 - Auto-create campaign bucket when a new order comes in (toggle on/off)
 - Default min qty per product
 - Default max qty per product (optional)
 
 **Notifications**
+
 - Notify when campaign threshold is met (toggle)
 - Notify when shipping date is approaching (toggle + set days before)
 
 **General**
+
 - Business profile (name, logo, etc.)
 - Member roles and permissions
 
 ### 10. Notifications
+
 In-app notification center.
 
 - Alerts: campaign threshold met, closing date reached, order stage changed, campaign completed, shipping date approaching
@@ -166,19 +180,20 @@ In-app notification center.
 
 ## TODO — Build Order
 
-- [x] 1. App Scaffold        — `apps/ops` setup, auth, layout, routing
-- [~] 2. Product Catalog     — UI shell built (list, add forms for all 5 types, variant builder); no backend persistence yet
-- [ ] 3. Customer Management — standalone foundation
-- [ ] 4. Workflow Builder    — standalone; defines stages & roles per product type
-- [ ] 5. Product Catalog     — complete backend + workflow link (needs Workflow Builder)
-- [ ] 6. Campaign            — needs Products
-- [ ] 7. Orders              — needs Products + Campaigns + Customers
-- [ ] 8. Production Board    — needs Workflows + Orders
-- [ ] 9. Team & Roles
-- [ ] 10. Dashboard & Reports
-- [ ] 11. Notifications
+- [x]   1. App Scaffold — `apps/ops` setup, auth, layout, routing
+- [~] 2. Product Catalog — UI shell built (list, add forms for all 5 types, variant builder); no backend persistence yet
+- [ ]   3. Customer Management — standalone foundation
+- [ ]   4. Workflow Builder — standalone; defines stages & roles per product type
+- [ ]   5. Product Catalog — complete backend + workflow link (needs Workflow Builder)
+- [ ]   6. Campaign — needs Products
+- [ ]   7. Orders — needs Products + Campaigns + Customers
+- [ ]   8. Production Board — needs Workflows + Orders
+- [ ]   9. Team & Roles
+- [ ]   10. Dashboard & Reports
+- [ ]   11. Notifications
 
 ### Catalog — Remaining Work
+
 - [ ] Wire up GraphQL mutations (create / update / archive product)
 - [ ] Product edit flow (open existing product in sheet/dialog)
 - [ ] Search + filter in catalog list
@@ -191,10 +206,10 @@ In-app notification center.
 
 Kubis is a SaaS platform with multiple products. `apps/main` is the account hub — not part of the ops system.
 
-| App | Purpose |
-|---|---|
-| `apps/sso` | Authentication — sign in, OAuth PKCE flow |
-| `apps/main` | Kubis hub — my account, explore & access Kubis products |
-| `apps/ops` | Kubis product: Process Management System (this app) |
-| `apps/pos` | Kubis product: POS (upcoming) |
-| `apps/customer-portal` | Standalone: customer-facing order status tracking |
+| App                    | Purpose                                                 |
+| ---------------------- | ------------------------------------------------------- |
+| `apps/sso`             | Authentication — sign in, OAuth PKCE flow               |
+| `apps/main`            | Kubis hub — my account, explore & access Kubis products |
+| `apps/ops`             | Kubis product: Process Management System (this app)     |
+| `apps/pos`             | Kubis product: POS (upcoming)                           |
+| `apps/customer-portal` | Standalone: customer-facing order status tracking       |

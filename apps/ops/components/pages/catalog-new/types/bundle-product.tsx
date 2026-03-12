@@ -176,7 +176,6 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                         </InputGroup>
                     </div>
                 </div>
-
             </section>
 
             <Separator />
