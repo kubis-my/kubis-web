@@ -1,7 +1,7 @@
 export const ROUTE = {
     OPS: {
-        HOME: '/',
-        CATALOG: '/catalog',
+        HOME: (companyIndex = 0) => `/c/${companyIndex}`,
+        CATALOG: (companyIndex = 0) => `/c/${companyIndex}/catalog`,
     },
 };
 

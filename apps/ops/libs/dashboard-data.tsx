@@ -1,49 +1,60 @@
 'use client';
 
 import { NavigationItem, NavUserItem } from '@/shadcn/dashboards/dashboard-01/types';
-import { IconHome, IconLogout, IconHelp, IconPackage } from '@tabler/icons-react';
+import { IconHome, IconLogout, IconHelp, IconPackage, IconReplace } from '@tabler/icons-react';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
 import { env } from '@repo/commons/constant/env';
+import { openSwitchCompanyDialog } from '../components/pages/switch-company/switch-company-dialog';
 
 export const APP_NAME = 'Process Management';
 
-export const navigationList: NavigationItem[] = [
-    {
-        id: 'app',
-        items: [
-            {
-                id: 'app-home',
-                title: 'Home',
-                url: ROUTE.OPS.HOME,
-                icon: <IconHome />,
-                isActive: false,
-            },
-            {
-                id: 'app-catalog',
-                title: 'Catalog',
-                url: ROUTE.OPS.CATALOG,
-                icon: <IconPackage />,
-                isActive: false,
-            },
-        ],
-    },
-];
+export function getNavigationList(companyIndex: number): NavigationItem[] {
+    return [
+        {
+            id: 'app',
+            items: [
+                {
+                    id: 'app-home',
+                    title: 'Home',
+                    url: ROUTE.OPS.HOME(companyIndex),
+                    icon: <IconHome />,
+                    isActive: false,
+                },
+                {
+                    id: 'app-catalog',
+                    title: 'Catalog',
+                    url: ROUTE.OPS.CATALOG(companyIndex),
+                    icon: <IconPackage />,
+                    isActive: false,
+                },
+            ],
+        },
+    ];
+}
 
 export const navigationUserItemList: NavUserItem[] = [
+    {
+        id: 'switch-company',
+        name: 'Switch company',
+        icon: <IconReplace />,
+        async action() {
+            openSwitchCompanyDialog();
+        },
+    },
     {
         id: 'help',
         name: 'Get Help',
         icon: <IconHelp />,
-        async action(e) {},
+        async action() {},
     },
     {
         id: 'log-out',
         name: 'Log out',
         icon: <IconLogout />,
         separator: true,
-        async action(e) {
+        async action() {
             const response = await fetch('/api/auth/logout', {
                 method: 'POST',
                 headers: getCsrfHeaders(),

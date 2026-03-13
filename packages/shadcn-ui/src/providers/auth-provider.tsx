@@ -22,6 +22,20 @@ const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
                 publicId
                 name
             }
+            userAccounts {
+                publicId
+                branch {
+                    publicId
+                    name
+                    code
+                    isActive
+                }
+                companyEmployee {
+                    company {
+                        publicId
+                    }
+                }
+            }
             credential {
                 publicId
                 email
