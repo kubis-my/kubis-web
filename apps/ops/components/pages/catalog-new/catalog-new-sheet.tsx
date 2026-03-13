@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@repo/shadcn-ui/components/button';
 import {
     Sheet,
@@ -55,12 +55,16 @@ const FORM_IDS: Record<DrawerProductType, string> = {
 
 type Props = {
     type: DrawerProductType | null;
-    isDirty: boolean;
     onClose: () => void;
 };
 
-export function CatalogNewSheet({ type, isDirty, onClose }: Props) {
+export function CatalogNewSheet({ type, onClose }: Props) {
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+
+    useEffect(() => {
+        setIsDirty(false);
+    }, [type]);
 
     function handleOpenChange(open: boolean) {
         if (!open) {
@@ -74,6 +78,7 @@ export function CatalogNewSheet({ type, isDirty, onClose }: Props) {
 
     function handleConfirmDiscard() {
         setConfirmOpen(false);
+        setIsDirty(false);
         onClose();
     }
 
@@ -84,8 +89,8 @@ export function CatalogNewSheet({ type, isDirty, onClose }: Props) {
             <Sheet open={isOpen} onOpenChange={handleOpenChange}>
                 <SheetContent
                     className="flex w-full flex-col gap-0 sm:max-w-[520px] [&>button:last-of-type]:hidden"
-                    onEscapeKeyDown={(e) => e.preventDefault()}
-                    onInteractOutside={(e) => e.preventDefault()}
+                    onEscapeKeyDown={(e) => { if (!confirmOpen) e.preventDefault(); }}
+                    onInteractOutside={(e) => { if (!confirmOpen) e.preventDefault(); }}
                 >
                     {type && (
                         <>
@@ -95,11 +100,11 @@ export function CatalogNewSheet({ type, isDirty, onClose }: Props) {
                             </SheetHeader>
 
                             <div className="flex-1 overflow-y-auto px-4">
-                                {type === 'simple' && <SimpleProductForm onClose={onClose} />}
-                                {type === 'digital' && <DigitalProductForm onClose={onClose} />}
-                                {type === 'service' && <ServiceProductForm onClose={onClose} />}
-                                {type === 'bundle' && <BundleProductForm onClose={onClose} />}
-                                {type === 'custom' && <CustomProductForm onClose={onClose} />}
+                                {type === 'simple' && <SimpleProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
+                                {type === 'digital' && <DigitalProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
+                                {type === 'service' && <ServiceProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
+                                {type === 'bundle' && <BundleProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
+                                {type === 'custom' && <CustomProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
                             </div>
 
                             <SheetFooter className="border-t pt-4">

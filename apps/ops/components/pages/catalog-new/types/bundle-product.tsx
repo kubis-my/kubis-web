@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { useCatalog } from '../../catalog/catalog-container';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useMutation, useQuery, useApolloClient } from '@apollo/client/react';
+import { PRODUCT_PAGINATION_SIZE } from '@/root/libs/constants';
 import { CategorySelect } from '../category-select';
 import { Button } from '@repo/shadcn-ui/components/button';
 import { Input } from '@repo/shadcn-ui/components/input';
@@ -22,9 +24,89 @@ import {
     SelectValue,
 } from '@repo/shadcn-ui/components/select';
 import { cn } from '@repo/shadcn-ui/lib/utils';
-import { IconPackage, IconPlus, IconX } from '@tabler/icons-react';
-import { DUMMY_PRODUCTS } from '../../catalog/catalog-dummy-data';
+import { IconChevronDown, IconLoader2, IconPackage, IconPlus, IconX } from '@tabler/icons-react';
 import type { ProductStatus } from '../../catalog/catalog-container';
+import { useCompany } from '@/root/components/container/company-provider';
+import {
+    BundleProductionMode,
+    BundleProductInput,
+    Product as OpsProduct,
+    ProductStatus as OpsProductStatus,
+    ProductPaginationInput,
+} from '@repo/commons/types/ops-service-schema.type';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
+import ShowErrorText from '@/shadcn/custom-components/show-error-text';
+
+const VALIDATION_FIELDS = ['name', 'categoryName', 'sku', 'price', 'bundleItems'];
+
+interface CreateBundleProductResponse {
+    createBundleProductForOps: OpsProduct;
+}
+
+interface CreateBundleProductVariables {
+    companyPublicId: string;
+    input: BundleProductInput;
+}
+
+const CREATE_BUNDLE_PRODUCT: TypedDocumentNode<
+    CreateBundleProductResponse,
+    CreateBundleProductVariables
+> = gql`
+    mutation CreateBundleProduct($companyPublicId: String!, $input: BundleProductInput!) {
+        createBundleProductForOps(companyPublicId: $companyPublicId, input: $input) {
+            publicId
+            name
+        }
+    }
+`;
+
+interface BundleProductItem {
+    publicId: string;
+    name: string;
+}
+
+interface GetProductsForBundleResponse {
+    getCompanyProducts: {
+        data: BundleProductItem[];
+        pageInfo: { endCursor: number | null; hasNextPage: boolean };
+    };
+}
+
+interface GetProductsForBundleVariables {
+    companyPublicId: string;
+    pagination: ProductPaginationInput;
+}
+
+const GET_PRODUCTS_FOR_BUNDLE: TypedDocumentNode<
+    GetProductsForBundleResponse,
+    GetProductsForBundleVariables
+> = gql`
+    query GetProductsForBundle($companyPublicId: String!, $pagination: ProductPaginationInput!) {
+        getCompanyProducts(companyPublicId: $companyPublicId, pagination: $pagination) {
+            data {
+                publicId
+                name
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+            }
+        }
+    }
+`;
+
+const STATUS_MAP: Record<ProductStatus, OpsProductStatus> = {
+    draft: OpsProductStatus.DRAFT,
+    active: OpsProductStatus.ACTIVE,
+    inactive: OpsProductStatus.INACTIVE,
+    archived: OpsProductStatus.ARCHIVED,
+};
+
+const BUNDLE_MODE_MAP: Record<'whole' | 'independent', BundleProductionMode> = {
+    whole: BundleProductionMode.WHOLE,
+    independent: BundleProductionMode.INDEPENDENT,
+};
 
 type FormState = {
     name: string;
@@ -52,24 +134,131 @@ const DEFAULT_FORM: FormState = {
     status: 'draft',
 };
 
-const DEFAULT_ITEMS: BundleItem[] = [
-    { id: 'item-1', productPublicId: DUMMY_PRODUCTS[0]?.publicId ?? '', qty: '1' },
-    { id: 'item-2', productPublicId: DUMMY_PRODUCTS[1]?.publicId ?? '', qty: '2' },
-];
+const DEFAULT_ITEMS: BundleItem[] = [];
 
-export function BundleProductForm({ onClose }: { onClose: () => void }) {
+export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => void; onDirtyChange?: (dirty: boolean) => void }) {
     const [form, setForm] = useState<FormState>(DEFAULT_FORM);
-    const { categories, addCategory } = useCatalog();
+    const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const [items, setItems] = useState<BundleItem[]>(DEFAULT_ITEMS);
+    const { activeCompany } = useCompany();
+
+    const { data: productsData, loading: productsLoading, fetchMore } = useQuery(
+        GET_PRODUCTS_FOR_BUNDLE,
+        {
+            skip: !activeCompany,
+            variables: {
+                companyPublicId: activeCompany?.publicId ?? '',
+                pagination: { cursor: null, take: PRODUCT_PAGINATION_SIZE },
+            },
+        },
+    );
+
+    const products = productsData?.getCompanyProducts.data ?? [];
+    const productsPageInfo = productsData?.getCompanyProducts.pageInfo;
+
+    function loadMoreProducts() {
+        if (!productsPageInfo?.hasNextPage || productsPageInfo.endCursor == null) return;
+
+        fetchMore({
+            variables: {
+                pagination: { cursor: productsPageInfo.endCursor, take: PRODUCT_PAGINATION_SIZE },
+            },
+            updateQuery: (prev, { fetchMoreResult }) => {
+                if (!fetchMoreResult) return prev;
+
+                return {
+                    getCompanyProducts: {
+                        ...fetchMoreResult.getCompanyProducts,
+                        data: [
+                            ...prev.getCompanyProducts.data,
+                            ...fetchMoreResult.getCompanyProducts.data,
+                        ],
+                    },
+                };
+            },
+        });
+    }
+    const client = useApolloClient();
+    const [createBundleProduct, { loading }] = useMutation(CREATE_BUNDLE_PRODUCT);
 
     function patch(values: Partial<FormState>) {
         setForm((prev) => ({ ...prev, ...values }));
+        onDirtyChange?.(true);
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        toast.success('Product created');
-        onClose();
+        if (loading || !activeCompany) return;
+
+        setFormValidation({});
+
+        try {
+            const { data, error } = await createBundleProduct({
+                variables: {
+                    companyPublicId: activeCompany.publicId,
+                    input: {
+                        name: form.name,
+                        description: form.description,
+                        categoryName: form.category,
+                        status: STATUS_MAP[form.status],
+                        sku: form.sku,
+                        price: Number(form.price),
+                        bundleProductionMode: BUNDLE_MODE_MAP[form.bundleProductionMode],
+                        bundleItems: items.map((item) => ({
+                            productPublicId: item.productPublicId,
+                            qty: Number(item.qty),
+                        })),
+                    },
+                },
+                errorPolicy: 'all',
+            });
+
+            if (hasGraphQLError(error)) {
+                const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+
+                if (gqlError) {
+                    const err = gqlError.extensions?.originalError as
+                        | Record<string, any>
+                        | undefined;
+
+                    if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                        setFormValidation(
+                            convertErrorMessageListToObject(VALIDATION_FIELDS, err.message),
+                        );
+                        return;
+                    }
+
+                    const id = err?.id;
+
+                    if (
+                        err?.statusCode === 409 &&
+                        id === "PRODUCT_SKU_ALREADY_EXISTS"
+                    ) {
+                        setFormValidation({
+                            sku: [
+                                'This SKU is already in use',
+                            ],
+                        });
+                        return;
+                    }
+                }
+            }
+
+            if (data) {
+                client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
+                toast.success('Product created');
+                onClose();
+                return;
+            }
+
+            toast.error('An unexpected error occurred. Please try again.', {
+                position: 'top-center',
+            });
+        } catch (error) {
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
+        }
     }
 
     function addItem() {
@@ -77,7 +266,7 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
             ...prev,
             {
                 id: `item-${Date.now()}`,
-                productPublicId: DUMMY_PRODUCTS[0]?.publicId ?? '',
+                productPublicId: products[0]?.publicId ?? '',
                 qty: '1',
             },
         ]);
@@ -87,6 +276,7 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
         setItems((prev) =>
             prev.map((item) => (item.id === itemId ? { ...item, ...values } : item)),
         );
+        onDirtyChange?.(true);
     }
 
     function removeItem(itemId: string) {
@@ -94,7 +284,7 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
     }
 
     const summary = useMemo(() => {
-        const productsMap = new Map(DUMMY_PRODUCTS.map((product) => [product.publicId, product]));
+        const productsMap = new Map(products.map((product) => [product.publicId, product]));
 
         const normalized = items.map((item) => ({
             ...item,
@@ -125,21 +315,22 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                         placeholder="Product name"
                         value={form.name}
                         onChange={(e) => patch({ name: e.target.value })}
+                        autoComplete='off'
                     />
+                    <ShowErrorText error={formValidation} field="name" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                     <Label>Category</Label>
                     <CategorySelect
-                        categories={categories}
                         value={form.category}
                         onChange={(value) => patch({ category: value })}
-                        onAddCategory={addCategory}
                     />
+                    <ShowErrorText error={formValidation} field="categoryName" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">Description<span className="text-muted-foreground text-xs">(Optional)</span></Label>
                     <Textarea
                         id="description"
                         placeholder="Short description"
@@ -157,7 +348,9 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                             placeholder="e.g. BND-001"
                             value={form.sku}
                             onChange={(e) => patch({ sku: e.target.value })}
+                            autoComplete='off'
                         />
+                        <ShowErrorText error={formValidation} field="sku" />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
@@ -174,6 +367,7 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                                 onChange={(e) => patch({ price: e.target.value })}
                             />
                         </InputGroup>
+                        <ShowErrorText error={formValidation} field="price" />
                     </div>
                 </div>
             </section>
@@ -218,7 +412,7 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                                             <SelectValue placeholder="Select product" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {DUMMY_PRODUCTS.map((product) => (
+                                            {products.map((product) => (
                                                 <SelectItem
                                                     key={product.publicId}
                                                     value={product.publicId}
@@ -226,6 +420,31 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                                                     {product.name}
                                                 </SelectItem>
                                             ))}
+                                            {productsPageInfo?.hasNextPage && (
+                                                <div className="border-t pt-1">
+                                                    <p className="text-muted-foreground px-2 py-1 text-xs">
+                                                        Showing {products.length} products
+                                                    </p>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="w-full"
+                                                        disabled={productsLoading}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            loadMoreProducts();
+                                                        }}
+                                                    >
+                                                        {productsLoading ? (
+                                                            <IconLoader2 className="size-3.5 animate-spin" />
+                                                        ) : (
+                                                            <IconChevronDown className="size-3.5" />
+                                                        )}
+                                                        {productsLoading ? 'Loading...' : 'Load more'}
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </SelectContent>
                                     </Select>
 
@@ -258,6 +477,7 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                         <Badge variant="secondary">Items: {summary.itemCount}</Badge>
                         <Badge variant="secondary">Total Qty: {summary.totalQty}</Badge>
                     </div>
+                    <ShowErrorText error={formValidation} field="bundleItems" />
                 </div>
 
                 <div className="rounded-lg border border-dashed p-3">
@@ -279,7 +499,7 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                                     'rounded-lg border px-3 py-2 text-left text-sm transition-colors',
                                     'hover:bg-accent',
                                     form.bundleProductionMode === mode &&
-                                        'border-primary bg-primary/5 font-medium',
+                                    'border-primary bg-primary/5 font-medium',
                                 )}
                             >
                                 {mode === 'whole' ? 'As a whole' : 'Independently per item'}
@@ -311,8 +531,6 @@ export function BundleProductForm({ onClose }: { onClose: () => void }) {
                         <SelectContent>
                             <SelectItem value="draft">Draft</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="archived">Archived</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

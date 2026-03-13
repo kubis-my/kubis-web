@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useMutation, useApolloClient } from '@apollo/client/react';
 import { Input } from '@repo/shadcn-ui/components/input';
 import {
     InputGroup,
@@ -17,8 +19,47 @@ import {
 } from '@repo/shadcn-ui/components/select';
 import { Separator } from '@repo/shadcn-ui/components/separator';
 import { Textarea } from '@repo/shadcn-ui/components/textarea';
-import { useCatalog, type ProductStatus } from '../../catalog/catalog-container';
+import { type ProductStatus } from '../../catalog/catalog-container';
 import { CategorySelect } from '../category-select';
+import { useCompany } from '@/root/components/container/company-provider';
+import {
+    Product as OpsProduct,
+    ProductStatus as OpsProductStatus,
+    SimpleProductInput,
+} from '@repo/commons/types/ops-service-schema.type';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
+import ShowErrorText from '@/shadcn/custom-components/show-error-text';
+
+const VALIDATION_FIELDS = ['name', 'categoryName', 'sku', 'price'];
+
+interface CreateSimpleProductResponse {
+    createSimpleProductForOps: OpsProduct;
+}
+
+interface CreateSimpleProductVariables {
+    companyPublicId: string;
+    input: SimpleProductInput;
+}
+
+const CREATE_SIMPLE_PRODUCT: TypedDocumentNode<
+    CreateSimpleProductResponse,
+    CreateSimpleProductVariables
+> = gql`
+    mutation CreateSimpleProduct($companyPublicId: String!, $input: SimpleProductInput!) {
+        createSimpleProductForOps(companyPublicId: $companyPublicId, input: $input) {
+            publicId
+            name
+        }
+    }
+`;
+
+const STATUS_MAP: Record<ProductStatus, OpsProductStatus> = {
+    draft: OpsProductStatus.DRAFT,
+    active: OpsProductStatus.ACTIVE,
+    inactive: OpsProductStatus.INACTIVE,
+    archived: OpsProductStatus.ARCHIVED,
+};
 
 type FormState = {
     name: string;
@@ -38,18 +79,86 @@ const DEFAULT_FORM: FormState = {
     status: 'draft',
 };
 
-export function SimpleProductForm({ onClose }: { onClose: () => void }) {
+export function SimpleProductForm({ onClose, onDirtyChange }: { onClose: () => void; onDirtyChange?: (dirty: boolean) => void }) {
     const [form, setForm] = useState<FormState>(DEFAULT_FORM);
-    const { categories, addCategory } = useCatalog();
+    const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
+    const { activeCompany } = useCompany();
+    const client = useApolloClient();
+    const [createSimpleProduct, { loading }] = useMutation(CREATE_SIMPLE_PRODUCT);
 
     function patch(values: Partial<FormState>) {
         setForm((prev) => ({ ...prev, ...values }));
+        onDirtyChange?.(true);
     }
 
-    function handleSubmit(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        toast.success('Product created');
-        onClose();
+        if (loading || !activeCompany) return;
+
+        setFormValidation({});
+
+        try {
+            const { data, error } = await createSimpleProduct({
+                variables: {
+                    companyPublicId: activeCompany.publicId,
+                    input: {
+                        name: form.name,
+                        description: form.description,
+                        categoryName: form.category,
+                        status: STATUS_MAP[form.status],
+                        sku: form.sku,
+                        price: Number(form.price),
+                    },
+                },
+                errorPolicy: 'all',
+            });
+
+            if (hasGraphQLError(error)) {
+                const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+
+                if (gqlError) {
+                    const err = gqlError.extensions?.originalError as
+                        | Record<string, any>
+                        | undefined;
+
+                    if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                        setFormValidation(
+                            convertErrorMessageListToObject(VALIDATION_FIELDS, err.message),
+                        );
+                        return;
+                    }
+
+                    const id = err?.id;
+
+                    if (
+                        err?.statusCode === 409 &&
+                        id === "PRODUCT_SKU_ALREADY_EXISTS"
+                    ) {
+                        setFormValidation({
+                            sku: [
+                                'This SKU is already in use',
+                            ],
+                        });
+                        return;
+                    }
+                }
+            }
+
+            if (data) {
+                client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
+                toast.success('Product created');
+                onClose();
+                return;
+            }
+
+            toast.error('An unexpected error occurred. Please try again.', {
+                position: 'top-center',
+            });
+        } catch (error) {
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
+        }
     }
 
     return (
@@ -69,21 +178,22 @@ export function SimpleProductForm({ onClose }: { onClose: () => void }) {
                         placeholder="Product name"
                         value={form.name}
                         onChange={(e) => patch({ name: e.target.value })}
+                        autoComplete='off'
                     />
+                    <ShowErrorText error={formValidation} field="name" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                     <Label>Category</Label>
                     <CategorySelect
-                        categories={categories}
                         value={form.category}
                         onChange={(value) => patch({ category: value })}
-                        onAddCategory={addCategory}
                     />
+                    <ShowErrorText error={formValidation} field="categoryName" />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">Description<span className="text-muted-foreground text-xs">(Optional)</span></Label>
                     <Textarea
                         id="description"
                         placeholder="Short description"
@@ -103,7 +213,9 @@ export function SimpleProductForm({ onClose }: { onClose: () => void }) {
                         placeholder="e.g. MUG-001"
                         value={form.sku}
                         onChange={(e) => patch({ sku: e.target.value })}
+                        autoComplete='off'
                     />
+                    <ShowErrorText error={formValidation} field="sku" />
                 </div>
             </section>
 
@@ -131,6 +243,7 @@ export function SimpleProductForm({ onClose }: { onClose: () => void }) {
                             onChange={(e) => patch({ price: e.target.value })}
                         />
                     </InputGroup>
+                    <ShowErrorText error={formValidation} field="price" />
                 </div>
             </section>
 
@@ -156,8 +269,6 @@ export function SimpleProductForm({ onClose }: { onClose: () => void }) {
                         <SelectContent>
                             <SelectItem value="draft">Draft</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="archived">Archived</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

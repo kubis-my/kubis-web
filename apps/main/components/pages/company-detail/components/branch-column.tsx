@@ -39,10 +39,10 @@ export const BranchColumn: ColumnDef<Branch>[] = [
                         {hasPhone ? (
                             `${phone.phoneCode} ${phone.phoneNumber}`
                         ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-muted-foreground">-</span>
                         )}
                     </div>
-                    <div className="text-muted-foreground text-sm">{email || '—'}</div>
+                    <div className="text-muted-foreground text-sm">{email || '-'}</div>
                 </div>
             );
         },

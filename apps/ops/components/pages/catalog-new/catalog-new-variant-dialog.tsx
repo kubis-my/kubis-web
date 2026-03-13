@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@repo/shadcn-ui/components/button';
 import {
     Dialog,
@@ -26,13 +26,21 @@ import { VariantProductForm } from './types/variant-product';
 
 type Props = {
     open: boolean;
-    isDirty: boolean;
     onClose: () => void;
 };
 
-export function CatalogNewVariantDialog({ open, isDirty, onClose }: Props) {
+export function CatalogNewVariantDialog({ open, onClose }: Props) {
     const [maximized, setMaximized] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [isDirty, setIsDirty] = useState(false);
+
+    useEffect(() => {
+        if (!open) {
+            setMaximized(false);
+            setIsDirty(false);
+            setConfirmOpen(false);
+        }
+    }, [open]);
 
     function handleOpenChange(next: boolean) {
         if (!next) {
@@ -45,8 +53,6 @@ export function CatalogNewVariantDialog({ open, isDirty, onClose }: Props) {
     }
 
     function handleConfirmDiscard() {
-        setConfirmOpen(false);
-        setMaximized(false);
         onClose();
     }
 
@@ -55,8 +61,8 @@ export function CatalogNewVariantDialog({ open, isDirty, onClose }: Props) {
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogContent
                     showCloseButton={false}
-                    onEscapeKeyDown={(e) => e.preventDefault()}
-                    onInteractOutside={(e) => e.preventDefault()}
+                    onEscapeKeyDown={(e) => { if (!confirmOpen) e.preventDefault(); }}
+                    onInteractOutside={(e) => { if (!confirmOpen) e.preventDefault(); }}
                     className={cn(
                         'flex flex-col gap-0 p-0',
                         'inset-0! m-auto translate-x-0! translate-y-0!',
@@ -91,7 +97,7 @@ export function CatalogNewVariantDialog({ open, isDirty, onClose }: Props) {
                     </DialogHeader>
 
                     <div className="flex-1 overflow-y-auto px-6">
-                        <VariantProductForm onClose={onClose} />
+                        <VariantProductForm onClose={onClose} onDirtyChange={setIsDirty} />
                     </div>
 
                     <DialogFooter className="border-t px-6 py-4">

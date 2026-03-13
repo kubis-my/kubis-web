@@ -1,27 +1,37 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { IconCheck, IconChevronDown, IconPlus } from '@tabler/icons-react';
+import { IconCheck, IconChevronDown, IconLoader2, IconPlus } from '@tabler/icons-react';
 import { cn } from '@repo/shadcn-ui/lib/utils';
+import { useCatalog } from '../catalog/catalog-container';
 
 type Props = {
-    categories: string[];
     value: string;
     onChange: (value: string) => void;
-    onAddCategory: (category: string) => void;
 };
 
-export function CategorySelect({ categories, value, onChange, onAddCategory }: Props) {
+export function CategorySelect({ value, onChange }: Props) {
+    const { categories: queriedCategories, categoriesLoading: loading } = useCatalog();
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
+    const [newCategories, setNewCategories] = useState<string[]>([]);
     const ref = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    const allCategories = [
+        ...queriedCategories,
+        ...newCategories.filter(
+            (n) => !queriedCategories.some((q) => q.toLowerCase() === n.toLowerCase()),
+        ),
+    ];
+
     const trimmed = search.trim();
-    const filtered = categories.filter((cat) => cat.toLowerCase().includes(trimmed.toLowerCase()));
+    const filtered = allCategories.filter((cat) =>
+        cat.toLowerCase().includes(trimmed.toLowerCase()),
+    );
     const canCreate =
         trimmed.length > 0 &&
-        !categories.some((cat) => cat.toLowerCase() === trimmed.toLowerCase());
+        !allCategories.some((cat) => cat.toLowerCase() === trimmed.toLowerCase());
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -52,7 +62,7 @@ export function CategorySelect({ categories, value, onChange, onAddCategory }: P
     function handleCreate() {
         if (!canCreate) return;
 
-        onAddCategory(trimmed);
+        setNewCategories((prev) => [...prev, trimmed]);
         onChange(trimmed);
         handleClose();
     }
@@ -81,7 +91,11 @@ export function CategorySelect({ categories, value, onChange, onAddCategory }: P
                 )}
             >
                 <span>{value || 'Select category'}</span>
-                <IconChevronDown className="size-4 shrink-0 opacity-50" />
+                {loading ? (
+                    <IconLoader2 className="size-4 shrink-0 animate-spin opacity-50" />
+                ) : (
+                    <IconChevronDown className="size-4 shrink-0 opacity-50" />
+                )}
             </button>
 
             {open && (

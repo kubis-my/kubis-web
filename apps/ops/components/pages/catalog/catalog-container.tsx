@@ -2,10 +2,21 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { useCompany } from '@/root/components/container/company-provider';
+import { PRODUCT_PAGINATION_SIZE } from '@/root/libs/constants';
 import { CatalogNewSheet } from '../catalog-new/catalog-new-sheet';
 import { CatalogNewVariantDialog } from '../catalog-new/catalog-new-variant-dialog';
 import CatalogHeaderAction from './catalog-header-action';
-import { DUMMY_CATEGORIES, DUMMY_PRODUCTS } from './catalog-dummy-data';
+import {
+    PaginatedProduct,
+    PageInfo,
+    Product as OpsProduct,
+    ProductPaginationInput,
+    ProductStatus as OpsProductStatus,
+    ProductType as OpsProductType,
+} from '@repo/commons/types/ops-service-schema.type';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 
 export type ProductType = 'simple' | 'variant' | 'digital' | 'service' | 'bundle' | 'custom';
 export type ProductStatus = 'draft' | 'active' | 'inactive' | 'archived';
@@ -21,16 +32,123 @@ export type Product = {
     archivedAt?: string;
 };
 
-export { DUMMY_PRODUCTS };
+interface GetCatalogResponse {
+    getCompanyProducts: PaginatedProduct;
+}
+
+interface GetCatalogVariables {
+    companyPublicId: string;
+    pagination: ProductPaginationInput;
+}
+
+interface GetCategoriesResponse {
+    getCompanyCategories: { publicId: string; name: string }[];
+}
+
+interface GetCategoriesVariables {
+    companyPublicId: string;
+}
+
+const GET_COMPANY_CATEGORIES: TypedDocumentNode<GetCategoriesResponse, GetCategoriesVariables> = gql`
+    query GetCompanyCategories($companyPublicId: String!) {
+        getCompanyCategories(companyPublicId: $companyPublicId) {
+            publicId
+            name
+        }
+    }
+`;
+
+const GET_CATALOG: TypedDocumentNode<GetCatalogResponse, GetCatalogVariables> = gql`
+    query GetCatalog($companyPublicId: String!, $pagination: ProductPaginationInput!) {
+        getCompanyProducts(companyPublicId: $companyPublicId, pagination: $pagination) {
+            data {
+                publicId
+                name
+                type
+                sku
+                price
+                estimatedPrice
+                status
+                archivedAt
+                category {
+                    name
+                }
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                total
+                currentPage
+                totalPages
+            }
+        }
+    }
+`;
+
+function toProductType(value: OpsProductType): ProductType {
+    switch (value) {
+        case OpsProductType.SIMPLE:
+            return 'simple';
+        case OpsProductType.VARIANT:
+            return 'variant';
+        case OpsProductType.DIGITAL:
+            return 'digital';
+        case OpsProductType.SERVICE:
+            return 'service';
+        case OpsProductType.BUNDLE:
+            return 'bundle';
+        case OpsProductType.CUSTOM:
+            return 'custom';
+    }
+}
+
+function toProductStatus(value: OpsProductStatus): ProductStatus {
+    switch (value) {
+        case OpsProductStatus.DRAFT:
+            return 'draft';
+        case OpsProductStatus.ACTIVE:
+            return 'active';
+        case OpsProductStatus.INACTIVE:
+            return 'inactive';
+        case OpsProductStatus.ARCHIVED:
+            return 'archived';
+    }
+}
+
+function mapProduct(product: OpsProduct): Product {
+    return {
+        publicId: product.publicId,
+        name: product.name,
+        category: product.category.name,
+        type: toProductType(product.type),
+        sku: product.sku ?? undefined,
+        price: product.price ?? product.estimatedPrice ?? undefined,
+        status: toProductStatus(product.status),
+        archivedAt: product.archivedAt ? String(product.archivedAt) : undefined,
+    };
+}
 
 type CatalogContextType = {
     products: Product[];
-    categories: string[];
-    addCategory: (category: string) => void;
     isLoading: boolean;
+    pageInfo: PageInfo;
+    pageSize: number;
+    onPageSizeChange: (size: number) => void;
+    cursorHistory: (number | null | undefined)[];
+    onNextPage: () => void;
+    onPreviousPage: () => void;
+    categories: string[];
+    categoriesLoading: boolean;
 };
 
 const CatalogContext = createContext<CatalogContextType | undefined>(undefined);
+const EMPTY_PAGE_INFO: PageInfo = {
+    endCursor: null,
+    hasNextPage: false,
+    total: 0,
+    currentPage: 1,
+    totalPages: 1,
+};
 
 export function useCatalog() {
     const context = useContext(CatalogContext);
@@ -43,14 +161,61 @@ export function useCatalog() {
 }
 
 export default function CatalogContainer({ children }: Readonly<{ children: React.ReactNode }>) {
-    const [products] = useState<Product[]>(DUMMY_PRODUCTS);
-    const [categories, setCategories] = useState<string[]>(DUMMY_CATEGORIES);
+    const { activeCompany } = useCompany();
+    const companyPublicId = activeCompany?.publicId;
+    const [pageSize, setPageSize] = useState(PRODUCT_PAGINATION_SIZE);
+    const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
+    const currentCursor = cursorHistory[cursorHistory.length - 1];
+    const { data, loading: isLoading } = useQuery(GET_CATALOG, {
+        skip: !companyPublicId,
+        variables: {
+            companyPublicId: companyPublicId ?? '',
+            pagination: {
+                cursor: currentCursor,
+                take: pageSize,
+            },
+        },
+    });
 
-    function addCategory(category: string) {
-        setCategories((prev) => [...prev, category]);
+    const { data: categoriesData, loading: categoriesLoading } = useQuery(GET_COMPANY_CATEGORIES, {
+        skip: !companyPublicId,
+        variables: { companyPublicId: companyPublicId ?? '' },
+    });
+
+    const categories = categoriesData?.getCompanyCategories.map((c) => c.name) ?? [];
+
+    const products = (data?.getCompanyProducts.data ?? []).map(mapProduct);
+    const pageInfo = data?.getCompanyProducts.pageInfo ?? EMPTY_PAGE_INFO;
+
+    function onPageSizeChange(size: number) {
+        setPageSize(size);
+        setCursorHistory([null]);
     }
+
+    function onNextPage() {
+        if (
+            !pageInfo.hasNextPage ||
+            pageInfo.endCursor === null ||
+            pageInfo.endCursor === undefined
+        ) {
+            return;
+        }
+
+        setCursorHistory((prev) => [...prev, pageInfo.endCursor]);
+    }
+
+    function onPreviousPage() {
+        if (cursorHistory.length <= 1) return;
+
+        setCursorHistory((prev) => prev.slice(0, prev.length - 1));
+    }
+
     const [openType, setOpenType] = useState<ProductType | null>(null);
     const { updateBreadcrumbList, updateHeaderAction } = useDashboard01();
+
+    useEffect(() => {
+        setCursorHistory([null]);
+    }, [companyPublicId]);
 
     useEffect(() => {
         updateBreadcrumbList([{ name: 'Product Catalog' }]);
@@ -68,14 +233,26 @@ export default function CatalogContainer({ children }: Readonly<{ children: Reac
             : null;
 
     return (
-        <CatalogContext.Provider value={{ products, categories, addCategory, isLoading: false }}>
+        <CatalogContext.Provider
+            value={{
+                products,
+                isLoading,
+                pageInfo,
+                pageSize,
+                onPageSizeChange,
+                cursorHistory,
+                onNextPage,
+                onPreviousPage,
+                categories,
+                categoriesLoading,
+            }}
+        >
             {children}
 
-            <CatalogNewSheet type={drawerType} isDirty={false} onClose={() => setOpenType(null)} />
+            <CatalogNewSheet type={drawerType} onClose={() => setOpenType(null)} />
 
             <CatalogNewVariantDialog
                 open={openType === 'variant'}
-                isDirty={false}
                 onClose={() => setOpenType(null)}
             />
         </CatalogContext.Provider>

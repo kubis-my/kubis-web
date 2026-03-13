@@ -1,15 +1,9 @@
 'use client';
 
 import { Badge } from '@repo/shadcn-ui/components/badge';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@repo/shadcn-ui/components/table';
-import { useCatalog, type ProductStatus, type ProductType } from './catalog-container';
+import { DataTable } from '@repo/shadcn-ui/components/data-table';
+import { ColumnDef } from '@tanstack/react-table';
+import { Product, useCatalog, type ProductStatus, type ProductType } from './catalog-container';
 
 const TYPE_LABELS: Record<ProductType, string> = {
     simple: 'Simple',
@@ -44,78 +38,103 @@ const STATUS_BADGE_VARIANT: Record<ProductStatus, 'default' | 'secondary' | 'out
 };
 
 function formatPrice(price?: number) {
-    if (price === undefined) return '—';
+    if (price === undefined) return '-';
     return new Intl.NumberFormat('en-MY', {
         style: 'currency',
         currency: 'MYR',
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 2,
     }).format(price);
 }
 
 function formatDate(value?: string) {
-    if (!value) return '—';
+    if (!value) return '-';
 
     return new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' }).format(new Date(value));
 }
 
+const ProductColumns: ColumnDef<Product>[] = [
+    {
+        accessorKey: 'name',
+        header: 'Name',
+        cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
+        enableHiding: false,
+    },
+    {
+        accessorKey: 'category',
+        header: 'Category',
+        cell: ({ row }) => <div className="text-muted-foreground">{row.original.category}</div>,
+        size: 170,
+    },
+    {
+        accessorKey: 'type',
+        header: 'Type',
+        cell: ({ row }) => (
+            <Badge variant={TYPE_BADGE_VARIANT[row.original.type]}>
+                {TYPE_LABELS[row.original.type]}
+            </Badge>
+        ),
+        size: 120,
+    },
+    {
+        accessorKey: 'sku',
+        header: 'SKU',
+        cell: ({ row }) => <div className="text-muted-foreground">{row.original.sku ?? '-'}</div>,
+        size: 140,
+    },
+    {
+        accessorKey: 'price',
+        header: 'Price',
+        cell: ({ row }) => <div>{formatPrice(row.original.price)}</div>,
+        size: 130,
+    },
+    {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => (
+            <Badge variant={STATUS_BADGE_VARIANT[row.original.status]}>
+                {STATUS_LABELS[row.original.status]}
+            </Badge>
+        ),
+        size: 120,
+    },
+    {
+        accessorKey: 'archivedAt',
+        header: 'Archived At',
+        cell: ({ row }) => (
+            <div className="text-muted-foreground">{formatDate(row.original.archivedAt)}</div>
+        ),
+        size: 150,
+    },
+];
+
 export default function CatalogList() {
-    const { products } = useCatalog();
+    const {
+        products,
+        isLoading,
+        pageInfo,
+        pageSize,
+        onPageSizeChange,
+        cursorHistory,
+        onNextPage,
+        onPreviousPage,
+    } = useCatalog();
 
     return (
         <div className="flex flex-1 flex-col gap-4 p-4">
-            <div className="rounded-lg border">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Category</TableHead>
-                            <TableHead>Type</TableHead>
-                            <TableHead>SKU</TableHead>
-                            <TableHead>Price</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Archived At</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {products.length === 0 ? (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={7}
-                                    className="text-muted-foreground py-12 text-center text-sm"
-                                >
-                                    No products yet. Click "Add Product" to get started.
-                                </TableCell>
-                            </TableRow>
-                        ) : (
-                            products.map((product) => (
-                                <TableRow key={product.publicId}>
-                                    <TableCell className="font-medium">{product.name}</TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {product.category}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={TYPE_BADGE_VARIANT[product.type]}>
-                                            {TYPE_LABELS[product.type]}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {product.sku ?? '—'}
-                                    </TableCell>
-                                    <TableCell>{formatPrice(product.price)}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={STATUS_BADGE_VARIANT[product.status]}>
-                                            {STATUS_LABELS[product.status]}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-muted-foreground">
-                                        {formatDate(product.archivedAt)}
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+            <DataTable
+                columns={ProductColumns}
+                data={products}
+                pageInfo={pageInfo}
+                isLoading={isLoading}
+                pageSize={pageSize}
+                onPageSizeChange={onPageSizeChange}
+                cursorHistory={cursorHistory}
+                onNextPage={onNextPage}
+                onPreviousPage={onPreviousPage}
+                emptyMessage='No products yet. Click "Add Product" to get started.'
+                getRowId={(row) => row.publicId}
+                flexColumnId="name"
+            />
         </div>
     );
 }
