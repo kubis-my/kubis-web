@@ -1,7 +1,7 @@
 'use client';
 
 import { NavigationItem, NavUserItem } from '@/shadcn/dashboards/dashboard-01/types';
-import { IconHome, IconLogout, IconHelp, IconPackage, IconReplace } from '@tabler/icons-react';
+import { IconHome, IconLogout, IconHelp, IconPackage, IconReplace, IconUser } from '@tabler/icons-react';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
@@ -41,6 +41,14 @@ export const navigationUserItemList: NavUserItem[] = [
         icon: <IconReplace />,
         async action() {
             openSwitchCompanyDialog();
+        },
+    },
+    {
+        id: 'my-account',
+        name: 'My account',
+        icon: <IconUser />,
+        async action() {
+            window.open(`${env.NEXT_PUBLIC_MAIN_APP_BASE_URL}/my-account`, '_blank');
         },
     },
     {
