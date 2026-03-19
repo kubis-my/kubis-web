@@ -1,9 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { Badge } from '@repo/shadcn-ui/components/badge';
 import { DataTable } from '@repo/shadcn-ui/components/data-table';
-import { ColumnDef } from '@tanstack/react-table';
-import { Product, useCatalog, type ProductStatus, type ProductType } from './catalog-container';
+import { ColumnDef, Row } from '@tanstack/react-table';
+import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
+import {
+    Product,
+    ProductBundleItem,
+    ProductVariant,
+    useCatalog,
+    type ProductStatus,
+    type ProductType,
+} from './catalog-container';
 
 const TYPE_LABELS: Record<ProductType, string> = {
     simple: 'Simple',
@@ -52,60 +61,55 @@ function formatDate(value?: string) {
     return new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' }).format(new Date(value));
 }
 
-const ProductColumns: ColumnDef<Product>[] = [
-    {
-        accessorKey: 'name',
-        header: 'Name',
-        cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
-        enableHiding: false,
-    },
-    {
-        accessorKey: 'category',
-        header: 'Category',
-        cell: ({ row }) => <div className="text-muted-foreground">{row.original.category}</div>,
-        size: 170,
-    },
-    {
-        accessorKey: 'type',
-        header: 'Type',
-        cell: ({ row }) => (
-            <Badge variant={TYPE_BADGE_VARIANT[row.original.type]}>
-                {TYPE_LABELS[row.original.type]}
-            </Badge>
-        ),
-        size: 120,
-    },
-    {
-        accessorKey: 'sku',
-        header: 'SKU',
-        cell: ({ row }) => <div className="text-muted-foreground">{row.original.sku ?? '-'}</div>,
-        size: 140,
-    },
-    {
-        accessorKey: 'price',
-        header: 'Price',
-        cell: ({ row }) => <div>{formatPrice(row.original.price)}</div>,
-        size: 130,
-    },
-    {
-        accessorKey: 'status',
-        header: 'Status',
-        cell: ({ row }) => (
-            <Badge variant={STATUS_BADGE_VARIANT[row.original.status]}>
-                {STATUS_LABELS[row.original.status]}
-            </Badge>
-        ),
-        size: 120,
-    },
-    {
-        accessorKey: 'archivedAt',
-        header: 'Archived At',
-        cell: ({ row }) => (
-            <div className="text-muted-foreground">{formatDate(row.original.archivedAt)}</div>
-        ),
-        size: 150,
-    },
-];
+function VariantSubRows({ variants }: { variants: ProductVariant[] }) {
+    return (
+        <div className="border-border/50 border-t px-5 py-2 pl-10">
+            <table className="w-full text-sm">
+                <thead>
+                    <tr className="text-muted-foreground border-border/40 border-b text-xs">
+                        <th className="py-1.5 text-left font-medium">SKU</th>
+                        <th className="py-1.5 text-left font-medium">Price</th>
+                        <th className="py-1.5 text-left font-medium">Attributes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {variants.map((v, i) => (
+                        <tr key={i} className="border-border/40 border-b last:border-0">
+                            <td className="py-2 font-mono text-xs">{v.sku}</td>
+                            <td className="py-2">{formatPrice(v.price)}</td>
+                            <td className="text-muted-foreground py-2">
+                                {v.attributeValues.join(' / ')}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+function BundleSubRows({ items }: { items: ProductBundleItem[] }) {
+    return (
+        <div className="border-border/50 border-t px-5 py-2 pl-10">
+            <table className="w-full text-sm">
+                <thead>
+                    <tr className="text-muted-foreground border-border/40 border-b text-xs">
+                        <th className="py-1.5 text-left font-medium">Product</th>
+                        <th className="py-1.5 text-left font-medium">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {items.map((item, i) => (
+                        <tr key={i} className="border-border/40 border-b last:border-0">
+                            <td className="py-2">{item.product.name}</td>
+                            <td className="py-2">{item.qty}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
 
 export default function CatalogList() {
     const {
@@ -118,6 +122,117 @@ export default function CatalogList() {
         onNextPage,
         onPreviousPage,
     } = useCatalog();
+
+    const [expandedId, setExpandedId] = useState<string | null>(null);
+
+    function toggleRow(publicId: string) {
+        setExpandedId((prev) => (prev === publicId ? null : publicId));
+    }
+
+    function hasChildren(product: Product) {
+        return (
+            (product.type === 'variant' && (product.variants?.length ?? 0) > 0) ||
+            (product.type === 'bundle' && (product.bundleItems?.length ?? 0) > 0)
+        );
+    }
+
+    function isExpanded(product: Product) {
+        return expandedId === product.publicId;
+    }
+
+    const ProductColumns: ColumnDef<Product>[] = [
+        {
+            accessorKey: 'name',
+            header: 'Name',
+            cell: ({ row }: { row: Row<Product> }) => (
+                <div className="flex items-center gap-2">
+                    {hasChildren(row.original) ? (
+                        <button
+                            className="text-muted-foreground hover:text-foreground shrink-0 transition-colors"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleRow(row.original.publicId);
+                            }}
+                        >
+                            {isExpanded(row.original) ? (
+                                <IconChevronDown className="size-4" />
+                            ) : (
+                                <IconChevronRight className="size-4" />
+                            )}
+                        </button>
+                    ) : (
+                        <span className="size-4 shrink-0" />
+                    )}
+                    <span className="font-medium">{row.original.name}</span>
+                </div>
+            ),
+            enableHiding: false,
+        },
+        {
+            accessorKey: 'category',
+            header: 'Category',
+            cell: ({ row }) => <div className="text-muted-foreground">{row.original.category}</div>,
+            size: 170,
+        },
+        {
+            accessorKey: 'type',
+            header: 'Type',
+            cell: ({ row }) => (
+                <Badge variant={TYPE_BADGE_VARIANT[row.original.type]}>
+                    {TYPE_LABELS[row.original.type]}
+                </Badge>
+            ),
+            size: 120,
+        },
+        {
+            accessorKey: 'sku',
+            header: 'SKU',
+            cell: ({ row }) => (
+                <div className="text-muted-foreground">{row.original.sku ?? '-'}</div>
+            ),
+            size: 140,
+        },
+        {
+            accessorKey: 'price',
+            header: 'Price',
+            cell: ({ row }) => <div>{formatPrice(row.original.price)}</div>,
+            size: 130,
+        },
+        {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: ({ row }) => (
+                <Badge variant={STATUS_BADGE_VARIANT[row.original.status]}>
+                    {STATUS_LABELS[row.original.status]}
+                </Badge>
+            ),
+            size: 120,
+        },
+        {
+            accessorKey: 'archivedAt',
+            header: 'Archived At',
+            cell: ({ row }) => (
+                <div className="text-muted-foreground">{formatDate(row.original.archivedAt)}</div>
+            ),
+            size: 150,
+        },
+    ];
+
+    function renderSubRow(row: Row<Product>) {
+        const product = row.original;
+
+        if (!isExpanded(product)) return null;
+
+        if (product.type === 'variant' && product.variants?.length) {
+            return <VariantSubRows variants={product.variants} />;
+        }
+
+        if (product.type === 'bundle' && product.bundleItems?.length) {
+            return <BundleSubRows items={product.bundleItems} />;
+        }
+
+        return null;
+    }
 
     return (
         <div className="flex flex-1 flex-col gap-4 p-4">
@@ -134,6 +249,7 @@ export default function CatalogList() {
                 emptyMessage='No products yet. Click "Add Product" to get started.'
                 getRowId={(row) => row.publicId}
                 flexColumnId="name"
+                renderSubRow={renderSubRow}
             />
         </div>
     );

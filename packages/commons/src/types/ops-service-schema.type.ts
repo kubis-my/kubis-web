@@ -123,6 +123,35 @@ export interface Category {
     updatedAt: DateTime;
 }
 
+export interface VariantAttributeValue {
+    publicId: string;
+    value: string;
+}
+
+export interface VariantAttribute {
+    publicId: string;
+    name: string;
+    values: VariantAttributeValue[];
+    createdAt: DateTime;
+    updatedAt: DateTime;
+}
+
+export interface ProductVariant {
+    publicId: string;
+    companyPublicId: string;
+    sku: string;
+    price?: Nullable<number>;
+    attributeValues: VariantAttributeValue[];
+    createdAt: DateTime;
+    updatedAt: DateTime;
+}
+
+export interface BundleItem {
+    publicId: string;
+    qty: number;
+    product: Product;
+}
+
 export interface Product {
     publicId: string;
     companyPublicId: string;
@@ -138,6 +167,9 @@ export interface Product {
     createdAt: DateTime;
     updatedAt: DateTime;
     category: Category;
+    attributes?: Nullable<VariantAttribute[]>;
+    variants?: Nullable<ProductVariant[]>;
+    bundleItems?: Nullable<BundleItem[]>;
 }
 
 export interface PaginatedProduct {

@@ -39,6 +39,7 @@ export interface DataTableProps<TData> {
     getRowId?: (row: TData) => string;
     onRowClick?: (row: TData, event: React.MouseEvent) => void;
     renderRow?: (row: Row<TData>) => React.ReactNode;
+    renderSubRow?: (row: Row<TData>) => React.ReactNode;
     renderSkeletonRow?: () => React.ReactNode;
     pageSizeOptions?: number[];
     flexColumnId?: string;
@@ -116,6 +117,7 @@ export function DataTable<TData>({
     getRowId,
     onRowClick,
     renderRow,
+    renderSubRow,
     renderSkeletonRow,
     pageSizeOptions = [10, 20, 30, 40, 50],
     flexColumnId,
@@ -141,6 +143,22 @@ export function DataTable<TData>({
         if (renderRow) {
             return renderRow(row);
         }
+
+        const subRow = renderSubRow?.(row);
+
+        if (subRow) {
+            return (
+                <React.Fragment key={row.id}>
+                    <DefaultRow row={row} flexColumnId={flexColumnId} onRowClick={onRowClick} />
+                    <TableRow className="bg-muted/30 hover:bg-muted/30">
+                        <TableCell colSpan={columns.length} className="p-0">
+                            {subRow}
+                        </TableCell>
+                    </TableRow>
+                </React.Fragment>
+            );
+        }
+
         return (
             <DefaultRow
                 key={row.id}

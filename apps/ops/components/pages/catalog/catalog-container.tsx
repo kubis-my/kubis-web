@@ -15,6 +15,17 @@ import {
     ProductStatus as OpsProductStatus,
     ProductType as OpsProductType,
 } from '@repo/commons/types/ops-service-schema.type';
+
+export type ProductVariant = {
+    sku: string;
+    price?: number;
+    attributeValues: string[];
+};
+
+export type ProductBundleItem = {
+    product: { name: string };
+    qty: number;
+};
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 
@@ -30,6 +41,8 @@ export type Product = {
     price?: number;
     status: ProductStatus;
     archivedAt?: string;
+    variants?: ProductVariant[];
+    bundleItems?: ProductBundleItem[];
 };
 
 interface GetCatalogResponse {
@@ -72,6 +85,19 @@ const GET_CATALOG: TypedDocumentNode<GetCatalogResponse, GetCatalogVariables> = 
                 archivedAt
                 category {
                     name
+                }
+                variants {
+                    sku
+                    price
+                    attributeValues {
+                        value
+                    }
+                }
+                bundleItems {
+                    qty
+                    product {
+                        name
+                    }
                 }
             }
             pageInfo {
@@ -125,6 +151,15 @@ function mapProduct(product: OpsProduct): Product {
         price: product.price ?? product.estimatedPrice ?? undefined,
         status: toProductStatus(product.status),
         archivedAt: product.archivedAt ? String(product.archivedAt) : undefined,
+        variants: product.variants?.map((v) => ({
+            sku: v.sku,
+            price: v.price ?? undefined,
+            attributeValues: v.attributeValues.map((av) => av.value),
+        })),
+        bundleItems: product.bundleItems?.map((b) => ({
+            product: { name: b.product.name },
+            qty: b.qty,
+        })),
     };
 }
 
