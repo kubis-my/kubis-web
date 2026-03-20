@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { Badge } from '@repo/shadcn-ui/components/badge';
+import { Button } from '@repo/shadcn-ui/components/button';
 import { DataTable } from '@repo/shadcn-ui/components/data-table';
 import { ColumnDef, Row } from '@tanstack/react-table';
-import { IconChevronDown, IconChevronRight } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronRight, IconPencil } from '@tabler/icons-react';
 import {
     Product,
     ProductBundleItem,
@@ -111,6 +112,8 @@ function BundleSubRows({ items }: { items: ProductBundleItem[] }) {
     );
 }
 
+const EDITABLE_TYPES: ProductType[] = ['simple', 'digital', 'service', 'custom'];
+
 export default function CatalogList() {
     const {
         products,
@@ -121,6 +124,7 @@ export default function CatalogList() {
         cursorHistory,
         onNextPage,
         onPreviousPage,
+        onEditProduct,
     } = useCatalog();
 
     const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -131,6 +135,7 @@ export default function CatalogList() {
 
     function hasChildren(product: Product) {
         return (
+            !!product.description ||
             (product.type === 'variant' && (product.variants?.length ?? 0) > 0) ||
             (product.type === 'bundle' && (product.bundleItems?.length ?? 0) > 0)
         );
@@ -216,6 +221,27 @@ export default function CatalogList() {
             ),
             size: 150,
         },
+        {
+            id: 'actions',
+            cell: ({ row }) => {
+                if (!EDITABLE_TYPES.includes(row.original.type)) return null;
+
+                return (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEditProduct(row.original);
+                        }}
+                    >
+                        <IconPencil className="size-4" />
+                    </Button>
+                );
+            },
+            size: 48,
+        },
     ];
 
     function renderSubRow(row: Row<Product>) {
@@ -223,15 +249,23 @@ export default function CatalogList() {
 
         if (!isExpanded(product)) return null;
 
-        if (product.type === 'variant' && product.variants?.length) {
-            return <VariantSubRows variants={product.variants} />;
-        }
+        return (
+            <>
+                {product.description && (
+                    <div className="border-border/50 border-t px-5 py-3 pl-10">
+                        <p className="text-muted-foreground text-sm">{product.description}</p>
+                    </div>
+                )}
 
-        if (product.type === 'bundle' && product.bundleItems?.length) {
-            return <BundleSubRows items={product.bundleItems} />;
-        }
+                {product.type === 'variant' && product.variants?.length ? (
+                    <VariantSubRows variants={product.variants} />
+                ) : null}
 
-        return null;
+                {product.type === 'bundle' && product.bundleItems?.length ? (
+                    <BundleSubRows items={product.bundleItems} />
+                ) : null}
+            </>
+        );
     }
 
     return (

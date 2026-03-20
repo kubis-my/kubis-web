@@ -6,6 +6,7 @@ import { useCompany } from '@/root/components/container/company-provider';
 import { PRODUCT_PAGINATION_SIZE } from '@/root/libs/constants';
 import { CatalogNewSheet } from '../catalog-new/catalog-new-sheet';
 import { CatalogNewVariantDialog } from '../catalog-new/catalog-new-variant-dialog';
+import { CatalogEditSheet } from '../catalog-edit/catalog-edit-sheet';
 import CatalogHeaderAction from './catalog-header-action';
 import {
     PaginatedProduct,
@@ -35,6 +36,7 @@ export type ProductStatus = 'draft' | 'active' | 'inactive' | 'archived';
 export type Product = {
     publicId: string;
     name: string;
+    description?: string;
     category: string;
     type: ProductType;
     sku?: string;
@@ -77,6 +79,7 @@ const GET_CATALOG: TypedDocumentNode<GetCatalogResponse, GetCatalogVariables> = 
             data {
                 publicId
                 name
+                description
                 type
                 sku
                 price
@@ -145,6 +148,7 @@ function mapProduct(product: OpsProduct): Product {
     return {
         publicId: product.publicId,
         name: product.name,
+        description: product.description ?? undefined,
         category: product.category.name,
         type: toProductType(product.type),
         sku: product.sku ?? undefined,
@@ -174,6 +178,7 @@ type CatalogContextType = {
     onPreviousPage: () => void;
     categories: string[];
     categoriesLoading: boolean;
+    onEditProduct: (product: Product) => void;
 };
 
 const CatalogContext = createContext<CatalogContextType | undefined>(undefined);
@@ -246,6 +251,7 @@ export default function CatalogContainer({ children }: Readonly<{ children: Reac
     }
 
     const [openType, setOpenType] = useState<ProductType | null>(null);
+    const [editProduct, setEditProduct] = useState<Product | null>(null);
     const { updateBreadcrumbList, updateHeaderAction } = useDashboard01();
 
     useEffect(() => {
@@ -280,6 +286,7 @@ export default function CatalogContainer({ children }: Readonly<{ children: Reac
                 onPreviousPage,
                 categories,
                 categoriesLoading,
+                onEditProduct: setEditProduct,
             }}
         >
             {children}
@@ -290,6 +297,8 @@ export default function CatalogContainer({ children }: Readonly<{ children: Reac
                 open={openType === 'variant'}
                 onClose={() => setOpenType(null)}
             />
+
+            <CatalogEditSheet product={editProduct} onClose={() => setEditProduct(null)} />
         </CatalogContext.Provider>
     );
 }

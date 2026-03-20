@@ -107,6 +107,45 @@ export interface CustomProductInput {
     estimatedPrice: number;
 }
 
+export interface UpdateSimpleProductInput {
+    productPublicId: string;
+    name?: Nullable<string>;
+    description?: Nullable<string>;
+    categoryName?: Nullable<string>;
+    status?: Nullable<ProductStatus>;
+    sku?: Nullable<string>;
+    price?: Nullable<number>;
+}
+
+export interface UpdateDigitalProductInput {
+    productPublicId: string;
+    name?: Nullable<string>;
+    description?: Nullable<string>;
+    categoryName?: Nullable<string>;
+    status?: Nullable<ProductStatus>;
+    sku?: Nullable<string>;
+    price?: Nullable<number>;
+}
+
+export interface UpdateServiceProductInput {
+    productPublicId: string;
+    name?: Nullable<string>;
+    description?: Nullable<string>;
+    categoryName?: Nullable<string>;
+    status?: Nullable<ProductStatus>;
+    sku?: Nullable<string>;
+    price?: Nullable<number>;
+}
+
+export interface UpdateCustomProductInput {
+    productPublicId: string;
+    name?: Nullable<string>;
+    description?: Nullable<string>;
+    categoryName?: Nullable<string>;
+    status?: Nullable<ProductStatus>;
+    estimatedPrice?: Nullable<number>;
+}
+
 export interface PageInfo {
     endCursor?: Nullable<number>;
     hasNextPage: boolean;
@@ -209,6 +248,22 @@ export interface IMutation {
     createCustomProductForOps(
         companyPublicId: string,
         input: CustomProductInput,
+    ): Product | Promise<Product>;
+    updateSimpleProductForOps(
+        companyPublicId: string,
+        input: UpdateSimpleProductInput,
+    ): Product | Promise<Product>;
+    updateDigitalProductForOps(
+        companyPublicId: string,
+        input: UpdateDigitalProductInput,
+    ): Product | Promise<Product>;
+    updateServiceProductForOps(
+        companyPublicId: string,
+        input: UpdateServiceProductInput,
+    ): Product | Promise<Product>;
+    updateCustomProductForOps(
+        companyPublicId: string,
+        input: UpdateCustomProductInput,
     ): Product | Promise<Product>;
 }
 
