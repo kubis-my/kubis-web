@@ -7,6 +7,7 @@ import { PRODUCT_PAGINATION_SIZE } from '@/root/libs/constants';
 import { CatalogNewSheet } from '../catalog-new/catalog-new-sheet';
 import { CatalogNewVariantDialog } from '../catalog-new/catalog-new-variant-dialog';
 import { CatalogEditSheet } from '../catalog-edit/catalog-edit-sheet';
+import { CatalogEditVariantDialog } from '../catalog-edit/catalog-edit-variant-dialog';
 import CatalogHeaderAction from './catalog-header-action';
 import {
     PaginatedProduct,
@@ -18,9 +19,17 @@ import {
 } from '@repo/commons/types/ops-service-schema.type';
 
 export type ProductVariant = {
+    publicId: string;
     sku: string;
     price?: number;
     attributeValues: string[];
+    deletedAt?: string;
+};
+
+export type ProductAttribute = {
+    publicId: string;
+    name: string;
+    values: string[];
 };
 
 export type ProductBundleItem = {
@@ -43,6 +52,7 @@ export type Product = {
     price?: number;
     status: ProductStatus;
     archivedAt?: string;
+    attributes?: ProductAttribute[];
     variants?: ProductVariant[];
     bundleItems?: ProductBundleItem[];
 };
@@ -89,12 +99,21 @@ const GET_CATALOG: TypedDocumentNode<GetCatalogResponse, GetCatalogVariables> = 
                 category {
                     name
                 }
+                attributes {
+                    publicId
+                    name
+                    values {
+                        value
+                    }
+                }
                 variants {
+                    publicId
                     sku
                     price
                     attributeValues {
                         value
                     }
+                    deletedAt
                 }
                 bundleItems {
                     qty
@@ -155,10 +174,17 @@ function mapProduct(product: OpsProduct): Product {
         price: product.price ?? product.estimatedPrice ?? undefined,
         status: toProductStatus(product.status),
         archivedAt: product.archivedAt ? String(product.archivedAt) : undefined,
+        attributes: product.attributes?.map((a) => ({
+            publicId: a.publicId,
+            name: a.name,
+            values: a.values.map((av) => av.value),
+        })),
         variants: product.variants?.map((v) => ({
+            publicId: v.publicId,
             sku: v.sku,
             price: v.price ?? undefined,
             attributeValues: v.attributeValues.map((av) => av.value),
+            deletedAt: v.deletedAt ? String(v.deletedAt) : undefined,
         })),
         bundleItems: product.bundleItems?.map((b) => ({
             product: { name: b.product.name },
@@ -299,6 +325,8 @@ export default function CatalogContainer({ children }: Readonly<{ children: Reac
             />
 
             <CatalogEditSheet product={editProduct} onClose={() => setEditProduct(null)} />
+
+            <CatalogEditVariantDialog product={editProduct} onClose={() => setEditProduct(null)} />
         </CatalogContext.Provider>
     );
 }

@@ -146,6 +146,29 @@ export interface UpdateCustomProductInput {
     estimatedPrice?: Nullable<number>;
 }
 
+export interface UpdateVariantProductInput {
+    name: string;
+    description?: Nullable<string>;
+    categoryName: string;
+    status: ProductStatus;
+    publicId: string;
+    variantAttributes: UpsertVariantAttributeInput[];
+    productVariants: UpsertProductVariantInput[];
+}
+
+export interface UpsertVariantAttributeInput {
+    publicId?: Nullable<string>;
+    name: string;
+    values: string[];
+}
+
+export interface UpsertProductVariantInput {
+    publicId?: Nullable<string>;
+    sku: string;
+    price: number;
+    attributeValues: string[];
+}
+
 export interface PageInfo {
     endCursor?: Nullable<number>;
     hasNextPage: boolean;
@@ -173,6 +196,7 @@ export interface VariantAttribute {
     values: VariantAttributeValue[];
     createdAt: DateTime;
     updatedAt: DateTime;
+    deletedAt?: Nullable<DateTime>;
 }
 
 export interface ProductVariant {
@@ -183,6 +207,7 @@ export interface ProductVariant {
     attributeValues: VariantAttributeValue[];
     createdAt: DateTime;
     updatedAt: DateTime;
+    deletedAt?: Nullable<DateTime>;
 }
 
 export interface BundleItem {
@@ -264,6 +289,10 @@ export interface IMutation {
     updateCustomProductForOps(
         companyPublicId: string,
         input: UpdateCustomProductInput,
+    ): Product | Promise<Product>;
+    updateVariantProductForOps(
+        companyPublicId: string,
+        input: UpdateVariantProductInput,
     ): Product | Promise<Product>;
 }
 

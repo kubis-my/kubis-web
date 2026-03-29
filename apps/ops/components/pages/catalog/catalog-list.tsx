@@ -6,6 +6,7 @@ import { Button } from '@repo/shadcn-ui/components/button';
 import { DataTable } from '@repo/shadcn-ui/components/data-table';
 import { ColumnDef, Row } from '@tanstack/react-table';
 import { IconChevronDown, IconChevronRight, IconPencil } from '@tabler/icons-react';
+import { cn } from '@repo/shadcn-ui/lib/utils';
 import {
     Product,
     ProductBundleItem,
@@ -71,16 +72,18 @@ function VariantSubRows({ variants }: { variants: ProductVariant[] }) {
                         <th className="py-1.5 text-left font-medium">SKU</th>
                         <th className="py-1.5 text-left font-medium">Price</th>
                         <th className="py-1.5 text-left font-medium">Attributes</th>
+                        <th className="py-1.5 text-left font-medium">Deleted At</th>
                     </tr>
                 </thead>
                 <tbody>
                     {variants.map((v, i) => (
                         <tr key={i} className="border-border/40 border-b last:border-0">
-                            <td className="py-2 font-mono text-xs">{v.sku}</td>
-                            <td className="py-2">{formatPrice(v.price)}</td>
-                            <td className="text-muted-foreground py-2">
+                            <td className={cn('py-2 font-mono text-xs', v.deletedAt && 'text-red-500 line-through')}>{v.sku}</td>
+                            <td className={cn('py-2', v.deletedAt && 'text-red-500 line-through')}>{formatPrice(v.price)}</td>
+                            <td className={cn('text-muted-foreground py-2', v.deletedAt && 'text-red-500 line-through')}>
                                 {v.attributeValues.join(' / ')}
                             </td>
+                            <td className="text-muted-foreground py-2">{formatDate(v.deletedAt)}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -112,7 +115,7 @@ function BundleSubRows({ items }: { items: ProductBundleItem[] }) {
     );
 }
 
-const EDITABLE_TYPES: ProductType[] = ['simple', 'digital', 'service', 'custom'];
+const EDITABLE_TYPES: ProductType[] = ['simple', 'digital', 'service', 'custom', 'variant'];
 
 export default function CatalogList() {
     const {
