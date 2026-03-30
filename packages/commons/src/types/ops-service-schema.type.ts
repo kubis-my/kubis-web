@@ -146,6 +146,24 @@ export interface UpdateCustomProductInput {
     estimatedPrice?: Nullable<number>;
 }
 
+export interface UpdateBundleProductInput {
+    name: string;
+    description?: Nullable<string>;
+    categoryName: string;
+    status: ProductStatus;
+    publicId: string;
+    sku: string;
+    price: number;
+    bundleProductionMode: BundleProductionMode;
+    bundleItems: UpsertBundleItemInput[];
+}
+
+export interface UpsertBundleItemInput {
+    publicId?: Nullable<string>;
+    productPublicId: string;
+    qty: number;
+}
+
 export interface UpdateVariantProductInput {
     name: string;
     description?: Nullable<string>;
@@ -214,6 +232,7 @@ export interface BundleItem {
     publicId: string;
     qty: number;
     product: Product;
+    deletedAt?: Nullable<DateTime>;
 }
 
 export interface Product {
@@ -289,6 +308,10 @@ export interface IMutation {
     updateCustomProductForOps(
         companyPublicId: string,
         input: UpdateCustomProductInput,
+    ): Product | Promise<Product>;
+    updateBundleProductForOps(
+        companyPublicId: string,
+        input: UpdateBundleProductInput,
     ): Product | Promise<Product>;
     updateVariantProductForOps(
         companyPublicId: string,

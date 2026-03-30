@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useMutation, useQuery, useApolloClient } from '@apollo/client/react';
 import { PRODUCT_PAGINATION_SIZE } from '@/root/libs/constants';
-import { CategorySelect } from '../category-select';
+import { CategorySelect } from '../../catalog-new/category-select';
 import { Button } from '@repo/shadcn-ui/components/button';
 import { Input } from '@repo/shadcn-ui/components/input';
 import {
@@ -24,15 +24,15 @@ import {
     SelectValue,
 } from '@repo/shadcn-ui/components/select';
 import { cn } from '@repo/shadcn-ui/lib/utils';
-import { IconChevronDown, IconLoader2, IconPackage, IconPlus, IconX } from '@tabler/icons-react';
-import type { ProductStatus } from '../../catalog/catalog-container';
+import { IconArrowBackUp, IconChevronDown, IconLoader2, IconPackage, IconPlus, IconX } from '@tabler/icons-react';
+import { type Product, type ProductStatus } from '../../catalog/catalog-container';
 import { useCompany } from '@/root/components/container/company-provider';
 import {
     BundleProductionMode,
-    BundleProductInput,
     Product as OpsProduct,
     ProductStatus as OpsProductStatus,
     ProductPaginationInput,
+    UpdateBundleProductInput,
 } from '@repo/commons/types/ops-service-schema.type';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
@@ -40,21 +40,21 @@ import ShowErrorText from '@/shadcn/custom-components/show-error-text';
 
 const VALIDATION_FIELDS = ['name', 'categoryName', 'sku', 'price', 'bundleItems'];
 
-interface CreateBundleProductResponse {
-    createBundleProductForOps: OpsProduct;
+interface UpdateBundleProductResponse {
+    updateBundleProductForOps: OpsProduct;
 }
 
-interface CreateBundleProductVariables {
+interface UpdateBundleProductVariables {
     companyPublicId: string;
-    input: BundleProductInput;
+    input: UpdateBundleProductInput;
 }
 
-const CREATE_BUNDLE_PRODUCT: TypedDocumentNode<
-    CreateBundleProductResponse,
-    CreateBundleProductVariables
+const UPDATE_BUNDLE_PRODUCT: TypedDocumentNode<
+    UpdateBundleProductResponse,
+    UpdateBundleProductVariables
 > = gql`
-    mutation CreateBundleProduct($companyPublicId: String!, $input: BundleProductInput!) {
-        createBundleProductForOps(companyPublicId: $companyPublicId, input: $input) {
+    mutation UpdateBundleProduct($companyPublicId: String!, $input: UpdateBundleProductInput!) {
+        updateBundleProductForOps(companyPublicId: $companyPublicId, input: $input) {
             publicId
             name
         }
@@ -115,26 +115,46 @@ type FormState = {
 
 type BundleItem = {
     id: string;
+    publicId?: string;
     productPublicId: string;
     qty: string;
+    deletedAt?: string;
 };
 
-const DEFAULT_FORM: FormState = {
-    name: '',
-    category: '',
-    description: '',
-    sku: '',
-    price: '',
-    bundleProductionMode: BundleProductionMode.WHOLE,
-    status: 'draft',
-};
+function toFormState(product: Product): FormState {
+    return {
+        name: product.name,
+        category: product.category,
+        description: product.description ?? '',
+        sku: product.sku ?? '',
+        price: product.price !== undefined ? String(product.price) : '',
+        bundleProductionMode: product.bundleProductionMode ?? BundleProductionMode.WHOLE,
+        status: product.status,
+    };
+}
 
-const DEFAULT_ITEMS: BundleItem[] = [];
+function toItems(product: Product): BundleItem[] {
+    return (product.bundleItems ?? []).map((item, i) => ({
+        id: `item-${i}`,
+        publicId: item.publicId,
+        productPublicId: item.productPublicId,
+        qty: String(item.qty),
+        deletedAt: item.deletedAt,
+    }));
+}
 
-export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => void; onDirtyChange?: (dirty: boolean) => void }) {
-    const [form, setForm] = useState<FormState>(DEFAULT_FORM);
+export function EditBundleProductForm({
+    product,
+    onClose,
+    onDirtyChange,
+}: {
+    product: Product;
+    onClose: () => void;
+    onDirtyChange?: (dirty: boolean) => void;
+}) {
+    const [form, setForm] = useState<FormState>(() => toFormState(product));
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
-    const [items, setItems] = useState<BundleItem[]>(DEFAULT_ITEMS);
+    const [items, setItems] = useState<BundleItem[]>(() => toItems(product));
     const { activeCompany } = useCompany();
 
     const { data: productsData, loading: productsLoading, fetchMore } = useQuery(
@@ -173,8 +193,9 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
             },
         });
     }
+
     const client = useApolloClient();
-    const [createBundleProduct, { loading }] = useMutation(CREATE_BUNDLE_PRODUCT);
+    const [updateBundleProduct, { loading }] = useMutation(UPDATE_BUNDLE_PRODUCT);
 
     function patch(values: Partial<FormState>) {
         setForm((prev) => ({ ...prev, ...values }));
@@ -188,21 +209,25 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
         setFormValidation({});
 
         try {
-            const { data, error } = await createBundleProduct({
+            const { data, error } = await updateBundleProduct({
                 variables: {
                     companyPublicId: activeCompany.publicId,
                     input: {
+                        publicId: product.publicId,
                         name: form.name,
-                        description: form.description,
+                        description: form.description || undefined,
                         categoryName: form.category,
                         status: STATUS_MAP[form.status],
                         sku: form.sku,
                         price: Number(form.price),
                         bundleProductionMode: form.bundleProductionMode,
-                        bundleItems: items.map((item) => ({
-                            productPublicId: item.productPublicId,
-                            qty: Number(item.qty),
-                        })),
+                        bundleItems: items
+                            .filter((item) => !item.deletedAt)
+                            .map((item) => ({
+                                publicId: item.publicId || undefined,
+                                productPublicId: item.productPublicId,
+                                qty: Number(item.qty),
+                            })),
                     },
                 },
                 errorPolicy: 'all',
@@ -225,15 +250,8 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
 
                     const id = err?.id;
 
-                    if (
-                        err?.statusCode === 409 &&
-                        id === "PRODUCT_SKU_ALREADY_EXISTS"
-                    ) {
-                        setFormValidation({
-                            sku: [
-                                'This SKU is already in use',
-                            ],
-                        });
+                    if (err?.statusCode === 409 && id === 'PRODUCT_SKU_ALREADY_EXISTS') {
+                        setFormValidation({ sku: ['This SKU is already in use'] });
                         return;
                     }
                 }
@@ -241,7 +259,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
 
             if (data) {
                 client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
-                toast.success('Product created');
+                toast.success('Product updated');
                 onClose();
                 return;
             }
@@ -249,7 +267,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
             toast.error('An unexpected error occurred. Please try again.', {
                 position: 'top-center',
             });
-        } catch (error) {
+        } catch {
             toast.error('Network error occurred. Please check your connection.', {
                 position: 'top-center',
             });
@@ -265,6 +283,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                 qty: '1',
             },
         ]);
+        onDirtyChange?.(true);
     }
 
     function patchItem(itemId: string, values: Partial<BundleItem>) {
@@ -276,12 +295,25 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
 
     function removeItem(itemId: string) {
         setItems((prev) => prev.filter((item) => item.id !== itemId));
+        onDirtyChange?.(true);
     }
 
-    const summary = useMemo(() => {
-        const productsMap = new Map(products.map((product) => [product.publicId, product]));
+    function restoreItem(itemId: string) {
+        setItems((prev) =>
+            prev.map((item) =>
+                item.id === itemId ? { ...item, deletedAt: undefined } : item,
+            ),
+        );
+        onDirtyChange?.(true);
+    }
 
-        const normalized = items.map((item) => ({
+    const activeItems = items.filter((item) => !item.deletedAt);
+    const deletedItems = items.filter((item) => !!item.deletedAt);
+
+    const summary = useMemo(() => {
+        const productsMap = new Map(products.map((p) => [p.publicId, p]));
+
+        const normalized = activeItems.map((item) => ({
             ...item,
             productName: productsMap.get(item.productPublicId)?.name ?? '',
             qtyNumber: Number(item.qty) || 0,
@@ -291,10 +323,10 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
         const totalQty = normalized.reduce((acc, item) => acc + Math.max(item.qtyNumber, 0), 0);
 
         return { itemCount: validItems.length, totalQty };
-    }, [items]);
+    }, [activeItems, products]);
 
     return (
-        <form id="bundle-product-form" onSubmit={handleSubmit} className="flex w-full flex-col">
+        <form id="edit-bundle-product-form" onSubmit={handleSubmit} className="flex w-full flex-col">
             <section className="flex flex-col gap-4 py-4">
                 <div>
                     <p className="text-sm font-medium">Basic Information</p>
@@ -310,7 +342,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                         placeholder="Product name"
                         value={form.name}
                         onChange={(e) => patch({ name: e.target.value })}
-                        autoComplete='off'
+                        autoComplete="off"
                     />
                     <ShowErrorText error={formValidation} field="name" />
                 </div>
@@ -325,7 +357,10 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="description">Description<span className="text-muted-foreground text-xs">(Optional)</span></Label>
+                    <Label htmlFor="description">
+                        Description{' '}
+                        <span className="text-muted-foreground text-xs">(Optional)</span>
+                    </Label>
                     <Textarea
                         id="description"
                         placeholder="Short description"
@@ -343,7 +378,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                             placeholder="e.g. BND-001"
                             value={form.sku}
                             onChange={(e) => patch({ sku: e.target.value })}
-                            autoComplete='off'
+                            autoComplete="off"
                         />
                         <ShowErrorText error={formValidation} field="sku" />
                     </div>
@@ -387,84 +422,124 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                     </div>
 
                     <div className="space-y-2">
-                        {items.length === 0 ? (
+                        {activeItems.length === 0 && deletedItems.length === 0 ? (
                             <p className="text-muted-foreground rounded-md border border-dashed px-3 py-4 text-center text-xs">
                                 No bundle item yet. Add at least one item to build this package.
                             </p>
                         ) : (
-                            items.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className="bg-background grid grid-cols-[1fr_80px_32px] gap-2 rounded-md border p-2"
-                                >
-                                    <Select
-                                        value={item.productPublicId}
-                                        onValueChange={(value) =>
-                                            patchItem(item.id, { productPublicId: value })
-                                        }
+                            <>
+                                {activeItems.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="bg-background grid grid-cols-[1fr_80px_32px] gap-2 rounded-md border p-2"
                                     >
-                                        <SelectTrigger className="h-8 w-full">
-                                            <SelectValue placeholder="Select product" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {products.map((product) => (
-                                                <SelectItem
-                                                    key={product.publicId}
-                                                    value={product.publicId}
+                                        <Select
+                                            value={item.productPublicId}
+                                            onValueChange={(value) =>
+                                                patchItem(item.id, { productPublicId: value })
+                                            }
+                                        >
+                                            <SelectTrigger className="h-8 w-full">
+                                                <SelectValue placeholder="Select product" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {products.map((p) => (
+                                                    <SelectItem key={p.publicId} value={p.publicId}>
+                                                        {p.name}
+                                                    </SelectItem>
+                                                ))}
+                                                {productsPageInfo?.hasNextPage && (
+                                                    <div className="border-t pt-1">
+                                                        <p className="text-muted-foreground px-2 py-1 text-xs">
+                                                            Showing {products.length} products
+                                                        </p>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="w-full"
+                                                            disabled={productsLoading}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                loadMoreProducts();
+                                                            }}
+                                                        >
+                                                            {productsLoading ? (
+                                                                <IconLoader2 className="size-3.5 animate-spin" />
+                                                            ) : (
+                                                                <IconChevronDown className="size-3.5" />
+                                                            )}
+                                                            {productsLoading ? 'Loading...' : 'Load more'}
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            value={item.qty}
+                                            onChange={(e) =>
+                                                patchItem(item.id, { qty: e.target.value })
+                                            }
+                                            placeholder="Qty"
+                                            className="h-8"
+                                        />
+
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="icon"
+                                            className="size-8"
+                                            onClick={() => removeItem(item.id)}
+                                        >
+                                            <IconX className="size-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+
+                                {deletedItems.length > 0 && (
+                                    <div className="space-y-2">
+                                        <p className="text-muted-foreground px-1 text-xs">
+                                            Removed items — click restore to re-include
+                                        </p>
+                                        {deletedItems.map((item) => {
+                                            const productName =
+                                                products.find((p) => p.publicId === item.productPublicId)?.name ??
+                                                product.bundleItems?.find(
+                                                    (b) => b.publicId === item.publicId,
+                                                )?.product.name ??
+                                                item.productPublicId;
+
+                                            return (
+                                                <div
+                                                    key={item.id}
+                                                    className="grid grid-cols-[1fr_32px] gap-2 rounded-md border border-dashed px-3 py-2"
                                                 >
-                                                    {product.name}
-                                                </SelectItem>
-                                            ))}
-                                            {productsPageInfo?.hasNextPage && (
-                                                <div className="border-t pt-1">
-                                                    <p className="text-muted-foreground px-2 py-1 text-xs">
-                                                        Showing {products.length} products
-                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-red-500 line-through text-sm">
+                                                            {productName}
+                                                        </span>
+                                                        <Badge variant="secondary" className="text-xs">
+                                                            qty: {item.qty}
+                                                        </Badge>
+                                                    </div>
                                                     <Button
                                                         type="button"
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="w-full"
-                                                        disabled={productsLoading}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            loadMoreProducts();
-                                                        }}
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="size-8"
+                                                        onClick={() => restoreItem(item.id)}
                                                     >
-                                                        {productsLoading ? (
-                                                            <IconLoader2 className="size-3.5 animate-spin" />
-                                                        ) : (
-                                                            <IconChevronDown className="size-3.5" />
-                                                        )}
-                                                        {productsLoading ? 'Loading...' : 'Load more'}
+                                                        <IconArrowBackUp className="size-4" />
                                                     </Button>
                                                 </div>
-                                            )}
-                                        </SelectContent>
-                                    </Select>
-
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        value={item.qty}
-                                        onChange={(e) =>
-                                            patchItem(item.id, { qty: e.target.value })
-                                        }
-                                        placeholder="Qty"
-                                        className="h-8"
-                                    />
-
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="icon"
-                                        className="size-8"
-                                        onClick={() => removeItem(item.id)}
-                                    >
-                                        <IconX className="size-4" />
-                                    </Button>
-                                </div>
-                            ))
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
 
@@ -494,7 +569,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                                     'rounded-lg border px-3 py-2 text-left text-sm transition-colors',
                                     'hover:bg-accent',
                                     form.bundleProductionMode === mode &&
-                                    'border-primary bg-primary/5 font-medium',
+                                        'border-primary bg-primary/5 font-medium',
                                 )}
                             >
                                 {mode === BundleProductionMode.WHOLE ? 'As a whole' : 'Independently per item'}
@@ -526,6 +601,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                         <SelectContent>
                             <SelectItem value="draft">Draft</SelectItem>
                             <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

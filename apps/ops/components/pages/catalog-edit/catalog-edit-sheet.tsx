@@ -25,14 +25,16 @@ import { EditSimpleProductForm } from './types/simple-product';
 import { EditDigitalProductForm } from './types/digital-product';
 import { EditServiceProductForm } from './types/service-product';
 import { EditCustomProductForm } from './types/custom-product';
+import { EditBundleProductForm } from './types/bundle-product';
 
-type EditableProductType = Extract<ProductType, 'simple' | 'digital' | 'service' | 'custom'>;
+type EditableProductType = Extract<ProductType, 'simple' | 'digital' | 'service' | 'custom' | 'bundle'>;
 
 const TYPE_LABELS: Record<EditableProductType, string> = {
     simple: 'Simple',
     digital: 'Digital',
     service: 'Service',
     custom: 'Custom',
+    bundle: 'Bundle',
 };
 
 const TYPE_SUBTITLES: Record<EditableProductType, string> = {
@@ -40,6 +42,7 @@ const TYPE_SUBTITLES: Record<EditableProductType, string> = {
     digital: 'For downloadable or license-based products.',
     service: 'For labor, consulting, or appointment-based offerings.',
     custom: 'For made-to-order work where specs and pricing are defined per job.',
+    bundle: 'A packaged set of products sold together as one offering.',
 };
 
 const FORM_IDS: Record<EditableProductType, string> = {
@@ -47,6 +50,7 @@ const FORM_IDS: Record<EditableProductType, string> = {
     digital: 'edit-digital-product-form',
     service: 'edit-service-product-form',
     custom: 'edit-custom-product-form',
+    bundle: 'edit-bundle-product-form',
 };
 
 type Props = {
@@ -55,7 +59,13 @@ type Props = {
 };
 
 function isEditableType(type: ProductType): type is EditableProductType {
-    return type === 'simple' || type === 'digital' || type === 'service' || type === 'custom';
+    return (
+        type === 'simple' ||
+        type === 'digital' ||
+        type === 'service' ||
+        type === 'custom' ||
+        type === 'bundle'
+    );
 }
 
 export function CatalogEditSheet({ product, onClose }: Props) {
@@ -128,6 +138,13 @@ export function CatalogEditSheet({ product, onClose }: Props) {
                                 )}
                                 {type === 'custom' && (
                                     <EditCustomProductForm
+                                        product={editableProduct}
+                                        onClose={onClose}
+                                        onDirtyChange={setIsDirty}
+                                    />
+                                )}
+                                {type === 'bundle' && (
+                                    <EditBundleProductForm
                                         product={editableProduct}
                                         onClose={onClose}
                                         onDirtyChange={setIsDirty}

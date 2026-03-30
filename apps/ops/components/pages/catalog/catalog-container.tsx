@@ -16,6 +16,7 @@ import {
     ProductPaginationInput,
     ProductStatus as OpsProductStatus,
     ProductType as OpsProductType,
+    BundleProductionMode,
 } from '@repo/commons/types/ops-service-schema.type';
 
 export type ProductVariant = {
@@ -33,8 +34,11 @@ export type ProductAttribute = {
 };
 
 export type ProductBundleItem = {
+    publicId: string;
+    productPublicId: string;
     product: { name: string };
     qty: number;
+    deletedAt?: string;
 };
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
@@ -52,6 +56,7 @@ export type Product = {
     price?: number;
     status: ProductStatus;
     archivedAt?: string;
+    bundleProductionMode?: BundleProductionMode;
     attributes?: ProductAttribute[];
     variants?: ProductVariant[];
     bundleItems?: ProductBundleItem[];
@@ -115,9 +120,13 @@ const GET_CATALOG: TypedDocumentNode<GetCatalogResponse, GetCatalogVariables> = 
                     }
                     deletedAt
                 }
+                bundleProductionMode
                 bundleItems {
+                    publicId
                     qty
+                    deletedAt
                     product {
+                        publicId
                         name
                     }
                 }
@@ -186,9 +195,13 @@ function mapProduct(product: OpsProduct): Product {
             attributeValues: v.attributeValues.map((av) => av.value),
             deletedAt: v.deletedAt ? String(v.deletedAt) : undefined,
         })),
+        bundleProductionMode: product.bundleProductionMode ?? undefined,
         bundleItems: product.bundleItems?.map((b) => ({
+            publicId: b.publicId,
+            productPublicId: b.product.publicId,
             product: { name: b.product.name },
             qty: b.qty,
+            deletedAt: b.deletedAt ? String(b.deletedAt) : undefined,
         })),
     };
 }

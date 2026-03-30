@@ -100,13 +100,15 @@ function BundleSubRows({ items }: { items: ProductBundleItem[] }) {
                     <tr className="text-muted-foreground border-border/40 border-b text-xs">
                         <th className="py-1.5 text-left font-medium">Product</th>
                         <th className="py-1.5 text-left font-medium">Qty</th>
+                        <th className="py-1.5 text-left font-medium">Deleted At</th>
                     </tr>
                 </thead>
                 <tbody>
                     {items.map((item, i) => (
                         <tr key={i} className="border-border/40 border-b last:border-0">
-                            <td className="py-2">{item.product.name}</td>
-                            <td className="py-2">{item.qty}</td>
+                            <td className={cn('py-2', item.deletedAt && 'text-red-500 line-through')}>{item.product.name}</td>
+                            <td className={cn('py-2', item.deletedAt && 'text-red-500 line-through')}>{item.qty}</td>
+                            <td className="text-muted-foreground py-2">{formatDate(item.deletedAt)}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -115,7 +117,7 @@ function BundleSubRows({ items }: { items: ProductBundleItem[] }) {
     );
 }
 
-const EDITABLE_TYPES: ProductType[] = ['simple', 'digital', 'service', 'custom', 'variant'];
+const EDITABLE_TYPES: ProductType[] = ['simple', 'digital', 'service', 'custom', 'variant', 'bundle'];
 
 export default function CatalogList() {
     const {
