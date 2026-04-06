@@ -23,7 +23,8 @@
     "tabler",
     "turbopack",
     "Turborepo",
-    "typebox"
+    "typebox",
+    "Vercel"
   ],
   "tailwindCSS.experimental.configFile": "packages/shadcn-ui/src/styles/globals.css",
   "tailwindCSS.experimental.classRegex": [
