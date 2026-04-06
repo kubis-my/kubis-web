@@ -7,7 +7,6 @@ import { UserSkeletonRow } from './components/user-skeleton-row';
 import { useCallback, useEffect, useState } from 'react';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import {
-    CompanyEmployee,
     CompanyEmployeePaginationInput,
     PaginatedCompanyEmployee,
 } from '@repo/commons/types/account-service-schema.type';
@@ -107,18 +106,11 @@ export default function UsersTab() {
         }
     }, [cursorHistory, pageSize, getCompanyEmployees]);
 
-    const handleRowClick = useCallback(
-        (employee: CompanyEmployee) => {
-            router.push(`/my-account/company/${ctx.company?.publicId}/user/${employee.publicId}`);
-        },
-        [router, ctx.company?.publicId],
-    );
-
     useEffect(() => {
         setPaginatedCompanyEmployee(
             data?.getCompanyEmployees ??
-                ctx.company?.companyEmployees ??
-                createInitialPaginatedData(),
+            ctx.company?.companyEmployees ??
+            createInitialPaginatedData(),
         );
     }, [ctx.company?.companyEmployees, data?.getCompanyEmployees]);
 
@@ -136,7 +128,6 @@ export default function UsersTab() {
                 onPreviousPage={goToPreviousPage}
                 emptyMessage="No users found."
                 getRowId={(row) => row.publicId.toString()}
-                onRowClick={handleRowClick}
                 renderSkeletonRow={() => <UserSkeletonRow />}
                 flexColumnId="fullName"
             />
