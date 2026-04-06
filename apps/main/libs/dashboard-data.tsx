@@ -70,7 +70,9 @@ export const navigationUserItemList: NavUserItem[] = [
         id: 'help',
         name: 'Get Help',
         icon: <IconHelp />,
-        async action(e) {},
+        async action(e) {
+            window.location.href = 'mailto:zarkashi93@yahoo.com';
+        },
     },
     {
         id: 'Log out',
