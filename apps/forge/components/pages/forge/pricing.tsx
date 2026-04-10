@@ -10,7 +10,7 @@ type PricingProps = {
 
 export default function Pricing({ content }: PricingProps) {
     return (
-        <section className="px-6 py-24">
+        <section id="pricing" className="px-6 py-24">
             <div className="mx-auto max-w-5xl">
                 <h2 className="mb-4 text-center text-4xl font-bold text-foreground">{content.title}</h2>
                 <p className="mb-16 text-center text-muted-foreground">{content.subtitle}</p>

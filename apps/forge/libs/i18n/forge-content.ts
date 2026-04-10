@@ -10,9 +10,6 @@ export type ForgeContent = {
         description: string;
         primaryCta: string;
         secondaryCta: string;
-        languageLabel: string;
-        englishLabel: string;
-        malayLabel: string;
     };
     howItWorks: {
         title: string;
@@ -91,9 +88,6 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 'Custom business systems built around your workflow. We build your core MVP first. Once it is ready for real production use, you move into a monthly subscription.',
             primaryCta: 'Book a Discovery Call',
             secondaryCta: 'See How the MVP Process Works',
-            languageLabel: 'Language',
-            englishLabel: 'English',
-            malayLabel: 'Malay',
         },
         howItWorks: {
             title: 'How It Works',
@@ -305,9 +299,6 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 'Sistem perniagaan khas dibina mengikut aliran kerja anda. Kami bina MVP teras anda dahulu. Apabila sistem sedia untuk penggunaan produksi sebenar, anda beralih ke langganan bulanan.',
             primaryCta: 'Tempah Panggilan Discovery',
             secondaryCta: 'Lihat Proses MVP',
-            languageLabel: 'Bahasa',
-            englishLabel: 'Inggeris',
-            malayLabel: 'Melayu',
         },
         howItWorks: {
             title: 'Bagaimana Ia Berfungsi',

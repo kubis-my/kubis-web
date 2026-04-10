@@ -6,7 +6,7 @@ type FaqProps = {
 
 export default function Faq({ content }: FaqProps) {
     return (
-        <section className="px-6 py-24">
+        <section id="faq" className="px-6 py-24">
             <div className="mx-auto max-w-3xl">
                 <h2 className="mb-16 text-center text-4xl font-bold text-foreground">{content.title}</h2>
                 <div className="flex flex-col gap-8">

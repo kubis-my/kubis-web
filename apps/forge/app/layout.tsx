@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Suspense } from 'react';
 import './globals.css';
 import { Toaster } from '@repo/shadcn-ui/components/sonner';
+import Footer from '@/component/footer';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -28,6 +30,9 @@ export default function RootLayout({
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 {children}
+                <Suspense>
+                    <Footer />
+                </Suspense>
                 <Toaster />
             </body>
         </html>

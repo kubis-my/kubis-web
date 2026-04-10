@@ -1,0 +1,81 @@
+'use client';
+
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import type { ForgeLocale } from '@/root/libs/i18n/forge-content';
+
+const NAV_LABELS: Record<ForgeLocale, { howItWorks: string; pricing: string; faq: string }> = {
+    en: { howItWorks: 'How It Works', pricing: 'Pricing', faq: 'FAQ' },
+    ms: { howItWorks: 'Cara Ia Berfungsi', pricing: 'Harga', faq: 'Soalan Lazim' },
+};
+
+export default function Footer() {
+    const searchParams = useSearchParams();
+    const locale: ForgeLocale = searchParams.get('lang') === 'ms' ? 'ms' : 'en';
+    const langParam = locale === 'ms' ? '?lang=ms' : '';
+    const nav = NAV_LABELS[locale];
+
+    return (
+        <footer className="bg-gray-900 dark:bg-gray-950">
+            <div className="h-px bg-linear-to-r from-transparent via-[#4CAF50]/50 to-transparent" />
+
+            <div className="mx-auto max-w-6xl px-6">
+                <div className="grid grid-cols-1 gap-12 py-16 md:grid-cols-3">
+                    <div className="flex flex-col gap-4">
+                        <span className="text-lg font-semibold text-white">Kubis Forge</span>
+                        <p className="max-w-xs text-sm leading-relaxed text-gray-400">
+                            Custom business systems built around your workflow. Build first, subscribe
+                            when ready.
+                        </p>
+
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                            Navigation
+                        </span>
+                        <nav className="flex flex-col gap-3">
+                            {[
+                                { label: nav.howItWorks, href: `/${langParam}#how-it-works` },
+                                { label: nav.pricing, href: `/${langParam}#pricing` },
+                                { label: nav.faq, href: `/${langParam}#faq` },
+                            ].map(({ label, href }) => (
+                                <Link
+                                    key={href}
+                                    href={href}
+                                    className="text-sm text-gray-400 transition-colors hover:text-white"
+                                >
+                                    {label}
+                                </Link>
+                            ))}
+                        </nav>
+                    </div>
+
+                    <div className="flex flex-col gap-4">
+                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                            Language
+                        </span>
+                        <div className="flex flex-col gap-3 text-sm">
+                            <Link
+                                href="/"
+                                className={`transition-colors ${locale === 'en' ? 'font-medium text-[#4CAF50]' : 'text-gray-400 hover:text-white'}`}
+                            >
+                                English
+                            </Link>
+                            <Link
+                                href="/?lang=ms"
+                                className={`transition-colors ${locale === 'ms' ? 'font-medium text-[#4CAF50]' : 'text-gray-400 hover:text-white'}`}
+                            >
+                                Bahasa Melayu
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="border-t border-white/10 py-6 text-xs text-gray-600">
+                    © {new Date().getFullYear()} Kubis Forge. All rights reserved.
+                </div>
+            </div>
+        </footer>
+    );
+}

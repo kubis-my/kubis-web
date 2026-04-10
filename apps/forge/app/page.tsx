@@ -18,7 +18,7 @@ export default async function ForgePage(props: {
 
     return (
         <main className="flex flex-col">
-            <Hero content={content.hero} locale={locale} />
+            <Hero content={content.hero} />
             <HowItWorks content={content.howItWorks} />
             <MvpScope content={content.mvpScope} />
             <Pricing content={content.pricing} />
