@@ -230,7 +230,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 {
                     title: 'Lower Upfront Risk',
                     description:
-                        'Clients do not need to commit heavily before seeing the core system take shape.',
+                        'Companies do not need to commit heavily before seeing the core system take shape.',
                 },
                 {
                     title: 'Faster Validation',
@@ -252,7 +252,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
         idealClients: {
             title: 'Who Is This For?',
             subtitle:
-                'Forge is built for businesses that need a tailored system without a large upfront software cost.',
+                'Kubis Forge is built for businesses that need a tailored system without a large upfront software cost.',
             clients: [
                 'Businesses still relying on spreadsheets and manual processes',
                 'Businesses with stock, order, approval, or internal workflow issues',
@@ -289,7 +289,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 {
                     question: 'Who manages the server and technical setup?',
                     answer:
-                        'Forge manages hosting, infrastructure, deployment, maintenance, and monitoring.',
+                        'Kubis Forge manages hosting, infrastructure, deployment, maintenance, and monitoring.',
                 },
             ],
         },
@@ -364,7 +364,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 'Integrasi pihak ketiga',
                 'Modul baharu di luar skop dipersetujui',
                 'Automasi lanjutan',
-                'Laporan berat',
+                'Laporan kompleks',
             ],
         },
         pricing: {
@@ -449,7 +449,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 {
                     title: 'Risiko Permulaan Lebih Rendah',
                     description:
-                        'Klien tidak perlu membuat komitmen besar sebelum melihat sistem teras mula terbentuk.',
+                        'Syarikat tidak perlu membuat komitmen besar sebelum melihat sistem teras mula terbentuk.',
                 },
                 {
                     title: 'Pengesahan Lebih Cepat',
@@ -471,11 +471,11 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
         idealClients: {
             title: 'Sesuai Untuk Siapa?',
             subtitle:
-                'Forge dibina untuk perniagaan yang perlukan sistem tersuai tanpa kos perisian permulaan yang besar.',
+                'Kubis Forge dibina untuk perniagaan yang perlukan sistem tersuai tanpa kos perisian permulaan yang besar.',
             clients: [
                 'Perniagaan yang masih bergantung pada spreadsheet dan proses manual',
                 'Perniagaan yang ada isu stok, pesanan, kelulusan, atau aliran kerja dalaman',
-                'Pasukan yang perlukan sistem dalaman tersuai tetapi tidak mahu menggaji pembangun dalaman',
+                'Pasukan yang perlukan sistem dalaman tersuai tetapi tidak mahu mengambil pembangun dalaman',
                 'Pengasas yang mahu sistem berfungsi dahulu sebelum komitmen jangka panjang',
             ],
         },
@@ -508,7 +508,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 {
                     question: 'Siapa urus server dan tetapan teknikal?',
                     answer:
-                        'Forge mengurus hosting, infrastruktur, deployment, penyelenggaraan, dan pemantauan.',
+                        'Kubis Forge mengurus hosting, infrastruktur, deployment, penyelenggaraan, dan pemantauan.',
                 },
             ],
         },
