@@ -227,7 +227,7 @@ export function DataTable<TData>({
                 </Table>
             </div>
 
-            <div className="flex items-center justify-between px-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-4">
                 {/* Left: Showing count */}
                 <div className="text-muted-foreground text-sm">
                     Showing{' '}
@@ -273,7 +273,7 @@ export function DataTable<TData>({
 
                 {/* Right: Rows per page */}
                 <div className="flex items-center gap-2">
-                    <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                    <Label htmlFor="rows-per-page" className="hidden text-sm font-medium sm:inline">
                         Rows per page
                     </Label>
                     <Select
