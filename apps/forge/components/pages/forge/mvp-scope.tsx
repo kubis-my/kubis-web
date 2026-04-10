@@ -7,9 +7,9 @@ type MvpScopeProps = {
 
 export default function MvpScope({ content }: MvpScopeProps) {
     return (
-        <section className="bg-muted px-6 py-24">
+        <section className="bg-muted px-6 py-16 md:py-24">
             <div className="mx-auto max-w-5xl">
-                <h2 className="mb-4 text-center text-4xl font-bold text-foreground">{content.title}</h2>
+                <h2 className="mb-4 text-center text-3xl font-bold text-foreground md:text-4xl">{content.title}</h2>
                 <p className="mb-16 text-center text-muted-foreground">{content.subtitle}</p>
                 <div className="grid gap-8 md:grid-cols-2">
                     <div className="rounded-lg border border-border bg-card p-8">

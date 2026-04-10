@@ -6,9 +6,9 @@ type WhyItWorksProps = {
 
 export default function WhyItWorks({ content }: WhyItWorksProps) {
     return (
-        <section className="px-6 py-24">
+        <section className="px-6 py-16 md:py-24">
             <div className="mx-auto max-w-5xl">
-                <h2 className="mb-16 text-center text-4xl font-bold text-foreground">{content.title}</h2>
+                <h2 className="mb-12 text-center text-3xl font-bold text-foreground md:mb-16 md:text-4xl">{content.title}</h2>
                 <div className="grid gap-8 md:grid-cols-2">
                     {content.reasons.map((reason) => (
                         <div

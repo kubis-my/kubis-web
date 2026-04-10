@@ -6,9 +6,9 @@ type AddOnsProps = {
 
 export default function AddOns({ content }: AddOnsProps) {
     return (
-        <section className="bg-muted px-6 py-24">
+        <section className="bg-muted px-6 py-16 md:py-24">
             <div className="mx-auto max-w-5xl">
-                <h2 className="mb-4 text-center text-4xl font-bold text-foreground">{content.title}</h2>
+                <h2 className="mb-4 text-center text-3xl font-bold text-foreground md:text-4xl">{content.title}</h2>
                 <p className="mb-16 text-center text-muted-foreground">{content.subtitle}</p>
                 <div className="grid gap-6 md:grid-cols-3">
                     {content.items.map((item) => (

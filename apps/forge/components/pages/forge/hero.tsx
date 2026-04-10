@@ -14,8 +14,8 @@ export default function Hero({ content }: HeroProps) {
     return (
         <section className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 text-center">
             <div className="flex max-w-3xl flex-col items-center gap-6">
-                <KubisSvg className="h-32 w-32" />
-                <h1 className="text-5xl leading-tight font-bold text-foreground md:text-6xl">
+                <KubisSvg className="h-24 w-24 md:h-32 md:w-32" />
+                <h1 className="text-4xl leading-tight font-bold text-foreground md:text-5xl lg:text-6xl">
                     {content.title}
                 </h1>
                 <p className="text-xl text-muted-foreground">{content.description}</p>
