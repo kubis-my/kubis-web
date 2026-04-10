@@ -1,4 +1,5 @@
 import ExploreAppsClient from '@/component/pages/explore-apps/explore-apps-client';
+import Footer from '@/component/pages/landing-page/footer';
 import { env } from '@repo/commons/constant/env';
 
 export default function ExploreAppsPage() {
@@ -39,5 +40,10 @@ export default function ExploreAppsPage() {
         },
     ];
 
-    return <ExploreAppsClient apps={apps} />;
+    return (
+        <>
+            <ExploreAppsClient apps={apps} />
+            <Footer />
+        </>
+    );
 }

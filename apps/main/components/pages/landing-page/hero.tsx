@@ -3,9 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 import { Button } from '@repo/shadcn-ui/components/button';
-import { Zap, Lock, Palette } from 'lucide-react';
+import { IconTool, IconRoute, IconBuildingStore } from '@tabler/icons-react';
 import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
-import { Card, CardDescription, CardHeader, CardTitle } from '@repo/shadcn-ui/components/card';
+import { Card, CardDescription, CardTitle } from '@repo/shadcn-ui/components/card';
 import Link from 'next/link';
 import { useAuth } from '@repo/shadcn-ui/providers/auth-provider';
 
@@ -46,32 +46,40 @@ export default function Hero() {
             {/* Features Grid */}
             <div className="grid w-full max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
                 <Card>
-                    <CardHeader>
-                        <Zap className="mb-4 h-10 w-10 text-[#4CAF50]" />
-                        <CardTitle>Fast & Efficient</CardTitle>
+                    <div className="flex flex-col items-center px-6 text-center">
+                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950">
+                            <IconTool className="h-6 w-6 text-[#4CAF50]" />
+                        </div>
+                        <CardTitle className="mb-1.5">Tailored to Your Workflow</CardTitle>
                         <CardDescription>
-                            Built for speed and performance. Access all your tools instantly without
-                            any lag.
+                            Systems built around how your business actually operates. Not generic
+                            templates forced onto your process.
                         </CardDescription>
-                    </CardHeader>
+                    </div>
                 </Card>
                 <Card>
-                    <CardHeader>
-                        <Lock className="mb-4 h-10 w-10 text-[#4CAF50]" />
-                        <CardTitle>Secure & Private</CardTitle>
+                    <div className="flex flex-col items-center px-6 text-center">
+                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950">
+                            <IconRoute className="h-6 w-6 text-[#4CAF50]" />
+                        </div>
+                        <CardTitle className="mb-1.5">End-to-End Operations</CardTitle>
                         <CardDescription>
-                            Your data is protected with enterprise-grade security and encryption.
+                            From intake to fulfillment, manage your entire business process in one
+                            connected workspace.
                         </CardDescription>
-                    </CardHeader>
+                    </div>
                 </Card>
                 <Card>
-                    <CardHeader>
-                        <Palette className="mb-4 h-10 w-10 text-[#4CAF50]" />
-                        <CardTitle>Beautiful Design</CardTitle>
+                    <div className="flex flex-col items-center px-6 text-center">
+                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 dark:bg-green-950">
+                            <IconBuildingStore className="h-6 w-6 text-[#4CAF50]" />
+                        </div>
+                        <CardTitle className="mb-1.5">Built for Growing Businesses</CardTitle>
                         <CardDescription>
-                            Modern, clean interface that adapts to your preferences and workflow.
+                            Purpose built tools for growing businesses ready to move beyond
+                            spreadsheets and manual processes.
                         </CardDescription>
-                    </CardHeader>
+                    </div>
                 </Card>
             </div>
         </main>
