@@ -78,6 +78,14 @@ export type ForgeContent = {
         description: string;
         cta: string;
     };
+    footer: {
+        description: string;
+        nav: {
+            howItWorks: string;
+            pricing: string;
+            faq: string;
+        };
+    };
 };
 
 export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
@@ -157,15 +165,11 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                         'Bug fixes',
                         'Basic support',
                         '1 active feature request at a time',
+                        '48-72 hour response time',
                     ],
-                    excluded: [
-                        'Major workflow changes',
-                        'Third-party integrations',
-                        'New modules',
-                    ],
-                    support: '48-72 hour response time',
-                    featurePolicy:
-                        '1 request at a time, 2-week cooldown after completion, small scope only.',
+                    excluded: [],
+                    support: null,
+                    featurePolicy: null,
                 },
                 {
                     name: 'Growth',
@@ -177,9 +181,12 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                         'Continuous improvements',
                         '1-2 small feature requests per month',
                         'Priority support',
+                        'Managed DB and auto updates',
+                        'Performance server',
+                        '24-48 hour response time',
                     ],
                     excluded: [],
-                    support: '24-48 hour response time',
+                    support: null,
                     featurePolicy: null,
                 },
                 {
@@ -192,6 +199,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                         '3-5 feature requests per month',
                         'Faster turnaround time',
                         'Higher priority handling',
+                        'Under 24 hour response time',
                     ],
                     excluded: [],
                     support: null,
@@ -246,7 +254,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             subtitle:
                 'Forge is built for businesses that need a tailored system without a large upfront software cost.',
             clients: [
-                'SMEs still relying on spreadsheets and manual processes',
+                'Businesses still relying on spreadsheets and manual processes',
                 'Businesses with stock, order, approval, or internal workflow issues',
                 'Teams that need a custom internal system but do not want to hire in-house developers',
                 'Founders who want a working system first before committing long term',
@@ -290,6 +298,14 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             description:
                 'Start with an MVP, validate the workflow, then move into production with a plan that grows with your business.',
             cta: "Let's Discuss Your Workflow",
+        },
+        footer: {
+            description: 'Custom business systems built around your workflow. Build first, subscribe when ready.',
+            nav: {
+                howItWorks: 'How It Works',
+                pricing: 'Pricing',
+                faq: 'FAQ',
+            },
         },
     },
     ms: {
@@ -368,15 +384,11 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                         'Pembetulan pepijat',
                         'Sokongan asas',
                         '1 permintaan ciri aktif pada satu masa',
+                        'Masa respons 48-72 jam',
                     ],
-                    excluded: [
-                        'Perubahan aliran kerja besar',
-                        'Integrasi pihak ketiga',
-                        'Modul baharu',
-                    ],
-                    support: 'Masa respons 48-72 jam',
-                    featurePolicy:
-                        '1 permintaan pada satu masa, cooldown 2 minggu selepas siap, skop kecil sahaja.',
+                    excluded: [],
+                    support: null,
+                    featurePolicy: null,
                 },
                 {
                     name: 'Growth',
@@ -388,9 +400,12 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                         'Penambahbaikan berterusan',
                         '1-2 permintaan ciri kecil setiap bulan',
                         'Sokongan keutamaan',
+                        'DB terurus dan kemaskini automatik',
+                        'Pelayan berprestasi',
+                        'Masa respons 24-48 jam',
                     ],
                     excluded: [],
-                    support: 'Masa respons 24-48 jam',
+                    support: null,
                     featurePolicy: null,
                 },
                 {
@@ -403,6 +418,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                         '3-5 permintaan ciri setiap bulan',
                         'Masa siap lebih cepat',
                         'Keutamaan lebih tinggi',
+                        'Masa respons bawah 24 jam',
                     ],
                     excluded: [],
                     support: null,
@@ -457,7 +473,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             subtitle:
                 'Forge dibina untuk perniagaan yang perlukan sistem tersuai tanpa kos perisian permulaan yang besar.',
             clients: [
-                'PKS yang masih bergantung pada spreadsheet dan proses manual',
+                'Perniagaan yang masih bergantung pada spreadsheet dan proses manual',
                 'Perniagaan yang ada isu stok, pesanan, kelulusan, atau aliran kerja dalaman',
                 'Pasukan yang perlukan sistem dalaman tersuai tetapi tidak mahu menggaji pembangun dalaman',
                 'Pengasas yang mahu sistem berfungsi dahulu sebelum komitmen jangka panjang',
@@ -501,6 +517,14 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             description:
                 'Mulakan dengan MVP, sahkan aliran kerja, kemudian masuk ke produksi dengan pelan yang berkembang bersama perniagaan anda.',
             cta: 'Jom Bincang Aliran Kerja Anda',
+        },
+        footer: {
+            description: 'Sistem perniagaan khas dibina mengikut aliran kerja anda. Bina dahulu, langgan bila sedia.',
+            nav: {
+                howItWorks: 'Cara Ia Berfungsi',
+                pricing: 'Harga',
+                faq: 'Soalan Lazim',
+            },
         },
     },
 };

@@ -2,18 +2,14 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import type { ForgeLocale } from '@/root/libs/i18n/forge-content';
-
-const NAV_LABELS: Record<ForgeLocale, { howItWorks: string; pricing: string; faq: string }> = {
-    en: { howItWorks: 'How It Works', pricing: 'Pricing', faq: 'FAQ' },
-    ms: { howItWorks: 'Cara Ia Berfungsi', pricing: 'Harga', faq: 'Soalan Lazim' },
-};
+import { scrollToSection } from '@repo/commons/utils/dom';
+import { FORGE_CONTENT, type ForgeLocale } from '@/root/libs/i18n/forge-content';
 
 export default function Footer() {
     const searchParams = useSearchParams();
     const locale: ForgeLocale = searchParams.get('lang') === 'ms' ? 'ms' : 'en';
     const langParam = locale === 'ms' ? '?lang=ms' : '';
-    const nav = NAV_LABELS[locale];
+    const { footer } = FORGE_CONTENT[locale];
 
     return (
         <footer className="bg-gray-900 dark:bg-gray-950">
@@ -24,8 +20,7 @@ export default function Footer() {
                     <div className="flex flex-col gap-4">
                         <span className="text-lg font-semibold text-white">Kubis Forge</span>
                         <p className="max-w-xs text-sm leading-relaxed text-gray-400">
-                            Custom business systems built around your workflow. Build first, subscribe
-                            when ready.
+                            {footer.description}
                         </p>
 
                     </div>
@@ -36,13 +31,14 @@ export default function Footer() {
                         </span>
                         <nav className="flex flex-col gap-3">
                             {[
-                                { label: nav.howItWorks, href: `/${langParam}#how-it-works` },
-                                { label: nav.pricing, href: `/${langParam}#pricing` },
-                                { label: nav.faq, href: `/${langParam}#faq` },
-                            ].map(({ label, href }) => (
+                                { label: footer.nav.howItWorks, href: `/${langParam}#how-it-works`, id: 'how-it-works' },
+                                { label: footer.nav.pricing, href: `/${langParam}#pricing`, id: 'pricing' },
+                                { label: footer.nav.faq, href: `/${langParam}#faq`, id: 'faq' },
+                            ].map(({ label, href, id }) => (
                                 <Link
                                     key={href}
                                     href={href}
+                                    onClick={(e) => scrollToSection(e, id)}
                                     className="text-sm text-gray-400 transition-colors hover:text-white"
                                 >
                                     {label}

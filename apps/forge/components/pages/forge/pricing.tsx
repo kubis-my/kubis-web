@@ -1,7 +1,5 @@
 import { Badge } from '@repo/shadcn-ui/components/badge';
-import { Button } from '@repo/shadcn-ui/components/button';
-import { Check, X } from 'lucide-react';
-import Link from 'next/link';
+import { Check } from 'lucide-react';
 import type { ForgeContent } from '@/root/libs/i18n/forge-content';
 
 type PricingProps = {
@@ -42,20 +40,7 @@ export default function Pricing({ content }: PricingProps) {
                                         <span className="text-sm text-foreground/80">{item}</span>
                                     </li>
                                 ))}
-                                {plan.excluded.map((item) => (
-                                    <li key={item} className="flex items-start gap-3">
-                                        <X className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
-                                        <span className="text-sm text-muted-foreground">{item}</span>
-                                    </li>
-                                ))}
                             </ul>
-                            {plan.support && <p className="mb-4 text-sm text-muted-foreground">{plan.support}</p>}
-                            {plan.featurePolicy && (
-                                <p className="mb-6 text-xs text-muted-foreground">{plan.featurePolicy}</p>
-                            )}
-                            <Button className="mt-auto w-full bg-[#4CAF50] hover:bg-[#43A047]" asChild>
-                                <Link href="#">{content.cta}</Link>
-                            </Button>
                         </div>
                     ))}
                 </div>
