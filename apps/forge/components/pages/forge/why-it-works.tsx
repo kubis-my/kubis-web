@@ -25,19 +25,19 @@ export default function WhyItWorks() {
     return (
         <section className="px-6 py-24">
             <div className="mx-auto max-w-5xl">
-                <h2 className="mb-16 text-center text-4xl font-bold text-gray-900 dark:text-white">
+                <h2 className="mb-16 text-center text-4xl font-bold text-foreground">
                     Why This Model Works
                 </h2>
                 <div className="grid gap-8 md:grid-cols-2">
                     {reasons.map((reason) => (
                         <div
                             key={reason.title}
-                            className="rounded-lg border border-gray-200 bg-white p-8 dark:border-gray-700 dark:bg-gray-800"
+                            className="rounded-lg border border-border bg-card p-8"
                         >
-                            <h3 className="mb-3 text-xl font-semibold text-gray-900 dark:text-white">
+                            <h3 className="mb-3 text-xl font-semibold text-foreground">
                                 {reason.title}
                             </h3>
-                            <p className="text-gray-600 dark:text-gray-400">{reason.description}</p>
+                            <p className="text-muted-foreground">{reason.description}</p>
                         </div>
                     ))}
                 </div>

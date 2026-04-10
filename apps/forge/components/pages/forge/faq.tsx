@@ -29,16 +29,16 @@ export default function Faq() {
     return (
         <section className="px-6 py-24">
             <div className="mx-auto max-w-3xl">
-                <h2 className="mb-16 text-center text-4xl font-bold text-gray-900 dark:text-white">
+                <h2 className="mb-16 text-center text-4xl font-bold text-foreground">
                     Frequently Asked Questions
                 </h2>
                 <div className="flex flex-col gap-8">
                     {faqs.map((faq) => (
                         <div key={faq.question}>
-                            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                            <h3 className="mb-2 text-lg font-semibold text-foreground">
                                 {faq.question}
                             </h3>
-                            <p className="text-gray-600 dark:text-gray-400">{faq.answer}</p>
+                            <p className="text-muted-foreground">{faq.answer}</p>
                         </div>
                     ))}
                 </div>

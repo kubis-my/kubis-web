@@ -57,42 +57,42 @@ export default function Pricing() {
     return (
         <section className="px-6 py-24">
             <div className="mx-auto max-w-5xl">
-                <h2 className="mb-4 text-center text-4xl font-bold text-gray-900 dark:text-white">
+                <h2 className="mb-4 text-center text-4xl font-bold text-foreground">
                     Subscription Plans
                 </h2>
-                <p className="mb-16 text-center text-gray-600 dark:text-gray-400">
+                <p className="mb-16 text-center text-muted-foreground">
                     Move into production with a plan that grows with your business.
                 </p>
                 <div className="grid gap-8 md:grid-cols-3">
                     {plans.map((plan) => (
                         <div
                             key={plan.name}
-                            className="relative flex flex-col rounded-lg border border-gray-200 bg-white p-8 dark:border-gray-700 dark:bg-gray-800"
+                            className="relative flex flex-col rounded-lg border border-border bg-card p-8"
                         >
                             {plan.badge && (
-                                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#4CAF50] hover:bg-[#43A047]">
                                     {plan.badge}
                                 </Badge>
                             )}
                             <div className="mb-6">
-                                <h3 className="mb-1 text-xl font-semibold text-gray-900 dark:text-white">
+                                <h3 className="mb-1 text-xl font-semibold text-foreground">
                                     {plan.name}
                                 </h3>
-                                <p className="mb-3 text-3xl font-bold text-gray-900 dark:text-white">
+                                <p className="mb-3 text-3xl font-bold text-foreground">
                                     {plan.price}
-                                    <span className="text-base font-normal text-gray-500">
+                                    <span className="text-base font-normal text-muted-foreground">
                                         /month
                                     </span>
                                 </p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                <p className="text-sm text-muted-foreground">
                                     {plan.description}
                                 </p>
                             </div>
                             <ul className="mb-6 flex flex-col gap-3">
                                 {plan.included.map((item) => (
                                     <li key={item} className="flex items-start gap-3">
-                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#4CAF50]" />
+                                        <span className="text-sm text-foreground/80">
                                             {item}
                                         </span>
                                     </li>
@@ -100,23 +100,23 @@ export default function Pricing() {
                                 {plan.excluded.map((item) => (
                                     <li key={item} className="flex items-start gap-3">
                                         <X className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
-                                        <span className="text-sm text-gray-500 dark:text-gray-500">
+                                        <span className="text-sm text-muted-foreground">
                                             {item}
                                         </span>
                                     </li>
                                 ))}
                             </ul>
                             {plan.support && (
-                                <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                                <p className="mb-4 text-sm text-muted-foreground">
                                     {plan.support}
                                 </p>
                             )}
                             {plan.featurePolicy && (
-                                <p className="mb-6 text-xs text-gray-400 dark:text-gray-500">
+                                <p className="mb-6 text-xs text-muted-foreground">
                                     {plan.featurePolicy}
                                 </p>
                             )}
-                            <Button className="mt-auto w-full" asChild>
+                            <Button className="mt-auto w-full bg-[#4CAF50] hover:bg-[#43A047]" asChild>
                                 <Link href="#">Get Started</Link>
                             </Button>
                         </div>

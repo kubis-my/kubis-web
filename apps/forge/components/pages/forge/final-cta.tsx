@@ -14,7 +14,7 @@ export default function FinalCta() {
                     Start with an MVP, validate the workflow, then move into production with a plan
                     that grows with your business.
                 </p>
-                <Button size="lg" asChild>
+                <Button size="lg" asChild className="bg-[#4CAF50] hover:bg-[#43A047]">
                     <Link href="#">Let&apos;s Discuss Your Workflow</Link>
                 </Button>
             </div>

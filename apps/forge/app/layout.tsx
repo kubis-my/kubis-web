@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'Forge — Build First, Subscribe When Ready',
+    title: 'Kubis Forge',
     description:
-        'Custom business systems built around your workflow. We build your core MVP first, then you move into a monthly subscription for hosting, maintenance, and continuous improvements.',
+        'Build First, Subscribe When Ready. Custom business systems built around your workflow. We build your core MVP first, then you move into a monthly subscription for hosting, maintenance, and continuous improvements.',
 };
 
 export default function RootLayout({
