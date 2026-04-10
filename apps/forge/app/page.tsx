@@ -7,19 +7,26 @@ import WhyItWorks from '@/component/pages/forge/why-it-works';
 import IdealClients from '@/component/pages/forge/ideal-clients';
 import Faq from '@/component/pages/forge/faq';
 import FinalCta from '@/component/pages/forge/final-cta';
+import { FORGE_CONTENT, resolveForgeLocale } from '@/root/libs/i18n/forge-content';
 
-export default function ForgePage() {
+export default async function ForgePage(props: {
+    searchParams: Promise<{ lang?: string }>;
+}) {
+    const searchParams = await props.searchParams;
+    const locale = resolveForgeLocale(searchParams.lang);
+    const content = FORGE_CONTENT[locale];
+
     return (
         <main className="flex flex-col">
-            <Hero />
-            <HowItWorks />
-            <MvpScope />
-            <Pricing />
-            <AddOns />
-            <WhyItWorks />
-            <IdealClients />
-            <Faq />
-            <FinalCta />
+            <Hero content={content.hero} locale={locale} />
+            <HowItWorks content={content.howItWorks} />
+            <MvpScope content={content.mvpScope} />
+            <Pricing content={content.pricing} />
+            <AddOns content={content.addOns} />
+            <WhyItWorks content={content.whyItWorks} />
+            <IdealClients content={content.idealClients} />
+            <Faq content={content.faq} />
+            <FinalCta content={content.finalCta} />
         </main>
     );
 }
