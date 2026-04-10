@@ -21,7 +21,7 @@ export default function Hero({ content }: HeroProps) {
                 <p className="text-xl text-muted-foreground">{content.description}</p>
                 <div className="flex flex-wrap justify-center gap-4">
                     <Button size="lg" asChild className="bg-[#4CAF50] hover:bg-[#43A047]">
-                        <Link href="#">{content.primaryCta}</Link>
+                        <Link href="mailto:zarkashi93@yahoo.com">{content.primaryCta}</Link>
                     </Button>
                     <Button size="lg" variant="outline" asChild>
                         <Link href="#how-it-works" onClick={(e) => scrollToSection(e, 'how-it-works')}>
