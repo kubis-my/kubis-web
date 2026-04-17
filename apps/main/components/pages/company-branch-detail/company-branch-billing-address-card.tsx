@@ -27,13 +27,6 @@ import { Label } from '@/shadcn/components/label';
 import { Input } from '@/shadcn/components/input';
 import { Separator } from '@/shadcn/components/separator';
 import { Button } from '@/shadcn/components/button';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/shadcn/components/select';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import {
     Branch,
@@ -44,7 +37,7 @@ import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
 import ShowErrorText from '@/shadcn/custom-components/show-error-text';
 import { toast } from 'sonner';
-import { PHONE_CODES } from '@/root/libs/constants';
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/shadcn/components/input-group';
 
 const UPSERT_BRANCH_BILLING_ADDRESS: TypedDocumentNode<
     { upsertBranchBillingAddress: Branch },
@@ -75,7 +68,7 @@ const initialFormData: UpsertBranchBillingAddressInput = {
     state: '',
     postalCode: '',
     country: '',
-    phoneCode: '',
+    phoneCode: '+60',
     phoneNumber: '',
 };
 
@@ -139,7 +132,7 @@ export default function CompanyBranchBillingAddressCard() {
             state: ctx.branch?.branchBillingAddress?.state || '',
             postalCode: ctx.branch?.branchBillingAddress?.postalCode || '',
             country: ctx.branch?.branchBillingAddress?.country || '',
-            phoneCode: ctx.branch?.branchBillingAddress?.phoneCode || '',
+            phoneCode: ctx.branch?.branchBillingAddress?.phoneCode || '+60',
             phoneNumber: ctx.branch?.branchBillingAddress?.phoneNumber || '',
         };
         setFormData(data);
@@ -211,7 +204,7 @@ export default function CompanyBranchBillingAddressCard() {
                             </div>
                             <div className="text-muted-foreground text-xs">
                                 {ctx.branch?.branchBillingAddress?.phoneCode &&
-                                ctx.branch?.branchBillingAddress?.phoneNumber
+                                    ctx.branch?.branchBillingAddress?.phoneNumber
                                     ? `${ctx.branch?.branchBillingAddress?.phoneCode}${ctx.branch?.branchBillingAddress?.phoneNumber}`
                                     : '-'}
                             </div>
@@ -306,41 +299,24 @@ export default function CompanyBranchBillingAddressCard() {
                             <Separator />
 
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="phoneCode">Phone Code</Label>
-                                <Select
-                                    value={formData.phoneCode}
-                                    onValueChange={(value) =>
-                                        setFormData((prev) => ({ ...prev, phoneCode: value }))
-                                    }
-                                >
-                                    <SelectTrigger id="phoneCode" className="w-full">
-                                        <SelectValue placeholder="Select phone code" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {PHONE_CODES.map((code) => (
-                                            <SelectItem key={code.value} value={code.value}>
-                                                {code.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <ShowErrorText error={formValidation} field="phoneCode" />
-                            </div>
-
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor="phoneNumber">Phone Number</Label>
-                                <Input
-                                    id="phoneNumber"
-                                    type="tel"
-                                    value={formData.phoneNumber}
-                                    onChange={(e) =>
-                                        setFormData((prev) => ({
-                                            ...prev,
-                                            phoneNumber: e.target.value,
-                                        }))
-                                    }
-                                    placeholder="Enter phone number"
-                                />
+                                <Label htmlFor="phoneNumber">Phone Number 1</Label>
+                                <InputGroup>
+                                    <InputGroupAddon>
+                                        <InputGroupText>+60</InputGroupText>
+                                    </InputGroupAddon>
+                                    <InputGroupInput
+                                        id="phoneNumber"
+                                        type="tel"
+                                        value={formData.phoneNumber}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                phoneNumber: e.target.value,
+                                            }))
+                                        }
+                                        placeholder="Enter phone number"
+                                    />
+                                </InputGroup>
                                 <ShowErrorText error={formValidation} field="phoneNumber" />
                             </div>
                         </div>
