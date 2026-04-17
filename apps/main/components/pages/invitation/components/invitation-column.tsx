@@ -23,7 +23,7 @@ import { formatDateTime } from '@repo/commons/utils/date';
 import { ColumnDef } from '@tanstack/react-table';
 import { useState } from 'react';
 import { UserAccount, UserAccountStatus } from '@repo/commons/types/account-service-schema.type';
-import { Credential } from '@repo/commons/types/auth-service-schema.type';
+import { Credential } from '@repo/commons/types/account-service-schema.type';
 
 const statusConfig: Record<UserAccountStatus, { label: string; className: string }> = {
     [UserAccountStatus.PENDING_INVITATION]: {

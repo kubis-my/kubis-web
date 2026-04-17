@@ -2,7 +2,7 @@
 
 import { AUDIT_LOG_PAGINATION_SIZE } from '@/root/libs/constants';
 import { useLazyQuery } from '@apollo/client/react';
-import { PaginatedAuditLog } from '@repo/commons/types/audit-service-schema.type';
+import { PaginatedAuditLog } from '@repo/commons/types/account-service-schema.type';
 import { useCallback, useEffect, useState } from 'react';
 import { GET_AUDIT_LOGS, useMyAccount } from './my-account-container';
 import { ActivityColumn } from './components/activity-column';

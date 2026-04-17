@@ -6,7 +6,7 @@ import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-import { Credential } from '@repo/commons/types/auth-service-schema.type';
+import { Credential } from '@repo/commons/types/account-service-schema.type';
 
 export default function DashboardContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const currentPathname = usePathname();

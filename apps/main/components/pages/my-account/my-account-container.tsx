@@ -17,12 +17,12 @@ import {
 import {
     AuditLogPaginationInput,
     PaginatedAuditLog,
-} from '@repo/commons/types/audit-service-schema.type';
+} from '@repo/commons/types/account-service-schema.type';
 import {
     CredentialDeviceOverview,
     CredentialDevicePaginationInput,
     PaginatedCredentialDevice,
-} from '@repo/commons/types/auth-service-schema.type';
+} from '@repo/commons/types/account-service-schema.type';
 import { createContext, useContext, useEffect, useMemo } from 'react';
 
 interface GetAuditLogsResponse {
@@ -179,6 +179,7 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
                 take: COMPANY_PAGINATION_SIZE,
             },
         },
+        fetchPolicy: 'no-cache',
     });
 
     const credentialDeviceOverview = useQuery(GET_CREDENTIAL_DEVICE_OVERVIEW, {
@@ -187,6 +188,7 @@ export default function MyAccountContainer({ children }: Readonly<{ children: Re
                 take: CREDENTIAL_DEVICE_PAGINATION_SIZE,
             },
         },
+        fetchPolicy: 'no-cache',
     });
 
     useEffect(() => {

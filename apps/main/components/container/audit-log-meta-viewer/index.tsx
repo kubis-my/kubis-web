@@ -12,7 +12,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/shadcn/components/sheet';
-import { AuditLog } from '@repo/commons/types/audit-service-schema.type';
+import { AuditLog } from '@repo/commons/types/account-service-schema.type';
 import { Branch, Company } from '@repo/commons/types/account-service-schema.type';
 import { formatDateTime } from '@repo/commons/utils/date';
 import { Building2, Calendar, Eye, GitBranch, Info, Server } from 'lucide-react';

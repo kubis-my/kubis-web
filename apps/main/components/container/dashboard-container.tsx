@@ -7,7 +7,7 @@ import { useSocket } from '@/shadcn/providers/socket-provider';
 import { NotificationEvent } from '@repo/commons/constant/web-socket';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
-import { Credential } from '@repo/commons/types/auth-service-schema.type';
+import { Credential } from '@repo/commons/types/account-service-schema.type';
 
 export default function DashboardContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const currentPathname = usePathname();

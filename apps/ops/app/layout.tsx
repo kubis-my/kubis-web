@@ -9,7 +9,7 @@ import { Suspense } from 'react';
 import { Toaster } from '@repo/shadcn-ui/components/sonner';
 import { env } from '@repo/commons/constant/env';
 
-const SOCKET_URL = env.NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL.replace(/\/graphql\/?$/, '');
+const SOCKET_URL = env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL.replace(/\/graphql\/?$/, '');
 
 const geistSans = Geist({
     variable: '--font-geist-sans',

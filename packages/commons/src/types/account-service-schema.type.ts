@@ -25,6 +25,12 @@ export enum UserAccountStatus {
     EXPIRED_INVITATION = 'EXPIRED_INVITATION',
 }
 
+export enum CredentialDeviceStatus {
+    CURRENT = 'CURRENT',
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+}
+
 export interface UserAccountPaginationInput {
     cursor?: Nullable<number>;
     take: number;
@@ -39,6 +45,15 @@ export interface CompanyEmployeePaginationInput {
 export interface BranchPaginationInput {
     cursor?: Nullable<number>;
     take: number;
+}
+
+export interface AuditLogPaginationInput {
+    cursor?: Nullable<number>;
+    take: number;
+    credentialId?: Nullable<string>;
+    userId?: Nullable<string>;
+    companyId?: Nullable<string>;
+    branchId?: Nullable<string>;
 }
 
 export interface BranchEventPaginationInput {
@@ -61,6 +76,11 @@ export interface CredentialInvitationPaginationInput {
     cursor?: Nullable<number>;
     take: number;
     status?: Nullable<UserAccountStatus>;
+}
+
+export interface CredentialDevicePaginationInput {
+    cursor?: Nullable<number>;
+    take: number;
 }
 
 export interface CompleteProfileInput {
@@ -146,6 +166,10 @@ export interface FactoryCreateUserAccountInput {
     position: string;
 }
 
+export interface RevokeAccessInput {
+    accessTokenPublicId: string;
+}
+
 export interface PageInfo {
     endCursor?: Nullable<number>;
     hasNextPage: boolean;
@@ -198,6 +222,7 @@ export interface Company {
     companyPhysicalAddresses?: Nullable<CompanyPhysicalAddress>;
     companyBillingAddress?: Nullable<CompanyBillingAddress>;
     branches?: PaginatedBranch;
+    auditLogs?: PaginatedAuditLog;
 }
 
 export interface CompanyEmployee {
@@ -247,6 +272,60 @@ export interface BranchOperationHours {
     branch: Branch;
 }
 
+export interface AuditLogAuthor {
+    publicId: string;
+    credentialId: string;
+    userId?: Nullable<string>;
+    companyId?: Nullable<string>;
+    branchId?: Nullable<string>;
+    user?: Nullable<User>;
+    company?: Nullable<Company>;
+    branch?: Nullable<Branch>;
+}
+
+export interface AuditLogResource {
+    publicId: string;
+    type: string;
+    svc: string;
+    parentId?: Nullable<string>;
+}
+
+export interface AuditLogMetaDataEntry {
+    key: string;
+    type: string;
+    value: string;
+}
+
+export interface AuditLogMetaData {
+    publicId: string;
+    before?: Nullable<AuditLogMetaDataEntry[]>;
+    after?: Nullable<AuditLogMetaDataEntry[]>;
+    additional?: Nullable<JSON>;
+}
+
+export interface AuditLog {
+    publicId: string;
+    emittedAt: DateTime;
+    type: string;
+    description: string;
+    createdAt: DateTime;
+    auditLogAuthor?: Nullable<AuditLogAuthor>;
+    auditLogResource?: Nullable<AuditLogResource>;
+    auditLogMetaData?: Nullable<AuditLogMetaData>;
+}
+
+export interface AuditLogOverview {
+    totalAction: number;
+    totalWeekAction: number;
+    lastActivity?: Nullable<string>;
+}
+
+export interface PaginatedAuditLog {
+    data: AuditLog[];
+    pageInfo: PageInfo;
+    overview: AuditLogOverview;
+}
+
 export interface PaginatedBranchEvent {
     data: BranchEvent[];
     pageInfo: PageInfo;
@@ -272,6 +351,7 @@ export interface Branch {
     branchOperationHours: BranchOperationHours[];
     branchEvents?: PaginatedBranchEvent;
     userAccounts?: PaginatedUserAccount;
+    auditLogs?: PaginatedAuditLog;
 }
 
 export interface UserAccount {
@@ -290,6 +370,11 @@ export interface UserAccount {
 
 export interface Credential {
     publicId: string;
+    email: string;
+    username?: Nullable<string>;
+    isEnable2FA: boolean;
+    createdAt: DateTime;
+    updatedAt: DateTime;
 }
 
 export interface User {
@@ -367,6 +452,34 @@ export interface PaginatedCredentialInvitation {
     overview: CredentialInvitationOverview;
 }
 
+export interface CredentialDevice {
+    publicId: string;
+    os: string;
+    browser: string;
+    deviceType: string;
+    deviceLabel: string;
+    ipAddress: string;
+    city?: Nullable<string>;
+    country?: Nullable<string>;
+    lastSeenAt: DateTime;
+    status: CredentialDeviceStatus;
+    createdAt: DateTime;
+}
+
+export interface CredentialDeviceOverview {
+    currentDevice?: Nullable<CredentialDevice>;
+    totalDevices: number;
+    activeInLast24h: number;
+    deviceTypeCount: number;
+    isEnable2FA: boolean;
+}
+
+export interface PaginatedCredentialDevice {
+    data: CredentialDevice[];
+    pageInfo: PageInfo;
+    overview: CredentialDeviceOverview;
+}
+
 export interface IQuery {
     getAuthUser(): User | Promise<User>;
     searchCredentialsForBranch(input: SearchCredentialsForBranchInput): User[] | Promise<User[]>;
@@ -381,6 +494,10 @@ export interface IQuery {
     getCredentialInvitations(
         pagination: CredentialInvitationPaginationInput,
     ): PaginatedCredentialInvitation | Promise<PaginatedCredentialInvitation>;
+    getCredential(publicId: string): Nullable<Credential> | Promise<Nullable<Credential>>;
+    getCredentialDevices(
+        pagination: CredentialDevicePaginationInput,
+    ): PaginatedCredentialDevice | Promise<PaginatedCredentialDevice>;
     getCompanyEmployees(
         companyPublicId: string,
         pagination: CompanyEmployeePaginationInput,
@@ -394,6 +511,9 @@ export interface IQuery {
         companyPublicId: string,
         pagination: BranchEventPaginationInput,
     ): PaginatedBranchEvent | Promise<PaginatedBranchEvent>;
+    getAuditLogs(
+        pagination: AuditLogPaginationInput,
+    ): PaginatedAuditLog | Promise<PaginatedAuditLog>;
 }
 
 export interface IMutation {
@@ -420,7 +540,10 @@ export interface IMutation {
         branchPublicId: string,
         input: UpsertBranchBillingAddressInput,
     ): Branch | Promise<Branch>;
+    signOutAllOtherDevices(): CredentialDevice[] | Promise<CredentialDevice[]>;
+    revokeAccess(input: RevokeAccessInput): CredentialDevice | Promise<CredentialDevice>;
 }
 
 export type DateTime = any;
+export type JSON = any;
 type Nullable<T> = T | null;

@@ -5,7 +5,7 @@ import { TabsContent } from '@/shadcn/components/tabs';
 import {
     AuditLogPaginationInput,
     PaginatedAuditLog,
-} from '@repo/commons/types/audit-service-schema.type';
+} from '@repo/commons/types/account-service-schema.type';
 import { AUDIT_LOG_PAGINATION_SIZE } from '@/root/libs/constants';
 import { createInitialPaginatedData } from '@repo/commons/utils/pagination-helpers';
 import { gql, TypedDocumentNode } from '@apollo/client';

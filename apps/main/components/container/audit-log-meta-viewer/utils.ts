@@ -1,4 +1,4 @@
-import { AuditLogMetaDataEntry } from '@repo/commons/types/audit-service-schema.type';
+import { AuditLogMetaDataEntry } from '@repo/commons/types/account-service-schema.type';
 
 export interface DiffEntryData {
     key: string;

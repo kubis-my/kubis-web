@@ -3,7 +3,7 @@
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
-import { Credential } from '@repo/commons/types/auth-service-schema.type';
+import { Credential } from '@repo/commons/types/account-service-schema.type';
 import { createContext, useContext, useMemo } from 'react';
 
 interface GetCredentialResponse {

@@ -8,7 +8,7 @@ import { DeviceSkeletonRow } from './components/device-skeleton-row';
 import {
     CredentialDevicePaginationInput,
     PaginatedCredentialDevice,
-} from '@repo/commons/types/auth-service-schema.type';
+} from '@repo/commons/types/account-service-schema.type';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useLazyQuery } from '@apollo/client/react';
 import { createInitialPaginatedData } from '@repo/commons/utils/pagination-helpers';

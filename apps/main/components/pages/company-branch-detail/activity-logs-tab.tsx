@@ -6,7 +6,7 @@ import { useCompanyBranchDetail } from './company-branch-detail-container';
 import {
     AuditLogPaginationInput,
     PaginatedAuditLog,
-} from '@repo/commons/types/audit-service-schema.type';
+} from '@repo/commons/types/account-service-schema.type';
 import { AUDIT_LOG_PAGINATION_SIZE } from '@/root/libs/constants';
 import { createInitialPaginatedData } from '@repo/commons/utils/pagination-helpers';
 import { gql, TypedDocumentNode } from '@apollo/client';

@@ -1,7 +1,7 @@
 'use client';
 
 import { CompanyEmployee } from '@repo/commons/types/account-service-schema.type';
-import { Credential } from '@repo/commons/types/auth-service-schema.type';
+import { Credential } from '@repo/commons/types/account-service-schema.type';
 import { ColumnDef } from '@tanstack/react-table';
 
 export const UserColumn: ColumnDef<CompanyEmployee>[] = [

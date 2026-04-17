@@ -2,7 +2,7 @@ import AuditLogMetaViewer from '@/root/components/container/audit-log-meta-viewe
 import { activityTypeConfig } from '@/root/libs/constants';
 import { Badge } from '@/shadcn/components/badge';
 import { Branch, Company } from '@repo/commons/types/account-service-schema.type';
-import { AuditLog, AuditLogAuthor } from '@repo/commons/types/audit-service-schema.type';
+import { AuditLog, AuditLogAuthor } from '@repo/commons/types/account-service-schema.type';
 import { formatDateTime } from '@repo/commons/utils/date';
 import { ColumnDef } from '@tanstack/react-table';
 

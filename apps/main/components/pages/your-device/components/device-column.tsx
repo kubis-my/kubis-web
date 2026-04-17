@@ -25,7 +25,7 @@ import { useState } from 'react';
 import {
     CredentialDevice,
     CredentialDeviceStatus,
-} from '@repo/commons/types/auth-service-schema.type';
+} from '@repo/commons/types/account-service-schema.type';
 
 const DeviceIcon = ({ type }: { type: string }) => {
     if (type === 'Mobile Device') {

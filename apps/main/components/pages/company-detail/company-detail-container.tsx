@@ -17,7 +17,7 @@ import {
 import {
     AuditLogPaginationInput,
     PaginatedAuditLog,
-} from '@repo/commons/types/audit-service-schema.type';
+} from '@repo/commons/types/account-service-schema.type';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';

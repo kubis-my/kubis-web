@@ -90,7 +90,7 @@ NEXT_PUBLIC_AUTH_URL=http://localhost:3000/api/auth
 NEXT_PUBLIC_MAIN_APP_BASE_URL=http://localhost:3001
 NEXT_PUBLIC_SSO_APP_BASE_URL=http://localhost:3000
 NEXT_PUBLIC_MAIN_CLIENT_ID=main-web
-NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL=http://localhost:4000/graphql
+NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL=http://localhost:4000/graphql
 ```
 
 ## Deployment

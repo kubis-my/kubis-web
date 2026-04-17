@@ -10,7 +10,7 @@ import {
     CredentialDeviceStatus,
     PaginatedCredentialDevice,
     RevokeAccessInput,
-} from '@repo/commons/types/auth-service-schema.type';
+} from '@repo/commons/types/account-service-schema.type';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
