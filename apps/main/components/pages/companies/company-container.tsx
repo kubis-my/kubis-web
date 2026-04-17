@@ -5,11 +5,11 @@ import {
     CompanyPaginationInput,
     PaginatedCompany,
 } from '@repo/commons/types/account-service-schema.type';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { COMPANY_PAGINATION_SIZE } from '@/root/libs/constants';
-import CompanyHeaderAction from './company-header-action';
+import { CreateCompanyFormDialog } from './create-company-dialog';
 
 interface GetUserCompaniesResponse {
     getUserCompanies: PaginatedCompany;
@@ -64,6 +64,7 @@ const GET_USER_COMPANIES: TypedDocumentNode<GetUserCompaniesResponse, GetUserCom
 export type CompanyContext = {
     paginatedCompany?: PaginatedCompany;
     isFetchingCompany: boolean;
+    registerRefreshCurrentPage: (fn: () => void) => void;
 };
 
 const CompanyContext = createContext<CompanyContext | undefined>(undefined);
@@ -74,6 +75,11 @@ export default function CompanyContainer({ children }: Readonly<{ children: Reac
     const [paginatedCompany, setPaginatedCompany] = useState<PaginatedCompany | undefined>(
         undefined,
     );
+
+    const refreshCurrentPageRef = useRef<(() => void) | undefined>(undefined);
+    const registerRefreshCurrentPage = useCallback((fn: () => void) => {
+        refreshCurrentPageRef.current = fn;
+    }, []);
 
     const { data, loading: isFetchingCompany } = useQuery(GET_USER_COMPANIES, {
         variables: {
@@ -93,7 +99,13 @@ export default function CompanyContainer({ children }: Readonly<{ children: Reac
                 name: 'List of Companies',
             },
         ]);
-        updateHeaderAction(CompanyHeaderAction);
+        updateHeaderAction(
+            <div className="flex items-center gap-2">
+                <CreateCompanyFormDialog onCompleted={async () => {
+                    refreshCurrentPageRef.current?.();
+                }} />
+            </div>
+        );
 
         return () => {
             updateBreadcrumbList([]);
@@ -105,8 +117,9 @@ export default function CompanyContainer({ children }: Readonly<{ children: Reac
         () => ({
             paginatedCompany,
             isFetchingCompany,
+            registerRefreshCurrentPage,
         }),
-        [paginatedCompany, isFetchingCompany],
+        [paginatedCompany, isFetchingCompany, registerRefreshCurrentPage],
     );
 
     return <CompanyContext.Provider value={contextValue}>{children}</CompanyContext.Provider>;

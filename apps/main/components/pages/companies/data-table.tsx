@@ -76,6 +76,22 @@ export function CompanyDataTable() {
         }
     }, [paginatedCompany, pageSize, getUserCompanies]);
 
+    const refreshCurrentPage = useCallback(() => {
+        const currentCursor = cursorHistory[cursorHistory.length - 1];
+        getUserCompanies({
+            variables: {
+                pagination: {
+                    cursor: currentCursor,
+                    take: pageSize,
+                },
+            },
+        });
+    }, [cursorHistory, pageSize, getUserCompanies]);
+
+    useEffect(() => {
+        ctx.registerRefreshCurrentPage(refreshCurrentPage);
+    }, [refreshCurrentPage, ctx.registerRefreshCurrentPage]);
+
     const goToPreviousPage = useCallback(() => {
         if (cursorHistory.length > 1) {
             const newHistory = [...cursorHistory];

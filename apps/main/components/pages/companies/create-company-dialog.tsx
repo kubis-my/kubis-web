@@ -19,7 +19,7 @@ import { Loader2Icon } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { gql, TypedDocumentNode } from '@apollo/client';
-import { useApolloClient, useMutation } from '@apollo/client/react';
+import { useMutation } from '@apollo/client/react';
 import { Company, UpsertCompanyInput } from '@repo/commons/types/account-service-schema.type';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
@@ -38,13 +38,12 @@ const UPSERT_COMPANY: TypedDocumentNode<{ upsertCompany: Company }, { input: Ups
         }
     `;
 
-export function CreateCompanyFormDialog() {
+export function CreateCompanyFormDialog({ onCompleted }: { onCompleted: () => Promise<void> }) {
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [registrationNo, setRegistrationNo] = useState('');
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
 
-    const client = useApolloClient();
     const [upsertCompany, { loading }] = useMutation(UPSERT_COMPANY);
 
     const resetForm = useCallback(() => {
@@ -102,7 +101,7 @@ export function CreateCompanyFormDialog() {
                 }
 
                 if (data) {
-                    client.refetchQueries({ include: ['GetUserCompanies'] });
+                    await onCompleted();
                     toast.success('Company created successfully!', {
                         position: 'top-center',
                     });
@@ -120,7 +119,7 @@ export function CreateCompanyFormDialog() {
                 });
             }
         },
-        [name, registrationNo, upsertCompany, resetForm, client],
+        [name, registrationNo, upsertCompany, resetForm, onCompleted],
     );
 
     return (
