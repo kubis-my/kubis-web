@@ -476,10 +476,12 @@ export default function CredentialInformationSection() {
                                 <Input
                                     id="otpCode"
                                     value={otpCode}
+                                    maxLength={6}
                                     onChange={(e) => setOtpCode(e.target.value)}
                                     placeholder="Enter OTP code"
-                                    autoComplete="one-time-code"
                                     disabled={isOtpExpired}
+                                    autoComplete="off"
+                                    type="password"
                                 />
                                 <ShowErrorText error={otpValidation} field="otpCode" />
                             </div>
