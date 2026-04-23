@@ -7,6 +7,7 @@ import { cn } from '@repo/shadcn-ui/lib/utils';
 const NAV_LINKS = [
     { label: 'Home', href: '/' },
     { label: 'Explore Apps', href: '/explore-apps' },
+    { label: 'Author', href: '/author' },
     { label: 'My Account', href: '/my-account' },
 ];
 
