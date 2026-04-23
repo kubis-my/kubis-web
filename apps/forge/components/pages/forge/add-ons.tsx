@@ -10,11 +10,10 @@ export default function AddOns({ content }: AddOnsProps) {
             <div className="mx-auto max-w-5xl">
                 <h2 className="mb-4 text-center text-3xl font-bold text-foreground md:text-4xl">{content.title}</h2>
                 <p className="mb-16 text-center text-muted-foreground">{content.subtitle}</p>
-                <div className="grid gap-6 md:grid-cols-3">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {content.items.map((item) => (
-                        <div key={item.name} className="rounded-lg border border-border bg-card p-6">
-                            <h3 className="mb-2 font-semibold text-foreground">{item.name}</h3>
-                            <p className="text-muted-foreground">{item.price}</p>
+                        <div key={item.name} className="rounded-lg border border-border bg-card p-6 text-center">
+                            <h3 className="font-semibold text-foreground">{item.name}</h3>
                         </div>
                     ))}
                 </div>

@@ -44,6 +44,14 @@ export default function Footer() {
                                     {label}
                                 </Link>
                             ))}
+                            <Link
+                                href={`${process.env.NEXT_PUBLIC_MAIN_APP_BASE_URL ?? 'https://kubis.my'}/author`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-gray-400 transition-colors hover:text-white"
+                            >
+                                {footer.nav.kubisApp} ↗
+                            </Link>
                         </nav>
                     </div>
 

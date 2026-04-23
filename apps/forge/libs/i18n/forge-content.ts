@@ -50,7 +50,6 @@ export type ForgeContent = {
         optionalTitle: string;
         items: Array<{
             name: string;
-            price: string;
         }>;
         optional: string[];
     };
@@ -84,6 +83,7 @@ export type ForgeContent = {
             howItWorks: string;
             pricing: string;
             faq: string;
+            kubisApp: string;
         };
     };
 };
@@ -155,6 +155,22 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             monthLabel: '/month',
             plans: [
                 {
+                    name: 'Maintenance',
+                    price: 'RM200',
+                    description: 'For stable systems with no active development needs.',
+                    badge: null,
+                    included: [
+                        'Production hosting',
+                        'Uptime monitoring',
+                        'Bug fixes only',
+                        'Email support',
+                        '72-hour response time',
+                    ],
+                    excluded: [],
+                    support: null,
+                    featurePolicy: null,
+                },
+                {
                     name: 'Starter',
                     price: 'RM500',
                     description: 'Suitable for small businesses getting started.',
@@ -213,9 +229,10 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 'Extend your system beyond the subscription scope with scoped add-ons.',
             optionalTitle: 'Optional Add-Ons',
             items: [
-                { name: 'New Module', price: 'RM2,000 - RM10,000' },
-                { name: 'Integration', price: 'RM1,000 - RM5,000' },
-                { name: 'Complex Automation', price: 'RM500 - RM2,000' },
+                { name: 'Minor Changes' },
+                { name: 'New Module' },
+                { name: 'Integration' },
+                { name: 'Complex Automation' },
             ],
             optional: [
                 'Data migration',
@@ -283,6 +300,16 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                     answer: 'Yes, but integrations are handled as add-ons and scoped separately.',
                 },
                 {
+                    question: 'How are add-on prices determined?',
+                    answer:
+                        'Add-ons are scoped and quoted individually based on complexity and requirements. Contact us to discuss your needs and we will provide a breakdown before any work begins.',
+                },
+                {
+                    question: 'What if we need changes while on the Maintenance plan?',
+                    answer:
+                        'Minor changes and new modules are available as scoped add-ons. You stay on the Maintenance plan and pay only for the specific work requested. If you need ongoing monthly development, upgrading to Starter or above is the better fit.',
+                },
+                {
                     question: 'What happens if we stop the subscription?',
                     answer: 'Production hosting and managed services may be suspended.',
                 },
@@ -305,6 +332,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 howItWorks: 'How It Works',
                 pricing: 'Pricing',
                 faq: 'FAQ',
+                kubisApp: 'Kubis App',
             },
         },
     },
@@ -374,6 +402,22 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             monthLabel: '/bulan',
             plans: [
                 {
+                    name: 'Maintenance',
+                    price: 'RM200',
+                    description: 'Untuk sistem stabil yang tiada keperluan pembangunan aktif.',
+                    badge: null,
+                    included: [
+                        'Hosting produksi',
+                        'Pemantauan uptime',
+                        'Pembetulan pepijat sahaja',
+                        'Sokongan emel',
+                        'Masa respons 72 jam',
+                    ],
+                    excluded: [],
+                    support: null,
+                    featurePolicy: null,
+                },
+                {
                     name: 'Starter',
                     price: 'RM500',
                     description: 'Sesuai untuk perniagaan kecil yang baru bermula.',
@@ -432,9 +476,10 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 'Luaskan sistem anda di luar skop langganan melalui add-on berasaskan skop.',
             optionalTitle: 'Add-On Pilihan',
             items: [
-                { name: 'Modul Baharu', price: 'RM2,000 - RM10,000' },
-                { name: 'Integrasi', price: 'RM1,000 - RM5,000' },
-                { name: 'Automasi Kompleks', price: 'RM500 - RM2,000' },
+                { name: 'Perubahan Kecil' },
+                { name: 'Modul Baharu' },
+                { name: 'Integrasi' },
+                { name: 'Automasi Kompleks' },
             ],
             optional: [
                 'Migrasi data',
@@ -502,6 +547,16 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                     answer: 'Ya, tetapi integrasi diuruskan sebagai add-on dengan skop berasingan.',
                 },
                 {
+                    question: 'Bagaimana harga add-on ditentukan?',
+                    answer:
+                        'Add-on diskop dan dikuotakan secara individu berdasarkan kerumitan dan keperluan. Hubungi kami untuk berbincang dan kami akan berikan pecahan kos sebelum sebarang kerja dimulakan.',
+                },
+                {
+                    question: 'Bagaimana jika kami perlukan perubahan semasa dalam pelan Maintenance?',
+                    answer:
+                        'Perubahan kecil dan modul baharu tersedia sebagai add-on berasaskan skop. Anda kekal dalam pelan Maintenance dan hanya bayar untuk kerja yang diminta. Jika anda perlukan pembangunan bulanan yang berterusan, naik taraf ke Starter atau lebih tinggi adalah pilihan yang lebih sesuai.',
+                },
+                {
                     question: 'Apa jadi jika kami hentikan langganan?',
                     answer: 'Hosting produksi dan perkhidmatan terurus mungkin akan digantung.',
                 },
@@ -524,6 +579,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 howItWorks: 'Cara Ia Berfungsi',
                 pricing: 'Harga',
                 faq: 'Soalan Lazim',
+                kubisApp: 'Kubis App',
             },
         },
     },
