@@ -2,8 +2,15 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Suspense } from 'react';
 import './globals.css';
+import { AuthProvider } from '@repo/shadcn-ui/providers/auth-provider';
+import { ApolloProvider } from '@repo/shadcn-ui/providers/apollo-provider';
+import { SocketProvider } from '@repo/shadcn-ui/providers/socket-provider';
+import ExchangeCodeForToken from '@repo/shadcn-ui/guards/exchange-code-for-token';
 import { Toaster } from '@repo/shadcn-ui/components/sonner';
+import { env } from '@repo/commons/constant/env';
 import Footer from '@/component/footer';
+
+const SOCKET_URL = env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL.replace(/\/graphql\/?$/, '');
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -29,7 +36,15 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                {children}
+                <Suspense fallback={null}>
+                    <ExchangeCodeForToken>
+                        <ApolloProvider>
+                            <AuthProvider>
+                                <SocketProvider url={SOCKET_URL}>{children}</SocketProvider>
+                            </AuthProvider>
+                        </ApolloProvider>
+                    </ExchangeCodeForToken>
+                </Suspense>
                 <Suspense>
                     <Footer />
                 </Suspense>

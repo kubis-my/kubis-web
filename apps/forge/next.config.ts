@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         root: path.join(__dirname, '../../'),
     },
     async headers() {
-        return getDefaultHeaders([]);
+        return getDefaultHeaders([process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL!]);
     },
 };
 

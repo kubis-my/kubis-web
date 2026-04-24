@@ -10,6 +10,7 @@
             "@/root/*": ["./*"],
             "@/*": ["./app/*"],
             "@/component/*": ["./components/*"],
+            "@/actions/*": ["./actions/*"],
             "@/shadcn/*": ["../../packages/shadcn-ui/src/*"]
         }
     },
