@@ -1,3 +1,4 @@
+import Footer from '@/component/footer';
 import Hero from '@/component/pages/forge/hero';
 import HowItWorks from '@/component/pages/forge/how-it-works';
 import MvpScope from '@/component/pages/forge/mvp-scope';
@@ -27,6 +28,7 @@ export default async function ForgePage(props: {
             <IdealClients content={content.idealClients} />
             <Faq content={content.faq} />
             <FinalCta content={content.finalCta} />
+            <Footer />
         </main>
     );
 }

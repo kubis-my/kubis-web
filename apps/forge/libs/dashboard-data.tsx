@@ -1,7 +1,7 @@
 'use client';
 
 import { NavigationItem, NavUserItem } from '@/shadcn/dashboards/dashboard-01/types';
-import { IconHome, IconLogout, IconHelp, IconUser } from '@tabler/icons-react';
+import { IconHome, IconLogout, IconHelp, IconUser, IconFolderOpen } from '@tabler/icons-react';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
@@ -19,6 +19,13 @@ export function getNavigationList(companyIndex: number): NavigationItem[] {
                     title: 'Home',
                     url: ROUTE.FORGE.HOME(companyIndex),
                     icon: <IconHome />,
+                    isActive: false,
+                },
+                {
+                    id: 'app-projects',
+                    title: 'Projects',
+                    url: ROUTE.FORGE.PROJECTS(companyIndex),
+                    icon: <IconFolderOpen />,
                     isActive: false,
                 },
             ],

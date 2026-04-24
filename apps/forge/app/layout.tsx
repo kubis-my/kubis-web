@@ -8,7 +8,6 @@ import { SocketProvider } from '@repo/shadcn-ui/providers/socket-provider';
 import ExchangeCodeForToken from '@repo/shadcn-ui/guards/exchange-code-for-token';
 import { Toaster } from '@repo/shadcn-ui/components/sonner';
 import { env } from '@repo/commons/constant/env';
-import Footer from '@/component/footer';
 
 const SOCKET_URL = env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL.replace(/\/graphql\/?$/, '');
 
@@ -44,9 +43,6 @@ export default function RootLayout({
                             </AuthProvider>
                         </ApolloProvider>
                     </ExchangeCodeForToken>
-                </Suspense>
-                <Suspense>
-                    <Footer />
                 </Suspense>
                 <Toaster />
             </body>
