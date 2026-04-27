@@ -1,6 +1,6 @@
 'use client';
 
-import { getNavigationList } from '@/root/libs/dashboard-data';
+import { getNavigationList, getProjectNavigationList } from '@/root/libs/dashboard-data';
 import { ROUTE } from '@/root/libs/constants';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
 import { useAuth } from '@/shadcn/providers/auth-provider';
@@ -15,7 +15,7 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     const { authUser } = useAuth();
     const { updateUser, updateNavigationList } = useDashboard01();
 
-    const companyIndex = Number(params?.companyIndex ?? 0);
+    const projectId = params?.projectId as string | undefined;
 
     useEffect(() => {
         if (!authUser) {
@@ -31,21 +31,24 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     }, [authUser, updateUser]);
 
     useEffect(() => {
-        const homeUrl = ROUTE.FORGE.HOME(companyIndex);
+        const navList = projectId
+            ? getProjectNavigationList(projectId)
+            : getNavigationList();
 
         updateNavigationList(() =>
-            getNavigationList(companyIndex).map((group) => ({
+            navList.map((group) => ({
                 ...group,
                 items: group.items.map((item) => ({
                     ...item,
-                    isActive:
-                        item.url === homeUrl
-                            ? currentPathname === item.url
-                            : currentPathname.startsWith(item.url),
+                    isActive: projectId
+                        ? currentPathname === item.url
+                        : item.url === ROUTE.FORGE.HOME
+                          ? currentPathname === item.url
+                          : currentPathname.startsWith(item.url),
                 })),
             })),
         );
-    }, [companyIndex, currentPathname, updateNavigationList]);
+    }, [projectId, currentPathname, updateNavigationList]);
 
     return children;
 }

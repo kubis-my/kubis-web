@@ -10,6 +10,7 @@ export type ForgeContent = {
         description: string;
         primaryCta: string;
         secondaryCta: string;
+        dashboardCta: string;
     };
     howItWorks: {
         title: string;
@@ -96,6 +97,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 'Custom business systems built around your workflow. We build your core MVP first. Once it is ready for real production use, you move into a monthly subscription.',
             primaryCta: 'Book a Discovery Call',
             secondaryCta: 'See How the MVP Process Works',
+            dashboardCta: 'View my projects',
         },
         howItWorks: {
             title: 'How It Works',
@@ -225,8 +227,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
         },
         addOns: {
             title: 'Add-Ons',
-            subtitle:
-                'Extend your system beyond the subscription scope with scoped add-ons.',
+            subtitle: 'Extend your system beyond the subscription scope with scoped add-ons.',
             optionalTitle: 'Optional Add-Ons',
             items: [
                 { name: 'Minor Changes' },
@@ -282,18 +283,15 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             items: [
                 {
                     question: 'What does MVP mean?',
-                    answer:
-                        'MVP stands for Minimum Viable Product. It is the first working version of your system that focuses only on the core workflow. The MVP is for validation and testing, not production use.',
+                    answer: 'MVP stands for Minimum Viable Product. It is the first working version of your system that focuses only on the core workflow. The MVP is for validation and testing, not production use.',
                 },
                 {
                     question: 'Is the MVP really free?',
-                    answer:
-                        'The MVP covers the agreed core workflow only. Production usage requires an active subscription plan.',
+                    answer: 'The MVP covers the agreed core workflow only. Production usage requires an active subscription plan.',
                 },
                 {
                     question: 'Can we use the staging system for daily operations?',
-                    answer:
-                        'No. Staging is for testing and feedback only. Live operations require production setup under a subscription.',
+                    answer: 'No. Staging is for testing and feedback only. Live operations require production setup under a subscription.',
                 },
                 {
                     question: 'Can we request integrations?',
@@ -301,13 +299,11 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 },
                 {
                     question: 'How are add-on prices determined?',
-                    answer:
-                        'Add-ons are scoped and quoted individually based on complexity and requirements. Contact us to discuss your needs and we will provide a breakdown before any work begins.',
+                    answer: 'Add-ons are scoped and quoted individually based on complexity and requirements. Contact us to discuss your needs and we will provide a breakdown before any work begins.',
                 },
                 {
                     question: 'What if we need changes while on the Maintenance plan?',
-                    answer:
-                        'Minor changes and new modules are available as scoped add-ons. You stay on the Maintenance plan and pay only for the specific work requested. If you need ongoing monthly development, upgrading to Starter or above is the better fit.',
+                    answer: 'Minor changes and new modules are available as scoped add-ons. You stay on the Maintenance plan and pay only for the specific work requested. If you need ongoing monthly development, upgrading to Starter or above is the better fit.',
                 },
                 {
                     question: 'What happens if we stop the subscription?',
@@ -315,8 +311,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 },
                 {
                     question: 'Who manages the server and technical setup?',
-                    answer:
-                        'Kubis Forge manages hosting, infrastructure, deployment, maintenance, and monitoring.',
+                    answer: 'Kubis Forge manages hosting, infrastructure, deployment, maintenance, and monitoring.',
                 },
             ],
         },
@@ -327,12 +322,13 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             cta: "Let's Discuss Your Workflow",
         },
         footer: {
-            description: 'Custom business systems built around your workflow. Build first, subscribe when ready.',
+            description:
+                'Custom business systems built around your workflow. Build first, subscribe when ready.',
             nav: {
                 howItWorks: 'How It Works',
                 pricing: 'Pricing',
                 faq: 'FAQ',
-                kubisApp: 'Kubis App',
+                kubisApp: 'Author',
             },
         },
     },
@@ -343,6 +339,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 'Sistem perniagaan khas dibina mengikut aliran kerja anda. Kami bina MVP teras anda dahulu. Apabila sistem sedia untuk penggunaan produksi sebenar, anda beralih ke langganan bulanan.',
             primaryCta: 'Tempah Panggilan Discovery',
             secondaryCta: 'Lihat Proses MVP',
+            dashboardCta: 'Lihat projek saya',
         },
         howItWorks: {
             title: 'Bagaimana Ia Berfungsi',
@@ -472,8 +469,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
         },
         addOns: {
             title: 'Add-On',
-            subtitle:
-                'Luaskan sistem anda di luar skop langganan melalui add-on berasaskan skop.',
+            subtitle: 'Luaskan sistem anda di luar skop langganan melalui add-on berasaskan skop.',
             optionalTitle: 'Add-On Pilihan',
             items: [
                 { name: 'Perubahan Kecil' },
@@ -529,18 +525,15 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             items: [
                 {
                     question: 'Apa maksud MVP?',
-                    answer:
-                        'MVP ialah Minimum Viable Product. Ia versi pertama sistem anda yang berfungsi dengan fokus pada aliran kerja teras sahaja. MVP digunakan untuk pengesahan dan ujian, bukan penggunaan produksi.',
+                    answer: 'MVP ialah Minimum Viable Product. Ia versi pertama sistem anda yang berfungsi dengan fokus pada aliran kerja teras sahaja. MVP digunakan untuk pengesahan dan ujian, bukan penggunaan produksi.',
                 },
                 {
                     question: 'Adakah MVP benar-benar percuma?',
-                    answer:
-                        'MVP meliputi aliran kerja teras yang dipersetujui sahaja. Penggunaan produksi memerlukan pelan langganan aktif.',
+                    answer: 'MVP meliputi aliran kerja teras yang dipersetujui sahaja. Penggunaan produksi memerlukan pelan langganan aktif.',
                 },
                 {
                     question: 'Bolehkah kami guna sistem staging untuk operasi harian?',
-                    answer:
-                        'Tidak. Staging hanya untuk ujian dan maklum balas. Operasi langsung memerlukan tetapan produksi di bawah langganan.',
+                    answer: 'Tidak. Staging hanya untuk ujian dan maklum balas. Operasi langsung memerlukan tetapan produksi di bawah langganan.',
                 },
                 {
                     question: 'Bolehkah kami minta integrasi?',
@@ -548,13 +541,12 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 },
                 {
                     question: 'Bagaimana harga add-on ditentukan?',
-                    answer:
-                        'Add-on diskop dan dikuotakan secara individu berdasarkan kerumitan dan keperluan. Hubungi kami untuk berbincang dan kami akan berikan pecahan kos sebelum sebarang kerja dimulakan.',
+                    answer: 'Add-on diskop dan dikuotakan secara individu berdasarkan kerumitan dan keperluan. Hubungi kami untuk berbincang dan kami akan berikan pecahan kos sebelum sebarang kerja dimulakan.',
                 },
                 {
-                    question: 'Bagaimana jika kami perlukan perubahan semasa dalam pelan Maintenance?',
-                    answer:
-                        'Perubahan kecil dan modul baharu tersedia sebagai add-on berasaskan skop. Anda kekal dalam pelan Maintenance dan hanya bayar untuk kerja yang diminta. Jika anda perlukan pembangunan bulanan yang berterusan, naik taraf ke Starter atau lebih tinggi adalah pilihan yang lebih sesuai.',
+                    question:
+                        'Bagaimana jika kami perlukan perubahan semasa dalam pelan Maintenance?',
+                    answer: 'Perubahan kecil dan modul baharu tersedia sebagai add-on berasaskan skop. Anda kekal dalam pelan Maintenance dan hanya bayar untuk kerja yang diminta. Jika anda perlukan pembangunan bulanan yang berterusan, naik taraf ke Starter atau lebih tinggi adalah pilihan yang lebih sesuai.',
                 },
                 {
                     question: 'Apa jadi jika kami hentikan langganan?',
@@ -562,8 +554,7 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
                 },
                 {
                     question: 'Siapa urus server dan tetapan teknikal?',
-                    answer:
-                        'Kubis Forge mengurus hosting, infrastruktur, deployment, penyelenggaraan, dan pemantauan.',
+                    answer: 'Kubis Forge mengurus hosting, infrastruktur, deployment, penyelenggaraan, dan pemantauan.',
                 },
             ],
         },
@@ -574,7 +565,8 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             cta: 'Jom Bincang Aliran Kerja Anda',
         },
         footer: {
-            description: 'Sistem perniagaan khas dibina mengikut aliran kerja anda. Bina dahulu, langgan bila sedia.',
+            description:
+                'Sistem perniagaan khas dibina mengikut aliran kerja anda. Bina dahulu, langgan bila sedia.',
             nav: {
                 howItWorks: 'Cara Ia Berfungsi',
                 pricing: 'Harga',

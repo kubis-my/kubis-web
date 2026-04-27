@@ -1,12 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect } from 'react';
-import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
-import { useParams, useRouter } from 'next/navigation';
+import React, { createContext, useContext } from 'react';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@repo/shadcn-ui/components/badge';
-import { Button } from '@repo/shadcn-ui/components/button';
 import { ROUTE } from '@/root/libs/constants';
-import { IconPlus } from '@tabler/icons-react';
 import { cn } from '@repo/shadcn-ui/lib/utils';
 
 export type ProjectStatus =
@@ -68,6 +65,7 @@ const STATUS_STYLES: Record<ProjectStatus, string> = {
 type ProjectsContextType = {
     projects: Project[];
     onOpenProject: (id: string) => void;
+    onNewProject: () => void;
 };
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
@@ -82,44 +80,21 @@ export function useProjects() {
     return context;
 }
 
-function ProjectsHeaderAction() {
-    const router = useRouter();
-    const params = useParams();
-    const companyIndex = Number(params?.companyIndex ?? 0);
-
-    return (
-        <Button size="sm" onClick={() => router.push(ROUTE.FORGE.PROJECT_NEW(companyIndex))}>
-            <IconPlus />
-            New Project
-        </Button>
-    );
-}
-
 export default function ProjectsContainer({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
-    const params = useParams();
     const router = useRouter();
-    const companyIndex = Number(params?.companyIndex ?? 0);
-
-    const { updateBreadcrumbList, updateHeaderAction } = useDashboard01();
-
-    useEffect(() => {
-        updateBreadcrumbList([{ name: 'Projects' }]);
-        updateHeaderAction(<ProjectsHeaderAction />);
-
-        return () => {
-            updateBreadcrumbList([]);
-            updateHeaderAction(undefined);
-        };
-    }, [updateBreadcrumbList, updateHeaderAction]);
 
     function onOpenProject(id: string) {
-        router.push(ROUTE.FORGE.PROJECT_DETAIL(companyIndex, id));
+        router.push(ROUTE.FORGE.PROJECT_DETAIL(id));
+    }
+
+    function onNewProject() {
+        router.push(ROUTE.FORGE.PROJECT_NEW);
     }
 
     return (
-        <ProjectsContext.Provider value={{ projects: MOCK_PROJECTS, onOpenProject }}>
+        <ProjectsContext.Provider value={{ projects: MOCK_PROJECTS, onOpenProject, onNewProject }}>
             {children}
         </ProjectsContext.Provider>
     );

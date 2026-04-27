@@ -13,7 +13,7 @@ export default function FinalCta({ content }: FinalCtaProps) {
                 <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">{content.title}</h2>
                 <p className="mb-10 text-lg text-gray-400">{content.description}</p>
                 <Button size="lg" asChild className="bg-[#4CAF50] hover:bg-[#43A047]">
-                    <Link href="/c/0/projects/new">{content.cta}</Link>
+                    <Link href="/projects/new">{content.cta}</Link>
                 </Button>
             </div>
         </section>

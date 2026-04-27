@@ -1,8 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
-import { useParams, useRouter } from 'next/navigation';
+import React, { createContext, useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/shadcn/providers/auth-provider';
+import { Company } from '@repo/commons/types/account-service-schema.type';
 import { ROUTE } from '@/root/libs/constants';
 
 type ProjectForm = {
@@ -13,11 +14,14 @@ type ProjectForm = {
     references: string;
     expectedUsers: string;
     notes: string;
+    companyIds: string[];
 };
 
 type NewProjectContextType = {
     form: ProjectForm;
-    onChange: (field: keyof ProjectForm, value: string) => void;
+    availableCompanies: Company[];
+    onChange: (field: keyof Omit<ProjectForm, 'companyIds'>, value: string) => void;
+    onToggleCompany: (publicId: string) => void;
     onSubmit: () => void;
 };
 
@@ -36,11 +40,10 @@ export function useNewProject() {
 export default function NewProjectContainer({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
-    const params = useParams();
     const router = useRouter();
-    const companyIndex = Number(params?.companyIndex ?? 0);
+    const { authUser } = useAuth();
 
-    const { updateBreadcrumbList, updateHeaderAction } = useDashboard01();
+    const availableCompanies = (authUser?.companies ?? []) as Company[];
 
     const [form, setForm] = useState<ProjectForm>({
         name: '',
@@ -50,30 +53,32 @@ export default function NewProjectContainer({
         references: '',
         expectedUsers: '',
         notes: '',
+        companyIds: [],
     });
 
-    useEffect(() => {
-        updateBreadcrumbList([
-            { name: 'Projects', url: ROUTE.FORGE.PROJECTS(companyIndex) },
-            { name: 'New Project' },
-        ]);
-        updateHeaderAction(undefined);
-
-        return () => {
-            updateBreadcrumbList([]);
-        };
-    }, [companyIndex, updateBreadcrumbList, updateHeaderAction]);
-
-    function onChange(field: keyof ProjectForm, value: string) {
+    function onChange(field: keyof Omit<ProjectForm, 'companyIds'>, value: string) {
         setForm((prev) => ({ ...prev, [field]: value }));
     }
 
+    function onToggleCompany(publicId: string) {
+        setForm((prev) => {
+            const already = prev.companyIds.includes(publicId);
+
+            return {
+                ...prev,
+                companyIds: already
+                    ? prev.companyIds.filter((id) => id !== publicId)
+                    : [...prev.companyIds, publicId],
+            };
+        });
+    }
+
     function onSubmit() {
-        router.push(ROUTE.FORGE.PROJECT_DETAIL(companyIndex, '1'));
+        router.push(ROUTE.FORGE.PROJECT_DETAIL('1'));
     }
 
     return (
-        <NewProjectContext.Provider value={{ form, onChange, onSubmit }}>
+        <NewProjectContext.Provider value={{ form, availableCompanies, onChange, onToggleCompany, onSubmit }}>
             {children}
         </NewProjectContext.Provider>
     );

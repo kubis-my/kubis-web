@@ -3,6 +3,7 @@
 import { Button } from '@repo/shadcn-ui/components/button';
 import KubisSvg from '@repo/shadcn-ui/custom-components/kubis-svg';
 import { scrollToSection } from '@repo/commons/utils/dom';
+import { IconArrowRight } from '@tabler/icons-react';
 import Link from 'next/link';
 import type { ForgeContent } from '@/root/libs/i18n/forge-content';
 
@@ -21,7 +22,7 @@ export default function Hero({ content }: HeroProps) {
                 <p className="text-xl text-muted-foreground">{content.description}</p>
                 <div className="flex flex-wrap justify-center gap-4">
                     <Button size="lg" asChild className="bg-[#4CAF50] hover:bg-[#43A047]">
-                        <Link href="/c/0/projects/new">{content.primaryCta}</Link>
+                        <Link href="/projects/new">{content.primaryCta}</Link>
                     </Button>
                     <Button size="lg" variant="outline" asChild>
                         <Link href="#how-it-works" onClick={(e) => scrollToSection(e, 'how-it-works')}>
@@ -29,6 +30,13 @@ export default function Hero({ content }: HeroProps) {
                         </Link>
                     </Button>
                 </div>
+                <Link
+                    href="/projects"
+                    className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
+                >
+                    {content.dashboardCta}
+                    <IconArrowRight className="size-3.5" />
+                </Link>
             </div>
         </section>
     );

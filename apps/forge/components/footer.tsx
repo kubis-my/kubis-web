@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { scrollToSection } from '@repo/commons/utils/dom';
 import { FORGE_CONTENT, type ForgeLocale } from '@/root/libs/i18n/forge-content';
 
 export default function Footer() {
+    const pathname = usePathname();
     const searchParams = useSearchParams();
     const locale: ForgeLocale = searchParams.get('lang') === 'ms' ? 'ms' : 'en';
     const langParam = locale === 'ms' ? '?lang=ms' : '';
@@ -31,26 +32,39 @@ export default function Footer() {
                         </span>
                         <nav className="flex flex-col gap-3">
                             {[
-                                { label: footer.nav.howItWorks, href: `/${langParam}#how-it-works`, id: 'how-it-works' },
-                                { label: footer.nav.pricing, href: `/${langParam}#pricing`, id: 'pricing' },
+                                {
+                                    label: footer.nav.howItWorks,
+                                    href: `/${langParam}#how-it-works`,
+                                    id: 'how-it-works',
+                                },
                                 { label: footer.nav.faq, href: `/${langParam}#faq`, id: 'faq' },
                             ].map(({ label, href, id }) => (
                                 <Link
                                     key={href}
                                     href={href}
-                                    onClick={(e) => scrollToSection(e, id)}
+                                    onClick={(e) => {
+                                        if (pathname === '/') {
+                                            scrollToSection(e, id);
+                                        }
+                                    }}
                                     className="text-sm text-gray-400 transition-colors hover:text-white"
                                 >
                                     {label}
                                 </Link>
                             ))}
                             <Link
+                                href={`/pricing${langParam}`}
+                                className="text-sm text-gray-400 transition-colors hover:text-white"
+                            >
+                                {footer.nav.pricing}
+                            </Link>
+                            <Link
                                 href={`${process.env.NEXT_PUBLIC_MAIN_APP_BASE_URL ?? 'https://kubis.my'}/author`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-sm text-gray-400 transition-colors hover:text-white"
                             >
-                                {footer.nav.kubisApp} ↗
+                                {footer.nav.kubisApp}
                             </Link>
                         </nav>
                     </div>

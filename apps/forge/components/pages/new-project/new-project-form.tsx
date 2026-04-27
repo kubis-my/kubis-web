@@ -6,10 +6,13 @@ import { Input } from '@repo/shadcn-ui/components/input';
 import { Textarea } from '@repo/shadcn-ui/components/textarea';
 import { Label } from '@repo/shadcn-ui/components/label';
 import { Separator } from '@repo/shadcn-ui/components/separator';
+import { Checkbox } from '@repo/shadcn-ui/components/checkbox';
 import RichTextEditor from '@repo/shadcn-ui/components/rich-text-editor';
+import Link from 'next/link';
+import { ROUTE } from '@/root/libs/constants';
 
 export default function NewProjectForm() {
-    const { form, onChange, onSubmit } = useNewProject();
+    const { form, availableCompanies, onChange, onToggleCompany, onSubmit } = useNewProject();
 
     const isValid = form.name.trim().length > 0 && form.problem.trim().length > 0 && form.systemNeeds.trim().length > 0;
 
@@ -54,6 +57,39 @@ export default function NewProjectForm() {
                             onChange={(e) => onChange('background', e.target.value)}
                         />
                     </div>
+
+                    {availableCompanies.length > 0 && (
+                        <div className="flex flex-col gap-2">
+                            <Label>Company</Label>
+                            <p className="text-muted-foreground text-xs">
+                                Select which of your companies this project is for. You can select more than one.
+                            </p>
+                            <div className="flex flex-col gap-2">
+                                {availableCompanies.map((company) => {
+                                    const checked = form.companyIds.includes(company.publicId);
+
+                                    return (
+                                        <div
+                                            key={company.publicId}
+                                            onClick={() => onToggleCompany(company.publicId)}
+                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
+                                                checked
+                                                    ? 'border-primary bg-primary/5'
+                                                    : 'hover:bg-muted/50'
+                                            }`}
+                                        >
+                                            <Checkbox
+                                                checked={checked}
+                                                onCheckedChange={() => onToggleCompany(company.publicId)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                            <span className="text-sm font-medium">{company.name}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                 </section>
 
@@ -113,7 +149,10 @@ export default function NewProjectForm() {
                     </div>
                 </section>
 
-                <div className="flex justify-end pb-8">
+                <div className="flex items-center justify-end gap-3 pb-8">
+                    <Button variant="outline" asChild>
+                        <Link href={ROUTE.FORGE.HOME}>Back</Link>
+                    </Button>
                     <Button type="submit" disabled={!isValid}>
                         Submit Project
                     </Button>

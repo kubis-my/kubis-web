@@ -1,7 +1,17 @@
 'use client';
 
 import { NavigationItem, NavUserItem } from '@/shadcn/dashboards/dashboard-01/types';
-import { IconHome, IconLogout, IconHelp, IconUser, IconFolderOpen } from '@tabler/icons-react';
+import {
+    IconHome,
+    IconLogout,
+    IconHelp,
+    IconUser,
+    IconFileDescription,
+    IconFlag,
+    IconMessages,
+    IconChecklist,
+    IconCreditCard,
+} from '@tabler/icons-react';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
@@ -9,7 +19,7 @@ import { env } from '@repo/commons/constant/env';
 
 export const APP_NAME = 'Forge Console';
 
-export function getNavigationList(companyIndex: number): NavigationItem[] {
+export function getNavigationList(): NavigationItem[] {
     return [
         {
             id: 'app',
@@ -17,19 +27,57 @@ export function getNavigationList(companyIndex: number): NavigationItem[] {
                 {
                     id: 'app-home',
                     title: 'Home',
-                    url: ROUTE.FORGE.HOME(companyIndex),
+                    url: ROUTE.FORGE.HOME,
                     icon: <IconHome />,
-                    isActive: false,
-                },
-                {
-                    id: 'app-projects',
-                    title: 'Projects',
-                    url: ROUTE.FORGE.PROJECTS(companyIndex),
-                    icon: <IconFolderOpen />,
                     isActive: false,
                 },
             ],
         },
+    ];
+}
+
+export function getProjectNavigationList(projectId: string): NavigationItem[] {
+    return [
+        {
+            id: 'app',
+            items: [
+                {
+                    id: 'project-brief',
+                    title: 'Brief',
+                    url: ROUTE.FORGE.PROJECT_DETAIL(projectId),
+                    icon: <IconFileDescription />,
+                    isActive: false,
+                },
+                {
+                    id: 'project-milestones',
+                    title: 'Milestones',
+                    url: ROUTE.FORGE.PROJECT_MILESTONES(projectId),
+                    icon: <IconFlag />,
+                    isActive: false,
+                },
+                {
+                    id: 'project-discussion',
+                    title: 'Discussion',
+                    url: ROUTE.FORGE.PROJECT_DISCUSSION(projectId),
+                    icon: <IconMessages />,
+                    isActive: false,
+                },
+                {
+                    id: 'project-todos',
+                    title: 'Todos',
+                    url: ROUTE.FORGE.PROJECT_TODOS(projectId),
+                    icon: <IconChecklist />,
+                    isActive: false,
+                },
+                {
+                    id: 'project-billing',
+                    title: 'Billing',
+                    url: ROUTE.FORGE.PROJECT_BILLING(projectId),
+                    icon: <IconCreditCard />,
+                    isActive: false,
+                },
+            ],
+        }
     ];
 }
 
@@ -46,7 +94,7 @@ export const navigationUserItemList: NavUserItem[] = [
         id: 'help',
         name: 'Get Help',
         icon: <IconHelp />,
-        async action() {},
+        async action() { },
     },
     {
         id: 'log-out',

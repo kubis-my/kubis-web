@@ -1,9 +1,11 @@
 export const ROUTE = {
     FORGE: {
-        HOME: (companyIndex = 0) => `/c/${companyIndex}`,
-        PROJECTS: (companyIndex = 0) => `/c/${companyIndex}/projects`,
-        PROJECT_NEW: (companyIndex = 0) => `/c/${companyIndex}/projects/new`,
-        PROJECT_DETAIL: (companyIndex = 0, projectId: string) =>
-            `/c/${companyIndex}/projects/${projectId}`,
+        HOME: '/projects',
+        PROJECT_NEW: '/projects/new',
+        PROJECT_DETAIL: (projectId: string) => `/projects/${projectId}`,
+        PROJECT_MILESTONES: (projectId: string) => `/projects/${projectId}/milestones`,
+        PROJECT_DISCUSSION: (projectId: string) => `/projects/${projectId}/discussion`,
+        PROJECT_TODOS: (projectId: string) => `/projects/${projectId}/todos`,
+        PROJECT_BILLING: (projectId: string) => `/projects/${projectId}/billing`,
     },
 };

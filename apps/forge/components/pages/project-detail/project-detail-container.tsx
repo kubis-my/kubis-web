@@ -1,14 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
-import { useParams } from 'next/navigation';
+import { ProjectStatus, SubscriptionPlan } from '../project-root/projects-container';
 import { ROUTE } from '@/root/libs/constants';
-import { ProjectStatus, SubscriptionPlan, StatusBadge } from '../projects/projects-container';
-import { Badge } from '@repo/shadcn-ui/components/badge';
-import { cn } from '@repo/shadcn-ui/lib/utils';
-
-export type ProjectTab = 'brief' | 'milestones' | 'discussion' | 'todos' | 'billing';
 
 export type ProjectBriefData = {
     background: string;
@@ -49,18 +44,8 @@ const MOCK_PROJECT: ProjectDetail = {
     },
 };
 
-const PLAN_STYLES: Record<SubscriptionPlan, string> = {
-    Maintenance:
-        'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700',
-    Starter: 'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-800',
-    Growth: 'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-800',
-    Scale: 'bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-900/30 dark:text-violet-400 dark:border-violet-800',
-};
-
 type ProjectDetailContextType = {
     project: ProjectDetail;
-    activeTab: ProjectTab;
-    setActiveTab: (tab: ProjectTab) => void;
 };
 
 const ProjectDetailContext = createContext<ProjectDetailContextType | undefined>(undefined);
@@ -78,36 +63,19 @@ export function useProjectDetail() {
 export default function ProjectDetailContainer({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
-    const params = useParams();
-    const companyIndex = Number(params?.companyIndex ?? 0);
-
-    const { updateBreadcrumbList, updateHeaderAction } = useDashboard01();
-    const [activeTab, setActiveTab] = useState<ProjectTab>('brief');
+    const { updateBreadcrumbList } = useDashboard01();
 
     useEffect(() => {
         updateBreadcrumbList([
-            { name: 'Projects', url: ROUTE.FORGE.PROJECTS(companyIndex) },
+            { name: 'Projects', url: ROUTE.FORGE.HOME },
             { name: MOCK_PROJECT.name },
         ]);
-        updateHeaderAction(
-            <div className="flex items-center gap-2">
-                <StatusBadge status={MOCK_PROJECT.status} />
-                {MOCK_PROJECT.plan && (
-                    <Badge variant="outline" className={cn(PLAN_STYLES[MOCK_PROJECT.plan])}>
-                        {MOCK_PROJECT.plan}
-                    </Badge>
-                )}
-            </div>,
-        );
 
-        return () => {
-            updateBreadcrumbList([]);
-            updateHeaderAction(undefined);
-        };
-    }, [companyIndex, updateBreadcrumbList, updateHeaderAction]);
+        return () => updateBreadcrumbList([]);
+    }, [updateBreadcrumbList]);
 
     return (
-        <ProjectDetailContext.Provider value={{ project: MOCK_PROJECT, activeTab, setActiveTab }}>
+        <ProjectDetailContext.Provider value={{ project: MOCK_PROJECT }}>
             {children}
         </ProjectDetailContext.Provider>
     );

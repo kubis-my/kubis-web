@@ -2,8 +2,6 @@ import Footer from '@/component/footer';
 import Hero from '@/component/pages/forge/hero';
 import HowItWorks from '@/component/pages/forge/how-it-works';
 import MvpScope from '@/component/pages/forge/mvp-scope';
-import Pricing from '@/component/pages/forge/pricing';
-import AddOns from '@/component/pages/forge/add-ons';
 import WhyItWorks from '@/component/pages/forge/why-it-works';
 import IdealClients from '@/component/pages/forge/ideal-clients';
 import Faq from '@/component/pages/forge/faq';
@@ -22,8 +20,6 @@ export default async function ForgePage(props: {
             <Hero content={content.hero} />
             <HowItWorks content={content.howItWorks} />
             <MvpScope content={content.mvpScope} />
-            <Pricing content={content.pricing} />
-            <AddOns content={content.addOns} />
             <WhyItWorks content={content.whyItWorks} />
             <IdealClients content={content.idealClients} />
             <Faq content={content.faq} />
