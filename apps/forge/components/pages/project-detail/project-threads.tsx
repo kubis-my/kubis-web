@@ -24,6 +24,7 @@ import {
     IconArrowDown,
     IconCornerUpLeft,
     IconFolderCode,
+    IconRestore,
     IconTrash,
     IconX,
 } from '@tabler/icons-react';
@@ -41,6 +42,7 @@ type Message = {
     content: string;
     timestamp: Date;
     replyToId?: string;
+    deletedContent?: string;
     deletedAt?: Date;
 };
 
@@ -281,6 +283,7 @@ function MessageGroupItem({
     highlightedMessageId,
     onReply,
     onDelete,
+    onRestore,
     onJumpToMessage,
 }: {
     group: MessageGroup;
@@ -288,6 +291,7 @@ function MessageGroupItem({
     highlightedMessageId: string | null;
     onReply: (message: Message) => void;
     onDelete: (message: Message) => void;
+    onRestore: (message: Message) => void;
     onJumpToMessage: (messageId: string) => void;
 }) {
     const sender = SENDERS[group.senderId] ?? {
@@ -364,14 +368,20 @@ function MessageGroupItem({
                                         <IconCornerUpLeft />
                                         Reply
                                     </ContextMenuItem>
-                                    <ContextMenuItem
-                                        className="text-destructive focus:text-destructive"
-                                        disabled={Boolean(msg.deletedAt)}
-                                        onSelect={() => onDelete(msg)}
-                                    >
-                                        <IconTrash />
-                                        Delete
-                                    </ContextMenuItem>
+                                    {msg.deletedAt ? (
+                                        <ContextMenuItem onSelect={() => onRestore(msg)}>
+                                            <IconRestore />
+                                            Restore
+                                        </ContextMenuItem>
+                                    ) : (
+                                        <ContextMenuItem
+                                            className="text-destructive focus:text-destructive"
+                                            onSelect={() => onDelete(msg)}
+                                        >
+                                            <IconTrash />
+                                            Delete
+                                        </ContextMenuItem>
+                                    )}
                                 </ContextMenuContent>
                             </ContextMenu>
                         );
@@ -392,6 +402,7 @@ export default function ProjectThreads() {
     const bottomRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<RichTextEditorRef>(null);
     const isFirstRender = useRef(true);
+    const shouldSkipNextAutoScroll = useRef(false);
     const highlightTimeoutRef = useRef<number | null>(null);
     const dateGroups = groupMessages(messages);
     const messagesById = useMemo(
@@ -403,6 +414,12 @@ export default function ProjectThreads() {
     useEffect(() => {
         const behavior: ScrollBehavior = isFirstRender.current ? 'instant' : 'smooth';
         isFirstRender.current = false;
+
+        if (shouldSkipNextAutoScroll.current) {
+            shouldSkipNextAutoScroll.current = false;
+            return;
+        }
+
         bottomRef.current?.scrollIntoView({ behavior });
     }, [messages]);
 
@@ -452,11 +469,14 @@ export default function ProjectThreads() {
     }, []);
 
     const deleteMessage = useCallback((message: Message) => {
+        shouldSkipNextAutoScroll.current = true;
+
         setMessages((prev) =>
             prev.map((item) =>
                 item.id === message.id
                     ? {
                           ...item,
+                          deletedContent: item.content,
                           content: '',
                           deletedAt: new Date(),
                       }
@@ -465,6 +485,23 @@ export default function ProjectThreads() {
         );
 
         setReplyingToId((currentId) => (currentId === message.id ? null : currentId));
+    }, []);
+
+    const restoreMessage = useCallback((message: Message) => {
+        shouldSkipNextAutoScroll.current = true;
+
+        setMessages((prev) =>
+            prev.map((item) =>
+                item.id === message.id
+                    ? {
+                          ...item,
+                          content: item.deletedContent ?? item.content,
+                          deletedContent: undefined,
+                          deletedAt: undefined,
+                      }
+                    : item,
+            ),
+        );
     }, []);
 
     const jumpToMessage = useCallback((messageId: string) => {
@@ -522,6 +559,7 @@ export default function ProjectThreads() {
                                         highlightedMessageId={highlightedMessageId}
                                         onReply={replyToMessage}
                                         onDelete={deleteMessage}
+                                        onRestore={restoreMessage}
                                         onJumpToMessage={jumpToMessage}
                                     />
                                 ))}
