@@ -56,9 +56,9 @@ export function getProjectNavigationList(projectId: string): NavigationItem[] {
                     isActive: false,
                 },
                 {
-                    id: 'project-discussion',
-                    title: 'Discussion',
-                    url: ROUTE.FORGE.PROJECT_DISCUSSION(projectId),
+                    id: 'project-threads',
+                    title: 'Threads',
+                    url: ROUTE.FORGE.PROJECT_THREADS(projectId),
                     icon: <IconMessages />,
                     isActive: false,
                 },
