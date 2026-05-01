@@ -33,8 +33,10 @@ export type ProjectDetail = {
     id: string;
     name: string;
     clientName: string;
+    companyNames: string[];
     status: ProjectStatus;
     startDate: string;
+    stagingUrl?: string;
     plan?: SubscriptionPlan;
     brief: ProjectBriefData;
     milestones: Milestone[];
@@ -44,8 +46,10 @@ const MOCK_PROJECT: ProjectDetail = {
     id: '1',
     name: 'Internal PO System',
     clientName: 'Syarikat Maju Sdn Bhd',
+    companyNames: ['Syarikat Maju Sdn Bhd', 'Maju Trading Sdn Bhd'],
     status: 'MVP Build',
     startDate: '2026-03-01',
+    stagingUrl: 'https://staging.internal-po.example.com',
     plan: 'Growth',
     brief: {
         background:

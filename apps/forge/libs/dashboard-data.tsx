@@ -42,8 +42,8 @@ export function getProjectNavigationList(projectId: string): NavigationItem[] {
             id: 'app',
             items: [
                 {
-                    id: 'project-brief',
-                    title: 'Brief',
+                    id: 'project-overview',
+                    title: 'Overview',
                     url: ROUTE.FORGE.PROJECT_DETAIL(projectId),
                     icon: <IconFileDescription />,
                     isActive: false,
