@@ -14,6 +14,21 @@ export type ProjectBriefData = {
     notes: string;
 };
 
+export type MilestoneStatus = 'Upcoming' | 'In Progress' | 'Done';
+
+export type MilestoneNote = {
+    date: string;
+    content: string;
+};
+
+export type Milestone = {
+    id: string;
+    name: string;
+    status: MilestoneStatus;
+    estimatedDate: string;
+    notes?: MilestoneNote[];
+};
+
 export type ProjectDetail = {
     id: string;
     name: string;
@@ -22,6 +37,7 @@ export type ProjectDetail = {
     startDate: string;
     plan?: SubscriptionPlan;
     brief: ProjectBriefData;
+    milestones: Milestone[];
 };
 
 const MOCK_PROJECT: ProjectDetail = {
@@ -42,6 +58,56 @@ const MOCK_PROJECT: ProjectDetail = {
         expectedUsers: '15–20 internal staff across operations, finance, and management.',
         notes: '',
     },
+    milestones: [
+        {
+            id: '1',
+            name: 'Discovery',
+            status: 'Done',
+            estimatedDate: '2026-03-15',
+            notes: [
+                {
+                    date: '2026-03-05',
+                    content: '<p>Kickoff call with client. Key takeaways:</p><ul><li>Current flow is entirely via WhatsApp + Excel</li><li>3 approval tiers: staff → HOD → finance</li><li>No existing audit trail</li></ul>',
+                },
+                {
+                    date: '2026-03-10',
+                    content: '<p>Follow-up to clarify routing rules:</p><ul><li>Requests above RM 5,000 require finance sign-off</li><li>HOD can delegate to a deputy</li></ul>',
+                },
+                {
+                    date: '2026-03-14',
+                    content: '<p>Scope locked. Requirements doc signed off. <strong>Moving to MVP Build.</strong></p>',
+                },
+            ],
+        },
+        {
+            id: '2',
+            name: 'MVP Build',
+            status: 'In Progress',
+            estimatedDate: '2026-05-30',
+            notes: [
+                {
+                    date: '2026-04-02',
+                    content: '<p>Staging deployed. Covered in this session:</p><ul><li>PO submission form live</li><li>Approval flow wired up for all 3 tiers</li><li>Client given staging credentials</li></ul>',
+                },
+                {
+                    date: '2026-04-28',
+                    content: '<p>Client walkthrough on staging. Feedback:</p><ul><li>Notification email needs company letterhead</li><li>Approver wants to add comments when rejecting</li></ul><p>Both items added to backlog.</p>',
+                },
+            ],
+        },
+        {
+            id: '3',
+            name: 'Validation',
+            status: 'Upcoming',
+            estimatedDate: '2026-06-20',
+        },
+        {
+            id: '4',
+            name: 'Production',
+            status: 'Upcoming',
+            estimatedDate: '2026-07-01',
+        },
+    ],
 };
 
 type ProjectDetailContextType = {
