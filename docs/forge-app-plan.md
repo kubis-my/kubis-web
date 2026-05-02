@@ -76,23 +76,28 @@ Top-level container per client engagement.
 - `Pending Review` = client just submitted, dev hasn't responded yet
 - Dev sees all projects; client sees only their own
 
-### 2. Project Intake / Brief
+### 2. Project Overview & Brief
 
-Client describes what they want built or what problem they want to solve.
+Project summary and client intake brief, combined into the project Overview page.
 
-- Submitted by client on first login (or prompted by dev)
-- Fields: business background, current problem/pain point, what the system needs to do, any reference systems, expected users, notes
+- Brief submitted by client on first login (or prompted by dev)
+- Brief fields: business background, current problem/pain point, what the system needs to do, reference systems, expected users, notes
+- Overview also shows: project metadata (client, companies, status, start date, subscription plan), active milestone, staging URL
 - Visible to both dev and client
-- Dev can leave comments/clarifications directly on the brief
 
-### 3. Discussion Thread
+### 3. Discussion Threads
 
-Async communication per project.
+Async communication per project. Route: `/threads`
 
 - Both dev and client can post messages
-- Supports text + file/image attachments (Phase 2)
-- Used for: requirements clarification, feedback, decisions, questions
-- Threaded replies (Phase 2)
+- Messages grouped by date (date separators) and by sender (consecutive messages from same sender grouped)
+- Reply-to: quote a message with a preview; click the preview to jump to and highlight the original
+- Soft delete: deleted messages show "This message was deleted on [date]" — dev can restore
+- Context menu (right-click) per message: Reply / Delete / Restore
+- RichTextEditor input (Cmd+Enter / Ctrl+Enter to send)
+- Scroll-to-bottom button when not at the bottom
+- Empty state when no messages
+- File/image attachments (Phase 2)
 
 ### 4. Milestone Tracker
 
@@ -114,7 +119,7 @@ During `MVP Build` milestone, dev can attach a staging URL to the project.
 - Client can open the staging environment directly from the console
 - Staging link only visible when set by dev — not shown on other milestones
 
-### 5. Internal Todo List
+### 5. Internal Todo List *(Phase 2)*
 
 Dev's task list per milestone. **Not visible to client.**
 
@@ -122,7 +127,7 @@ Dev's task list per milestone. **Not visible to client.**
 - Fields: task name, status (`Todo` / `In Progress` / `Done`), notes
 - Purely internal — helps dev track granular work without exposing it to client
 
-### 6. Billing
+### 6. Billing *(Phase 2)*
 
 Per-project billing. Manual tracking, no payment gateway for MVP.
 
@@ -160,20 +165,19 @@ Projects are scoped to the authenticated user — company is a tag on the projec
 /                            → redirect to /projects
 /projects                    → client's project list (filterable by company)
 /projects/new                → create project (select company, submit brief)
-/projects/[id]               → project overview
-/projects/[id]/discussion    → discussion thread
+/projects/[id]               → project overview + brief
 /projects/[id]/milestones    → milestone tracker
-/projects/[id]/todos         → internal todos (dev only)
-/projects/[id]/billing       → billing & invoices
+/projects/[id]/threads       → discussion threads
 ```
 
 ---
 
 ## Phase 2 (Post-MVP)
 
-- **File/image attachments** in discussion thread
+- **File/image attachments** in discussion threads
 - **Threaded replies** in discussion
-- **Billing / subscription status** visible to client
+- **Internal todo list** — dev task list per milestone (not visible to client)
+- **Billing / invoicing** — manual invoice tracking per project, visible to both
 - **Email notifications** on milestone updates and new messages
 - **Activity log** per project
 
@@ -204,10 +208,12 @@ Projects are scoped to the authenticated user — company is a tag on the projec
 
 ## TODO — Build Order
 
-- [ ] 1. App Scaffold — `apps/forge` setup, auth, layout, routing (restructure to `/projects/[id]`)
-- [ ] 2. Project Intake — client creates project, selects company, submits brief
-- [ ] 3. Dev Dashboard — list of all submitted projects, status overview
-- [ ] 4. Milestone Tracker — dev creates milestones, client monitors
-- [ ] 5. Internal Todo List — dev manages todos per milestone
-- [ ] 6. Discussion Thread — async messaging per project
-- [ ] 7. Billing — invoices per project, manual status tracking, visible to both
+- [x] 1. App Scaffold — `apps/forge` setup, auth, layout, routing (`/projects/[id]`)
+- [x] 2. Project Overview & Brief — project metadata + client intake brief on overview page
+- [x] 3. Projects List — list of submitted projects, status overview
+- [x] 4. Milestone Tracker — milestones with status (Upcoming / In Progress / Done), estimated dates, dev notes
+- [x] 5. Discussion Threads — async messaging with reply-to, soft delete/restore, message grouping
+- [ ] 6. Connect GraphQL — wire all containers to real API (currently mock data)
+- [ ] 7. New Project Flow — client creates project, selects company, submits brief (form exists, no backend)
+- [ ] 8. Internal Todo List *(Phase 2)*
+- [ ] 9. Billing *(Phase 2)*
