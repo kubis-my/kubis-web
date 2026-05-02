@@ -9,8 +9,6 @@ import {
     IconFileDescription,
     IconFlag,
     IconMessages,
-    IconChecklist,
-    IconCreditCard,
 } from '@tabler/icons-react';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
@@ -60,20 +58,6 @@ export function getProjectNavigationList(projectId: string): NavigationItem[] {
                     title: 'Threads',
                     url: ROUTE.FORGE.PROJECT_THREADS(projectId),
                     icon: <IconMessages />,
-                    isActive: false,
-                },
-                {
-                    id: 'project-todos',
-                    title: 'Todos',
-                    url: ROUTE.FORGE.PROJECT_TODOS(projectId),
-                    icon: <IconChecklist />,
-                    isActive: false,
-                },
-                {
-                    id: 'project-billing',
-                    title: 'Billing',
-                    url: ROUTE.FORGE.PROJECT_BILLING(projectId),
-                    icon: <IconCreditCard />,
                     isActive: false,
                 },
             ],
