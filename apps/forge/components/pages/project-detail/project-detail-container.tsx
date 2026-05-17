@@ -8,9 +8,10 @@ import { useAuth } from '@/shadcn/providers/auth-provider';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
 import {
     MilestoneStatus as GqlMilestoneStatus,
+    Project as GqlProject,
     ProjectStatus as GqlProjectStatus,
 } from '@repo/commons/types/forge-service-schema.type';
-import { ProjectStatus, SubscriptionPlan } from '../project-root/projects-container';
+import { type ProjectStatus, type SubscriptionPlan } from '../project-root/types';
 import { ROUTE } from '@/root/libs/constants';
 
 export type ProjectBriefData = {
@@ -67,42 +68,8 @@ const MILESTONE_STATUS_MAP: Record<GqlMilestoneStatus, MilestoneStatus> = {
     CANCELLED: 'Cancelled',
 };
 
-type GqlMilestoneNote = {
-    content: string;
-    date: string;
-};
-
-type GqlMilestone = {
-    publicId: string;
-    name: string;
-    status: GqlMilestoneStatus;
-    estimatedAt: string | null;
-    order: number;
-    notes: GqlMilestoneNote[];
-};
-
-type GqlBrief = {
-    background: string | null;
-    problem: string;
-    systemNeeds: string;
-    references: string | null;
-    expectedUsers: string | null;
-    notes: string | null;
-};
-
-type GqlProjectDetail = {
-    publicId: string;
-    name: string;
-    status: GqlProjectStatus;
-    stagingUrl: string | null;
-    companyIds: string[];
-    createdAt: string;
-    brief: GqlBrief | null;
-    milestones: GqlMilestone[];
-};
-
 const GET_PROJECT: TypedDocumentNode<
-    { getProjectForForge: GqlProjectDetail },
+    { getProjectForForge: GqlProject },
     { publicId: string }
 > = gql`
     query GetProjectForForge($publicId: String!) {

@@ -1,9 +1,6 @@
 'use client';
 
-import { type ReactNode } from 'react';
-import { useProjects, StatusBadge, type Project, type ProjectStatus } from './projects-container';
 import {
-    IconArrowRight,
     IconArrowUpRight,
     IconBolt,
     IconFolderCode,
@@ -22,11 +19,10 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from '@/shadcn/components/empty';
-import { cn } from '@repo/shadcn-ui/lib/utils';
-
-function formatDate(value: string) {
-    return new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' }).format(new Date(value));
-}
+import { useProjects } from './projects-container';
+import { type Project } from './types';
+import { ProjectCard } from './project-card';
+import { StatCard } from './stat-card';
 
 function getProjectSummary(projects: Project[]) {
     const activeStatuses: Project['status'][] = ['Discovery', 'MVP Build', 'Validation', 'Production'];
@@ -44,110 +40,6 @@ function getProjectSummary(projects: Project[]) {
     };
 }
 
-const STATUS_ACCENT: Record<ProjectStatus, string> = {
-    'Pending Review': 'border-l-amber-400',
-    Discovery: 'border-l-blue-400',
-    'MVP Build': 'border-l-violet-500',
-    Validation: 'border-l-orange-400',
-    Production: 'border-l-emerald-400',
-    'On Hold': 'border-l-zinc-400',
-    Cancelled: 'border-l-red-400',
-};
-
-function ProjectAvatar({ name }: { name: string }) {
-    const initials = name
-        .split(' ')
-        .slice(0, 2)
-        .map((w) => w[0]?.toUpperCase() ?? '')
-        .join('');
-
-    return (
-        <div className="from-primary/20 to-primary/5 text-primary ring-primary/20 flex size-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br text-xs font-bold tracking-wide ring-1 ring-inset">
-            {initials}
-        </div>
-    );
-}
-
-type StatCardProps = {
-    label: string;
-    value: string | number;
-    sub: ReactNode;
-    icon: ReactNode;
-    iconClass: string;
-    ring?: boolean;
-};
-
-function StatCard({ label, value, sub, icon, iconClass, ring }: StatCardProps) {
-    return (
-        <Card
-            className={cn(
-                'rounded-2xl py-0 transition-shadow duration-200 hover:shadow-md',
-                ring && 'ring-1 ring-amber-300 dark:ring-amber-700/60',
-            )}
-        >
-            <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-2">
-                    <p className="text-muted-foreground text-xs font-medium">{label}</p>
-                    <div
-                        className={cn(
-                            'flex size-8 shrink-0 items-center justify-center rounded-lg shadow-sm',
-                            iconClass,
-                        )}
-                    >
-                        {icon}
-                    </div>
-                </div>
-                <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
-                <div className="text-muted-foreground mt-1.5 text-xs">{sub}</div>
-            </CardContent>
-        </Card>
-    );
-}
-
-function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
-    return (
-        <button
-            type="button"
-            onClick={onOpen}
-            className={cn(
-                'group rounded-2xl border border-l-4 p-4 text-left transition-all duration-200',
-                'hover:bg-muted/40 hover:-translate-y-0.5 hover:shadow-md',
-                STATUS_ACCENT[project.status],
-            )}
-        >
-            <div className="flex items-start gap-3">
-                <ProjectAvatar name={project.name} />
-                <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{project.name}</p>
-                    <p className="text-muted-foreground mt-0.5 truncate text-xs">
-                        {project.clientName}
-                    </p>
-                </div>
-                <StatusBadge status={project.status} />
-            </div>
-            <div className="border-border mt-3 flex items-center justify-between border-t pt-3">
-                <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-xs">
-                        {formatDate(project.startDate)}
-                    </span>
-                    {project.plan && (
-                        <Badge
-                            variant="outline"
-                            className="h-auto rounded-full px-1.5 py-0 text-[10px]"
-                        >
-                            {project.plan}
-                        </Badge>
-                    )}
-                </div>
-                <span className="text-muted-foreground group-hover:text-foreground inline-flex items-center gap-1 text-xs transition-colors">
-                    Open
-                    <IconArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-                </span>
-            </div>
-        </button>
-    );
-}
-
 export default function ProjectsList() {
     const { projects, onOpenProject, onNewProject } = useProjects();
     const summary = getProjectSummary(projects);
@@ -158,9 +50,7 @@ export default function ProjectsList() {
             <div className="relative flex flex-col gap-4">
                 {/* Hero */}
                 <Card className="border-primary/30 bg-card/80 overflow-hidden rounded-3xl py-0 backdrop-blur-sm">
-                    {/* Soft bloom behind heading */}
                     <div className="bg-primary/8 pointer-events-none absolute -left-8 -top-8 size-64 rounded-full blur-3xl" />
-                    {/* Right gradient sweep */}
                     <div className="from-primary/25 to-primary/0 absolute inset-y-0 right-0 w-1/2 bg-linear-to-l" />
                     <CardContent className="relative p-5 md:p-7">
                         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -255,8 +145,8 @@ export default function ProjectsList() {
                                         </EmptyMedia>
                                         <EmptyTitle>No Projects Yet</EmptyTitle>
                                         <EmptyDescription>
-                                            You haven&apos;t created any projects yet. Get started by creating your
-                                            first project.
+                                            You haven&apos;t created any projects yet. Get started by
+                                            creating your first project.
                                         </EmptyDescription>
                                     </EmptyHeader>
                                 </Empty> :

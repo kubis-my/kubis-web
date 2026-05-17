@@ -43,6 +43,7 @@ export default function NewProjectForm() {
                             id="name"
                             placeholder="e.g. Internal Purchase Order System"
                             value={form.name}
+                            autoComplete='off'
                             onChange={(e) => onChange('name', e.target.value)}
                         />
                     </div>
@@ -130,6 +131,7 @@ export default function NewProjectForm() {
                             placeholder="e.g. similar to Xero, SAP, or an existing spreadsheet setup"
                             value={form.references}
                             onChange={(e) => onChange('references', e.target.value)}
+                            autoComplete='off'
                         />
                     </div>
 
@@ -140,6 +142,7 @@ export default function NewProjectForm() {
                             placeholder="e.g. 5–10 internal staff across operations and finance"
                             value={form.expectedUsers}
                             onChange={(e) => onChange('expectedUsers', e.target.value)}
+                            autoComplete='off'
                         />
                     </div>
 

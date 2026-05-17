@@ -24,15 +24,15 @@ export enum ProjectStatus {
     CANCELLED = 'CANCELLED',
 }
 
+export interface ThreadPaginationInput {
+    cursor?: Nullable<number>;
+    take: number;
+}
+
 export interface ProjectPaginationInput {
     cursor?: Nullable<number>;
     take: number;
     status?: Nullable<ProjectStatus>;
-}
-
-export interface ThreadPaginationInput {
-    cursor?: Nullable<number>;
-    take: number;
 }
 
 export interface CreateProjectInput {
@@ -49,6 +49,12 @@ export interface CreateProjectInput {
 export interface AddProjectTeamMemberInput {
     projectPublicId: string;
     userPublicId: string;
+}
+
+export interface SendThreadMessageInput {
+    projectPublicId: string;
+    content: string;
+    replyToPublicId?: Nullable<string>;
 }
 
 export interface CreateMilestoneInput {
@@ -69,12 +75,6 @@ export interface AddMilestoneNoteInput {
     milestonePublicId: string;
     content: string;
     date: DateTime;
-}
-
-export interface SendThreadMessageInput {
-    projectPublicId: string;
-    content: string;
-    replyToPublicId?: Nullable<string>;
 }
 
 export interface PageInfo {
@@ -123,24 +123,6 @@ export interface ProjectTeam {
     isOwner: boolean;
 }
 
-export interface Project {
-    publicId: string;
-    name: string;
-    status: ProjectStatus;
-    stagingUrl?: Nullable<string>;
-    companyIds: string[];
-    createdAt: DateTime;
-    updatedAt: DateTime;
-    brief?: Nullable<Brief>;
-    projectTeams: ProjectTeam[];
-    milestones: Milestone[];
-}
-
-export interface PaginatedProject {
-    data: Project[];
-    pageInfo: PageInfo;
-}
-
 export interface ThreadMessage {
     publicId: string;
     senderId: string;
@@ -163,35 +145,54 @@ export interface PaginatedThreadMessages {
     pageInfo: ThreadPageInfo;
 }
 
+export interface Project {
+    publicId: string;
+    name: string;
+    status: ProjectStatus;
+    stagingUrl?: Nullable<string>;
+    companyIds: string[];
+    createdAt: DateTime;
+    updatedAt: DateTime;
+    brief?: Nullable<Brief>;
+    projectTeams: ProjectTeam[];
+    milestones: Milestone[];
+    threads?: PaginatedThreadMessages;
+}
+
+export interface PaginatedProject {
+    data: Project[];
+    pageInfo: PageInfo;
+}
+
 export interface IQuery {
     health(): string | Promise<string>;
     getProjectsForForge(
         pagination: ProjectPaginationInput,
     ): PaginatedProject | Promise<PaginatedProject>;
     getProjectForForge(publicId: string): Project | Promise<Project>;
-    getMilestonesForForge(projectPublicId: string): Milestone[] | Promise<Milestone[]>;
-    getMilestoneForForge(publicId: string): Milestone | Promise<Milestone>;
     getThreadMessagesForForge(
         projectPublicId: string,
         pagination: ThreadPaginationInput,
     ): PaginatedThreadMessages | Promise<PaginatedThreadMessages>;
+    getMilestonesForForge(projectPublicId: string): Milestone[] | Promise<Milestone[]>;
+    getMilestoneForForge(publicId: string): Milestone | Promise<Milestone>;
 }
 
 export interface IMutation {
     createProjectForForge(input: CreateProjectInput): Project | Promise<Project>;
     addProjectTeamMember(input: AddProjectTeamMemberInput): ProjectTeam | Promise<ProjectTeam>;
     removeProjectTeamMember(projectTeamPublicId: string): ProjectTeam | Promise<ProjectTeam>;
+    sendThreadMessageForForge(
+        input: SendThreadMessageInput,
+    ): ThreadMessage | Promise<ThreadMessage>;
+    deleteThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
+    restoreThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
     createMilestoneForForge(input: CreateMilestoneInput): Milestone | Promise<Milestone>;
     updateMilestoneForForge(
         publicId: string,
         input: UpdateMilestoneInput,
     ): Milestone | Promise<Milestone>;
     addMilestoneNoteForForge(input: AddMilestoneNoteInput): MilestoneNote | Promise<MilestoneNote>;
-    sendThreadMessageForForge(
-        input: SendThreadMessageInput,
-    ): ThreadMessage | Promise<ThreadMessage>;
-    deleteThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
-    restoreThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
 }
 
 export type DateTime = any;
