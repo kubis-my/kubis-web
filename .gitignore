@@ -37,3 +37,15 @@ yarn-error.log*
 .DS_Store
 *.pem
 *.log
+
+# Ruflo / Claude-Flow generated artifacts
+.claude-flow/
+.claude/agents/
+.claude/commands/
+.claude/helpers/
+.claude/memory.db
+.claude/settings.json
+.swarm/
+claude-flow.config.json
+data/
+ruvector.db
