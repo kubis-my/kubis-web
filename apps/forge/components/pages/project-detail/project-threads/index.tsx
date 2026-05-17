@@ -23,6 +23,7 @@ import { DateSeparator } from './date-separator';
 import { DELETE_MESSAGE, GET_THREAD_MESSAGES, RESTORE_MESSAGE, SEND_MESSAGE } from './graphql';
 import { MessageGroupItem } from './message-group-item';
 import { ReplyPreview } from './reply-preview';
+import { getThreadCache, setThreadCache } from './thread-cache';
 import type { Message } from './types';
 import { groupMessages, mapGqlMessage } from './utils';
 
@@ -43,7 +44,7 @@ export default function ProjectThreads() {
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const bottomRef = useRef<HTMLDivElement>(null);
+
     const topSentinelRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<RichTextEditorRef>(null);
     const isFirstRender = useRef(true);
@@ -51,6 +52,9 @@ export default function ProjectThreads() {
     const highlightTimeoutRef = useRef<number | null>(null);
     const isLoadingMoreRef = useRef(false);
     const pageInfoRef = useRef<ThreadPageInfo>(initialThreadsPageInfo);
+    const messagesRef = useRef<Message[]>(messages);
+
+    messagesRef.current = messages;
 
     const [sendMutation] = useMutation(SEND_MESSAGE);
     const [deleteMutation] = useMutation(DELETE_MESSAGE);
@@ -74,7 +78,7 @@ export default function ProjectThreads() {
             return;
         }
 
-        bottomRef.current?.scrollIntoView({ behavior });
+        scrollContainerRef.current?.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior });
     }, [messages]);
 
     const updateScrollToBottomVisibility = useCallback(() => {
@@ -97,6 +101,7 @@ export default function ProjectThreads() {
 
         const scrollContainer = scrollContainerRef.current;
         const prevScrollHeight = scrollContainer?.scrollHeight ?? 0;
+        const prevScrollTop = scrollContainer?.scrollTop ?? 0;
 
         const result = await fetchMoreMessages({
             variables: { projectPublicId: projectId, pagination: { take: THREAD_PAGINATION_SIZE, cursor: currentPageInfo.endCursor } },
@@ -104,19 +109,20 @@ export default function ProjectThreads() {
 
         const fetched = result.data?.getThreadMessagesForForge;
         if (fetched) {
-            setMessages((prev) => {
-                const existingIds = new Set(prev.map((m) => m.id));
-                const incoming = fetched.data
-                    .map((msg) => mapGqlMessage(msg, authUserId))
-                    .filter((m) => !existingIds.has(m.id));
-                return [...incoming, ...prev];
-            });
+            const existingIds = new Set(messagesRef.current.map((m) => m.id));
+            const incoming = fetched.data
+                .map((msg) => mapGqlMessage(msg, authUserId))
+                .filter((m) => !existingIds.has(m.id));
+            const accumulated = [...incoming, ...messagesRef.current];
+
+            setMessages(accumulated);
             pageInfoRef.current = fetched.pageInfo;
+            setThreadCache(projectId, accumulated, fetched.pageInfo);
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     if (scrollContainer) {
-                        scrollContainer.scrollTop = scrollContainer.scrollHeight - prevScrollHeight;
+                        scrollContainer.scrollTop = prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
                     }
                 });
             });
@@ -157,6 +163,44 @@ export default function ProjectThreads() {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (!projectId) return;
+
+        let cancelled = false;
+
+        getThreadCache(projectId).then((cached) => {
+            if (cancelled || !cached || cached.messages.length === 0) return;
+
+            const scrollContainer = scrollContainerRef.current;
+            const prevScrollHeight = scrollContainer?.scrollHeight ?? 0;
+            const prevScrollTop = scrollContainer?.scrollTop ?? 0;
+
+            shouldSkipNextAutoScroll.current = true;
+            pageInfoRef.current = cached.pageInfo;
+
+            setMessages((current) => {
+                if (current.length === 0) return cached.messages;
+
+                const oldestTs = current[0]!.timestamp.getTime();
+                const older = cached.messages.filter((m) => m.timestamp.getTime() < oldestTs);
+
+                return older.length > 0 ? [...older, ...current] : current;
+            });
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (scrollContainer) {
+                        scrollContainer.scrollTop = prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
+                    }
+                });
+            });
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [projectId]);
 
     const sendMessage = useCallback(async () => {
         if (!input.trim() || !projectId) return;
@@ -257,7 +301,7 @@ export default function ProjectThreads() {
     }, []);
 
     const scrollToBottom = useCallback(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        scrollContainerRef.current?.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: 'smooth' });
     }, []);
 
     return (
@@ -309,7 +353,7 @@ export default function ProjectThreads() {
                         ))}
                     </>
                 )}
-                <div ref={bottomRef} className="h-2" />
+                <div className="h-2" />
             </div>
 
             {messages.length > 0 && showScrollToBottom ? (
