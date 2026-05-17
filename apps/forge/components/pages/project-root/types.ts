@@ -9,6 +9,8 @@ export type ProjectStatus =
 
 export type SubscriptionPlan = 'Maintenance' | 'Starter' | 'Growth' | 'Scale';
 
+export type MilestoneStatus = 'Upcoming' | 'In Progress' | 'Done' | 'Cancelled';
+
 export type Project = {
     id: string;
     name: string;

@@ -11,7 +11,7 @@ import {
     Project as GqlProject,
     ProjectStatus as GqlProjectStatus,
 } from '@repo/commons/types/forge-service-schema.type';
-import { type ProjectStatus, type SubscriptionPlan } from '../project-root/types';
+import { type MilestoneStatus, type ProjectStatus } from '../project-root/types';
 import { ROUTE } from '@/root/libs/constants';
 
 export type ProjectBriefData = {
@@ -22,8 +22,6 @@ export type ProjectBriefData = {
     expectedUsers: string;
     notes: string;
 };
-
-export type MilestoneStatus = 'Upcoming' | 'In Progress' | 'Done' | 'Cancelled';
 
 export type MilestoneNote = {
     date: string;
@@ -41,12 +39,10 @@ export type Milestone = {
 export type ProjectDetail = {
     id: string;
     name: string;
-    clientName: string;
     companyNames: string[];
     status: ProjectStatus;
     startDate: string;
     stagingUrl?: string;
-    plan?: SubscriptionPlan;
     brief: ProjectBriefData;
     milestones: Milestone[];
 };
@@ -147,7 +143,6 @@ export default function ProjectDetailContainer({
             id: raw.publicId,
             name: raw.name,
             status: PROJECT_STATUS_MAP[raw.status],
-            clientName: companyNames[0] ?? '',
             companyNames,
             startDate: raw.createdAt,
             stagingUrl: raw.stagingUrl ?? undefined,

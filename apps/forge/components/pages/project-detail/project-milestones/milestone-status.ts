@@ -1,5 +1,5 @@
 import { IconCheck, IconCircle, IconCircleDashed, IconX } from '@tabler/icons-react';
-import type { MilestoneStatus } from '../project-detail-container';
+import type { MilestoneStatus } from '../../project-root/types';
 
 export const STATUS_CONFIG: Record<
     MilestoneStatus,
