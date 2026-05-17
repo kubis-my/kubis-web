@@ -71,17 +71,21 @@ export default function NewProjectForm() {
                                     return (
                                         <div
                                             key={company.publicId}
-                                            onClick={() => onToggleCompany(company.publicId)}
-                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
-                                                checked
-                                                    ? 'border-primary bg-primary/5'
-                                                    : 'hover:bg-muted/50'
-                                            }`}
+                                            onClick={(e) => {
+                                                if ((e.target as HTMLElement).tagName === 'INPUT') return;
+                                                onToggleCompany(company.publicId);
+                                            }}
+                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${checked
+                                                ? 'border-primary bg-primary/5'
+                                                : 'hover:bg-muted/50'
+                                                }`}
                                         >
                                             <Checkbox
                                                 checked={checked}
-                                                onCheckedChange={() => onToggleCompany(company.publicId)}
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onToggleCompany(company.publicId);
+                                                }}
                                             />
                                             <span className="text-sm font-medium">{company.name}</span>
                                         </div>
