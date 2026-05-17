@@ -16,6 +16,7 @@ export const env = createEnv({
         NEXT_PUBLIC_FORGE_CLIENT_ID: z.string().min(1),
         NEXT_PUBLIC_FORGE_APP_BASE_URL: z.url(),
         NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL: z.url(),
+        NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: z.url(),
     },
     emptyStringAsUndefined: true,
     runtimeEnvStrict: {
@@ -30,5 +31,6 @@ export const env = createEnv({
         NEXT_PUBLIC_FORGE_APP_BASE_URL: process.env.NEXT_PUBLIC_FORGE_APP_BASE_URL,
         NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL:
             process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL,
+        NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: process.env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL,
     },
 });

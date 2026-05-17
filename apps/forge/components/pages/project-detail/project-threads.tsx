@@ -1,6 +1,9 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { useParams } from 'next/navigation';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { Avatar, AvatarFallback } from '@repo/shadcn-ui/components/avatar';
 import { Button } from '@repo/shadcn-ui/components/button';
 import {
@@ -28,21 +31,17 @@ import {
     IconTrash,
     IconX,
 } from '@tabler/icons-react';
-
-type Sender = {
-    id: string;
-    name: string;
-    initials: string;
-    avatarClass: string;
-};
+import { useAuth } from '@/shadcn/providers/auth-provider';
 
 type Message = {
     id: string;
     senderId: string;
+    senderName: string;
+    senderInitials: string;
+    avatarClass: string;
     content: string;
     timestamp: Date;
     replyToId?: string;
-    deletedContent?: string;
     deletedAt?: Date;
 };
 
@@ -57,100 +56,93 @@ type DateGroup = {
     groups: MessageGroup[];
 };
 
-const SENDERS: Record<string, Sender> = {
-    kubis: {
-        id: 'kubis',
-        name: 'Kubis Team',
-        initials: 'KB',
-        avatarClass: 'bg-violet-500 text-white',
-    },
-    client: {
-        id: 'client',
-        name: 'Ahmad Faris',
-        initials: 'AF',
-        avatarClass: 'bg-sky-500 text-white',
-    },
+type GqlMessage = {
+    publicId: string;
+    senderId: string;
+    senderName: string;
+    senderInitials: string;
+    content: string;
+    replyToId: string | null;
+    deletedAt: string | null;
+    createdAt: string;
 };
 
-const MOCK_MESSAGES: Message[] = [
-    {
-        id: '1',
-        senderId: 'client',
-        content:
-            "<p>Hi, I've submitted the project brief. Let me know if you need any clarification on the approval flow.</p>",
-        timestamp: new Date('2026-04-30T10:31:00'),
-    },
-    {
-        id: '2',
-        senderId: 'client',
-        content: '<p>Also, should I prepare any documentation from our current Excel tracker?</p>',
-        timestamp: new Date('2026-04-30T10:32:00'),
-    },
-    {
-        id: '3',
-        senderId: 'kubis',
-        content:
-            "<p>Hi Ahmad! Thanks for the detailed brief — really helpful. We'll kick off discovery this week.</p>",
-        timestamp: new Date('2026-04-30T11:05:00'),
-    },
-    {
-        id: '4',
-        senderId: 'kubis',
-        content:
-            "<p>Yes, please export a few sample rows from the Excel tracker. It'll help us understand the current data structure.</p>",
-        timestamp: new Date('2026-04-30T11:06:00'),
-    },
-    {
-        id: '5',
-        senderId: 'kubis',
-        content: '<p>No need to clean it up — raw data is fine.</p>',
-        timestamp: new Date('2026-04-30T11:06:30'),
-    },
-    {
-        id: '6',
-        senderId: 'client',
-        content: "<p>Sure, I'll send it over shortly.</p>",
-        timestamp: new Date('2026-04-30T11:20:00'),
-    },
-    {
-        id: '7',
-        senderId: 'client',
-        content: "<p>I've shared the Excel file via the drive link I sent to your email.</p>",
-        timestamp: new Date('2026-05-01T09:15:00'),
-    },
-    {
-        id: '8',
-        senderId: 'kubis',
-        content: '<p>Got it, thanks! A few questions before we finalise the scope:</p>',
-        timestamp: new Date('2026-05-01T09:45:00'),
-    },
-    {
-        id: '9',
-        senderId: 'kubis',
-        content:
-            '<p>1. How many departments need the approval flow? Is it just Ops, Finance, and Management?</p>',
-        timestamp: new Date('2026-05-01T09:45:30'),
-    },
-    {
-        id: '10',
-        senderId: 'kubis',
-        content: '<p>2. Are there any cases where approval can skip Finance entirely?</p>',
-        timestamp: new Date('2026-05-01T09:46:00'),
-    },
-    {
-        id: '11',
-        senderId: 'client',
-        content: "<p>Yes, it's those 3 departments.</p>",
-        timestamp: new Date('2026-05-01T10:02:00'),
-    },
-    {
-        id: '12',
-        senderId: 'client',
-        content:
-            '<p>And yes — for internal consumables (e.g. printer paper, stationery), Finance approval can be bypassed.</p>',
-        timestamp: new Date('2026-05-01T10:03:00'),
-    },
-];
+const GET_THREAD_MESSAGES: TypedDocumentNode<
+    { getThreadMessagesForForge: { data: GqlMessage[] } },
+    { projectPublicId: string; pagination: { take: number } }
+> = gql`
+    query GetThreadMessagesForForge($projectPublicId: String!, $pagination: ThreadPaginationInput!) {
+        getThreadMessagesForForge(projectPublicId: $projectPublicId, pagination: $pagination) {
+            data {
+                publicId
+                senderId
+                senderName
+                senderInitials
+                content
+                replyToId
+                deletedAt
+                createdAt
+            }
+        }
+    }
+`;
+
+const SEND_MESSAGE: TypedDocumentNode<
+    { sendThreadMessageForForge: GqlMessage },
+    { input: { projectPublicId: string; content: string; replyToPublicId?: string } }
+> = gql`
+    mutation SendThreadMessageForForge($input: SendThreadMessageInput!) {
+        sendThreadMessageForForge(input: $input) {
+            publicId
+            senderId
+            senderName
+            senderInitials
+            content
+            replyToId
+            deletedAt
+            createdAt
+        }
+    }
+`;
+
+const DELETE_MESSAGE: TypedDocumentNode<
+    { deleteThreadMessageForForge: { publicId: string; deletedAt: string } },
+    { publicId: string }
+> = gql`
+    mutation DeleteThreadMessageForForge($publicId: String!) {
+        deleteThreadMessageForForge(publicId: $publicId) {
+            publicId
+            deletedAt
+        }
+    }
+`;
+
+const RESTORE_MESSAGE: TypedDocumentNode<
+    { restoreThreadMessageForForge: { publicId: string; content: string; deletedAt: string | null } },
+    { publicId: string }
+> = gql`
+    mutation RestoreThreadMessageForForge($publicId: String!) {
+        restoreThreadMessageForForge(publicId: $publicId) {
+            publicId
+            content
+            deletedAt
+        }
+    }
+`;
+
+function mapGqlMessage(msg: GqlMessage, authUserId?: string): Message {
+    return {
+        id: msg.publicId,
+        senderId: msg.senderId,
+        senderName: msg.senderName,
+        senderInitials: msg.senderInitials,
+        avatarClass: msg.senderId === authUserId ? 'bg-violet-500 text-white' : 'bg-sky-500 text-white',
+        content: msg.content,
+        timestamp: new Date(msg.createdAt),
+        replyToId: msg.replyToId ?? undefined,
+        deletedAt: msg.deletedAt ? new Date(msg.deletedAt) : undefined,
+    };
+}
 
 function toLocalDateKey(date: Date): string {
     return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
@@ -255,11 +247,6 @@ function ReplyPreview({
         );
     }
 
-    const sender = SENDERS[message.senderId] ?? {
-        name: message.senderId,
-        initials: '?',
-        avatarClass: 'bg-muted',
-    };
     const preview = message.deletedAt
         ? 'This message was deleted'
         : getPlainTextFromHtml(message.content);
@@ -271,7 +258,7 @@ function ReplyPreview({
             role={onClick ? 'button' : undefined}
             tabIndex={onClick ? 0 : undefined}
         >
-            <p className="text-primary text-xs font-semibold">{sender.name}</p>
+            <p className="text-primary text-xs font-semibold">{message.senderName}</p>
             <p className="text-muted-foreground line-clamp-2 text-xs leading-5">{preview}</p>
         </div>
     );
@@ -294,11 +281,14 @@ function MessageGroupItem({
     onRestore: (message: Message) => void;
     onJumpToMessage: (messageId: string) => void;
 }) {
-    const sender = SENDERS[group.senderId] ?? {
-        name: group.senderId,
-        initials: '?',
-        avatarClass: 'bg-muted',
-    };
+    const firstMsg = group.messages[0];
+    const sender = firstMsg
+        ? {
+            name: firstMsg.senderName,
+            initials: firstMsg.senderInitials,
+            avatarClass: firstMsg.avatarClass,
+        }
+        : { name: group.senderId, initials: '?', avatarClass: 'bg-muted' };
 
     return (
         <div className="group flex gap-3 px-4 py-2 transition-colors md:px-6">
@@ -329,7 +319,7 @@ function MessageGroupItem({
                                         className={cn(
                                             'border-border/30 hover:border-border/40 hover:bg-muted/20 -mx-3 scroll-mt-28 rounded-lg border px-3 py-2 transition-colors',
                                             highlightedMessageId === msg.id &&
-                                                'border-emerald-200/70',
+                                            'border-emerald-200/70',
                                         )}
                                     >
                                         {msg.replyToId ? (
@@ -393,17 +383,37 @@ function MessageGroupItem({
 }
 
 export default function ProjectThreads() {
-    const [messages, setMessages] = useState(MOCK_MESSAGES);
+    const { projectId } = useParams<{ projectId: string }>();
+    const { authUser } = useAuth();
+
+    const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [replyingToId, setReplyingToId] = useState<string | null>(null);
     const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
     const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<RichTextEditorRef>(null);
     const isFirstRender = useRef(true);
     const shouldSkipNextAutoScroll = useRef(false);
     const highlightTimeoutRef = useRef<number | null>(null);
+
+    const { data: threadData, refetch } = useQuery(GET_THREAD_MESSAGES, {
+        variables: { projectPublicId: projectId, pagination: { take: 100 } },
+        skip: !projectId,
+    });
+
+    const [sendMutation] = useMutation(SEND_MESSAGE);
+    const [deleteMutation] = useMutation(DELETE_MESSAGE);
+    const [restoreMutation] = useMutation(RESTORE_MESSAGE);
+
+    useEffect(() => {
+        if (!threadData) return;
+        const authUserId = authUser?.publicId;
+        setMessages(threadData.getThreadMessagesForForge.data.map((msg) => mapGqlMessage(msg, authUserId)));
+    }, [threadData, authUser?.publicId]);
+
     const dateGroups = groupMessages(messages);
     const messagesById = useMemo(
         () => new Map(messages.map((message) => [message.id, message])),
@@ -445,64 +455,80 @@ export default function ProjectThreads() {
         };
     }, []);
 
-    const sendMessage = useCallback(() => {
-        if (!input.trim()) return;
+    const sendMessage = useCallback(async () => {
+        if (!input.trim() || !projectId) return;
 
-        setMessages((prev) => [
-            ...prev,
-            {
-                id: String(Date.now()),
-                senderId: 'kubis',
-                content: input,
-                timestamp: new Date(),
-                replyToId: replyingToId ?? undefined,
-            },
-        ]);
+        const tempId = `temp-${Date.now()}`;
+        const tempMessage: Message = {
+            id: tempId,
+            senderId: authUser?.publicId ?? '',
+            senderName: authUser?.nickname ?? authUser?.displayName ?? 'You',
+            senderInitials: ((authUser?.nickname ?? authUser?.displayName ?? 'Y').at(0) ?? 'Y').toUpperCase(),
+            avatarClass: 'bg-violet-500 text-white',
+            content: input,
+            timestamp: new Date(),
+            replyToId: replyingToId ?? undefined,
+        };
+
+        setMessages((prev) => [...prev, tempMessage]);
         setInput('');
         setReplyingToId(null);
         editorRef.current?.clear();
-    }, [input, replyingToId]);
+
+        await sendMutation({
+            variables: {
+                input: {
+                    projectPublicId: projectId,
+                    content: input,
+                    replyToPublicId: replyingToId ?? undefined,
+                },
+            },
+        });
+
+        await refetch();
+    }, [input, replyingToId, projectId, authUser, sendMutation, refetch]);
 
     const replyToMessage = useCallback((message: Message) => {
         setReplyingToId(message.id);
         editorRef.current?.focus();
     }, []);
 
-    const deleteMessage = useCallback((message: Message) => {
-        shouldSkipNextAutoScroll.current = true;
+    const deleteMessage = useCallback(
+        async (message: Message) => {
+            shouldSkipNextAutoScroll.current = true;
 
-        setMessages((prev) =>
-            prev.map((item) =>
-                item.id === message.id
-                    ? {
-                          ...item,
-                          deletedContent: item.content,
-                          content: '',
-                          deletedAt: new Date(),
-                      }
-                    : item,
-            ),
-        );
+            setMessages((prev) =>
+                prev.map((item) =>
+                    item.id === message.id ? { ...item, deletedAt: new Date() } : item,
+                ),
+            );
 
-        setReplyingToId((currentId) => (currentId === message.id ? null : currentId));
-    }, []);
+            setReplyingToId((currentId) => (currentId === message.id ? null : currentId));
 
-    const restoreMessage = useCallback((message: Message) => {
-        shouldSkipNextAutoScroll.current = true;
+            await deleteMutation({ variables: { publicId: message.id } });
+        },
+        [deleteMutation],
+    );
 
-        setMessages((prev) =>
-            prev.map((item) =>
-                item.id === message.id
-                    ? {
-                          ...item,
-                          content: item.deletedContent ?? item.content,
-                          deletedContent: undefined,
-                          deletedAt: undefined,
-                      }
-                    : item,
-            ),
-        );
-    }, []);
+    const restoreMessage = useCallback(
+        async (message: Message) => {
+            shouldSkipNextAutoScroll.current = true;
+
+            const result = await restoreMutation({ variables: { publicId: message.id } });
+            const restored = result.data?.restoreThreadMessageForForge;
+
+            if (restored) {
+                setMessages((prev) =>
+                    prev.map((item) =>
+                        item.id === restored.publicId
+                            ? { ...item, content: restored.content, deletedAt: undefined }
+                            : item,
+                    ),
+                );
+            }
+        },
+        [restoreMutation],
+    );
 
     const jumpToMessage = useCallback((messageId: string) => {
         document.getElementById(`thread-message-${messageId}`)?.scrollIntoView({

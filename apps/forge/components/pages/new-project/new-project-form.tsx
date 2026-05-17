@@ -12,7 +12,7 @@ import Link from 'next/link';
 import { ROUTE } from '@/root/libs/constants';
 
 export default function NewProjectForm() {
-    const { form, availableCompanies, onChange, onToggleCompany, onSubmit } = useNewProject();
+    const { form, availableCompanies, isSubmitting, onChange, onToggleCompany, onSubmit } = useNewProject();
 
     const isValid = form.name.trim().length > 0 && form.problem.trim().length > 0 && form.systemNeeds.trim().length > 0;
 
@@ -157,8 +157,8 @@ export default function NewProjectForm() {
                     <Button variant="outline" asChild>
                         <Link href={ROUTE.FORGE.HOME}>Back</Link>
                     </Button>
-                    <Button type="submit" disabled={!isValid}>
-                        Submit Project
+                    <Button type="submit" disabled={!isValid || isSubmitting}>
+                        {isSubmitting ? 'Submitting...' : 'Submit Project'}
                     </Button>
                 </div>
             </form>

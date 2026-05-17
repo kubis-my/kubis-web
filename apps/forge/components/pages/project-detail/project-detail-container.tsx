@@ -1,7 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import { useParams } from 'next/navigation';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
+import { useAuth } from '@/shadcn/providers/auth-provider';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import {
+    MilestoneStatus as GqlMilestoneStatus,
+    ProjectStatus as GqlProjectStatus,
+} from '@repo/commons/types/forge-service-schema.type';
 import { ProjectStatus, SubscriptionPlan } from '../project-root/projects-container';
 import { ROUTE } from '@/root/libs/constants';
 
@@ -14,7 +22,7 @@ export type ProjectBriefData = {
     notes: string;
 };
 
-export type MilestoneStatus = 'Upcoming' | 'In Progress' | 'Done';
+export type MilestoneStatus = 'Upcoming' | 'In Progress' | 'Done' | 'Cancelled';
 
 export type MilestoneNote = {
     date: string;
@@ -25,7 +33,7 @@ export type Milestone = {
     id: string;
     name: string;
     status: MilestoneStatus;
-    estimatedDate: string;
+    estimatedDate: string | null;
     notes?: MilestoneNote[];
 };
 
@@ -42,77 +50,91 @@ export type ProjectDetail = {
     milestones: Milestone[];
 };
 
-const MOCK_PROJECT: ProjectDetail = {
-    id: '1',
-    name: 'Internal PO System',
-    clientName: 'Syarikat Maju Sdn Bhd',
-    companyNames: ['Syarikat Maju Sdn Bhd', 'Maju Trading Sdn Bhd'],
-    status: 'MVP Build',
-    startDate: '2026-03-01',
-    stagingUrl: 'https://staging.internal-po.example.com',
-    plan: 'Growth',
-    brief: {
-        background:
-            'We are a manufacturing company with 50+ staff. Our procurement process is currently managed via WhatsApp and Excel spreadsheets.',
-        problem:
-            '<p>Our purchase approval workflow is entirely manual — requests are sent via WhatsApp to managers who approve verbally or via message. This creates:</p><ul><li>No audit trail for approvals</li><li>Lost or forgotten purchase requests</li><li>No visibility into pending or approved orders</li></ul>',
-        systemNeeds:
-            '<p>We need a system that allows staff to:</p><ul><li>Submit purchase requests with item details and estimated cost</li><li>Route requests to the correct approver based on department</li><li>Track approval status in real-time</li><li>Generate a simple purchase order PDF on approval</li></ul>',
-        references: 'Similar to SAP Ariba but much simpler. We currently use an Excel tracker.',
-        expectedUsers: '15–20 internal staff across operations, finance, and management.',
-        notes: '',
-    },
-    milestones: [
-        {
-            id: '1',
-            name: 'Discovery',
-            status: 'Done',
-            estimatedDate: '2026-03-15',
-            notes: [
-                {
-                    date: '2026-03-05',
-                    content: '<p>Kickoff call with client. Key takeaways:</p><ul><li>Current flow is entirely via WhatsApp + Excel</li><li>3 approval tiers: staff → HOD → finance</li><li>No existing audit trail</li></ul>',
-                },
-                {
-                    date: '2026-03-10',
-                    content: '<p>Follow-up to clarify routing rules:</p><ul><li>Requests above RM 5,000 require finance sign-off</li><li>HOD can delegate to a deputy</li></ul>',
-                },
-                {
-                    date: '2026-03-14',
-                    content: '<p>Scope locked. Requirements doc signed off. <strong>Moving to MVP Build.</strong></p>',
-                },
-            ],
-        },
-        {
-            id: '2',
-            name: 'MVP Build',
-            status: 'In Progress',
-            estimatedDate: '2026-05-30',
-            notes: [
-                {
-                    date: '2026-04-02',
-                    content: '<p>Staging deployed. Covered in this session:</p><ul><li>PO submission form live</li><li>Approval flow wired up for all 3 tiers</li><li>Client given staging credentials</li></ul>',
-                },
-                {
-                    date: '2026-04-28',
-                    content: '<p>Client walkthrough on staging. Feedback:</p><ul><li>Notification email needs company letterhead</li><li>Approver wants to add comments when rejecting</li></ul><p>Both items added to backlog.</p>',
-                },
-            ],
-        },
-        {
-            id: '3',
-            name: 'Validation',
-            status: 'Upcoming',
-            estimatedDate: '2026-06-20',
-        },
-        {
-            id: '4',
-            name: 'Production',
-            status: 'Upcoming',
-            estimatedDate: '2026-07-01',
-        },
-    ],
+const PROJECT_STATUS_MAP: Record<GqlProjectStatus, ProjectStatus> = {
+    PENDING_REVIEW: 'Pending Review',
+    DISCOVERY: 'Discovery',
+    MVP_BUILD: 'MVP Build',
+    VALIDATION: 'Validation',
+    PRODUCTION: 'Production',
+    ON_HOLD: 'On Hold',
+    CANCELLED: 'Cancelled',
 };
+
+const MILESTONE_STATUS_MAP: Record<GqlMilestoneStatus, MilestoneStatus> = {
+    UPCOMING: 'Upcoming',
+    IN_PROGRESS: 'In Progress',
+    DONE: 'Done',
+    CANCELLED: 'Cancelled',
+};
+
+type GqlMilestoneNote = {
+    content: string;
+    date: string;
+};
+
+type GqlMilestone = {
+    publicId: string;
+    name: string;
+    status: GqlMilestoneStatus;
+    estimatedAt: string | null;
+    order: number;
+    notes: GqlMilestoneNote[];
+};
+
+type GqlBrief = {
+    background: string | null;
+    problem: string;
+    systemNeeds: string;
+    references: string | null;
+    expectedUsers: string | null;
+    notes: string | null;
+};
+
+type GqlProjectDetail = {
+    publicId: string;
+    name: string;
+    status: GqlProjectStatus;
+    stagingUrl: string | null;
+    companyIds: string[];
+    createdAt: string;
+    brief: GqlBrief | null;
+    milestones: GqlMilestone[];
+};
+
+const GET_PROJECT: TypedDocumentNode<
+    { getProjectForForge: GqlProjectDetail },
+    { publicId: string }
+> = gql`
+    query GetProjectForForge($publicId: String!) {
+        getProjectForForge(publicId: $publicId) {
+            publicId
+            name
+            status
+            stagingUrl
+            companyIds
+            createdAt
+            brief {
+                background
+                problem
+                systemNeeds
+                references
+                expectedUsers
+                notes
+            }
+            milestones {
+                publicId
+                name
+                status
+                estimatedAt
+                order
+                notes {
+                    content
+                    date
+                }
+            }
+        }
+    }
+`;
 
 type ProjectDetailContextType = {
     project: ProjectDetail;
@@ -133,19 +155,70 @@ export function useProjectDetail() {
 export default function ProjectDetailContainer({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
+    const { projectId } = useParams<{ projectId: string }>();
+    const { authUser } = useAuth();
     const { updateBreadcrumbList } = useDashboard01();
 
+    const { data } = useQuery(GET_PROJECT, {
+        variables: { publicId: projectId },
+        skip: !projectId,
+    });
+
+    const companyNameMap = useMemo(() => {
+        const map = new Map<string, string>();
+        (authUser?.companies ?? []).forEach((c) => map.set(c.publicId, c.name));
+        return map;
+    }, [authUser]);
+
+    const project = useMemo((): ProjectDetail | null => {
+        const raw = data?.getProjectForForge;
+        if (!raw) return null;
+
+        const companyNames = raw.companyIds.map((id) => companyNameMap.get(id) ?? id);
+
+        return {
+            id: raw.publicId,
+            name: raw.name,
+            status: PROJECT_STATUS_MAP[raw.status],
+            clientName: companyNames[0] ?? '',
+            companyNames,
+            startDate: raw.createdAt,
+            stagingUrl: raw.stagingUrl ?? undefined,
+            brief: {
+                background: raw.brief?.background ?? '',
+                problem: raw.brief?.problem ?? '',
+                systemNeeds: raw.brief?.systemNeeds ?? '',
+                references: raw.brief?.references ?? '',
+                expectedUsers: raw.brief?.expectedUsers ?? '',
+                notes: raw.brief?.notes ?? '',
+            },
+            milestones: [...raw.milestones]
+                .sort((a, b) => a.order - b.order)
+                .map((m) => ({
+                    id: m.publicId,
+                    name: m.name,
+                    status: MILESTONE_STATUS_MAP[m.status],
+                    estimatedDate: m.estimatedAt,
+                    notes: m.notes.map((n) => ({ date: n.date, content: n.content })),
+                })),
+        };
+    }, [data, companyNameMap]);
+
     useEffect(() => {
+        if (!project) return;
+
         updateBreadcrumbList([
             { name: 'Projects', url: ROUTE.FORGE.HOME },
-            { name: MOCK_PROJECT.name },
+            { name: project.name },
         ]);
 
         return () => updateBreadcrumbList([]);
-    }, [updateBreadcrumbList]);
+    }, [project, updateBreadcrumbList]);
+
+    if (!project) return null;
 
     return (
-        <ProjectDetailContext.Provider value={{ project: MOCK_PROJECT }}>
+        <ProjectDetailContext.Provider value={{ project }}>
             {children}
         </ProjectDetailContext.Provider>
     );

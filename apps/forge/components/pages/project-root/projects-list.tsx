@@ -62,7 +62,7 @@ function ProjectAvatar({ name }: { name: string }) {
         .join('');
 
     return (
-        <div className="from-primary/20 to-primary/5 text-primary ring-primary/20 flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-xs font-bold tracking-wide ring-1 ring-inset">
+        <div className="from-primary/20 to-primary/5 text-primary ring-primary/20 flex size-9 shrink-0 items-center justify-center rounded-xl bg-linear-to-br text-xs font-bold tracking-wide ring-1 ring-inset">
             {initials}
         </div>
     );

@@ -1,9 +1,10 @@
 'use client';
 
-import { IconCheck, IconCircle, IconCircleDashed } from '@tabler/icons-react';
+import { IconCheck, IconCircle, IconCircleDashed, IconNotes, IconX } from '@tabler/icons-react';
 import { useProjectDetail } from './project-detail-container';
-import type { MilestoneNote, MilestoneStatus } from './project-detail-container';
+import type { MilestoneStatus } from './project-detail-container';
 import { cn } from '@repo/shadcn-ui/lib/utils';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/shadcn/components/empty';
 
 const STATUS_CONFIG: Record<
     MilestoneStatus,
@@ -27,6 +28,12 @@ const STATUS_CONFIG: Record<
         iconClass: 'bg-muted text-muted-foreground',
         badgeClass: 'bg-muted text-muted-foreground border-border',
     },
+    Cancelled: {
+        label: 'Cancelled',
+        Icon: IconX,
+        iconClass: 'bg-red-500 text-white',
+        badgeClass: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
+    },
 };
 
 const dateFormatter = new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' });
@@ -34,7 +41,6 @@ const dateFormatter = new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' });
 export default function ProjectMilestones() {
     const { project } = useProjectDetail();
     const { milestones } = project;
-    const milestoneWithNotes = milestones.filter((m) => m.notes?.length);
 
     return (
         <div className="flex w-full flex-col gap-8 py-2">
@@ -50,7 +56,7 @@ export default function ProjectMilestones() {
                     const config = STATUS_CONFIG[milestone.status];
                     const isFirst = index === 0;
                     const isLast = index === milestones.length - 1;
-                    const prevDone = index > 0 && milestones[index - 1].status === 'Done';
+                    const prevDone = index > 0 && milestones[index - 1]?.status === 'Done';
                     const isDone = milestone.status === 'Done';
 
                     return (
@@ -88,20 +94,22 @@ export default function ProjectMilestones() {
                                 >
                                     {config.label}
                                 </span>
-                                <p className="text-xs text-muted-foreground">
-                                    Est. {dateFormatter.format(new Date(milestone.estimatedDate))}
-                                </p>
+                                {milestone.estimatedDate ? (
+                                    <p className="text-xs text-muted-foreground">
+                                        Est. {dateFormatter.format(new Date(milestone.estimatedDate))}
+                                    </p>
+                                ) : null}
                             </div>
                         </div>
                     );
                 })}
             </div>
 
-            {milestoneWithNotes.length > 0 && (
+            {milestones.length > 0 && (
                 <div className="space-y-5">
-                    {milestoneWithNotes.map((milestone) => {
+                    {milestones.map((milestone) => {
                         const config = STATUS_CONFIG[milestone.status];
-                        const notes = milestone.notes as MilestoneNote[];
+                        const notes = milestone.notes ?? [];
 
                         return (
                             <section
@@ -125,23 +133,37 @@ export default function ProjectMilestones() {
                                 </div>
 
                                 <div className="divide-y">
-                                    {notes.map((note, i) => (
-                                        <article
-                                            key={i}
-                                            className="grid gap-3 px-4 py-4 sm:grid-cols-[108px_1fr] sm:gap-4 sm:px-5"
-                                        >
-                                            <div className="sm:pt-1">
-                                                <p className="text-xs font-medium text-muted-foreground">
-                                                    {dateFormatter.format(new Date(note.date))}
-                                                </p>
-                                            </div>
+                                    {notes.length === 0 ? (
+                                        <Empty className="col-span-full">
+                                            <EmptyHeader>
+                                                <EmptyMedia variant="icon">
+                                                    <IconNotes />
+                                                </EmptyMedia>
+                                                <EmptyTitle>No Updates Yet</EmptyTitle>
+                                                <EmptyDescription>
+                                                    There are no updates for this milestone yet.
+                                                </EmptyDescription>
+                                            </EmptyHeader>
+                                        </Empty>
+                                    ) : (
+                                        notes.map((note, i) => (
+                                            <article
+                                                key={`${note.date}-${i}`}
+                                                className="grid gap-3 px-4 py-4 sm:grid-cols-[108px_1fr] sm:gap-4 sm:px-5"
+                                            >
+                                                <div className="sm:pt-1">
+                                                    <p className="text-xs font-medium text-muted-foreground">
+                                                        {dateFormatter.format(new Date(note.date))}
+                                                    </p>
+                                                </div>
 
-                                            <div
-                                                className="prose-editor text-sm leading-6"
-                                                dangerouslySetInnerHTML={{ __html: note.content }}
-                                            />
-                                        </article>
-                                    ))}
+                                                <div
+                                                    className="prose-editor text-sm leading-6"
+                                                    dangerouslySetInnerHTML={{ __html: note.content }}
+                                                />
+                                            </article>
+                                        ))
+                                    )}
                                 </div>
                             </section>
                         );

@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { gql, TypedDocumentNode } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { Company } from '@repo/commons/types/account-service-schema.type';
 import { ROUTE } from '@/root/libs/constants';
@@ -20,6 +22,7 @@ type ProjectForm = {
 type NewProjectContextType = {
     form: ProjectForm;
     availableCompanies: Company[];
+    isSubmitting: boolean;
     onChange: (field: keyof Omit<ProjectForm, 'companyIds'>, value: string) => void;
     onToggleCompany: (publicId: string) => void;
     onSubmit: () => void;
@@ -36,6 +39,28 @@ export function useNewProject() {
 
     return context;
 }
+
+const CREATE_PROJECT: TypedDocumentNode<
+    { createProjectForForge: { publicId: string } },
+    {
+        input: {
+            name: string;
+            companyIds: string[];
+            background?: string;
+            problem: string;
+            systemNeeds: string;
+            references?: string;
+            expectedUsers?: string;
+            notes?: string;
+        };
+    }
+> = gql`
+    mutation CreateProjectForForge($input: CreateProjectInput!) {
+        createProjectForForge(input: $input) {
+            publicId
+        }
+    }
+`;
 
 export default function NewProjectContainer({
     children,
@@ -56,6 +81,8 @@ export default function NewProjectContainer({
         companyIds: [],
     });
 
+    const [createProject, { loading: isSubmitting }] = useMutation(CREATE_PROJECT);
+
     function onChange(field: keyof Omit<ProjectForm, 'companyIds'>, value: string) {
         setForm((prev) => ({ ...prev, [field]: value }));
     }
@@ -73,12 +100,33 @@ export default function NewProjectContainer({
         });
     }
 
-    function onSubmit() {
-        router.push(ROUTE.FORGE.PROJECT_DETAIL('1'));
+    async function onSubmit() {
+        const result = await createProject({
+            variables: {
+                input: {
+                    name: form.name,
+                    companyIds: form.companyIds,
+                    background: form.background || undefined,
+                    problem: form.problem,
+                    systemNeeds: form.systemNeeds,
+                    references: form.references || undefined,
+                    expectedUsers: form.expectedUsers || undefined,
+                    notes: form.notes || undefined,
+                },
+            },
+        });
+
+        const publicId = result.data?.createProjectForForge.publicId;
+
+        if (publicId) {
+            router.push(ROUTE.FORGE.PROJECT_DETAIL(publicId));
+        }
     }
 
     return (
-        <NewProjectContext.Provider value={{ form, availableCompanies, onChange, onToggleCompany, onSubmit }}>
+        <NewProjectContext.Provider
+            value={{ form, availableCompanies, isSubmitting, onChange, onToggleCompany, onSubmit }}
+        >
             {children}
         </NewProjectContext.Provider>
     );

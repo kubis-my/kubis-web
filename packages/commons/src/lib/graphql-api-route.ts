@@ -3,8 +3,8 @@ import { getAccessTokenCookie } from '../utils/cookie-helpers';
 import { csrfProtection } from './csrf-plugin';
 import { createForwardedHeaders } from '../utils/client-ip';
 
-export const graphql = (GRAPHQL_URL: string) => {
-    return new Elysia({ prefix: '/api/graphql' })
+export const graphql = (GRAPHQL_URL: string, prefix = '/api/graphql') => {
+    return new Elysia({ prefix })
         .use(csrfProtection())
         .post('/', async ({ body, set, request }) => {
             const accessToken = (await getAccessTokenCookie()) ?? 'invalid-token';

@@ -1,0 +1,198 @@
+/*
+ * -------------------------------------------------------
+ * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+ * -------------------------------------------------------
+ */
+
+/* tslint:disable */
+/* eslint-disable */
+
+export enum MilestoneStatus {
+    UPCOMING = 'UPCOMING',
+    IN_PROGRESS = 'IN_PROGRESS',
+    DONE = 'DONE',
+    CANCELLED = 'CANCELLED',
+}
+
+export enum ProjectStatus {
+    PENDING_REVIEW = 'PENDING_REVIEW',
+    DISCOVERY = 'DISCOVERY',
+    MVP_BUILD = 'MVP_BUILD',
+    VALIDATION = 'VALIDATION',
+    PRODUCTION = 'PRODUCTION',
+    ON_HOLD = 'ON_HOLD',
+    CANCELLED = 'CANCELLED',
+}
+
+export interface ProjectPaginationInput {
+    cursor?: Nullable<number>;
+    take: number;
+    status?: Nullable<ProjectStatus>;
+}
+
+export interface ThreadPaginationInput {
+    cursor?: Nullable<number>;
+    take: number;
+}
+
+export interface CreateProjectInput {
+    name: string;
+    companyIds: string[];
+    background?: Nullable<string>;
+    problem: string;
+    systemNeeds: string;
+    references?: Nullable<string>;
+    expectedUsers?: Nullable<string>;
+    notes?: Nullable<string>;
+}
+
+export interface AddProjectTeamMemberInput {
+    projectPublicId: string;
+    userPublicId: string;
+}
+
+export interface CreateMilestoneInput {
+    projectPublicId: string;
+    name: string;
+    estimatedAt?: Nullable<DateTime>;
+    order?: Nullable<number>;
+}
+
+export interface UpdateMilestoneInput {
+    name?: Nullable<string>;
+    status?: Nullable<MilestoneStatus>;
+    estimatedAt?: Nullable<DateTime>;
+    order?: Nullable<number>;
+}
+
+export interface AddMilestoneNoteInput {
+    milestonePublicId: string;
+    content: string;
+    date: DateTime;
+}
+
+export interface SendThreadMessageInput {
+    projectPublicId: string;
+    content: string;
+    replyToPublicId?: Nullable<string>;
+}
+
+export interface PageInfo {
+    endCursor?: Nullable<number>;
+    hasNextPage: boolean;
+    total: number;
+    currentPage: number;
+    totalPages: number;
+}
+
+export interface Brief {
+    publicId: string;
+    background?: Nullable<string>;
+    problem: string;
+    systemNeeds: string;
+    references?: Nullable<string>;
+    expectedUsers?: Nullable<string>;
+    notes?: Nullable<string>;
+    createdAt: DateTime;
+    updatedAt: DateTime;
+}
+
+export interface MilestoneNote {
+    publicId: string;
+    content: string;
+    date: DateTime;
+    createdAt: DateTime;
+    updatedAt: DateTime;
+}
+
+export interface Milestone {
+    publicId: string;
+    name: string;
+    status: MilestoneStatus;
+    estimatedAt?: Nullable<DateTime>;
+    order: number;
+    createdAt: DateTime;
+    updatedAt: DateTime;
+    notes: MilestoneNote[];
+}
+
+export interface ProjectTeam {
+    publicId: string;
+    userPublicId: string;
+    isActive: boolean;
+    isOwner: boolean;
+}
+
+export interface Project {
+    publicId: string;
+    name: string;
+    status: ProjectStatus;
+    stagingUrl?: Nullable<string>;
+    companyIds: string[];
+    createdAt: DateTime;
+    updatedAt: DateTime;
+    brief?: Nullable<Brief>;
+    projectTeams: ProjectTeam[];
+    milestones: Milestone[];
+}
+
+export interface PaginatedProject {
+    data: Project[];
+    pageInfo: PageInfo;
+}
+
+export interface ThreadMessage {
+    publicId: string;
+    senderId: string;
+    senderName: string;
+    senderInitials: string;
+    content: string;
+    replyToId?: Nullable<string>;
+    deletedAt?: Nullable<DateTime>;
+    createdAt: DateTime;
+}
+
+export interface ThreadPageInfo {
+    endCursor?: Nullable<number>;
+    hasMore: boolean;
+    total: number;
+}
+
+export interface PaginatedThreadMessages {
+    data: ThreadMessage[];
+    pageInfo: ThreadPageInfo;
+}
+
+export interface IQuery {
+    health(): string | Promise<string>;
+    getProjectsForForge(
+        pagination: ProjectPaginationInput,
+    ): PaginatedProject | Promise<PaginatedProject>;
+    getProjectForForge(publicId: string): Project | Promise<Project>;
+    getMilestonesForForge(projectPublicId: string): Milestone[] | Promise<Milestone[]>;
+    getMilestoneForForge(publicId: string): Milestone | Promise<Milestone>;
+    getThreadMessagesForForge(
+        projectPublicId: string,
+        pagination: ThreadPaginationInput,
+    ): PaginatedThreadMessages | Promise<PaginatedThreadMessages>;
+}
+
+export interface IMutation {
+    createProjectForForge(input: CreateProjectInput): Project | Promise<Project>;
+    addProjectTeamMember(input: AddProjectTeamMemberInput): ProjectTeam | Promise<ProjectTeam>;
+    removeProjectTeamMember(projectTeamPublicId: string): ProjectTeam | Promise<ProjectTeam>;
+    createMilestoneForForge(input: CreateMilestoneInput): Milestone | Promise<Milestone>;
+    updateMilestoneForForge(
+        publicId: string,
+        input: UpdateMilestoneInput,
+    ): Milestone | Promise<Milestone>;
+    addMilestoneNoteForForge(input: AddMilestoneNoteInput): MilestoneNote | Promise<MilestoneNote>;
+    sendThreadMessageForForge(
+        input: SendThreadMessageInput,
+    ): ThreadMessage | Promise<ThreadMessage>;
+    deleteThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
+    restoreThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
+}
+
+export type DateTime = any;
+type Nullable<T> = T | null;

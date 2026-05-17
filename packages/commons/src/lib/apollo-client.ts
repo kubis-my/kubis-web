@@ -5,17 +5,7 @@ import { getCsrfToken } from '../utils/csrf-client';
 // Store multiple Apollo Client instances by URI
 const apolloClients: Map<string, ApolloClient> = new Map();
 
-/**
- * Create a new Apollo Client instance
- * Uses Next.js API proxy for authenticated requests (tokens in httpOnly cookies)
- *
- * @param useProxy - If true, uses /api/graphql proxy (for authenticated requests)
- *                   If false, connects directly to external service (for public queries)
- */
-function createApolloClient(useProxy: boolean = true) {
-    // Use proxy endpoint for authenticated requests (handles tokens server-side)
-    // Or direct connection for public/unauthenticated queries
-    const uri = useProxy ? '/api/graphql' : '';
+function createApolloClient(uri: string) {
 
     const httpLink = new HttpLink({
         uri,
@@ -75,27 +65,22 @@ function createApolloClient(useProxy: boolean = true) {
     });
 }
 
-/**
- * Get or create an Apollo Client instance
- * Uses httpOnly cookie-based authentication via Next.js API proxy
- *
- * @returns Apollo Client instance
- */
+function getOrCreateClient(key: string, uri: string): ApolloClient {
+    if (typeof window === 'undefined') return createApolloClient(uri);
+
+    if (!apolloClients.has(key)) {
+        apolloClients.set(key, createApolloClient(uri));
+    }
+
+    return apolloClients.get(key)!;
+}
+
 export function getApolloClient() {
-    const isServer = typeof window === 'undefined';
-    const clientKey = 'default';
+    return getOrCreateClient('account', '/api/graphql');
+}
 
-    if (isServer) {
-        // Always create a new client for SSR
-        return createApolloClient(true);
-    }
-
-    // Reuse client on the client-side
-    if (!apolloClients.has(clientKey)) {
-        apolloClients.set(clientKey, createApolloClient(true));
-    }
-
-    return apolloClients.get(clientKey)!;
+export function getForgeApolloClient() {
+    return getOrCreateClient('forge', '/api/app/graphql');
 }
 
 /**
