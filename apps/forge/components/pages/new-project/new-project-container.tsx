@@ -6,6 +6,7 @@ import { gql, TypedDocumentNode } from '@apollo/client';
 import { useMutation } from '@apollo/client/react';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { Company } from '@repo/commons/types/account-service-schema.type';
+import { CreateProjectInput } from '@repo/commons/types/forge-service-schema.type';
 import { ROUTE } from '@/root/libs/constants';
 
 type ProjectForm = {
@@ -40,21 +41,15 @@ export function useNewProject() {
     return context;
 }
 
-const CREATE_PROJECT: TypedDocumentNode<
-    { createProjectForForge: { publicId: string } },
-    {
-        input: {
-            name: string;
-            companyIds: string[];
-            background?: string;
-            problem: string;
-            systemNeeds: string;
-            references?: string;
-            expectedUsers?: string;
-            notes?: string;
-        };
-    }
-> = gql`
+interface CreateProjectResponse {
+    createProjectForForge: { publicId: string };
+}
+
+interface CreateProjectVariables {
+    input: CreateProjectInput;
+}
+
+const CREATE_PROJECT: TypedDocumentNode<CreateProjectResponse, CreateProjectVariables> = gql`
     mutation CreateProjectForForge($input: CreateProjectInput!) {
         createProjectForForge(input: $input) {
             publicId

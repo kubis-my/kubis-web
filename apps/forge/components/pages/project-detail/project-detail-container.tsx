@@ -10,9 +10,12 @@ import {
     MilestoneStatus as GqlMilestoneStatus,
     Project as GqlProject,
     ProjectStatus as GqlProjectStatus,
+    type ThreadMessage,
+    type ThreadPageInfo,
+    type ThreadPaginationInput,
 } from '@repo/commons/types/forge-service-schema.type';
 import { type MilestoneStatus, type ProjectStatus } from '../project-root/types';
-import { ROUTE } from '@/root/libs/constants';
+import { ROUTE, THREAD_PAGINATION_SIZE } from '@/root/libs/constants';
 
 export type ProjectBriefData = {
     background: string;
@@ -64,11 +67,17 @@ const MILESTONE_STATUS_MAP: Record<GqlMilestoneStatus, MilestoneStatus> = {
     CANCELLED: 'Cancelled',
 };
 
-const GET_PROJECT: TypedDocumentNode<
-    { getProjectForForge: GqlProject },
-    { publicId: string }
-> = gql`
-    query GetProjectForForge($publicId: String!) {
+interface GetProjectResponse {
+    getProjectForForge: GqlProject;
+}
+
+interface GetProjectVariables {
+    publicId: string;
+    threadPagination: ThreadPaginationInput;
+}
+
+const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = gql`
+    query GetProjectForForge($publicId: String!, $threadPagination: ThreadPaginationInput!) {
         getProjectForForge(publicId: $publicId) {
             publicId
             name
@@ -95,12 +104,31 @@ const GET_PROJECT: TypedDocumentNode<
                     date
                 }
             }
+            threads(pagination: $threadPagination) {
+                data {
+                    publicId
+                    content
+                    senderId
+                    senderName
+                    senderInitials
+                    replyToId
+                    deletedAt
+                    createdAt
+                }
+                pageInfo {
+                    endCursor
+                    hasMore
+                    total
+                }
+            }
         }
     }
 `;
 
 type ProjectDetailContextType = {
     project: ProjectDetail;
+    initialThreads: ThreadMessage[];
+    initialThreadsPageInfo: ThreadPageInfo;
 };
 
 const ProjectDetailContext = createContext<ProjectDetailContextType | undefined>(undefined);
@@ -123,7 +151,7 @@ export default function ProjectDetailContainer({
     const { updateBreadcrumbList } = useDashboard01();
 
     const { data } = useQuery(GET_PROJECT, {
-        variables: { publicId: projectId },
+        variables: { publicId: projectId, threadPagination: { take: THREAD_PAGINATION_SIZE } },
         skip: !projectId,
     });
 
@@ -166,6 +194,17 @@ export default function ProjectDetailContainer({
         };
     }, [data, companyNameMap]);
 
+    const initialThreads = useMemo(
+        () => (data?.getProjectForForge?.threads?.data as ThreadMessage[]) ?? [],
+        [data],
+    );
+
+    const initialThreadsPageInfo = useMemo(
+        (): ThreadPageInfo =>
+            data?.getProjectForForge?.threads?.pageInfo ?? { hasMore: false, total: 0 },
+        [data],
+    );
+
     useEffect(() => {
         if (!project) return;
 
@@ -180,7 +219,7 @@ export default function ProjectDetailContainer({
     if (!project) return null;
 
     return (
-        <ProjectDetailContext.Provider value={{ project }}>
+        <ProjectDetailContext.Provider value={{ project, initialThreads, initialThreadsPageInfo }}>
             {children}
         </ProjectDetailContext.Provider>
     );

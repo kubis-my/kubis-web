@@ -7,14 +7,23 @@ import { useQuery } from '@apollo/client/react';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import {
     Project as GqlProject,
+    ProjectPaginationInput,
     ProjectStatus as GqlProjectStatus,
 } from '@repo/commons/types/forge-service-schema.type';
-import { ROUTE } from '@/root/libs/constants';
+import { PROJECT_PAGINATION_SIZE, ROUTE } from '@/root/libs/constants';
 import { type Project, type ProjectStatus } from './types';
 
-const GET_PROJECTS: TypedDocumentNode<{ getProjectsForForge: { data: GqlProject[] } }> = gql`
-    query GetProjectsForForge {
-        getProjectsForForge(pagination: { take: 50 }) {
+interface GetProjectsResponse {
+    getProjectsForForge: { data: GqlProject[] };
+}
+
+interface GetProjectsVariables {
+    pagination: ProjectPaginationInput;
+}
+
+const GET_PROJECTS: TypedDocumentNode<GetProjectsResponse, GetProjectsVariables> = gql`
+    query GetProjectsForForge($pagination: ProjectPaginationInput!) {
+        getProjectsForForge(pagination: $pagination) {
             data {
                 publicId
                 name
@@ -61,7 +70,9 @@ export default function ProjectsContainer({
     const router = useRouter();
     const { authUser } = useAuth();
 
-    const { data, loading } = useQuery(GET_PROJECTS);
+    const { data, loading } = useQuery(GET_PROJECTS, {
+        variables: { pagination: { take: PROJECT_PAGINATION_SIZE } },
+    });
 
     const companyNameMap = useMemo(() => {
         const map = new Map<string, string>();

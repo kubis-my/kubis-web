@@ -1,9 +1,23 @@
 import { gql, TypedDocumentNode } from '@apollo/client';
-import type { ThreadMessage } from '@repo/commons/types/forge-service-schema.type';
+import type {
+    SendThreadMessageInput,
+    ThreadMessage,
+    ThreadPageInfo,
+    ThreadPaginationInput,
+} from '@repo/commons/types/forge-service-schema.type';
+
+interface GetThreadMessagesResponse {
+    getThreadMessagesForForge: { data: ThreadMessage[]; pageInfo: ThreadPageInfo };
+}
+
+interface GetThreadMessagesVariables {
+    projectPublicId: string;
+    pagination: ThreadPaginationInput;
+}
 
 export const GET_THREAD_MESSAGES: TypedDocumentNode<
-    { getThreadMessagesForForge: { data: ThreadMessage[] } },
-    { projectPublicId: string; pagination: { take: number } }
+    GetThreadMessagesResponse,
+    GetThreadMessagesVariables
 > = gql`
     query GetThreadMessagesForForge($projectPublicId: String!, $pagination: ThreadPaginationInput!) {
         getThreadMessagesForForge(projectPublicId: $projectPublicId, pagination: $pagination) {
@@ -17,14 +31,24 @@ export const GET_THREAD_MESSAGES: TypedDocumentNode<
                 deletedAt
                 createdAt
             }
+            pageInfo {
+                endCursor
+                hasMore
+                total
+            }
         }
     }
 `;
 
-export const SEND_MESSAGE: TypedDocumentNode<
-    { sendThreadMessageForForge: ThreadMessage },
-    { input: { projectPublicId: string; content: string; replyToPublicId?: string } }
-> = gql`
+interface SendMessageResponse {
+    sendThreadMessageForForge: ThreadMessage;
+}
+
+interface SendMessageVariables {
+    input: SendThreadMessageInput;
+}
+
+export const SEND_MESSAGE: TypedDocumentNode<SendMessageResponse, SendMessageVariables> = gql`
     mutation SendThreadMessageForForge($input: SendThreadMessageInput!) {
         sendThreadMessageForForge(input: $input) {
             publicId
@@ -39,10 +63,15 @@ export const SEND_MESSAGE: TypedDocumentNode<
     }
 `;
 
-export const DELETE_MESSAGE: TypedDocumentNode<
-    { deleteThreadMessageForForge: { publicId: string; deletedAt: string } },
-    { publicId: string }
-> = gql`
+interface DeleteMessageResponse {
+    deleteThreadMessageForForge: { publicId: string; deletedAt: string };
+}
+
+interface DeleteMessageVariables {
+    publicId: string;
+}
+
+export const DELETE_MESSAGE: TypedDocumentNode<DeleteMessageResponse, DeleteMessageVariables> = gql`
     mutation DeleteThreadMessageForForge($publicId: String!) {
         deleteThreadMessageForForge(publicId: $publicId) {
             publicId
@@ -51,9 +80,17 @@ export const DELETE_MESSAGE: TypedDocumentNode<
     }
 `;
 
+interface RestoreMessageResponse {
+    restoreThreadMessageForForge: { publicId: string; content: string; deletedAt: string | null };
+}
+
+interface RestoreMessageVariables {
+    publicId: string;
+}
+
 export const RESTORE_MESSAGE: TypedDocumentNode<
-    { restoreThreadMessageForForge: { publicId: string; content: string; deletedAt: string | null } },
-    { publicId: string }
+    RestoreMessageResponse,
+    RestoreMessageVariables
 > = gql`
     mutation RestoreThreadMessageForForge($publicId: String!) {
         restoreThreadMessageForForge(publicId: $publicId) {

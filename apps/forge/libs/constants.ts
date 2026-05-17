@@ -7,3 +7,6 @@ export const ROUTE = {
         PROJECT_THREADS: (projectId: string) => `/projects/${projectId}/threads`,
     },
 };
+
+export const PROJECT_PAGINATION_SIZE = 50;
+export const THREAD_PAGINATION_SIZE = 100;

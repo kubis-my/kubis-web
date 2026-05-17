@@ -67,6 +67,7 @@ export function MessageGroupItem({
                                             'border-border/30 hover:border-border/40 hover:bg-muted/20 -mx-3 scroll-mt-28 rounded-lg border px-3 py-2 transition-colors',
                                             highlightedMessageId === msg.id &&
                                             'border-emerald-200/70',
+                                            msg.deletedAt && 'border-red-300/60 dark:border-red-800/50',
                                         )}
                                     >
                                         {msg.replyToId ? (

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { useMutation, useQuery } from '@apollo/client/react';
+import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { Button } from '@repo/shadcn-ui/components/button';
 import RichTextEditor, {
     type RichTextEditorRef,
@@ -14,8 +14,11 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from '@/shadcn/components/empty';
-import { IconArrowDown, IconFolderCode, IconX } from '@tabler/icons-react';
+import { IconArrowDown, IconFolderCode, IconLoader2, IconX } from '@tabler/icons-react';
 import { useAuth } from '@/shadcn/providers/auth-provider';
+import type { ThreadPageInfo } from '@repo/commons/types/forge-service-schema.type';
+import { THREAD_PAGINATION_SIZE } from '@/root/libs/constants';
+import { useProjectDetail } from '../project-detail-container';
 import { DateSeparator } from './date-separator';
 import { DELETE_MESSAGE, GET_THREAD_MESSAGES, RESTORE_MESSAGE, SEND_MESSAGE } from './graphql';
 import { MessageGroupItem } from './message-group-item';
@@ -26,34 +29,34 @@ import { groupMessages, mapGqlMessage } from './utils';
 export default function ProjectThreads() {
     const { projectId } = useParams<{ projectId: string }>();
     const { authUser } = useAuth();
+    const { initialThreads, initialThreadsPageInfo } = useProjectDetail();
 
-    const [messages, setMessages] = useState<Message[]>([]);
+    const authUserId = authUser?.publicId;
+
+    const [messages, setMessages] = useState<Message[]>(() =>
+        initialThreads.map((msg) => mapGqlMessage(msg, authUserId)),
+    );
     const [input, setInput] = useState('');
     const [replyingToId, setReplyingToId] = useState<string | null>(null);
     const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
     const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const bottomRef = useRef<HTMLDivElement>(null);
+    const topSentinelRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<RichTextEditorRef>(null);
     const isFirstRender = useRef(true);
     const shouldSkipNextAutoScroll = useRef(false);
     const highlightTimeoutRef = useRef<number | null>(null);
-
-    const { data: threadData, refetch } = useQuery(GET_THREAD_MESSAGES, {
-        variables: { projectPublicId: projectId, pagination: { take: 100 } },
-        skip: !projectId,
-    });
+    const isLoadingMoreRef = useRef(false);
+    const pageInfoRef = useRef<ThreadPageInfo>(initialThreadsPageInfo);
 
     const [sendMutation] = useMutation(SEND_MESSAGE);
     const [deleteMutation] = useMutation(DELETE_MESSAGE);
     const [restoreMutation] = useMutation(RESTORE_MESSAGE);
 
-    useEffect(() => {
-        if (!threadData) return;
-        const authUserId = authUser?.publicId;
-        setMessages(threadData.getThreadMessagesForForge.data.map((msg) => mapGqlMessage(msg, authUserId)));
-    }, [threadData, authUser?.publicId]);
+    const [fetchMoreMessages] = useLazyQuery(GET_THREAD_MESSAGES);
 
     const dateGroups = groupMessages(messages);
     const messagesById = useMemo(
@@ -84,6 +87,65 @@ export default function ProjectThreads() {
         setShowScrollToBottom(distanceFromBottom > 120);
     }, []);
 
+    const loadMoreMessages = useCallback(async () => {
+        const currentPageInfo = pageInfoRef.current;
+        if (isLoadingMoreRef.current || !currentPageInfo.hasMore || !projectId) return;
+
+        isLoadingMoreRef.current = true;
+        setIsLoadingMore(true);
+        shouldSkipNextAutoScroll.current = true;
+
+        const scrollContainer = scrollContainerRef.current;
+        const prevScrollHeight = scrollContainer?.scrollHeight ?? 0;
+
+        const result = await fetchMoreMessages({
+            variables: { projectPublicId: projectId, pagination: { take: THREAD_PAGINATION_SIZE, cursor: currentPageInfo.endCursor } },
+        });
+
+        const fetched = result.data?.getThreadMessagesForForge;
+        if (fetched) {
+            setMessages((prev) => {
+                const existingIds = new Set(prev.map((m) => m.id));
+                const incoming = fetched.data
+                    .map((msg) => mapGqlMessage(msg, authUserId))
+                    .filter((m) => !existingIds.has(m.id));
+                return [...incoming, ...prev];
+            });
+            pageInfoRef.current = fetched.pageInfo;
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (scrollContainer) {
+                        scrollContainer.scrollTop = scrollContainer.scrollHeight - prevScrollHeight;
+                    }
+                });
+            });
+        }
+
+        isLoadingMoreRef.current = false;
+        setIsLoadingMore(false);
+    }, [projectId, fetchMoreMessages, authUserId]);
+
+    useEffect(() => {
+        const sentinel = topSentinelRef.current;
+        const scrollContainer = scrollContainerRef.current;
+        if (!sentinel || !scrollContainer) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry?.isIntersecting) loadMoreMessages();
+            },
+            { root: scrollContainer, threshold: 0 },
+        );
+
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [loadMoreMessages]);
+
+    const handleScroll = useCallback(() => {
+        updateScrollToBottomVisibility();
+    }, [updateScrollToBottomVisibility]);
+
     useEffect(() => {
         updateScrollToBottomVisibility();
     }, [messages, updateScrollToBottomVisibility]);
@@ -102,7 +164,7 @@ export default function ProjectThreads() {
         const tempId = `temp-${Date.now()}`;
         const tempMessage: Message = {
             id: tempId,
-            senderId: authUser?.publicId ?? '',
+            senderId: authUserId ?? '',
             senderName: authUser?.nickname ?? authUser?.displayName ?? 'You',
             senderInitials: ((authUser?.nickname ?? authUser?.displayName ?? 'Y').at(0) ?? 'Y').toUpperCase(),
             avatarClass: 'bg-violet-500 text-white',
@@ -116,7 +178,7 @@ export default function ProjectThreads() {
         setReplyingToId(null);
         editorRef.current?.clear();
 
-        await sendMutation({
+        const result = await sendMutation({
             variables: {
                 input: {
                     projectPublicId: projectId,
@@ -126,8 +188,13 @@ export default function ProjectThreads() {
             },
         });
 
-        await refetch();
-    }, [input, replyingToId, projectId, authUser, sendMutation, refetch]);
+        const confirmed = result.data?.sendThreadMessageForForge;
+        if (confirmed) {
+            setMessages((prev) =>
+                prev.map((m) => (m.id === tempId ? mapGqlMessage(confirmed, authUserId) : m)),
+            );
+        }
+    }, [input, replyingToId, projectId, authUserId, authUser, sendMutation]);
 
     const replyToMessage = useCallback((message: Message) => {
         setReplyingToId(message.id);
@@ -198,7 +265,7 @@ export default function ProjectThreads() {
             <div
                 ref={scrollContainerRef}
                 className="min-h-0 flex-1 overflow-y-auto py-3"
-                onScroll={updateScrollToBottomVisibility}
+                onScroll={handleScroll}
             >
                 {messages.length === 0 ? (
                     <Empty className="flex min-h-full items-center justify-center px-4">
@@ -214,25 +281,33 @@ export default function ProjectThreads() {
                         </EmptyHeader>
                     </Empty>
                 ) : (
-                    dateGroups.map((dg) => (
-                        <div key={dg.dateKey} className="mb-3">
-                            <DateSeparator label={dg.dateLabel} />
-                            <div className="space-y-3">
-                                {dg.groups.map((group, i) => (
-                                    <MessageGroupItem
-                                        key={`${dg.dateKey}-${i}`}
-                                        group={group}
-                                        messagesById={messagesById}
-                                        highlightedMessageId={highlightedMessageId}
-                                        onReply={replyToMessage}
-                                        onDelete={deleteMessage}
-                                        onRestore={restoreMessage}
-                                        onJumpToMessage={jumpToMessage}
-                                    />
-                                ))}
+                    <>
+                        <div ref={topSentinelRef} className="h-px" />
+                        {isLoadingMore ? (
+                            <div className="flex items-center justify-center py-3">
+                                <IconLoader2 size={16} className="text-muted-foreground animate-spin" />
                             </div>
-                        </div>
-                    ))
+                        ) : null}
+                        {dateGroups.map((dg) => (
+                            <div key={dg.dateKey} className="mb-3">
+                                <DateSeparator label={dg.dateLabel} />
+                                <div className="space-y-3">
+                                    {dg.groups.map((group, i) => (
+                                        <MessageGroupItem
+                                            key={`${dg.dateKey}-${i}`}
+                                            group={group}
+                                            messagesById={messagesById}
+                                            highlightedMessageId={highlightedMessageId}
+                                            onReply={replyToMessage}
+                                            onDelete={deleteMessage}
+                                            onRestore={restoreMessage}
+                                            onJumpToMessage={jumpToMessage}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </>
                 )}
                 <div ref={bottomRef} className="h-2" />
             </div>
