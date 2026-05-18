@@ -4,6 +4,13 @@ html {
     scroll-behavior: smooth;
 }
 
+@utility scrollbar-hide {
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 /* Tiptap rich text editor */
 .prose-editor {
     p {

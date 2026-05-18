@@ -26,6 +26,8 @@ import { ReplyPreview } from './reply-preview';
 import { getThreadCache, setThreadCache } from './thread-cache';
 import type { Message } from './types';
 import { groupMessages, mapGqlMessage } from './utils';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { toast } from 'sonner';
 
 export default function ProjectThreads() {
     const { projectId } = useParams<{ projectId: string }>();
@@ -78,10 +80,19 @@ export default function ProjectThreads() {
             return;
         }
 
-        scrollContainerRef.current?.scrollTo({
-            top: scrollContainerRef.current.scrollHeight,
-            behavior,
-        });
+        if (behavior === 'instant') {
+            requestAnimationFrame(() => {
+                scrollContainerRef.current?.scrollTo({
+                    top: scrollContainerRef.current!.scrollHeight,
+                    behavior,
+                });
+            });
+        } else {
+            scrollContainerRef.current?.scrollTo({
+                top: scrollContainerRef.current.scrollHeight,
+                behavior,
+            });
+        }
     }, [messages]);
 
     const updateScrollToBottomVisibility = useCallback(() => {
@@ -309,6 +320,24 @@ export default function ProjectThreads() {
             shouldSkipNextAutoScroll.current = true;
 
             const result = await restoreMutation({ variables: { publicId: message.id } });
+
+            if (hasGraphQLError(result.error)) {
+                const gqlError = result.error.errors?.[0] || result.error.graphQLErrors?.[0];
+
+                if (gqlError) {
+                    const err = gqlError.extensions?.originalError as
+                        | Record<string, any>
+                        | undefined;
+
+                    if (err?.statusCode === 403 && err?.id === 'SUPER_ADMIN_REQUIRED') {
+                        toast.error('Only Kubis Team can restore deleted messages', {
+                            position: 'top-center',
+                        });
+                        return;
+                    }
+                }
+            }
+
             const restored = result.data?.restoreThreadMessageForForge;
 
             if (restored) {
@@ -353,7 +382,7 @@ export default function ProjectThreads() {
         <div className="from-background via-background to-muted/20 relative flex min-h-0 flex-1 flex-col overflow-hidden bg-linear-to-b">
             <div
                 ref={scrollContainerRef}
-                className="min-h-0 flex-1 overflow-y-auto py-3"
+                className="scrollbar-hide min-h-0 flex-1 overflow-y-auto py-3"
                 onScroll={handleScroll}
             >
                 {messages.length === 0 ? (
