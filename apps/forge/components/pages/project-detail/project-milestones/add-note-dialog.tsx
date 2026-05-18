@@ -48,7 +48,7 @@ type Props = {
 };
 
 export function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) {
-    const [content, setContent] = useState('');
+    const [content, setContent] = useState<object | null>(null);
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [calendarOpen, setCalendarOpen] = useState(false);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
@@ -57,7 +57,7 @@ export function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) 
 
     useEffect(() => {
         if (open) {
-            setContent('');
+            setContent(null);
             setDate(new Date());
             setFormValidation({});
         }

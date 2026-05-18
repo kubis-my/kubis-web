@@ -18,7 +18,7 @@ export function OverviewSection() {
                 <div className="px-4 py-4 sm:px-5">
                     <BriefField label="Current Problem / Pain Point">
                         <RichTextView
-                            html={brief.problem}
+                            content={brief.problem}
                             emptyMessage="No problem statement documented yet."
                         />
                     </BriefField>
@@ -27,7 +27,7 @@ export function OverviewSection() {
                 <div className="px-4 py-4 sm:px-5">
                     <BriefField label="What the System Needs to Do">
                         <RichTextView
-                            html={brief.systemNeeds}
+                            content={brief.systemNeeds}
                             emptyMessage="No system requirements documented yet."
                         />
                     </BriefField>
@@ -56,7 +56,7 @@ export function OverviewSection() {
                 <div className="mx-4 my-4 rounded-md border p-3 sm:mx-5">
                     <BriefField label="Additional Notes">
                         <RichTextView
-                            html={brief.notes}
+                            content={brief.notes}
                             emptyMessage="No additional notes documented yet."
                         />
                     </BriefField>

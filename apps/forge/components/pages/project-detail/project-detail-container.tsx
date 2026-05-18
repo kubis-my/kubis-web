@@ -19,17 +19,17 @@ import { ROUTE, THREAD_PAGINATION_SIZE } from '@/root/libs/constants';
 
 export type ProjectBriefData = {
     background: string;
-    problem: string;
-    systemNeeds: string;
+    problem: object | null;
+    systemNeeds: object | null;
     references: string;
     expectedUsers: string;
-    notes: string;
+    notes: object | null;
 };
 
 export type MilestoneNote = {
     id: string;
     date: string;
-    content: string;
+    content: object | null;
 };
 
 export type Milestone = {
@@ -178,11 +178,11 @@ export default function ProjectDetailContainer({
             stagingUrl: raw.stagingUrl ?? undefined,
             brief: {
                 background: raw.brief?.background ?? '',
-                problem: raw.brief?.problem ?? '',
-                systemNeeds: raw.brief?.systemNeeds ?? '',
+                problem: raw.brief?.problem ?? null,
+                systemNeeds: raw.brief?.systemNeeds ?? null,
                 references: raw.brief?.references ?? '',
                 expectedUsers: raw.brief?.expectedUsers ?? '',
-                notes: raw.brief?.notes ?? '',
+                notes: raw.brief?.notes ?? null,
             },
             milestones: [...raw.milestones]
                 .sort((a, b) => a.order - b.order)

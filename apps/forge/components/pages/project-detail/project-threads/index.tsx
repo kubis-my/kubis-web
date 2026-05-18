@@ -39,7 +39,7 @@ export default function ProjectThreads() {
     const [messages, setMessages] = useState<Message[]>(() =>
         initialThreads.map((msg) => mapGqlMessage(msg, authUserId)),
     );
-    const [input, setInput] = useState('');
+    const [input, setInput] = useState<object | null>(null);
     const [replyingToId, setReplyingToId] = useState<string | null>(null);
     const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
     const [showScrollToBottom, setShowScrollToBottom] = useState(false);
@@ -251,7 +251,7 @@ export default function ProjectThreads() {
     }, [projectId]);
 
     const sendMessage = useCallback(async () => {
-        if (!input.trim() || !projectId) return;
+        if (!input || !projectId) return;
 
         const tempId = `temp-${Date.now()}`;
         const tempMessage: Message = {
@@ -268,7 +268,7 @@ export default function ProjectThreads() {
         };
 
         setMessages((prev) => [...prev, tempMessage]);
-        setInput('');
+        setInput(null);
         setReplyingToId(null);
         editorRef.current?.clear();
 
@@ -466,7 +466,7 @@ export default function ProjectThreads() {
 
                     <RichTextEditor
                         ref={editorRef}
-                        value=""
+                        value={null}
                         onChange={setInput}
                         onSubmit={sendMessage}
                         placeholder="Write a message..."

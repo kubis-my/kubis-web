@@ -12,11 +12,11 @@ import { ROUTE } from '@/root/libs/constants';
 type ProjectForm = {
     name: string;
     background: string;
-    problem: string;
-    systemNeeds: string;
+    problem: object | null;
+    systemNeeds: object | null;
     references: string;
     expectedUsers: string;
-    notes: string;
+    notes: object | null;
     companyIds: string[];
 };
 
@@ -24,7 +24,7 @@ type NewProjectContextType = {
     form: ProjectForm;
     availableCompanies: Company[];
     isSubmitting: boolean;
-    onChange: (field: keyof Omit<ProjectForm, 'companyIds'>, value: string) => void;
+    onChange: (field: keyof Omit<ProjectForm, 'companyIds'>, value: string | object | null) => void;
     onToggleCompany: (publicId: string) => void;
     onSubmit: () => void;
 };
@@ -66,17 +66,17 @@ export default function NewProjectContainer({ children }: Readonly<{ children: R
     const [form, setForm] = useState<ProjectForm>({
         name: '',
         background: '',
-        problem: '',
-        systemNeeds: '',
+        problem: null,
+        systemNeeds: null,
         references: '',
         expectedUsers: '',
-        notes: '',
+        notes: null,
         companyIds: [],
     });
 
     const [createProject, { loading: isSubmitting }] = useMutation(CREATE_PROJECT);
 
-    function onChange(field: keyof Omit<ProjectForm, 'companyIds'>, value: string) {
+    function onChange(field: keyof Omit<ProjectForm, 'companyIds'>, value: string | object | null) {
         setForm((prev) => ({ ...prev, [field]: value }));
     }
 

@@ -4,7 +4,7 @@ export type Message = {
     senderName: string;
     senderInitials: string;
     avatarClass: string;
-    content: string;
+    content: object;
     timestamp: Date;
     replyToId?: string;
     deletedAt?: Date;

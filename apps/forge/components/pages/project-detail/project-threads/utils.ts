@@ -73,9 +73,13 @@ export function groupMessages(messages: Message[]): DateGroup[] {
     return dateGroups;
 }
 
-export function getPlainTextFromHtml(html: string): string {
-    return html
-        .replace(/<[^>]*>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+export function getPlainTextFromJson(json: object | null): string {
+    if (!json) return '';
+    const texts: string[] = [];
+    function collect(node: any) {
+        if (node.text) texts.push(node.text);
+        if (Array.isArray(node.content)) node.content.forEach(collect);
+    }
+    collect(json);
+    return texts.join(' ').trim();
 }

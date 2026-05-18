@@ -1,6 +1,6 @@
 import { cn } from '@repo/shadcn-ui/lib/utils';
 import type { Message } from './types';
-import { getPlainTextFromHtml } from './utils';
+import { getPlainTextFromJson } from './utils';
 
 export function ReplyPreview({
     message,
@@ -34,7 +34,7 @@ export function ReplyPreview({
 
     const preview = message.deletedAt
         ? 'This message was deleted'
-        : getPlainTextFromHtml(message.content);
+        : getPlainTextFromJson(message.content);
 
     return (
         <div

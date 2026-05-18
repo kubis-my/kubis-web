@@ -17,8 +17,8 @@ export default function NewProjectForm() {
 
     const isValid =
         form.name.trim().length > 0 &&
-        form.problem.trim().length > 0 &&
-        form.systemNeeds.trim().length > 0;
+        form.problem !== null &&
+        form.systemNeeds !== null;
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -122,7 +122,7 @@ export default function NewProjectForm() {
                         <Label>Current Problem / Pain Point *</Label>
                         <RichTextEditor
                             value={form.problem}
-                            onChange={(html) => onChange('problem', html)}
+                            onChange={(value) => onChange('problem', value)}
                             placeholder="What is the main challenge or workflow issue you're facing right now?"
                         />
                     </div>
@@ -131,7 +131,7 @@ export default function NewProjectForm() {
                         <Label>What the System Needs to Do *</Label>
                         <RichTextEditor
                             value={form.systemNeeds}
-                            onChange={(html) => onChange('systemNeeds', html)}
+                            onChange={(value) => onChange('systemNeeds', value)}
                             placeholder="Describe the core workflow or features the system should handle."
                         />
                     </div>
@@ -162,7 +162,7 @@ export default function NewProjectForm() {
                         <Label>Additional Notes (optional)</Label>
                         <RichTextEditor
                             value={form.notes}
-                            onChange={(html) => onChange('notes', html)}
+                            onChange={(value) => onChange('notes', value)}
                             placeholder="Anything else we should know before the discovery session."
                         />
                     </div>

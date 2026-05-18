@@ -2,10 +2,25 @@
 
 import * as React from 'react';
 import { createPortal } from 'react-dom';
+import { generateHTML } from '@tiptap/core';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
+
+const renderExtensions = [
+    StarterKit.configure({ heading: { levels: [2, 3] } }),
+    Link.configure({ openOnClick: false, autolink: true }),
+];
+
+export function richTextToHtml(json: object | null): string {
+    if (!json) return '';
+    try {
+        return generateHTML(json as Parameters<typeof generateHTML>[0], renderExtensions);
+    } catch {
+        return '';
+    }
+}
 import { cn } from '@repo/shadcn-ui/lib/utils';
 import { Button } from '@repo/shadcn-ui/components/button';
 import { Input } from '@repo/shadcn-ui/components/input';
@@ -60,8 +75,8 @@ export type RichTextEditorRef = {
 };
 
 type RichTextEditorProps = {
-    value: string;
-    onChange: (html: string) => void;
+    value: object | null;
+    onChange: (value: object | null) => void;
     placeholder?: string;
     className?: string;
     editorClassName?: string;
@@ -96,7 +111,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
                     autolink: true,
                 }),
             ],
-            content: value || '',
+            content: value ?? '',
             editorProps: {
                 attributes: {
                     class:
@@ -120,8 +135,8 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
                 },
             },
             onUpdate({ editor }) {
-                const html = editor.isEmpty || !editor.getText().trim() ? '' : editor.getHTML();
-                onChange(html);
+                const json = editor.isEmpty || !editor.getText().trim() ? null : editor.getJSON();
+                onChange(json);
             },
             immediatelyRender: false,
         });

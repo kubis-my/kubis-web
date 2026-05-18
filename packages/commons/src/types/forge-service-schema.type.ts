@@ -39,11 +39,11 @@ export interface CreateProjectInput {
     name: string;
     companyIds: string[];
     background?: Nullable<string>;
-    problem: string;
-    systemNeeds: string;
+    problem: JSON;
+    systemNeeds: JSON;
     references?: Nullable<string>;
     expectedUsers?: Nullable<string>;
-    notes?: Nullable<string>;
+    notes?: Nullable<JSON>;
 }
 
 export interface AddProjectTeamMemberInput {
@@ -53,7 +53,7 @@ export interface AddProjectTeamMemberInput {
 
 export interface SendThreadMessageInput {
     projectPublicId: string;
-    content: string;
+    content: JSON;
     replyToPublicId?: Nullable<string>;
 }
 
@@ -73,7 +73,7 @@ export interface UpdateMilestoneInput {
 
 export interface AddMilestoneNoteInput {
     milestonePublicId: string;
-    content: string;
+    content: JSON;
     date: DateTime;
 }
 
@@ -88,18 +88,18 @@ export interface PageInfo {
 export interface Brief {
     publicId: string;
     background?: Nullable<string>;
-    problem: string;
-    systemNeeds: string;
+    problem: JSON;
+    systemNeeds: JSON;
     references?: Nullable<string>;
     expectedUsers?: Nullable<string>;
-    notes?: Nullable<string>;
+    notes?: Nullable<JSON>;
     createdAt: DateTime;
     updatedAt: DateTime;
 }
 
 export interface MilestoneNote {
     publicId: string;
-    content: string;
+    content: JSON;
     date: DateTime;
     createdAt: DateTime;
     updatedAt: DateTime;
@@ -128,7 +128,7 @@ export interface ThreadMessage {
     senderId: string;
     senderName: string;
     senderInitials: string;
-    content: string;
+    content: JSON;
     replyToId?: Nullable<string>;
     deletedAt?: Nullable<DateTime>;
     createdAt: DateTime;
@@ -195,5 +195,6 @@ export interface IMutation {
     addMilestoneNoteForForge(input: AddMilestoneNoteInput): MilestoneNote | Promise<MilestoneNote>;
 }
 
+export type JSON = any;
 export type DateTime = any;
 type Nullable<T> = T | null;

@@ -7,6 +7,7 @@ import {
 } from '@repo/shadcn-ui/components/context-menu';
 import { cn } from '@repo/shadcn-ui/lib/utils';
 import { IconCornerUpLeft, IconRestore, IconTrash } from '@tabler/icons-react';
+import { richTextToHtml } from '@repo/shadcn-ui/components/rich-text-editor';
 import { ReplyPreview } from './reply-preview';
 import type { Message, MessageGroup } from './types';
 import { deletedAtFormatter, timeFormatter } from './utils';
@@ -91,7 +92,7 @@ export function MessageGroupItem({
                                                 <div
                                                     className="prose-editor text-foreground/90 min-w-0 text-[15px] leading-7"
                                                     dangerouslySetInnerHTML={{
-                                                        __html: msg.content,
+                                                        __html: richTextToHtml(msg.content),
                                                     }}
                                                 />
                                             )}

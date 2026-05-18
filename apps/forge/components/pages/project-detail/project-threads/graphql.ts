@@ -84,7 +84,7 @@ export const DELETE_MESSAGE: TypedDocumentNode<DeleteMessageResponse, DeleteMess
 `;
 
 interface RestoreMessageResponse {
-    restoreThreadMessageForForge: { publicId: string; content: string; deletedAt: string | null };
+    restoreThreadMessageForForge: { publicId: string; content: object; deletedAt: string | null };
 }
 
 interface RestoreMessageVariables {

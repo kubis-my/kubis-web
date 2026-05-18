@@ -1,5 +1,6 @@
 import { IconDots, IconNote, IconNotes, IconPencil } from '@tabler/icons-react';
 import { cn } from '@repo/shadcn-ui/lib/utils';
+import { richTextToHtml } from '@repo/shadcn-ui/components/rich-text-editor';
 import {
     Empty,
     EmptyDescription,
@@ -131,7 +132,7 @@ export default function MilestoneCard({ milestone, highlightedMilestoneId, highl
 
                             <div
                                 className="prose-editor text-sm leading-6"
-                                dangerouslySetInnerHTML={{ __html: note.content }}
+                                dangerouslySetInnerHTML={{ __html: richTextToHtml(note.content) }}
                             />
                         </article>
                     ))
