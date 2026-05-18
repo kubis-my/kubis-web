@@ -179,30 +179,59 @@ export default function ProjectThreads() {
         getThreadCache(projectId).then((cached) => {
             if (cancelled || !cached || cached.messages.length === 0) return;
 
-            const scrollContainer = scrollContainerRef.current;
-            const prevScrollHeight = scrollContainer?.scrollHeight ?? 0;
-            const prevScrollTop = scrollContainer?.scrollTop ?? 0;
-
-            shouldSkipNextAutoScroll.current = true;
             pageInfoRef.current = cached.pageInfo;
 
-            setMessages((current) => {
-                if (current.length === 0) return cached.messages;
+            const currentMessages = messagesRef.current;
 
-                const oldestTs = current[0]!.timestamp.getTime();
-                const older = cached.messages.filter((m) => m.timestamp.getTime() < oldestTs);
+            if (currentMessages.length === 0) {
+                shouldSkipNextAutoScroll.current = true;
+                setMessages(cached.messages);
+                return;
+            }
 
-                return older.length > 0 ? [...older, ...current] : current;
-            });
+            const cachedById = new Map(cached.messages.map((m) => [m.id, m]));
+            const existingIds = new Set(currentMessages.map((m) => m.id));
 
-            requestAnimationFrame(() => {
+            // Apply cached state to existing messages (picks up deletedAt, content changes)
+            const mergedCurrent = currentMessages.map((m) => cachedById.get(m.id) ?? m);
+            const hasStateUpdates = mergedCurrent.some((m, i) => m !== currentMessages[i]);
+
+            const notInCurrent = cached.messages.filter((m) => !existingIds.has(m.id));
+
+            if (notInCurrent.length === 0 && !hasStateUpdates) return;
+
+            if (notInCurrent.length === 0) {
+                // Only state updates (delete/restore) — no scroll change
+                shouldSkipNextAutoScroll.current = true;
+                setMessages(mergedCurrent);
+                return;
+            }
+
+            const oldestTs = currentMessages[0]!.timestamp.getTime();
+            const newestTs = currentMessages[currentMessages.length - 1]!.timestamp.getTime();
+            const older = notInCurrent.filter((m) => m.timestamp.getTime() < oldestTs);
+            const newer = notInCurrent.filter((m) => m.timestamp.getTime() > newestTs);
+
+            if (older.length > 0) {
+                const scrollContainer = scrollContainerRef.current;
+                const prevScrollHeight = scrollContainer?.scrollHeight ?? 0;
+                const prevScrollTop = scrollContainer?.scrollTop ?? 0;
+
+                shouldSkipNextAutoScroll.current = true;
+                setMessages([...older, ...mergedCurrent, ...newer]);
+
                 requestAnimationFrame(() => {
-                    if (scrollContainer) {
-                        scrollContainer.scrollTop =
-                            prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
-                    }
+                    requestAnimationFrame(() => {
+                        if (scrollContainer) {
+                            scrollContainer.scrollTop =
+                                prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
+                        }
+                    });
                 });
-            });
+            } else {
+                // Only newer messages — scroll to bottom
+                setMessages([...mergedCurrent, ...newer]);
+            }
         });
 
         return () => {
@@ -244,9 +273,12 @@ export default function ProjectThreads() {
 
         const confirmed = result.data?.sendThreadMessageForForge;
         if (confirmed) {
-            setMessages((prev) =>
-                prev.map((m) => (m.id === tempId ? mapGqlMessage(confirmed, authUserId) : m)),
+            const confirmedMessage = mapGqlMessage(confirmed, authUserId);
+            const updated = messagesRef.current.map((m) =>
+                m.id === tempId ? confirmedMessage : m,
             );
+            setMessages(updated);
+            setThreadCache(projectId, updated, pageInfoRef.current);
         }
     }, [input, replyingToId, projectId, authUserId, authUser, sendMutation]);
 
@@ -259,17 +291,17 @@ export default function ProjectThreads() {
         async (message: Message) => {
             shouldSkipNextAutoScroll.current = true;
 
-            setMessages((prev) =>
-                prev.map((item) =>
-                    item.id === message.id ? { ...item, deletedAt: new Date() } : item,
-                ),
+            const updated = messagesRef.current.map((item) =>
+                item.id === message.id ? { ...item, deletedAt: new Date() } : item,
             );
+            setMessages(updated);
+            setThreadCache(projectId, updated, pageInfoRef.current);
 
             setReplyingToId((currentId) => (currentId === message.id ? null : currentId));
 
             await deleteMutation({ variables: { publicId: message.id } });
         },
-        [deleteMutation],
+        [deleteMutation, projectId],
     );
 
     const restoreMessage = useCallback(
@@ -280,16 +312,16 @@ export default function ProjectThreads() {
             const restored = result.data?.restoreThreadMessageForForge;
 
             if (restored) {
-                setMessages((prev) =>
-                    prev.map((item) =>
-                        item.id === restored.publicId
-                            ? { ...item, content: restored.content, deletedAt: undefined }
-                            : item,
-                    ),
+                const updated = messagesRef.current.map((item) =>
+                    item.id === restored.publicId
+                        ? { ...item, content: restored.content, deletedAt: undefined }
+                        : item,
                 );
+                setMessages(updated);
+                setThreadCache(projectId, updated, pageInfoRef.current);
             }
         },
-        [restoreMutation],
+        [restoreMutation, projectId],
     );
 
     const jumpToMessage = useCallback((messageId: string) => {
