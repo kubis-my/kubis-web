@@ -211,6 +211,7 @@ export interface Company {
     name: string;
     registrationNo: string;
     isActive: boolean;
+    isSuperAdmin: boolean;
     logo?: Nullable<string>;
     createdAt: DateTime;
     updatedAt: DateTime;
