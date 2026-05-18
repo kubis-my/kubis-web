@@ -1,10 +1,19 @@
 'use client';
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/shadcn/components/alert-dialog';
 import { Button } from '@/shadcn/components/button';
 import { Calendar } from '@/shadcn/components/calendar';
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
@@ -31,6 +40,7 @@ import {
 } from '@repo/commons/types/forge-service-schema.type';
 import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { useFormDirty } from '@repo/commons/hooks/use-form-dirty';
 import { format, parseISO } from 'date-fns';
 import { CalendarIcon, Loader2Icon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -76,17 +86,36 @@ export function EditMilestoneDialog({ open, onOpenChange, milestone }: Props) {
     );
     const [calendarOpen, setCalendarOpen] = useState(false);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    const formData = { name, status, estimatedAt: estimatedAt ? format(estimatedAt, 'yyyy-MM-dd') : null };
+    const { isDirty, setOriginal } = useFormDirty(formData);
 
     const [updateMilestone, { loading }] = useMutation(UPDATE_MILESTONE);
 
     useEffect(() => {
         if (open) {
+            const date = milestone.estimatedDate ? parseISO(milestone.estimatedDate) : undefined;
             setName(milestone.name);
             setStatus(milestone.status);
-            setEstimatedAt(milestone.estimatedDate ? parseISO(milestone.estimatedDate) : undefined);
+            setEstimatedAt(date);
             setFormValidation({});
+            setOriginal({ name: milestone.name, status: milestone.status, estimatedAt: date ? format(date, 'yyyy-MM-dd') : null });
         }
     }, [open, milestone]);
+
+    function handleRequestClose() {
+        if (isDirty) {
+            setConfirmOpen(true);
+        } else {
+            onOpenChange(false);
+        }
+    }
+
+    function handleConfirmDiscard() {
+        setConfirmOpen(false);
+        onOpenChange(false);
+    }
 
     const handleSubmit = useCallback(
         async (e: React.FormEvent) => {
@@ -147,8 +176,19 @@ export function EditMilestoneDialog({ open, onOpenChange, milestone }: Props) {
     );
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[425px]">
+        <>
+        <Dialog open={open} onOpenChange={(val) => { if (!val) handleRequestClose(); }}>
+            <DialogContent
+                className="sm:max-w-[425px]"
+                onEscapeKeyDown={(e) => {
+                    e.preventDefault();
+                    if (!confirmOpen) handleRequestClose();
+                }}
+                onInteractOutside={(e) => {
+                    e.preventDefault();
+                    if (!confirmOpen) handleRequestClose();
+                }}
+            >
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Edit Milestone</DialogTitle>
@@ -220,12 +260,15 @@ export function EditMilestoneDialog({ open, onOpenChange, milestone }: Props) {
                         </div>
                     </div>
                     <DialogFooter>
-                        <DialogClose asChild>
-                            <Button type="button" variant="outline" disabled={loading}>
-                                Cancel
-                            </Button>
-                        </DialogClose>
-                        <Button type="submit" disabled={loading}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={loading}
+                            onClick={handleRequestClose}
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={!isDirty || loading}>
                             {!loading ? (
                                 'Save'
                             ) : (
@@ -239,5 +282,21 @@ export function EditMilestoneDialog({ open, onOpenChange, milestone }: Props) {
                 </form>
             </DialogContent>
         </Dialog>
+
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Discard changes?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        You have unsaved changes. Closing will discard them permanently.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Keep editing</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleConfirmDiscard}>Discard</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     );
 }
