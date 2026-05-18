@@ -3,7 +3,7 @@ import type { MilestoneStatus } from '../../project-root/types';
 
 export const STATUS_CONFIG: Record<
     MilestoneStatus,
-    { label: string; iconClass: string; badgeClass: string; Icon: React.ElementType }
+    { label: string; iconClass: string; badgeClass: string; borderClass: string; Icon: React.ElementType }
 > = {
     Done: {
         label: 'Done',
@@ -11,6 +11,7 @@ export const STATUS_CONFIG: Record<
         iconClass: 'bg-green-500 text-white',
         badgeClass:
             'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800',
+        borderClass: 'border-l-green-500',
     },
     'In Progress': {
         label: 'In Progress',
@@ -18,12 +19,14 @@ export const STATUS_CONFIG: Record<
         iconClass: 'bg-purple-500 text-white',
         badgeClass:
             'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800',
+        borderClass: 'border-l-purple-500',
     },
     Upcoming: {
         label: 'Upcoming',
         Icon: IconCircleDashed,
         iconClass: 'bg-muted text-muted-foreground',
         badgeClass: 'bg-muted text-muted-foreground border-border',
+        borderClass: 'border-l-border',
     },
     Cancelled: {
         label: 'Cancelled',
@@ -31,6 +34,7 @@ export const STATUS_CONFIG: Record<
         iconClass: 'bg-red-500 text-white',
         badgeClass:
             'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
+        borderClass: 'border-l-red-500',
     },
 };
 
