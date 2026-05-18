@@ -67,6 +67,17 @@ html {
         font-style: italic;
     }
 
+    a {
+        color: #2563eb;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+
+        &:hover {
+            color: #1d4ed8;
+        }
+    }
+
     p.is-editor-empty:first-child::before {
         content: attr(data-placeholder);
         color: var(--muted-foreground);
