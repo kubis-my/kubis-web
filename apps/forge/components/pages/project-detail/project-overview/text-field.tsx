@@ -1,5 +1,5 @@
 export function TextField({ value, emptyMessage }: { value: string; emptyMessage: string }) {
-    if (!value) return <p className="text-sm italic text-muted-foreground">{emptyMessage}</p>;
+    if (!value) return <p className="text-muted-foreground text-sm italic">{emptyMessage}</p>;
 
-    return <p className="text-sm leading-6 text-foreground/90">{value}</p>;
+    return <p className="text-foreground/90 text-sm leading-6">{value}</p>;
 }

@@ -54,10 +54,7 @@ const UPDATE_VARIANT_PRODUCT: TypedDocumentNode<
     UpdateVariantProductResponse,
     UpdateVariantProductVariables
 > = gql`
-    mutation UpdateVariantProduct(
-        $companyPublicId: String!
-        $input: UpdateVariantProductInput!
-    ) {
+    mutation UpdateVariantProduct($companyPublicId: String!, $input: UpdateVariantProductInput!) {
         updateVariantProductForOps(companyPublicId: $companyPublicId, input: $input) {
             publicId
             name
@@ -107,15 +104,20 @@ function toAttributes(product: Product): VariantAttribute[] {
 }
 
 // Key existing variants by their sorted attributeValues for pre-population
-function buildVariantLookup(product: Product): Map<string, { sku: string; price: string; publicId: string, isDeleted: boolean }> {
-    const map = new Map<string, { sku: string; price: string; publicId: string, isDeleted: boolean }>();
+function buildVariantLookup(
+    product: Product,
+): Map<string, { sku: string; price: string; publicId: string; isDeleted: boolean }> {
+    const map = new Map<
+        string,
+        { sku: string; price: string; publicId: string; isDeleted: boolean }
+    >();
 
     for (const v of product.variants ?? []) {
         map.set(v.attributeValues.join('|'), {
             publicId: v.publicId,
             sku: v.sku,
             price: v.price !== undefined ? String(v.price) : '',
-            isDeleted: v.deletedAt ? true : false
+            isDeleted: v.deletedAt ? true : false,
         });
     }
 
@@ -168,7 +170,9 @@ export function EditVariantProductForm({
         setVariantData((prev) => {
             if (!prev[variantId]) {
                 const row = variantRows.find((r) => r.id === variantId);
-                const fromLookup = row ? variantLookup.get(row.attributeValues.join('|')) : undefined;
+                const fromLookup = row
+                    ? variantLookup.get(row.attributeValues.join('|'))
+                    : undefined;
                 const seed = { sku: fromLookup?.sku ?? '', price: fromLookup?.price ?? '' };
                 return { ...prev, [variantId]: { ...seed, ...values } };
             }
@@ -447,8 +451,7 @@ export function EditVariantProductForm({
                                             className="size-8"
                                             disabled={attribute.values.some(
                                                 (v) =>
-                                                    deletedValues.has(v) &&
-                                                    !restoredValues.has(v),
+                                                    deletedValues.has(v) && !restoredValues.has(v),
                                             )}
                                             onClick={() => removeAttribute(attribute.id)}
                                         >
@@ -464,7 +467,8 @@ export function EditVariantProductForm({
                                                 className={`gap-1 pr-1 ${deletedValues.has(value) && !restoredValues.has(value) ? 'bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400' : ''}`}
                                             >
                                                 {value}
-                                                {deletedValues.has(value) && !restoredValues.has(value) ? (
+                                                {deletedValues.has(value) &&
+                                                !restoredValues.has(value) ? (
                                                     <button
                                                         type="button"
                                                         onClick={() =>
@@ -549,7 +553,9 @@ export function EditVariantProductForm({
                                 </TableHeader>
                                 <TableBody>
                                     {variantRows.map((variant) => {
-                                        const existing = variantLookup.get(variant.attributeValues.join('|'));
+                                        const existing = variantLookup.get(
+                                            variant.attributeValues.join('|'),
+                                        );
                                         const overrides = variantData[variant.id];
                                         const sku = overrides?.sku ?? existing?.sku ?? variant.sku;
                                         const price = overrides?.price ?? existing?.price ?? '';

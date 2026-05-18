@@ -77,7 +77,13 @@ const DEFAULT_FORM: FormState = {
     status: 'draft',
 };
 
-export function CustomProductForm({ onClose, onDirtyChange }: { onClose: () => void; onDirtyChange?: (dirty: boolean) => void }) {
+export function CustomProductForm({
+    onClose,
+    onDirtyChange,
+}: {
+    onClose: () => void;
+    onDirtyChange?: (dirty: boolean) => void;
+}) {
     const [form, setForm] = useState<FormState>(DEFAULT_FORM);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const { activeCompany } = useCompany();
@@ -127,14 +133,9 @@ export function CustomProductForm({ onClose, onDirtyChange }: { onClose: () => v
 
                     const id = err?.id;
 
-                    if (
-                        err?.statusCode === 409 &&
-                        id === "PRODUCT_SKU_ALREADY_EXISTS"
-                    ) {
+                    if (err?.statusCode === 409 && id === 'PRODUCT_SKU_ALREADY_EXISTS') {
                         setFormValidation({
-                            sku: [
-                                'This SKU is already in use',
-                            ],
+                            sku: ['This SKU is already in use'],
                         });
                         return;
                     }
@@ -142,10 +143,12 @@ export function CustomProductForm({ onClose, onDirtyChange }: { onClose: () => v
             }
 
             if (data) {
-                client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
+                client.refetchQueries({
+                    include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'],
+                });
                 toast.success('Product created');
                 onClose();
-                return
+                return;
             }
 
             toast.error('An unexpected error occurred. Please try again.', {
@@ -175,7 +178,7 @@ export function CustomProductForm({ onClose, onDirtyChange }: { onClose: () => v
                         placeholder="Product name"
                         value={form.name}
                         onChange={(e) => patch({ name: e.target.value })}
-                        autoComplete='off'
+                        autoComplete="off"
                     />
                     <ShowErrorText error={formValidation} field="name" />
                 </div>

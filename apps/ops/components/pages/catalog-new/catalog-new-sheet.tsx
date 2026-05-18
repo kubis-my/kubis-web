@@ -90,8 +90,12 @@ export function CatalogNewSheet({ type, onClose }: Props) {
                 <SheetContent
                     className="flex w-full flex-col gap-0 sm:max-w-[520px] [&>button:last-of-type]:hidden"
                     onOpenAutoFocus={(e) => e.preventDefault()}
-                    onEscapeKeyDown={(e) => { if (!confirmOpen) e.preventDefault(); }}
-                    onInteractOutside={(e) => { if (!confirmOpen) e.preventDefault(); }}
+                    onEscapeKeyDown={(e) => {
+                        if (!confirmOpen) e.preventDefault();
+                    }}
+                    onInteractOutside={(e) => {
+                        if (!confirmOpen) e.preventDefault();
+                    }}
                 >
                     {type && (
                         <>
@@ -101,11 +105,36 @@ export function CatalogNewSheet({ type, onClose }: Props) {
                             </SheetHeader>
 
                             <div className="flex-1 overflow-y-auto px-4">
-                                {type === 'simple' && <SimpleProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
-                                {type === 'digital' && <DigitalProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
-                                {type === 'service' && <ServiceProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
-                                {type === 'bundle' && <BundleProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
-                                {type === 'custom' && <CustomProductForm onClose={onClose} onDirtyChange={setIsDirty} />}
+                                {type === 'simple' && (
+                                    <SimpleProductForm
+                                        onClose={onClose}
+                                        onDirtyChange={setIsDirty}
+                                    />
+                                )}
+                                {type === 'digital' && (
+                                    <DigitalProductForm
+                                        onClose={onClose}
+                                        onDirtyChange={setIsDirty}
+                                    />
+                                )}
+                                {type === 'service' && (
+                                    <ServiceProductForm
+                                        onClose={onClose}
+                                        onDirtyChange={setIsDirty}
+                                    />
+                                )}
+                                {type === 'bundle' && (
+                                    <BundleProductForm
+                                        onClose={onClose}
+                                        onDirtyChange={setIsDirty}
+                                    />
+                                )}
+                                {type === 'custom' && (
+                                    <CustomProductForm
+                                        onClose={onClose}
+                                        onDirtyChange={setIsDirty}
+                                    />
+                                )}
                             </div>
 
                             <SheetFooter className="border-t pt-4">

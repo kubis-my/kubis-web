@@ -7,10 +7,10 @@ export function ProjectDetailsSection() {
     const { brief } = project;
 
     return (
-        <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-            <div className="border-b bg-muted/30 px-4 py-3 sm:px-5">
+        <section className="bg-card overflow-hidden rounded-xl border shadow-sm">
+            <div className="bg-muted/30 border-b px-4 py-3 sm:px-5">
                 <h2 className="text-base font-semibold">Project Details</h2>
-                <p className="mt-0.5 text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-0.5 text-sm">
                     Basic information about the project.
                 </p>
             </div>
@@ -22,14 +22,14 @@ export function ProjectDetailsSection() {
                             {project.companyNames.map((company) => (
                                 <span
                                     key={company}
-                                    className="rounded-md border bg-muted/30 px-2 py-1 text-xs font-medium text-foreground/90"
+                                    className="bg-muted/30 text-foreground/90 rounded-md border px-2 py-1 text-xs font-medium"
                                 >
                                     {company}
                                 </span>
                             ))}
                         </div>
                     ) : (
-                        <p className="text-sm italic text-muted-foreground">
+                        <p className="text-muted-foreground text-sm italic">
                             No company associations documented yet.
                         </p>
                     )}

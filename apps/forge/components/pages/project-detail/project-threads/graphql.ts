@@ -19,7 +19,10 @@ export const GET_THREAD_MESSAGES: TypedDocumentNode<
     GetThreadMessagesResponse,
     GetThreadMessagesVariables
 > = gql`
-    query GetThreadMessagesForForge($projectPublicId: String!, $pagination: ThreadPaginationInput!) {
+    query GetThreadMessagesForForge(
+        $projectPublicId: String!
+        $pagination: ThreadPaginationInput!
+    ) {
         getThreadMessagesForForge(projectPublicId: $projectPublicId, pagination: $pagination) {
             data {
                 publicId
@@ -88,15 +91,13 @@ interface RestoreMessageVariables {
     publicId: string;
 }
 
-export const RESTORE_MESSAGE: TypedDocumentNode<
-    RestoreMessageResponse,
-    RestoreMessageVariables
-> = gql`
-    mutation RestoreThreadMessageForForge($publicId: String!) {
-        restoreThreadMessageForForge(publicId: $publicId) {
-            publicId
-            content
-            deletedAt
+export const RESTORE_MESSAGE: TypedDocumentNode<RestoreMessageResponse, RestoreMessageVariables> =
+    gql`
+        mutation RestoreThreadMessageForForge($publicId: String!) {
+            restoreThreadMessageForForge(publicId: $publicId) {
+                publicId
+                content
+                deletedAt
+            }
         }
-    }
-`;
+    `;

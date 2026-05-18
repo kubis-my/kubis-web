@@ -1,7 +1,10 @@
 import type { ThreadMessage } from '@repo/commons/types/forge-service-schema.type';
 import type { DateGroup, Message, MessageGroup } from './types';
 
-export const timeFormatter = new Intl.DateTimeFormat('en-MY', { hour: '2-digit', minute: '2-digit' });
+export const timeFormatter = new Intl.DateTimeFormat('en-MY', {
+    hour: '2-digit',
+    minute: '2-digit',
+});
 export const deletedAtFormatter = new Intl.DateTimeFormat('en-MY', {
     day: 'numeric',
     month: 'short',
@@ -16,7 +19,8 @@ export function mapGqlMessage(msg: ThreadMessage, authUserId?: string): Message 
         senderId: msg.senderId,
         senderName: msg.senderName,
         senderInitials: msg.senderInitials,
-        avatarClass: msg.senderId === authUserId ? 'bg-violet-500 text-white' : 'bg-sky-500 text-white',
+        avatarClass:
+            msg.senderId === authUserId ? 'bg-violet-500 text-white' : 'bg-sky-500 text-white',
         content: msg.content,
         timestamp: new Date(msg.createdAt),
         replyToId: msg.replyToId ?? undefined,

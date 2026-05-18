@@ -109,8 +109,8 @@ export default function UsersTab() {
     useEffect(() => {
         setPaginatedCompanyEmployee(
             data?.getCompanyEmployees ??
-            ctx.company?.companyEmployees ??
-            createInitialPaginatedData(),
+                ctx.company?.companyEmployees ??
+                createInitialPaginatedData(),
         );
     }, [ctx.company?.companyEmployees, data?.getCompanyEmployees]);
 

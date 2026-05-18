@@ -12,9 +12,7 @@ export default function UserRow({
     branchId: string;
 }) {
     return (
-        <TableRow
-            className="hover:bg-muted/50 transition-colors"
-        >
+        <TableRow className="hover:bg-muted/50 transition-colors">
             {row.getVisibleCells().map((cell) => {
                 return (
                     <TableCell

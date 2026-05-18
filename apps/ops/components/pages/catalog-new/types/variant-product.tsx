@@ -95,7 +95,13 @@ const DEFAULT_FORM: FormState = {
 
 const DEFAULT_ATTRIBUTES: VariantAttribute[] = [];
 
-export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => void; onDirtyChange?: (dirty: boolean) => void }) {
+export function VariantProductForm({
+    onClose,
+    onDirtyChange,
+}: {
+    onClose: () => void;
+    onDirtyChange?: (dirty: boolean) => void;
+}) {
     const [form, setForm] = useState<FormState>(DEFAULT_FORM);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const [attributes, setAttributes] = useState<VariantAttribute[]>(DEFAULT_ATTRIBUTES);
@@ -133,7 +139,6 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
             .filter((attr) => attr.name && attr.values.length > 0);
 
         try {
-
             const { data, error } = await createVariantProduct({
                 variables: {
                     companyPublicId: activeCompany.publicId,
@@ -146,9 +151,8 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
                         productVariants: variantRows.map((row) => {
                             const overrides = variantData[row.id];
 
-
                             return {
-                                sku: overrides?.sku ?? "",
+                                sku: overrides?.sku ?? '',
                                 price: Number(overrides?.price) || 0,
                                 attributeValues: row.attributeValues,
                             };
@@ -175,38 +179,23 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
 
                     const id = err?.id;
 
-                    if (
-                        err?.statusCode === 409 &&
-                        id === "PRODUCT_SKU_ALREADY_EXISTS"
-                    ) {
+                    if (err?.statusCode === 409 && id === 'PRODUCT_SKU_ALREADY_EXISTS') {
                         setFormValidation({
-                            productVariants: [
-                                'This SKU is already in use',
-                            ],
+                            productVariants: ['This SKU is already in use'],
                         });
                         return;
                     }
 
-                    if (
-                        err?.statusCode === 422 &&
-                        id === "PRODUCT_SKU_EMPTY"
-                    ) {
+                    if (err?.statusCode === 422 && id === 'PRODUCT_SKU_EMPTY') {
                         setFormValidation({
-                            productVariants: [
-                                'SKU is required for each product variant.',
-                            ],
+                            productVariants: ['SKU is required for each product variant.'],
                         });
                         return;
                     }
 
-                    if (
-                        err?.statusCode === 422 &&
-                        id === "DUPLICATE_VARIANT_SKU"
-                    ) {
+                    if (err?.statusCode === 422 && id === 'DUPLICATE_VARIANT_SKU') {
                         setFormValidation({
-                            productVariants: [
-                                "Duplicate variant SKU in input"
-                            ],
+                            productVariants: ['Duplicate variant SKU in input'],
                         });
                         return;
                     }
@@ -217,7 +206,7 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
                 client.refetchQueries({ include: ['GetCatalog', 'GetProductsForBundle'] });
                 toast.success('Product created');
                 onClose();
-                return
+                return;
             }
 
             toast.error('An unexpected error occurred. Please try again.', {
@@ -235,7 +224,7 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
             ...prev,
             {
                 id: `attr-${Date.now()}`,
-                name: "",
+                name: '',
                 values: [],
                 valueInput: '',
             },
@@ -314,7 +303,7 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
                 id: `variant-${index + 1}`,
                 label: combination.map((c) => c.label).join(' / '),
                 attributeValues: combination.map((c) => c.value),
-                sku: "",
+                sku: '',
             };
         });
     }, [attributes]);
@@ -336,7 +325,7 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
                         placeholder="Product name"
                         value={form.name}
                         onChange={(e) => patch({ name: e.target.value })}
-                        autoComplete='off'
+                        autoComplete="off"
                     />
                     <ShowErrorText error={formValidation} field="name" />
                 </div>
@@ -402,7 +391,7 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
                                             }
                                             placeholder="Attribute name"
                                             className="h-8"
-                                            autoComplete='off'
+                                            autoComplete="off"
                                         />
                                         <Button
                                             type="button"
@@ -452,7 +441,7 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
                                             }}
                                             placeholder="Add value (e.g. XL)"
                                             className="h-8"
-                                            autoComplete='off'
+                                            autoComplete="off"
                                         />
                                         <Button
                                             type="button"
@@ -509,7 +498,7 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
                                                         }
                                                         placeholder={variant.sku}
                                                         className="h-7 w-28 text-xs"
-                                                        autoComplete='off'
+                                                        autoComplete="off"
                                                     />
                                                 </TableCell>
                                                 <TableCell>
@@ -529,7 +518,7 @@ export function VariantProductForm({ onClose, onDirtyChange }: { onClose: () => 
                                                             }
                                                             placeholder="0"
                                                             className="h-7 w-24 text-xs"
-                                                            autoComplete='off'
+                                                            autoComplete="off"
                                                         />
                                                     </InputGroup>
                                                 </TableCell>

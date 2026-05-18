@@ -79,14 +79,15 @@ interface GetCategoriesVariables {
     companyPublicId: string;
 }
 
-const GET_COMPANY_CATEGORIES: TypedDocumentNode<GetCategoriesResponse, GetCategoriesVariables> = gql`
-    query GetCompanyCategories($companyPublicId: String!) {
-        getCompanyCategories(companyPublicId: $companyPublicId) {
-            publicId
-            name
+const GET_COMPANY_CATEGORIES: TypedDocumentNode<GetCategoriesResponse, GetCategoriesVariables> =
+    gql`
+        query GetCompanyCategories($companyPublicId: String!) {
+            getCompanyCategories(companyPublicId: $companyPublicId) {
+                publicId
+                name
+            }
         }
-    }
-`;
+    `;
 
 const GET_CATALOG: TypedDocumentNode<GetCatalogResponse, GetCatalogVariables> = gql`
     query GetCatalog($companyPublicId: String!, $pagination: ProductPaginationInput!) {

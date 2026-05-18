@@ -24,7 +24,14 @@ import {
     SelectValue,
 } from '@repo/shadcn-ui/components/select';
 import { cn } from '@repo/shadcn-ui/lib/utils';
-import { IconArrowBackUp, IconChevronDown, IconLoader2, IconPackage, IconPlus, IconX } from '@tabler/icons-react';
+import {
+    IconArrowBackUp,
+    IconChevronDown,
+    IconLoader2,
+    IconPackage,
+    IconPlus,
+    IconX,
+} from '@tabler/icons-react';
 import { type Product, type ProductStatus } from '../../catalog/catalog-container';
 import { useCompany } from '@/root/components/container/company-provider';
 import {
@@ -157,16 +164,17 @@ export function EditBundleProductForm({
     const [items, setItems] = useState<BundleItem[]>(() => toItems(product));
     const { activeCompany } = useCompany();
 
-    const { data: productsData, loading: productsLoading, fetchMore } = useQuery(
-        GET_PRODUCTS_FOR_BUNDLE,
-        {
-            skip: !activeCompany,
-            variables: {
-                companyPublicId: activeCompany?.publicId ?? '',
-                pagination: { cursor: null, take: PRODUCT_PAGINATION_SIZE },
-            },
+    const {
+        data: productsData,
+        loading: productsLoading,
+        fetchMore,
+    } = useQuery(GET_PRODUCTS_FOR_BUNDLE, {
+        skip: !activeCompany,
+        variables: {
+            companyPublicId: activeCompany?.publicId ?? '',
+            pagination: { cursor: null, take: PRODUCT_PAGINATION_SIZE },
         },
-    );
+    });
 
     const products = productsData?.getCompanyProducts.data ?? [];
     const productsPageInfo = productsData?.getCompanyProducts.pageInfo;
@@ -258,7 +266,9 @@ export function EditBundleProductForm({
             }
 
             if (data) {
-                client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
+                client.refetchQueries({
+                    include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'],
+                });
                 toast.success('Product updated');
                 onClose();
                 return;
@@ -300,9 +310,7 @@ export function EditBundleProductForm({
 
     function restoreItem(itemId: string) {
         setItems((prev) =>
-            prev.map((item) =>
-                item.id === itemId ? { ...item, deletedAt: undefined } : item,
-            ),
+            prev.map((item) => (item.id === itemId ? { ...item, deletedAt: undefined } : item)),
         );
         onDirtyChange?.(true);
     }
@@ -326,7 +334,11 @@ export function EditBundleProductForm({
     }, [activeItems, products]);
 
     return (
-        <form id="edit-bundle-product-form" onSubmit={handleSubmit} className="flex w-full flex-col">
+        <form
+            id="edit-bundle-product-form"
+            onSubmit={handleSubmit}
+            className="flex w-full flex-col"
+        >
             <section className="flex flex-col gap-4 py-4">
                 <div>
                     <p className="text-sm font-medium">Basic Information</p>
@@ -469,7 +481,9 @@ export function EditBundleProductForm({
                                                             ) : (
                                                                 <IconChevronDown className="size-3.5" />
                                                             )}
-                                                            {productsLoading ? 'Loading...' : 'Load more'}
+                                                            {productsLoading
+                                                                ? 'Loading...'
+                                                                : 'Load more'}
                                                         </Button>
                                                     </div>
                                                 )}
@@ -506,7 +520,9 @@ export function EditBundleProductForm({
                                         </p>
                                         {deletedItems.map((item) => {
                                             const productName =
-                                                products.find((p) => p.publicId === item.productPublicId)?.name ??
+                                                products.find(
+                                                    (p) => p.publicId === item.productPublicId,
+                                                )?.name ??
                                                 product.bundleItems?.find(
                                                     (b) => b.publicId === item.publicId,
                                                 )?.product.name ??
@@ -518,10 +534,13 @@ export function EditBundleProductForm({
                                                     className="grid grid-cols-[1fr_32px] gap-2 rounded-md border border-dashed px-3 py-2"
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-red-500 line-through text-sm">
+                                                        <span className="text-sm text-red-500 line-through">
                                                             {productName}
                                                         </span>
-                                                        <Badge variant="secondary" className="text-xs">
+                                                        <Badge
+                                                            variant="secondary"
+                                                            className="text-xs"
+                                                        >
                                                             qty: {item.qty}
                                                         </Badge>
                                                     </div>
@@ -560,7 +579,9 @@ export function EditBundleProductForm({
                     </p>
 
                     <div className="grid grid-cols-2 gap-2">
-                        {([BundleProductionMode.WHOLE, BundleProductionMode.INDEPENDENT] as const).map((mode) => (
+                        {(
+                            [BundleProductionMode.WHOLE, BundleProductionMode.INDEPENDENT] as const
+                        ).map((mode) => (
                             <button
                                 key={mode}
                                 type="button"
@@ -572,7 +593,9 @@ export function EditBundleProductForm({
                                         'border-primary bg-primary/5 font-medium',
                                 )}
                             >
-                                {mode === BundleProductionMode.WHOLE ? 'As a whole' : 'Independently per item'}
+                                {mode === BundleProductionMode.WHOLE
+                                    ? 'As a whole'
+                                    : 'Independently per item'}
                             </button>
                         ))}
                     </div>

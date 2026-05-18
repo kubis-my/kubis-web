@@ -8,9 +8,7 @@ import Faq from '@/component/pages/forge/faq';
 import FinalCta from '@/component/pages/forge/final-cta';
 import { FORGE_CONTENT, resolveForgeLocale } from '@/root/libs/i18n/forge-content';
 
-export default async function ForgePage(props: {
-    searchParams: Promise<{ lang?: string }>;
-}) {
+export default async function ForgePage(props: { searchParams: Promise<{ lang?: string }> }) {
     const searchParams = await props.searchParams;
     const locale = resolveForgeLocale(searchParams.lang);
     const content = FORGE_CONTENT[locale];

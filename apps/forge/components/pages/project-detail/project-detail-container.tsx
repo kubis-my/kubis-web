@@ -208,10 +208,7 @@ export default function ProjectDetailContainer({
     useEffect(() => {
         if (!project) return;
 
-        updateBreadcrumbList([
-            { name: 'Projects', url: ROUTE.FORGE.HOME },
-            { name: project.name },
-        ]);
+        updateBreadcrumbList([{ name: 'Projects', url: ROUTE.FORGE.HOME }, { name: project.name }]);
 
         return () => updateBreadcrumbList([]);
     }, [project, updateBreadcrumbList]);

@@ -149,7 +149,9 @@ export function EditSimpleProductForm({
             }
 
             if (data) {
-                client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
+                client.refetchQueries({
+                    include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'],
+                });
                 toast.success('Product updated');
                 onClose();
                 return;
@@ -166,7 +168,11 @@ export function EditSimpleProductForm({
     }
 
     return (
-        <form id="edit-simple-product-form" onSubmit={handleSubmit} className="flex w-full flex-col">
+        <form
+            id="edit-simple-product-form"
+            onSubmit={handleSubmit}
+            className="flex w-full flex-col"
+        >
             <section className="flex flex-col gap-4 py-4">
                 <div>
                     <p className="text-sm font-medium">Basic Information</p>

@@ -9,13 +9,15 @@ export const STATUS_CONFIG: Record<
         label: 'Done',
         Icon: IconCheck,
         iconClass: 'bg-green-500 text-white',
-        badgeClass: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800',
+        badgeClass:
+            'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800',
     },
     'In Progress': {
         label: 'In Progress',
         Icon: IconCircle,
         iconClass: 'bg-purple-500 text-white',
-        badgeClass: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800',
+        badgeClass:
+            'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800',
     },
     Upcoming: {
         label: 'Upcoming',
@@ -27,7 +29,8 @@ export const STATUS_CONFIG: Record<
         label: 'Cancelled',
         Icon: IconX,
         iconClass: 'bg-red-500 text-white',
-        badgeClass: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
+        badgeClass:
+            'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
     },
 };
 

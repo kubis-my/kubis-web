@@ -61,7 +61,7 @@ export function getProjectNavigationList(projectId: string): NavigationItem[] {
                     isActive: false,
                 },
             ],
-        }
+        },
     ];
 }
 
@@ -78,7 +78,7 @@ export const navigationUserItemList: NavUserItem[] = [
         id: 'help',
         name: 'Get Help',
         icon: <IconHelp />,
-        async action() { },
+        async action() {},
     },
     {
         id: 'log-out',

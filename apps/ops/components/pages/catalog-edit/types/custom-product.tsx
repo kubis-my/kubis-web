@@ -115,7 +115,8 @@ export function EditCustomProductForm({
                         description: form.description || null,
                         categoryName: form.category || undefined,
                         status: STATUS_MAP[form.status],
-                        estimatedPrice: form.estimatedPrice !== '' ? Number(form.estimatedPrice) : undefined,
+                        estimatedPrice:
+                            form.estimatedPrice !== '' ? Number(form.estimatedPrice) : undefined,
                     },
                 },
                 errorPolicy: 'all',
@@ -139,7 +140,9 @@ export function EditCustomProductForm({
             }
 
             if (data) {
-                client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
+                client.refetchQueries({
+                    include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'],
+                });
                 toast.success('Product updated');
                 onClose();
                 return;
@@ -156,7 +159,11 @@ export function EditCustomProductForm({
     }
 
     return (
-        <form id="edit-custom-product-form" onSubmit={handleSubmit} className="flex w-full flex-col">
+        <form
+            id="edit-custom-product-form"
+            onSubmit={handleSubmit}
+            className="flex w-full flex-col"
+        >
             <section className="flex flex-col gap-4 py-4">
                 <div>
                     <p className="text-sm font-medium">Basic Information</p>

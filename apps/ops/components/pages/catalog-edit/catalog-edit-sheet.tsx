@@ -27,7 +27,10 @@ import { EditServiceProductForm } from './types/service-product';
 import { EditCustomProductForm } from './types/custom-product';
 import { EditBundleProductForm } from './types/bundle-product';
 
-type EditableProductType = Extract<ProductType, 'simple' | 'digital' | 'service' | 'custom' | 'bundle'>;
+type EditableProductType = Extract<
+    ProductType,
+    'simple' | 'digital' | 'service' | 'custom' | 'bundle'
+>;
 
 const TYPE_LABELS: Record<EditableProductType, string> = {
     simple: 'Simple',
@@ -103,8 +106,12 @@ export function CatalogEditSheet({ product, onClose }: Props) {
                 <SheetContent
                     className="flex w-full flex-col gap-0 sm:max-w-[520px] [&>button:last-of-type]:hidden"
                     onOpenAutoFocus={(e) => e.preventDefault()}
-                    onEscapeKeyDown={(e) => { if (!confirmOpen) e.preventDefault(); }}
-                    onInteractOutside={(e) => { if (!confirmOpen) e.preventDefault(); }}
+                    onEscapeKeyDown={(e) => {
+                        if (!confirmOpen) e.preventDefault();
+                    }}
+                    onInteractOutside={(e) => {
+                        if (!confirmOpen) e.preventDefault();
+                    }}
                 >
                     {editableProduct && type && (
                         <>
@@ -114,7 +121,6 @@ export function CatalogEditSheet({ product, onClose }: Props) {
                             </SheetHeader>
 
                             <div className="flex-1 overflow-y-auto px-4">
-
                                 {type === 'simple' && (
                                     <EditSimpleProductForm
                                         product={editableProduct}
@@ -152,7 +158,8 @@ export function CatalogEditSheet({ product, onClose }: Props) {
                                 )}
                             </div>
                             <div className="bg-muted/50 text-muted-foreground mt-4 px-3 py-2 text-xs">
-                                Required fields cannot be cleared and will keep their current values. Optional fields can be cleared.
+                                Required fields cannot be cleared and will keep their current
+                                values. Optional fields can be cleared.
                             </div>
                             <SheetFooter className="border-t pt-4">
                                 <Button type="submit" form={FORM_IDS[type]}>

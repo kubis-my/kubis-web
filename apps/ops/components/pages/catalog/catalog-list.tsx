@@ -78,12 +78,28 @@ function VariantSubRows({ variants }: { variants: ProductVariant[] }) {
                 <tbody>
                     {variants.map((v, i) => (
                         <tr key={i} className="border-border/40 border-b last:border-0">
-                            <td className={cn('py-2 font-mono text-xs', v.deletedAt && 'text-red-500 line-through')}>{v.sku}</td>
-                            <td className={cn('py-2', v.deletedAt && 'text-red-500 line-through')}>{formatPrice(v.price)}</td>
-                            <td className={cn('text-muted-foreground py-2', v.deletedAt && 'text-red-500 line-through')}>
+                            <td
+                                className={cn(
+                                    'py-2 font-mono text-xs',
+                                    v.deletedAt && 'text-red-500 line-through',
+                                )}
+                            >
+                                {v.sku}
+                            </td>
+                            <td className={cn('py-2', v.deletedAt && 'text-red-500 line-through')}>
+                                {formatPrice(v.price)}
+                            </td>
+                            <td
+                                className={cn(
+                                    'text-muted-foreground py-2',
+                                    v.deletedAt && 'text-red-500 line-through',
+                                )}
+                            >
                                 {v.attributeValues.join(' / ')}
                             </td>
-                            <td className="text-muted-foreground py-2">{formatDate(v.deletedAt)}</td>
+                            <td className="text-muted-foreground py-2">
+                                {formatDate(v.deletedAt)}
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -106,9 +122,25 @@ function BundleSubRows({ items }: { items: ProductBundleItem[] }) {
                 <tbody>
                     {items.map((item, i) => (
                         <tr key={i} className="border-border/40 border-b last:border-0">
-                            <td className={cn('py-2', item.deletedAt && 'text-red-500 line-through')}>{item.product.name}</td>
-                            <td className={cn('py-2', item.deletedAt && 'text-red-500 line-through')}>{item.qty}</td>
-                            <td className="text-muted-foreground py-2">{formatDate(item.deletedAt)}</td>
+                            <td
+                                className={cn(
+                                    'py-2',
+                                    item.deletedAt && 'text-red-500 line-through',
+                                )}
+                            >
+                                {item.product.name}
+                            </td>
+                            <td
+                                className={cn(
+                                    'py-2',
+                                    item.deletedAt && 'text-red-500 line-through',
+                                )}
+                            >
+                                {item.qty}
+                            </td>
+                            <td className="text-muted-foreground py-2">
+                                {formatDate(item.deletedAt)}
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -117,7 +149,14 @@ function BundleSubRows({ items }: { items: ProductBundleItem[] }) {
     );
 }
 
-const EDITABLE_TYPES: ProductType[] = ['simple', 'digital', 'service', 'custom', 'variant', 'bundle'];
+const EDITABLE_TYPES: ProductType[] = [
+    'simple',
+    'digital',
+    'service',
+    'custom',
+    'variant',
+    'bundle',
+];
 
 export default function CatalogList() {
     const {

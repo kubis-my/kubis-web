@@ -8,10 +8,10 @@ export function OverviewSection() {
     const { brief } = project;
 
     return (
-        <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-            <div className="border-b bg-muted/30 px-4 py-3 sm:px-5">
+        <section className="bg-card overflow-hidden rounded-xl border shadow-sm">
+            <div className="bg-muted/30 border-b px-4 py-3 sm:px-5">
                 <h2 className="text-base font-semibold">Overview</h2>
-                <p className="mt-0.5 text-sm text-muted-foreground">What the client wants built.</p>
+                <p className="text-muted-foreground mt-0.5 text-sm">What the client wants built.</p>
             </div>
 
             <div className="divide-y">

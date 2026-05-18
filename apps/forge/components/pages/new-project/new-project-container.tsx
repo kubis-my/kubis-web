@@ -57,9 +57,7 @@ const CREATE_PROJECT: TypedDocumentNode<CreateProjectResponse, CreateProjectVari
     }
 `;
 
-export default function NewProjectContainer({
-    children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function NewProjectContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const router = useRouter();
     const { authUser } = useAuth();
 

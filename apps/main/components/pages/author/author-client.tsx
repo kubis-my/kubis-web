@@ -19,7 +19,16 @@ const stats = [
 
 const skills: Record<string, { items: string[]; color: string }> = {
     Backend: {
-        items: ['NestJS', 'Node.js', 'Laravel', '.NET (C#)', 'Microservices', 'REST APIs', 'GraphQL', 'WebSocket'],
+        items: [
+            'NestJS',
+            'Node.js',
+            'Laravel',
+            '.NET (C#)',
+            'Microservices',
+            'REST APIs',
+            'GraphQL',
+            'WebSocket',
+        ],
         color: 'text-emerald-600 dark:text-emerald-400',
     },
     Database: {
@@ -47,7 +56,16 @@ const projects = [
         label: 'Transportation Management System',
         description:
             'Multi-tenant TMS backend managing the full freight lifecycle load management, rate confirmations, invoicing, and bulk data import supporting up to 100K rows with real-time progress via WebSocket.',
-        tech: ['NestJS', 'TypeScript', 'PostgreSQL', 'Prisma', 'Redis', 'BullMQ', 'Socket.io', 'AWS S3'],
+        tech: [
+            'NestJS',
+            'TypeScript',
+            'PostgreSQL',
+            'Prisma',
+            'Redis',
+            'BullMQ',
+            'Socket.io',
+            'AWS S3',
+        ],
     },
     {
         index: '02',
@@ -88,21 +106,19 @@ const projects = [
         description:
             'Track agent performance, manage agents, and monitor sales activities with authentication, performance tracking, and async queue processing.',
         tech: ['Laravel', 'jQuery', 'MySQL'],
-    }
+    },
 ];
 
 export default function AuthorClient() {
     return (
         <div className="min-h-screen bg-[#ecf0f1] dark:bg-gray-950">
             <div className="mx-auto max-w-4xl px-6 py-20">
-
                 {/* Hero */}
                 <div className="mb-20">
                     <div className="flex flex-col items-center text-center">
-
                         {/* Avatar */}
-                        <div className="mb-6 relative">
-                            <div className="absolute inset-0 rounded-full bg-linear-to-br from-[#4CAF50] to-teal-400 blur-lg opacity-40 scale-110" />
+                        <div className="relative mb-6">
+                            <div className="absolute inset-0 scale-110 rounded-full bg-linear-to-br from-[#4CAF50] to-teal-400 opacity-40 blur-lg" />
                             <div className="relative h-24 w-24 rounded-full bg-linear-to-br from-[#4CAF50] to-emerald-600 p-0.5 shadow-xl">
                                 <div className="flex h-full w-full items-center justify-center rounded-full bg-[#ecf0f1] dark:bg-gray-950">
                                     <span className="text-3xl font-bold text-[#4CAF50]">MZZ</span>
@@ -113,7 +129,7 @@ export default function AuthorClient() {
                         {/* Name & title */}
                         <div className="mb-2 flex items-center gap-2">
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-[#4CAF50]/30 bg-[#4CAF50]/10 px-3 py-1 text-xs font-medium text-[#4CAF50]">
-                                <span className="h-1.5 w-1.5 rounded-full bg-[#4CAF50] animate-pulse" />
+                                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#4CAF50]" />
                                 Author of KUBIS
                             </span>
                         </div>
@@ -144,10 +160,11 @@ export default function AuthorClient() {
 
                         {/* Bio */}
                         <p className="mx-auto mb-10 max-w-xl text-base leading-relaxed text-gray-600 dark:text-gray-400">
-                            Full-stack developer with 5+ years of experience specializing in backend systems,
-                            API integrations, and scalable service architecture. I built KUBIS as a personal
-                            project to explore microservices, workflow automation, and centralized auth. The
-                            kind of platform I always wanted to use.
+                            Full-stack developer with 5+ years of experience specializing in backend
+                            systems, API integrations, and scalable service architecture. I built
+                            KUBIS as a personal project to explore microservices, workflow
+                            automation, and centralized auth. The kind of platform I always wanted
+                            to use.
                         </p>
 
                         {/* Stats */}
@@ -173,7 +190,7 @@ export default function AuthorClient() {
                 <section className="mb-16">
                     <div className="mb-5 flex items-center gap-2">
                         <IconRocket className="h-4 w-4 text-[#4CAF50]" />
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                        <span className="text-xs font-semibold tracking-widest text-gray-400 uppercase dark:text-gray-500">
                             Projects
                         </span>
                     </div>
@@ -186,12 +203,12 @@ export default function AuthorClient() {
                             >
                                 <CardContent className="p-6">
                                     <div className="mb-3 flex items-start justify-between gap-2">
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="mb-1 flex items-center gap-2">
                                                 <span className="font-mono text-xs font-medium text-[#4CAF50]">
                                                     {project.index}
                                                 </span>
-                                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                                                <h3 className="truncate text-sm font-semibold text-gray-900 dark:text-white">
                                                     {project.name}
                                                 </h3>
                                             </div>
@@ -224,7 +241,7 @@ export default function AuthorClient() {
                 <section className="mb-8">
                     <div className="mb-5 flex items-center gap-2">
                         <IconCode className="h-4 w-4 text-[#4CAF50]" />
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                        <span className="text-xs font-semibold tracking-widest text-gray-400 uppercase dark:text-gray-500">
                             Skills
                         </span>
                     </div>
@@ -255,7 +272,6 @@ export default function AuthorClient() {
                         </div>
                     </div>
                 </section>
-
             </div>
         </div>
     );

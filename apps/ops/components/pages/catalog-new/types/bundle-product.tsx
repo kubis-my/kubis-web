@@ -131,22 +131,29 @@ const DEFAULT_FORM: FormState = {
 
 const DEFAULT_ITEMS: BundleItem[] = [];
 
-export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => void; onDirtyChange?: (dirty: boolean) => void }) {
+export function BundleProductForm({
+    onClose,
+    onDirtyChange,
+}: {
+    onClose: () => void;
+    onDirtyChange?: (dirty: boolean) => void;
+}) {
     const [form, setForm] = useState<FormState>(DEFAULT_FORM);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const [items, setItems] = useState<BundleItem[]>(DEFAULT_ITEMS);
     const { activeCompany } = useCompany();
 
-    const { data: productsData, loading: productsLoading, fetchMore } = useQuery(
-        GET_PRODUCTS_FOR_BUNDLE,
-        {
-            skip: !activeCompany,
-            variables: {
-                companyPublicId: activeCompany?.publicId ?? '',
-                pagination: { cursor: null, take: PRODUCT_PAGINATION_SIZE },
-            },
+    const {
+        data: productsData,
+        loading: productsLoading,
+        fetchMore,
+    } = useQuery(GET_PRODUCTS_FOR_BUNDLE, {
+        skip: !activeCompany,
+        variables: {
+            companyPublicId: activeCompany?.publicId ?? '',
+            pagination: { cursor: null, take: PRODUCT_PAGINATION_SIZE },
         },
-    );
+    });
 
     const products = productsData?.getCompanyProducts.data ?? [];
     const productsPageInfo = productsData?.getCompanyProducts.pageInfo;
@@ -225,14 +232,9 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
 
                     const id = err?.id;
 
-                    if (
-                        err?.statusCode === 409 &&
-                        id === "PRODUCT_SKU_ALREADY_EXISTS"
-                    ) {
+                    if (err?.statusCode === 409 && id === 'PRODUCT_SKU_ALREADY_EXISTS') {
                         setFormValidation({
-                            sku: [
-                                'This SKU is already in use',
-                            ],
+                            sku: ['This SKU is already in use'],
                         });
                         return;
                     }
@@ -240,7 +242,9 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
             }
 
             if (data) {
-                client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
+                client.refetchQueries({
+                    include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'],
+                });
                 toast.success('Product created');
                 onClose();
                 return;
@@ -310,7 +314,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                         placeholder="Product name"
                         value={form.name}
                         onChange={(e) => patch({ name: e.target.value })}
-                        autoComplete='off'
+                        autoComplete="off"
                     />
                     <ShowErrorText error={formValidation} field="name" />
                 </div>
@@ -325,7 +329,9 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="description">Description<span className="text-muted-foreground text-xs">(Optional)</span></Label>
+                    <Label htmlFor="description">
+                        Description<span className="text-muted-foreground text-xs">(Optional)</span>
+                    </Label>
                     <Textarea
                         id="description"
                         placeholder="Short description"
@@ -343,7 +349,7 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                             placeholder="e.g. BND-001"
                             value={form.sku}
                             onChange={(e) => patch({ sku: e.target.value })}
-                            autoComplete='off'
+                            autoComplete="off"
                         />
                         <ShowErrorText error={formValidation} field="sku" />
                     </div>
@@ -436,7 +442,9 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                                                         ) : (
                                                             <IconChevronDown className="size-3.5" />
                                                         )}
-                                                        {productsLoading ? 'Loading...' : 'Load more'}
+                                                        {productsLoading
+                                                            ? 'Loading...'
+                                                            : 'Load more'}
                                                     </Button>
                                                 </div>
                                             )}
@@ -485,7 +493,9 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                     </p>
 
                     <div className="grid grid-cols-2 gap-2">
-                        {([BundleProductionMode.WHOLE, BundleProductionMode.INDEPENDENT] as const).map((mode) => (
+                        {(
+                            [BundleProductionMode.WHOLE, BundleProductionMode.INDEPENDENT] as const
+                        ).map((mode) => (
                             <button
                                 key={mode}
                                 type="button"
@@ -494,10 +504,12 @@ export function BundleProductForm({ onClose, onDirtyChange }: { onClose: () => v
                                     'rounded-lg border px-3 py-2 text-left text-sm transition-colors',
                                     'hover:bg-accent',
                                     form.bundleProductionMode === mode &&
-                                    'border-primary bg-primary/5 font-medium',
+                                        'border-primary bg-primary/5 font-medium',
                                 )}
                             >
-                                {mode === BundleProductionMode.WHOLE ? 'As a whole' : 'Independently per item'}
+                                {mode === BundleProductionMode.WHOLE
+                                    ? 'As a whole'
+                                    : 'Independently per item'}
                             </button>
                         ))}
                     </div>

@@ -36,7 +36,7 @@ export default function ForgotPasswordForm({
                     value={email}
                     onChange={(e) => onEmailChange(e.target.value)}
                 />
-                <ShowErrorText className='-mt-2!' error={formValidation} field="email" />
+                <ShowErrorText className="-mt-2!" error={formValidation} field="email" />
             </div>
 
             <div className="grid gap-3">
@@ -47,7 +47,7 @@ export default function ForgotPasswordForm({
                     value={password}
                     onChange={(e) => onPasswordChange(e.target.value)}
                 />
-                <ShowErrorText className='-mt-2!' error={formValidation} field="newPassword" />
+                <ShowErrorText className="-mt-2!" error={formValidation} field="newPassword" />
             </div>
 
             <Button type="button" className="w-full" onClick={onSubmit} disabled={isSubmitting}>

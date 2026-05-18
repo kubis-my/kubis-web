@@ -61,8 +61,12 @@ export function CatalogNewVariantDialog({ open, onClose }: Props) {
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <DialogContent
                     showCloseButton={false}
-                    onEscapeKeyDown={(e) => { if (!confirmOpen) e.preventDefault(); }}
-                    onInteractOutside={(e) => { if (!confirmOpen) e.preventDefault(); }}
+                    onEscapeKeyDown={(e) => {
+                        if (!confirmOpen) e.preventDefault();
+                    }}
+                    onInteractOutside={(e) => {
+                        if (!confirmOpen) e.preventDefault();
+                    }}
                     className={cn(
                         'flex flex-col gap-0 p-0',
                         'inset-0! m-auto translate-x-0! translate-y-0!',

@@ -9,11 +9,13 @@ export default function MvpScope({ content }: MvpScopeProps) {
     return (
         <section className="bg-muted px-6 py-16 md:py-24">
             <div className="mx-auto max-w-5xl">
-                <h2 className="mb-4 text-center text-3xl font-bold text-foreground md:text-4xl">{content.title}</h2>
-                <p className="mb-16 text-center text-muted-foreground">{content.subtitle}</p>
+                <h2 className="text-foreground mb-4 text-center text-3xl font-bold md:text-4xl">
+                    {content.title}
+                </h2>
+                <p className="text-muted-foreground mb-16 text-center">{content.subtitle}</p>
                 <div className="grid gap-8 md:grid-cols-2">
-                    <div className="rounded-lg border border-border bg-card p-8">
-                        <h3 className="mb-6 text-xl font-semibold text-foreground">
+                    <div className="border-border bg-card rounded-lg border p-8">
+                        <h3 className="text-foreground mb-6 text-xl font-semibold">
                             {content.includedTitle}
                         </h3>
                         <ul className="flex flex-col gap-3">
@@ -25,8 +27,8 @@ export default function MvpScope({ content }: MvpScopeProps) {
                             ))}
                         </ul>
                     </div>
-                    <div className="rounded-lg border border-border bg-card p-8">
-                        <h3 className="mb-6 text-xl font-semibold text-foreground">
+                    <div className="border-border bg-card rounded-lg border p-8">
+                        <h3 className="text-foreground mb-6 text-xl font-semibold">
                             {content.excludedTitle}
                         </h3>
                         <ul className="flex flex-col gap-3">

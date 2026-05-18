@@ -20,4 +20,3 @@ export type DateGroup = {
     dateKey: string;
     groups: MessageGroup[];
 };
-

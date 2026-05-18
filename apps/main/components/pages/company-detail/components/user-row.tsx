@@ -6,9 +6,7 @@ import { flexRender, Row } from '@tanstack/react-table';
 
 export function UserRow({ row, companyId }: { row: Row<UserAccount>; companyId: string }) {
     return (
-        <TableRow
-            className="hover:bg-muted/50 transition-colors"
-        >
+        <TableRow className="hover:bg-muted/50 transition-colors">
             {row.getVisibleCells().map((cell) => {
                 return (
                     <TableCell

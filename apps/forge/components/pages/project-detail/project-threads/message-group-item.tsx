@@ -31,10 +31,10 @@ export function MessageGroupItem({
     const firstMsg = group.messages[0];
     const sender = firstMsg
         ? {
-            name: firstMsg.senderName,
-            initials: firstMsg.senderInitials,
-            avatarClass: firstMsg.avatarClass,
-        }
+              name: firstMsg.senderName,
+              initials: firstMsg.senderInitials,
+              avatarClass: firstMsg.avatarClass,
+          }
         : { name: group.senderId, initials: '?', avatarClass: 'bg-muted' };
 
     return (
@@ -66,8 +66,9 @@ export function MessageGroupItem({
                                         className={cn(
                                             'border-border/30 hover:border-border/40 hover:bg-muted/20 -mx-3 scroll-mt-28 rounded-lg border px-3 py-2 transition-colors',
                                             highlightedMessageId === msg.id &&
-                                            'border-emerald-200/70',
-                                            msg.deletedAt && 'border-red-300/60 dark:border-red-800/50',
+                                                'border-emerald-200/70',
+                                            msg.deletedAt &&
+                                                'border-red-300/60 dark:border-red-800/50',
                                         )}
                                     >
                                         {msg.replyToId ? (

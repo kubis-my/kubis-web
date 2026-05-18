@@ -79,7 +79,13 @@ const DEFAULT_FORM: FormState = {
     status: 'draft',
 };
 
-export function ServiceProductForm({ onClose, onDirtyChange }: { onClose: () => void; onDirtyChange?: (dirty: boolean) => void }) {
+export function ServiceProductForm({
+    onClose,
+    onDirtyChange,
+}: {
+    onClose: () => void;
+    onDirtyChange?: (dirty: boolean) => void;
+}) {
     const [form, setForm] = useState<FormState>(DEFAULT_FORM);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const { activeCompany } = useCompany();
@@ -130,14 +136,9 @@ export function ServiceProductForm({ onClose, onDirtyChange }: { onClose: () => 
 
                     const id = err?.id;
 
-                    if (
-                        err?.statusCode === 409 &&
-                        id === "PRODUCT_SKU_ALREADY_EXISTS"
-                    ) {
+                    if (err?.statusCode === 409 && id === 'PRODUCT_SKU_ALREADY_EXISTS') {
                         setFormValidation({
-                            sku: [
-                                'This SKU is already in use',
-                            ],
+                            sku: ['This SKU is already in use'],
                         });
                         return;
                     }
@@ -145,10 +146,12 @@ export function ServiceProductForm({ onClose, onDirtyChange }: { onClose: () => 
             }
 
             if (data) {
-                client.refetchQueries({ include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'] });
+                client.refetchQueries({
+                    include: ['GetCatalog', 'GetCompanyCategories', 'GetProductsForBundle'],
+                });
                 toast.success('Product created');
                 onClose();
-                return
+                return;
             }
 
             toast.error('An unexpected error occurred. Please try again.', {
@@ -178,7 +181,7 @@ export function ServiceProductForm({ onClose, onDirtyChange }: { onClose: () => 
                         placeholder="Product name"
                         value={form.name}
                         onChange={(e) => patch({ name: e.target.value })}
-                        autoComplete='off'
+                        autoComplete="off"
                     />
                     <ShowErrorText error={formValidation} field="name" />
                 </div>
@@ -210,7 +213,7 @@ export function ServiceProductForm({ onClose, onDirtyChange }: { onClose: () => 
                         placeholder="e.g. SVC-001"
                         value={form.sku}
                         onChange={(e) => patch({ sku: e.target.value })}
-                        autoComplete='off'
+                        autoComplete="off"
                     />
                     <ShowErrorText error={formValidation} field="sku" />
                 </div>

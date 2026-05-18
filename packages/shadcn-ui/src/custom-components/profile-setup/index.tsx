@@ -141,7 +141,11 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                                     onChange={(e) => setFirstName(e.target.value)}
                                     disabled={loading}
                                 />
-                                <ShowErrorText className='-mt-2!' error={formValidation} field="firstName" />
+                                <ShowErrorText
+                                    className="-mt-2!"
+                                    error={formValidation}
+                                    field="firstName"
+                                />
                             </Field>
                             <Field>
                                 <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
@@ -153,7 +157,11 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                                     onChange={(e) => setLastName(e.target.value)}
                                     disabled={loading}
                                 />
-                                <ShowErrorText className='-mt-2!' error={formValidation} field="lastName" />
+                                <ShowErrorText
+                                    className="-mt-2!"
+                                    error={formValidation}
+                                    field="lastName"
+                                />
                             </Field>
                             <Field>
                                 <FieldLabel htmlFor="nickname">Nickname</FieldLabel>
@@ -165,7 +173,11 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                                     onChange={(e) => setNickname(e.target.value)}
                                     disabled={loading}
                                 />
-                                <ShowErrorText className='-mt-2!' error={formValidation} field="nickname" />
+                                <ShowErrorText
+                                    className="-mt-2!"
+                                    error={formValidation}
+                                    field="nickname"
+                                />
                             </Field>
                             <Field>
                                 <Button type="submit" className="w-full" disabled={loading}>

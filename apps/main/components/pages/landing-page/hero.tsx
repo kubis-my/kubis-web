@@ -14,7 +14,7 @@ export default function Hero() {
     const isAuthenticated = auth.isAuthenticated;
 
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center gap-16 bg-[#ecf0f1] px-6 pt-16 md:pt-0 text-center dark:bg-gray-950">
+        <main className="flex min-h-screen flex-col items-center justify-center gap-16 bg-[#ecf0f1] px-6 pt-16 text-center md:pt-0 dark:bg-gray-950">
             <div className="flex flex-col items-center">
                 <Image
                     src="/logo.png"

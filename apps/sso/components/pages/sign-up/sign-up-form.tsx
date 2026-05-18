@@ -41,7 +41,7 @@ export default function SignUpForm({
                     value={username}
                     onChange={(e) => onUsernameChange(e.target.value)}
                 />
-                <ShowErrorText className='-mt-2!' error={formValidation} field="username" />
+                <ShowErrorText className="-mt-2!" error={formValidation} field="username" />
             </div>
 
             <div className="grid gap-3">
@@ -52,7 +52,7 @@ export default function SignUpForm({
                     value={email}
                     onChange={(e) => onEmailChange(e.target.value)}
                 />
-                <ShowErrorText className='-mt-2!' error={formValidation} field="email" />
+                <ShowErrorText className="-mt-2!" error={formValidation} field="email" />
             </div>
 
             <div className="grid gap-3">
@@ -63,7 +63,7 @@ export default function SignUpForm({
                     value={password}
                     onChange={(e) => onPasswordChange(e.target.value)}
                 />
-                <ShowErrorText className='-mt-2!' error={formValidation} field="password" />
+                <ShowErrorText className="-mt-2!" error={formValidation} field="password" />
             </div>
 
             <Button type="button" className="w-full" onClick={onSubmit} disabled={isSubmitting}>

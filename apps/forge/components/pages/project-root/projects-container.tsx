@@ -64,9 +64,7 @@ export function useProjects() {
     return context;
 }
 
-export default function ProjectsContainer({
-    children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function ProjectsContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const router = useRouter();
     const { authUser } = useAuth();
 

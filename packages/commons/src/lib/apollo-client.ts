@@ -6,7 +6,6 @@ import { getCsrfToken } from '../utils/csrf-client';
 const apolloClients: Map<string, ApolloClient> = new Map();
 
 function createApolloClient(uri: string) {
-
     const httpLink = new HttpLink({
         uri,
         credentials: 'include', // Send cookies with requests

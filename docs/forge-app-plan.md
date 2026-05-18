@@ -119,7 +119,7 @@ During `MVP Build` milestone, dev can attach a staging URL to the project.
 - Client can open the staging environment directly from the console
 - Staging link only visible when set by dev — not shown on other milestones
 
-### 5. Internal Todo List *(Phase 2)*
+### 5. Internal Todo List _(Phase 2)_
 
 Dev's task list per milestone. **Not visible to client.**
 
@@ -127,7 +127,7 @@ Dev's task list per milestone. **Not visible to client.**
 - Fields: task name, status (`Todo` / `In Progress` / `Done`), notes
 - Purely internal — helps dev track granular work without exposing it to client
 
-### 6. Billing *(Phase 2)*
+### 6. Billing _(Phase 2)_
 
 Per-project billing. Manual tracking, no payment gateway for MVP.
 
@@ -150,10 +150,10 @@ Per-project billing. Manual tracking, no payment gateway for MVP.
 
 ## User Roles
 
-| Role | Access |
-|---|---|
-| Dev (you) | Full access to everything across all projects |
-| Client | Own projects only: intake, discussion thread, milestone tracker (read-only) |
+| Role      | Access                                                                      |
+| --------- | --------------------------------------------------------------------------- |
+| Dev (you) | Full access to everything across all projects                               |
+| Client    | Own projects only: intake, discussion thread, milestone tracker (read-only) |
 
 ---
 
@@ -196,24 +196,24 @@ Projects are scoped to the authenticated user — company is a tag on the projec
 
 ## App Ecosystem
 
-| App | Purpose |
-|---|---|
-| `apps/sso` | Authentication — sign in, OAuth PKCE flow |
-| `apps/main` | Kubis hub — my account, explore & access Kubis products, permission management for all deployed apps |
-| `apps/ops` | Kubis product: Process Management System |
-| `apps/forge` | Kubis product: Forge client project console (this app) |
-| Custom-built apps | End result of Forge projects (e.g., POS, CRM) — accessed via Kubis SSO, managed in `apps/main` |
+| App               | Purpose                                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| `apps/sso`        | Authentication — sign in, OAuth PKCE flow                                                            |
+| `apps/main`       | Kubis hub — my account, explore & access Kubis products, permission management for all deployed apps |
+| `apps/ops`        | Kubis product: Process Management System                                                             |
+| `apps/forge`      | Kubis product: Forge client project console (this app)                                               |
+| Custom-built apps | End result of Forge projects (e.g., POS, CRM) — accessed via Kubis SSO, managed in `apps/main`       |
 
 ---
 
 ## TODO — Build Order
 
-- [x] 1. App Scaffold — `apps/forge` setup, auth, layout, routing (`/projects/[id]`)
-- [x] 2. Project Overview & Brief — project metadata + client intake brief on overview page
-- [x] 3. Projects List — list of submitted projects, status overview
-- [x] 4. Milestone Tracker — milestones with status (Upcoming / In Progress / Done), estimated dates, dev notes
-- [x] 5. Discussion Threads — async messaging with reply-to, soft delete/restore, message grouping
-- [ ] 6. Connect GraphQL — wire all containers to real API (currently mock data)
-- [ ] 7. New Project Flow — client creates project, selects company, submits brief (form exists, no backend)
-- [ ] 8. Internal Todo List *(Phase 2)*
-- [ ] 9. Billing *(Phase 2)*
+- [x]   1. App Scaffold — `apps/forge` setup, auth, layout, routing (`/projects/[id]`)
+- [x]   2. Project Overview & Brief — project metadata + client intake brief on overview page
+- [x]   3. Projects List — list of submitted projects, status overview
+- [x]   4. Milestone Tracker — milestones with status (Upcoming / In Progress / Done), estimated dates, dev notes
+- [x]   5. Discussion Threads — async messaging with reply-to, soft delete/restore, message grouping
+- [ ]   6. Connect GraphQL — wire all containers to real API (currently mock data)
+- [ ]   7. New Project Flow — client creates project, selects company, submits brief (form exists, no backend)
+- [ ]   8. Internal Todo List _(Phase 2)_
+- [ ]   9. Billing _(Phase 2)_

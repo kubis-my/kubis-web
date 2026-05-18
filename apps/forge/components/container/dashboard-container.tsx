@@ -31,9 +31,7 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     }, [authUser, updateUser]);
 
     useEffect(() => {
-        const navList = projectId
-            ? getProjectNavigationList(projectId)
-            : getNavigationList();
+        const navList = projectId ? getProjectNavigationList(projectId) : getNavigationList();
 
         updateNavigationList(() =>
             navList.map((group) => ({

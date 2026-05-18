@@ -1,6 +1,12 @@
 import { IconNotes } from '@tabler/icons-react';
 import { cn } from '@repo/shadcn-ui/lib/utils';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/shadcn/components/empty';
+import {
+    Empty,
+    EmptyDescription,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+} from '@/shadcn/components/empty';
 import type { Milestone } from '../project-detail-container';
 import { STATUS_CONFIG, dateFormatter } from './milestone-status';
 
@@ -13,8 +19,8 @@ export default function MilestoneCard({ milestone }: Props) {
     const notes = milestone.notes ?? [];
 
     return (
-        <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3 sm:px-5">
+        <section className="bg-card overflow-hidden rounded-xl border shadow-sm">
+            <div className="bg-muted/30 flex items-center justify-between border-b px-4 py-3 sm:px-5">
                 <div className="flex items-center gap-2">
                     <h3 className="text-sm font-semibold tracking-tight">{milestone.name}</h3>
                     <span
@@ -36,7 +42,9 @@ export default function MilestoneCard({ milestone }: Props) {
                                 <IconNotes />
                             </EmptyMedia>
                             <EmptyTitle>No Updates Yet</EmptyTitle>
-                            <EmptyDescription>There are no updates for this milestone yet.</EmptyDescription>
+                            <EmptyDescription>
+                                There are no updates for this milestone yet.
+                            </EmptyDescription>
                         </EmptyHeader>
                     </Empty>
                 ) : (
@@ -46,7 +54,7 @@ export default function MilestoneCard({ milestone }: Props) {
                             className="grid gap-3 px-4 py-4 sm:grid-cols-[108px_1fr] sm:gap-4 sm:px-5"
                         >
                             <div className="sm:pt-1">
-                                <p className="text-xs font-medium text-muted-foreground">
+                                <p className="text-muted-foreground text-xs font-medium">
                                     {dateFormatter.format(new Date(note.date))}
                                 </p>
                             </div>

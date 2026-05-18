@@ -5,7 +5,15 @@ import {
     CompanyPaginationInput,
     PaginatedCompany,
 } from '@repo/commons/types/account-service-schema.type';
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { COMPANY_PAGINATION_SIZE } from '@/root/libs/constants';
@@ -101,10 +109,12 @@ export default function CompanyContainer({ children }: Readonly<{ children: Reac
         ]);
         updateHeaderAction(
             <div className="flex items-center gap-2">
-                <CreateCompanyFormDialog onCompleted={async () => {
-                    refreshCurrentPageRef.current?.();
-                }} />
-            </div>
+                <CreateCompanyFormDialog
+                    onCompleted={async () => {
+                        refreshCurrentPageRef.current?.();
+                    }}
+                />
+            </div>,
         );
 
         return () => {

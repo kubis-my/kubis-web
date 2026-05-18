@@ -25,7 +25,12 @@ import { ProjectCard } from './project-card';
 import { StatCard } from './stat-card';
 
 function getProjectSummary(projects: Project[]) {
-    const activeStatuses: Project['status'][] = ['Discovery', 'MVP Build', 'Validation', 'Production'];
+    const activeStatuses: Project['status'][] = [
+        'Discovery',
+        'MVP Build',
+        'Validation',
+        'Production',
+    ];
     const planCount: Record<string, number> = {};
 
     projects.forEach((p) => {
@@ -50,7 +55,7 @@ export default function ProjectsList() {
             <div className="relative flex flex-col gap-4">
                 {/* Hero */}
                 <Card className="border-primary/30 bg-card/80 overflow-hidden rounded-3xl py-0 backdrop-blur-sm">
-                    <div className="bg-primary/8 pointer-events-none absolute -left-8 -top-8 size-64 rounded-full blur-3xl" />
+                    <div className="bg-primary/8 pointer-events-none absolute -top-8 -left-8 size-64 rounded-full blur-3xl" />
                     <div className="from-primary/25 to-primary/0 absolute inset-y-0 right-0 w-1/2 bg-linear-to-l" />
                     <CardContent className="relative p-5 md:p-7">
                         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
@@ -75,7 +80,7 @@ export default function ProjectsList() {
                                 onClick={onNewProject}
                             >
                                 <span className="absolute inset-0 bg-linear-to-r from-white/12 via-white/0 to-white/12 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                                <span className="relative mr-2.5 inline-flex size-5 items-center justify-center rounded-md bg-white/18 ring-1 ring-inset ring-white/20 transition-transform duration-300 group-hover:scale-105">
+                                <span className="relative mr-2.5 inline-flex size-5 items-center justify-center rounded-md bg-white/18 ring-1 ring-white/20 transition-transform duration-300 ring-inset group-hover:scale-105">
                                     <IconPlus className="size-3.5" />
                                 </span>
                                 <span className="relative">New Project</span>
@@ -97,7 +102,7 @@ export default function ProjectsList() {
                         label="Active Streams"
                         value={summary.active}
                         sub={
-                            <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                            <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                                 <IconArrowUpRight className="size-3.5" />
                                 In motion now
                             </span>
@@ -137,7 +142,7 @@ export default function ProjectsList() {
                             </Badge>
                         </div>
                         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                            {projects.length === 0 ?
+                            {projects.length === 0 ? (
                                 <Empty className="col-span-full">
                                     <EmptyHeader>
                                         <EmptyMedia variant="icon">
@@ -145,11 +150,12 @@ export default function ProjectsList() {
                                         </EmptyMedia>
                                         <EmptyTitle>No Projects Yet</EmptyTitle>
                                         <EmptyDescription>
-                                            You haven&apos;t created any projects yet. Get started by
-                                            creating your first project.
+                                            You haven&apos;t created any projects yet. Get started
+                                            by creating your first project.
                                         </EmptyDescription>
                                     </EmptyHeader>
-                                </Empty> :
+                                </Empty>
+                            ) : (
                                 projects.map((project) => (
                                     <ProjectCard
                                         key={project.id}
@@ -157,7 +163,7 @@ export default function ProjectsList() {
                                         onOpen={() => onOpenProject(project.id)}
                                     />
                                 ))
-                            }
+                            )}
                         </div>
                     </CardContent>
                 </Card>

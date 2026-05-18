@@ -22,7 +22,11 @@ export default function MilestoneStepper({ milestones }: Props) {
                             <div
                                 className={cn(
                                     'h-px flex-1',
-                                    isFirst ? 'invisible' : prevDone || isDone ? 'bg-green-400' : 'bg-border',
+                                    isFirst
+                                        ? 'invisible'
+                                        : prevDone || isDone
+                                          ? 'bg-green-400'
+                                          : 'bg-border',
                                 )}
                             />
                             <div
@@ -42,7 +46,7 @@ export default function MilestoneStepper({ milestones }: Props) {
                         </div>
 
                         <div className="mt-3 flex flex-col items-center gap-1.5 px-1 text-center">
-                            <p className="text-sm font-medium leading-tight">{milestone.name}</p>
+                            <p className="text-sm leading-tight font-medium">{milestone.name}</p>
                             <span
                                 className={cn(
                                     'rounded-md border px-1.5 py-0.5 text-xs font-medium',
@@ -52,7 +56,7 @@ export default function MilestoneStepper({ milestones }: Props) {
                                 {config.label}
                             </span>
                             {milestone.estimatedDate ? (
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-muted-foreground text-xs">
                                     Est. {dateFormatter.format(new Date(milestone.estimatedDate))}
                                 </p>
                             ) : null}

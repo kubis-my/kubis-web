@@ -38,16 +38,16 @@ export default function ExploreAppsClient({ apps }: { apps: AppSlide[] }) {
                                 className="h-2 w-2 rounded-full"
                                 style={{ backgroundColor: app.accentColor }}
                             />
-                            <span className="text-sm font-medium text-muted-foreground">
+                            <span className="text-muted-foreground text-sm font-medium">
                                 {app.badge}
                             </span>
                         </div>
 
-                        <h1 className="text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
+                        <h1 className="text-foreground text-4xl leading-tight font-bold tracking-tight md:text-5xl">
                             {app.title}
                         </h1>
 
-                        <p className="text-base leading-relaxed text-muted-foreground">
+                        <p className="text-muted-foreground text-base leading-relaxed">
                             {app.description}
                         </p>
 
@@ -55,16 +55,16 @@ export default function ExploreAppsClient({ apps }: { apps: AppSlide[] }) {
                             {app.bullets.map((point) => (
                                 <li
                                     key={point}
-                                    className="flex items-start gap-2 text-sm text-muted-foreground"
+                                    className="text-muted-foreground flex items-start gap-2 text-sm"
                                 >
-                                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/50" />
+                                    <span className="bg-muted-foreground/50 mt-1.5 h-1 w-1 shrink-0 rounded-full" />
                                     {point}
                                 </li>
                             ))}
                         </ul>
 
                         {app.comingSoon ? (
-                            <span className="mt-2 w-fit rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground">
+                            <span className="border-border text-muted-foreground mt-2 w-fit rounded-md border px-3 py-1.5 text-xs font-medium">
                                 Coming Soon
                             </span>
                         ) : app.href ? (
@@ -91,7 +91,7 @@ export default function ExploreAppsClient({ apps }: { apps: AppSlide[] }) {
                         <div className="absolute inset-0 flex items-center justify-center opacity-10">
                             <div className="h-64 w-64 rounded-full bg-white blur-3xl" />
                         </div>
-                        <div className="absolute bottom-6 right-6 flex flex-col items-end gap-1">
+                        <div className="absolute right-6 bottom-6 flex flex-col items-end gap-1">
                             <span className="text-6xl font-black tracking-tighter text-white/20">
                                 {app.name}
                             </span>
@@ -103,13 +103,13 @@ export default function ExploreAppsClient({ apps }: { apps: AppSlide[] }) {
                 <div className="mt-10 flex items-center gap-4">
                     <button
                         onClick={prev}
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+                        className="border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
                     >
                         <IconArrowLeft className="h-4 w-4" />
                     </button>
                     <button
                         onClick={next}
-                        className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-foreground/40 hover:text-foreground"
+                        className="border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
                     >
                         <IconArrowRight className="h-4 w-4" />
                     </button>
@@ -120,7 +120,9 @@ export default function ExploreAppsClient({ apps }: { apps: AppSlide[] }) {
                                 onClick={() => setCurrent(i)}
                                 className={cn(
                                     'h-1.5 rounded-full transition-all',
-                                    i === current ? 'w-6 bg-foreground' : 'w-1.5 bg-muted-foreground/40',
+                                    i === current
+                                        ? 'bg-foreground w-6'
+                                        : 'bg-muted-foreground/40 w-1.5',
                                 )}
                             />
                         ))}

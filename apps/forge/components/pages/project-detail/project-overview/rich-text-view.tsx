@@ -1,9 +1,9 @@
 export function RichTextView({ html, emptyMessage }: { html: string; emptyMessage: string }) {
-    if (!html) return <p className="text-sm italic text-muted-foreground">{emptyMessage}</p>;
+    if (!html) return <p className="text-muted-foreground text-sm italic">{emptyMessage}</p>;
 
     return (
         <div
-            className="prose-editor text-sm leading-6 text-foreground/90"
+            className="prose-editor text-foreground/90 text-sm leading-6"
             dangerouslySetInnerHTML={{ __html: html }}
         />
     );

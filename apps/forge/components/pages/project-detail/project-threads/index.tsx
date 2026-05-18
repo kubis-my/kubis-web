@@ -78,7 +78,10 @@ export default function ProjectThreads() {
             return;
         }
 
-        scrollContainerRef.current?.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior });
+        scrollContainerRef.current?.scrollTo({
+            top: scrollContainerRef.current.scrollHeight,
+            behavior,
+        });
     }, [messages]);
 
     const updateScrollToBottomVisibility = useCallback(() => {
@@ -104,7 +107,10 @@ export default function ProjectThreads() {
         const prevScrollTop = scrollContainer?.scrollTop ?? 0;
 
         const result = await fetchMoreMessages({
-            variables: { projectPublicId: projectId, pagination: { take: THREAD_PAGINATION_SIZE, cursor: currentPageInfo.endCursor } },
+            variables: {
+                projectPublicId: projectId,
+                pagination: { take: THREAD_PAGINATION_SIZE, cursor: currentPageInfo.endCursor },
+            },
         });
 
         const fetched = result.data?.getThreadMessagesForForge;
@@ -122,7 +128,8 @@ export default function ProjectThreads() {
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     if (scrollContainer) {
-                        scrollContainer.scrollTop = prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
+                        scrollContainer.scrollTop =
+                            prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
                     }
                 });
             });
@@ -191,7 +198,8 @@ export default function ProjectThreads() {
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     if (scrollContainer) {
-                        scrollContainer.scrollTop = prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
+                        scrollContainer.scrollTop =
+                            prevScrollTop + (scrollContainer.scrollHeight - prevScrollHeight);
                     }
                 });
             });
@@ -210,7 +218,9 @@ export default function ProjectThreads() {
             id: tempId,
             senderId: authUserId ?? '',
             senderName: authUser?.nickname ?? authUser?.displayName ?? 'You',
-            senderInitials: ((authUser?.nickname ?? authUser?.displayName ?? 'Y').at(0) ?? 'Y').toUpperCase(),
+            senderInitials: (
+                (authUser?.nickname ?? authUser?.displayName ?? 'Y').at(0) ?? 'Y'
+            ).toUpperCase(),
             avatarClass: 'bg-violet-500 text-white',
             content: input,
             timestamp: new Date(),
@@ -301,7 +311,10 @@ export default function ProjectThreads() {
     }, []);
 
     const scrollToBottom = useCallback(() => {
-        scrollContainerRef.current?.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: 'smooth' });
+        scrollContainerRef.current?.scrollTo({
+            top: scrollContainerRef.current.scrollHeight,
+            behavior: 'smooth',
+        });
     }, []);
 
     return (
@@ -329,7 +342,10 @@ export default function ProjectThreads() {
                         <div ref={topSentinelRef} className="h-px" />
                         {isLoadingMore ? (
                             <div className="flex items-center justify-center py-3">
-                                <IconLoader2 size={16} className="text-muted-foreground animate-spin" />
+                                <IconLoader2
+                                    size={16}
+                                    className="text-muted-foreground animate-spin"
+                                />
                             </div>
                         ) : null}
                         {dateGroups.map((dg) => (

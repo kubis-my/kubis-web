@@ -37,7 +37,12 @@ import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { convertErrorMessageListToObject } from '@repo/commons/utils/error-message';
 import ShowErrorText from '@/shadcn/custom-components/show-error-text';
 import { toast } from 'sonner';
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/shadcn/components/input-group';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+    InputGroupText,
+} from '@/shadcn/components/input-group';
 
 const UPSERT_BRANCH_BILLING_ADDRESS: TypedDocumentNode<
     { upsertBranchBillingAddress: Branch },
@@ -204,7 +209,7 @@ export default function CompanyBranchBillingAddressCard() {
                             </div>
                             <div className="text-muted-foreground text-xs">
                                 {ctx.branch?.branchBillingAddress?.phoneCode &&
-                                    ctx.branch?.branchBillingAddress?.phoneNumber
+                                ctx.branch?.branchBillingAddress?.phoneNumber
                                     ? `${ctx.branch?.branchBillingAddress?.phoneCode}${ctx.branch?.branchBillingAddress?.phoneNumber}`
                                     : '-'}
                             </div>

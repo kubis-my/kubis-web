@@ -35,7 +35,7 @@ export default function SignInCredentialsStage({
                     value={identifier}
                     onChange={(e) => onIdentifierChange(e.target.value)}
                 />
-                <ShowErrorText className='-mt-2!' error={formValidation} field="identifier" />
+                <ShowErrorText className="-mt-2!" error={formValidation} field="identifier" />
             </div>
             <div className="grid gap-3">
                 <div className="flex items-center">
@@ -53,7 +53,7 @@ export default function SignInCredentialsStage({
                     value={password}
                     onChange={(e) => onPasswordChange(e.target.value)}
                 />
-                <ShowErrorText className='-mt-2!' error={formValidation} field="password" />
+                <ShowErrorText className="-mt-2!" error={formValidation} field="password" />
             </div>
             <Button type="button" className="w-full" onClick={onSubmit} disabled={isSubmitting}>
                 {!isSubmitting ? (

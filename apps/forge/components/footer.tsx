@@ -23,11 +23,10 @@ export default function Footer() {
                         <p className="max-w-xs text-sm leading-relaxed text-gray-400">
                             {footer.description}
                         </p>
-
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                        <span className="text-xs font-semibold tracking-widest text-gray-500 uppercase">
                             Navigation
                         </span>
                         <nav className="flex flex-col gap-3">
@@ -70,7 +69,7 @@ export default function Footer() {
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                        <span className="text-xs font-semibold tracking-widest text-gray-500 uppercase">
                             Language
                         </span>
                         <div className="flex flex-col gap-3 text-sm">
