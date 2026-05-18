@@ -1,98 +1,175 @@
-# CLAUDE.md
+# Ruflo — Claude Code Configuration
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## Rules
 
-## Commands
+- Do what has been asked; nothing more, nothing less
+- NEVER create files unless absolutely necessary — prefer editing existing files
+- NEVER create documentation files unless explicitly requested
+- NEVER save working files or tests to root — use `/src`, `/tests`, `/docs`, `/config`, `/scripts`
+- ALWAYS read a file before editing it
+- NEVER commit secrets, credentials, or .env files
+- Keep files under 500 lines
+- Validate input at system boundaries
+
+## Agent Comms (SendMessage-First Coordination)
+
+Named agents coordinate via `SendMessage`, not polling or shared state.
+
+```
+Lead (you) ←→ architect ←→ developer ←→ tester ←→ reviewer
+              (named agents message each other directly)
+```
+
+### Spawning a Coordinated Team
+
+```javascript
+// ALL agents in ONE message, each knows WHO to message next
+Agent({ prompt: "Research the codebase. SendMessage findings to 'architect'.",
+  subagent_type: "researcher", name: "researcher", run_in_background: true })
+Agent({ prompt: "Wait for 'researcher'. Design solution. SendMessage to 'coder'.",
+  subagent_type: "system-architect", name: "architect", run_in_background: true })
+Agent({ prompt: "Wait for 'architect'. Implement it. SendMessage to 'tester'.",
+  subagent_type: "coder", name: "coder", run_in_background: true })
+Agent({ prompt: "Wait for 'coder'. Write tests. SendMessage results to 'reviewer'.",
+  subagent_type: "tester", name: "tester", run_in_background: true })
+Agent({ prompt: "Wait for 'tester'. Review code quality and security.",
+  subagent_type: "reviewer", name: "reviewer", run_in_background: true })
+
+// Kick off the pipeline
+SendMessage({ to: "researcher", summary: "Start", message: "[task context]" })
+```
+
+### Patterns
+
+| Pattern | Flow | Use When |
+|---------|------|----------|
+| **Pipeline** | A → B → C → D | Sequential dependencies (feature dev) |
+| **Fan-out** | Lead → A, B, C → Lead | Independent parallel work (research) |
+| **Supervisor** | Lead ↔ workers | Ongoing coordination (complex refactor) |
+
+### Rules
+
+- ALWAYS name agents — `name: "role"` makes them addressable
+- ALWAYS include comms instructions in prompts — who to message, what to send
+- Spawn ALL agents in ONE message with `run_in_background: true`
+- After spawning: STOP, tell user what's running, wait for results
+- NEVER poll status — agents message back or complete automatically
+
+## Swarm & Routing
+
+### Config
+- **Topology**: hierarchical-mesh (anti-drift)
+- **Max Agents**: 15
+- **Memory**: hybrid
+- **HNSW**: Enabled
+- **Neural**: Enabled
 
 ```bash
-pnpm install              # Install all workspace dependencies
-pnpm dev                  # Run all apps in dev mode
-pnpm build                # Build all packages/apps
-pnpm lint                 # Lint all packages/apps
-pnpm check-types          # TypeScript type checking
-pnpm format               # Prettier format (write)
-pnpm format:check         # Prettier check (CI)
-
-turbo dev --filter=main   # Main app only (port 3001)
-turbo dev --filter=sso    # SSO app only (port 3000)
-turbo build --filter=main
-turbo lint --filter=main
+npx @claude-flow/cli@latest swarm init --topology hierarchical --max-agents 8 --strategy specialized
 ```
 
-No test framework is configured in this repo.
+### Agent Routing
 
-## Architecture
+| Task | Agents | Topology |
+|------|--------|----------|
+| Bug Fix | researcher, coder, tester | hierarchical |
+| Feature | architect, coder, tester, reviewer | hierarchical |
+| Refactor | architect, coder, reviewer | hierarchical |
+| Performance | perf-engineer, coder | hierarchical |
+| Security | security-architect, auditor | hierarchical |
 
-**Turborepo monorepo** with pnpm workspaces, Next.js 16 (App Router + Turbopack), React 19, TypeScript.
+### When to Swarm
+- **YES**: 3+ files, new features, cross-module refactoring, API changes, security, performance
+- **NO**: single file edits, 1-2 line fixes, docs updates, config changes, questions
 
-### Apps
+### 3-Tier Model Routing
 
-- **`apps/main`** (port 3001) — Main product dashboard/workspace app. Protected routes under `/my-account` use `AuthGuard`.
-- **`apps/sso`** (port 3000) — SSO/OAuth app handling sign-in and OAuth authorization flows.
+| Tier | Handler | Use Cases |
+|------|---------|-----------|
+| 1 | Agent Booster (WASM) | Simple transforms — skip LLM, use Edit directly |
+| 2 | Haiku | Simple tasks, low complexity |
+| 3 | Sonnet/Opus | Architecture, security, complex reasoning |
 
-### Packages
+## Memory & Learning
 
-- **`packages/commons`** — Shared API clients (Apollo, Axios, Elysia route handlers), constants, env validation (`@t3-oss/env-core` + Zod), types, utilities, hooks, server actions.
-- **`packages/shadcn-ui`** — Shared UI: shadcn/ui primitives (new-york style), custom components, guards (`AuthGuard`, `ExchangeCodeForToken`), providers (`AuthProvider`, `ApolloProvider`, `SocketProvider`), dashboard layout, hooks.
-- **`packages/tailwind-config`**, **`packages/eslint-config`**, **`packages/typescript-config`** — Shared config packages.
-
-### Key Patterns
-
-**Page → Container → Components**: Pages are thin wrappers that import a container component. Containers are `'use client'` components that own data fetching (Apollo `useQuery`/`useMutation`), define a local React Context, and expose a `useXxx()` hook. Sub-components consume the context.
-
-**GraphQL**: Apollo Client 4. Queries use `TypedDocumentNode<Response, Variables>` with inline `gql` template literals co-located in the container file. All queries proxy through `/api/graphql` (Elysia route handler injects httpOnly access token cookie).
-
-**Auth**: Custom OAuth 2.0 PKCE flow (no NextAuth). SSO app handles credentials → issues auth code → main app exchanges for tokens stored in httpOnly cookies. Token refresh every 25 minutes. CSRF tokens seeded by middleware (`proxy.ts`) and validated on mutating routes.
-
-**API routes**: Built with Elysia (not raw Next.js handlers). Both `auth-api-route.ts` and `graphql-api-route.ts` export `.fetch` as the route handler.
-
-**State management**: React Context API only (no Redux/Zustand). Key contexts: `AuthContext`, `DashboardContext`, `SocketContext`, plus per-feature contexts in containers.
-
-**Server actions**: `useBaseAction()` factory from `@repo/commons/utils/base-action.ts` provides cookie access, Axios instance with forwarded headers, and form helpers.
-
-### Styling
-
-- Tailwind CSS v4 with oklch CSS custom properties for theming (dark mode via `.dark` class)
-- `cn()` utility from `@repo/shadcn-ui/lib/utils` (clsx + tailwind-merge)
-- Prettier enforces Tailwind class ordering via `prettier-plugin-tailwindcss`
-
-### Import Conventions
-
-```typescript
-// Shared UI
-import { Button } from '@repo/shadcn-ui/components/button';
-import { useAuth } from '@repo/shadcn-ui/providers/auth-provider';
-
-// Shared utilities
-import { env } from '@repo/commons/constant/env';
-
-// App-local (main app path aliases)
-// @/*           → ./app/*
-// @/root/*      → ./*
-// @/component/* → ./components/*
-// @/shadcn/*    → ../../packages/shadcn-ui/src/*
+### Before Any Task
+```bash
+npx @claude-flow/cli@latest memory search --query "[task keywords]" --namespace patterns
+npx @claude-flow/cli@latest hooks route --task "[task description]"
 ```
 
-**Icons**: `@tabler/icons-react` (primary), `lucide-react` (secondary).
+### After Success
+```bash
+npx @claude-flow/cli@latest memory store --namespace patterns --key "[name]" --value "[what worked]"
+npx @claude-flow/cli@latest hooks post-task --task-id "[id]" --success true --store-results true
+```
 
-### Formatting
+### MCP Tools (use `ToolSearch("keyword")` to discover)
 
-- Prettier: 4 spaces, single quotes, 100 char width, LF line endings
-- Vertical spacing: one blank line between logical operations, before/after block comments, between declarations and operations; no blank line between closely related operations
+| Category | Key Tools |
+|----------|-----------|
+| **Memory** | `memory_store`, `memory_search`, `memory_search_unified` |
+| **Bridge** | `memory_import_claude`, `memory_bridge_status` |
+| **Swarm** | `swarm_init`, `swarm_status`, `swarm_health` |
+| **Agents** | `agent_spawn`, `agent_list`, `agent_status` |
+| **Hooks** | `hooks_route`, `hooks_post-task`, `hooks_worker-dispatch` |
+| **Security** | `aidefence_scan`, `aidefence_is_safe`, `aidefence_has_pii` |
+| **Hive-Mind** | `hive-mind_init`, `hive-mind_consensus`, `hive-mind_spawn` |
 
-## Environment Variables
+### Background Workers
 
-Validated at startup via `packages/commons/src/constant/env.ts`. All `NEXT_PUBLIC_*` must be valid URLs or startup fails. Create `.env.local` in each app:
+| Worker | When |
+|--------|------|
+| `audit` | After security changes |
+| `optimize` | After performance work |
+| `testgaps` | After adding features |
+| `map` | Every 5+ file changes |
+| `document` | After API changes |
 
 ```bash
-APP_ENV=development
-NEXT_PUBLIC_AUTH_URL=http://localhost:3000/api/auth
-NEXT_PUBLIC_MAIN_APP_BASE_URL=http://localhost:3001
-NEXT_PUBLIC_SSO_APP_BASE_URL=http://localhost:3000
-NEXT_PUBLIC_MAIN_CLIENT_ID=main-web
-NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL=http://localhost:4000/graphql
+npx @claude-flow/cli@latest hooks worker dispatch --trigger audit
 ```
 
-## Deployment
+## Agents
 
-Multi-stage Dockerfile with `APP_NAME` build arg. Deployed to Fly.io via GitHub Actions (`fly.prod.toml` for production, `fly.staging.toml` for staging).
+**Core**: `coder`, `reviewer`, `tester`, `planner`, `researcher`
+**Architecture**: `system-architect`, `backend-dev`, `mobile-dev`
+**Security**: `security-architect`, `security-auditor`
+**Performance**: `performance-engineer`, `perf-analyzer`
+**Coordination**: `hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`
+**GitHub**: `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`
+
+Any string works as a custom agent type.
+
+## Build & Test
+
+- ALWAYS run tests after code changes
+- ALWAYS verify build succeeds before committing
+
+```bash
+npm run build && npm test
+```
+
+## CLI Quick Reference
+
+```bash
+npx @claude-flow/cli@latest init --wizard           # Setup
+npx @claude-flow/cli@latest swarm init --v3-mode     # Start swarm
+npx @claude-flow/cli@latest memory search --query "" # Vector search
+npx @claude-flow/cli@latest hooks route --task ""    # Route to agent
+npx @claude-flow/cli@latest doctor --fix             # Diagnostics
+npx @claude-flow/cli@latest security scan            # Security scan
+npx @claude-flow/cli@latest performance benchmark    # Benchmarks
+```
+
+26 commands, 140+ subcommands. Use `--help` on any command for details.
+
+## Setup
+
+```bash
+claude mcp add claude-flow -- npx -y @claude-flow/cli@latest
+npx @claude-flow/cli@latest daemon start
+npx @claude-flow/cli@latest doctor --fix
+```
+
+**Agent tool** handles execution (agents, files, code, git). **MCP tools** handle coordination (swarm, memory, hooks). **CLI** is the same via Bash.

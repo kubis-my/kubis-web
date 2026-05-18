@@ -45,7 +45,11 @@ yarn-error.log*
 .claude/helpers/
 .claude/memory.db
 .claude/settings.json
+.claude/settings.local.json
 .swarm/
 claude-flow.config.json
 data/
 ruvector.db
+agentdb.rvf
+agentdb.rvf.lock
+.mcp.json
