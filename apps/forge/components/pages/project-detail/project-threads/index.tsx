@@ -438,7 +438,7 @@ export default function ProjectThreads() {
                     type="button"
                     size="icon"
                     variant="secondary"
-                    className="border-border/70 bg-background/95 absolute right-5 bottom-40 z-30 size-10 rounded-full border shadow-lg backdrop-blur md:right-7"
+                    className={`border-border/70 bg-background/95 absolute right-5 z-30 size-10 rounded-full border shadow-lg backdrop-blur md:right-7 ${replyingToId ? 'bottom-56' : 'bottom-40'}`}
                     onClick={scrollToBottom}
                 >
                     <IconArrowDown size={18} />

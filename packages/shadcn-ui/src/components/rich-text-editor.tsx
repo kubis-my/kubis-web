@@ -84,7 +84,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
                 },
             },
             onUpdate({ editor }) {
-                const html = editor.isEmpty ? '' : editor.getHTML();
+                const html = editor.isEmpty || !editor.getText().trim() ? '' : editor.getHTML();
                 onChange(html);
             },
             immediatelyRender: false,

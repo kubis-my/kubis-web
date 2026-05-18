@@ -27,6 +27,7 @@ export type ProjectBriefData = {
 };
 
 export type MilestoneNote = {
+    id: string;
     date: string;
     content: string;
 };
@@ -100,6 +101,7 @@ const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = 
                 estimatedAt
                 order
                 notes {
+                    publicId
                     content
                     date
                 }
@@ -189,7 +191,7 @@ export default function ProjectDetailContainer({
                     name: m.name,
                     status: MILESTONE_STATUS_MAP[m.status],
                     estimatedDate: m.estimatedAt,
-                    notes: m.notes.map((n) => ({ date: n.date, content: n.content })),
+                    notes: m.notes.map((n) => ({ id: n.publicId, date: n.date, content: n.content })),
                 })),
         };
     }, [data, companyNameMap]);

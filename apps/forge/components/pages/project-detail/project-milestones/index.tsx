@@ -8,12 +8,16 @@ import { useEffect } from 'react';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
 import { CreateMilestoneDialog } from './create-milestone-dialog';
+import { useSearchParams } from 'next/navigation';
 
 export default function ProjectMilestones() {
     const { project } = useProjectDetail();
     const { milestones } = project;
     const { updateHeaderAction } = useDashboard01();
     const auth = useAuth();
+    const searchParams = useSearchParams();
+    const highlightedMilestoneId = searchParams.get('id') ?? undefined;
+    const highlightedNoteId = searchParams.get('note_id') ?? undefined;
 
     useEffect(() => {
         const isSuperAdmin = hasSuperAdminAccess(auth.authUser?.companies ?? [])
@@ -45,7 +49,12 @@ export default function ProjectMilestones() {
             {milestones.length > 0 && (
                 <div className="space-y-5">
                     {milestones.map((milestone) => (
-                        <MilestoneCard key={milestone.id} milestone={milestone} />
+                        <MilestoneCard
+                            key={milestone.id}
+                            milestone={milestone}
+                            highlightedMilestoneId={highlightedMilestoneId}
+                            highlightedNoteId={highlightedNoteId}
+                        />
                     ))}
                 </div>
             )}

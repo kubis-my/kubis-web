@@ -13,23 +13,48 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '@/shadcn/components/button';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AddNoteDialog } from './add-note-dialog';
 import { EditMilestoneDialog } from './edit-milestone-dialog';
 
 type Props = {
     milestone: Milestone;
+    highlightedMilestoneId?: string;
+    highlightedNoteId?: string;
 };
 
-export default function MilestoneCard({ milestone }: Props) {
+export default function MilestoneCard({ milestone, highlightedMilestoneId, highlightedNoteId }: Props) {
     const config = STATUS_CONFIG[milestone.status];
     const notes = milestone.notes ?? [];
     const auth = useAuth();
     const [editOpen, setEditOpen] = useState(false);
     const [addNoteOpen, setAddNoteOpen] = useState(false);
+    const sectionRef = useRef<HTMLElement>(null);
+    const noteRefs = useRef<Map<string, HTMLElement>>(new Map());
+
+    const isMilestoneHighlighted = highlightedMilestoneId === milestone.id;
+
+    useEffect(() => {
+        if (isMilestoneHighlighted && sectionRef.current) {
+            sectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [isMilestoneHighlighted]);
+
+    useEffect(() => {
+        if (highlightedNoteId) {
+            const el = noteRefs.current.get(highlightedNoteId);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [highlightedNoteId]);
 
     return (
-        <section className={cn("bg-card overflow-hidden rounded-xl border shadow-sm", config.borderClass)}>
+        <section
+            ref={sectionRef}
+            className={cn(
+                "bg-card overflow-hidden rounded-xl border shadow-sm transition-shadow",
+                isMilestoneHighlighted && "ring-2 ring-blue-400/50 ",
+            )}
+        >
             <div className="bg-muted/30 flex items-center justify-between border-b px-4 py-3 sm:px-5">
                 <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-sm font-semibold tracking-tight">{milestone.name}</h3>
@@ -89,7 +114,14 @@ export default function MilestoneCard({ milestone }: Props) {
                     notes.map((note, i) => (
                         <article
                             key={`${note.date}-${i}`}
-                            className="grid gap-3 px-4 py-4 sm:grid-cols-[108px_1fr] sm:gap-4 sm:px-5"
+                            ref={(el) => {
+                                if (el) noteRefs.current.set(note.id, el);
+                                else noteRefs.current.delete(note.id);
+                            }}
+                            className={cn(
+                                "grid gap-3 px-4 py-4 sm:grid-cols-[108px_1fr] sm:gap-4 sm:px-5",
+                                highlightedNoteId === note.id && "bg-blue-50/60 dark:bg-blue-950/20 ",
+                            )}
                         >
                             <div className="sm:pt-1">
                                 <p className="text-muted-foreground text-xs font-medium">
