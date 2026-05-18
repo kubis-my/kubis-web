@@ -7,8 +7,7 @@ import { useAuth } from '@/shadcn/providers/auth-provider';
 import { useEffect } from 'react';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
-import { Button } from '@/shadcn/components/button';
-import { IconPlus } from '@tabler/icons-react';
+import { CreateMilestoneDialog } from './create-milestone-dialog';
 
 export default function ProjectMilestones() {
     const { project } = useProjectDetail();
@@ -22,10 +21,8 @@ export default function ProjectMilestones() {
         if (isSuperAdmin) {
             updateHeaderAction(
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="size-7">
-                        <IconPlus />
-                    </Button>
-                </div>,
+                    <CreateMilestoneDialog projectPublicId={project.id} order={milestones.length + 1} />
+                </div>
             );
         }
 
