@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useNewProject } from './new-project-container';
 import { Button } from '@repo/shadcn-ui/components/button';
 import { Input } from '@repo/shadcn-ui/components/input';
@@ -10,10 +11,13 @@ import { Checkbox } from '@repo/shadcn-ui/components/checkbox';
 import RichTextEditor from '@repo/shadcn-ui/components/rich-text-editor';
 import Link from 'next/link';
 import { ROUTE } from '@/root/libs/constants';
+import { TriangleAlert } from 'lucide-react';
 
 export default function NewProjectForm() {
     const { form, availableCompanies, isSubmitting, onChange, onToggleCompany, onSubmit } =
         useNewProject();
+
+    const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
     const isValid =
         form.name.trim().length > 0 &&
@@ -22,6 +26,7 @@ export default function NewProjectForm() {
 
     function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        setHasAttemptedSubmit(true);
         if (isValid) onSubmit();
     }
 
@@ -37,21 +42,32 @@ export default function NewProjectForm() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-10">
                 <section className="flex flex-col gap-6">
                     <div>
-                        <h2 className="text-base font-semibold">Project Details</h2>
+                        <h2 className="text-base font-semibold">
+                            <span className="text-muted-foreground mr-2 font-normal">1.</span>
+                            Project Details
+                        </h2>
                         <p className="text-muted-foreground mt-0.5 text-sm">
                             Basic information about your project.
                         </p>
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <Label htmlFor="name">Project Name *</Label>
+                        <Label htmlFor="name"><span>Project Name<span className='text-red-500 ml-0.5'>*</span></span></Label>
                         <Input
                             id="name"
                             placeholder="e.g. Internal Purchase Order System"
                             value={form.name}
                             autoComplete="off"
                             onChange={(e) => onChange('name', e.target.value)}
+                            className={
+                                hasAttemptedSubmit && !form.name.trim()
+                                    ? 'border-destructive focus-visible:ring-destructive'
+                                    : ''
+                            }
                         />
+                        {hasAttemptedSubmit && !form.name.trim() && (
+                            <p className="text-destructive text-xs">Project name is required.</p>
+                        )}
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -84,11 +100,10 @@ export default function NewProjectForm() {
                                                     return;
                                                 onToggleCompany(company.publicId);
                                             }}
-                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
-                                                checked
-                                                    ? 'border-primary bg-primary/5'
-                                                    : 'hover:bg-muted/50'
-                                            }`}
+                                            className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${checked
+                                                ? 'border-primary bg-primary/5'
+                                                : 'hover:bg-muted/50'
+                                                }`}
                                         >
                                             <Checkbox
                                                 checked={checked}
@@ -112,28 +127,37 @@ export default function NewProjectForm() {
 
                 <section className="flex flex-col gap-6">
                     <div>
-                        <h2 className="text-base font-semibold">Project Brief</h2>
+                        <h2 className="text-base font-semibold">
+                            <span className="text-muted-foreground mr-2 font-normal">2.</span>
+                            Project Brief
+                        </h2>
                         <p className="text-muted-foreground mt-0.5 text-sm">
                             Help us understand what you need built.
                         </p>
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <Label>Current Problem / Pain Point *</Label>
+                        <Label><span>Current Problem / Pain Point<span className='text-red-500 ml-0.5'>*</span></span></Label>
                         <RichTextEditor
                             value={form.problem}
                             onChange={(value) => onChange('problem', value)}
                             placeholder="What is the main challenge or workflow issue you're facing right now?"
                         />
+                        {hasAttemptedSubmit && !form.problem && (
+                            <p className="text-destructive text-xs">This field is required.</p>
+                        )}
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <Label>What the System Needs to Do *</Label>
+                        <Label><span>What the System Needs to Do<span className='text-red-500 ml-0.5'>*</span></span></Label>
                         <RichTextEditor
                             value={form.systemNeeds}
                             onChange={(value) => onChange('systemNeeds', value)}
                             placeholder="Describe the core workflow or features the system should handle."
                         />
+                        {hasAttemptedSubmit && !form.systemNeeds && (
+                            <p className="text-destructive text-xs">This field is required.</p>
+                        )}
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -166,13 +190,25 @@ export default function NewProjectForm() {
                             placeholder="Anything else we should know before the discovery session."
                         />
                     </div>
+                    <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm dark:border-amber-800 dark:bg-amber-950/40">
+                        <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                        <p>
+                            <span className="font-semibold text-amber-900 dark:text-amber-200">
+                                Please review carefully before submitting.
+                            </span>{' '}
+                            <span className="text-amber-800 dark:text-amber-300">
+                                Your requirements and brief cannot be edited once the project is
+                                submitted.
+                            </span>
+                        </p>
+                    </div>
                 </section>
 
                 <div className="flex items-center justify-end gap-3 pb-8">
                     <Button variant="outline" asChild>
                         <Link href={ROUTE.FORGE.HOME}>Back</Link>
                     </Button>
-                    <Button type="submit" disabled={!isValid || isSubmitting}>
+                    <Button type="submit" disabled={isSubmitting}>
                         {isSubmitting ? 'Submitting...' : 'Submit Project'}
                     </Button>
                 </div>

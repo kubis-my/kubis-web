@@ -89,8 +89,13 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="border-t border-white/10 py-6 text-xs text-gray-600">
-                    © {new Date().getFullYear()} Kubis Forge. All rights reserved.
+                <div className="py-6 text-xs text-gray-600 flex justify-between">
+                    <div>
+                        © {new Date().getFullYear()} Kubis Forge
+                    </div>
+                    <div>
+                        All rights reserved
+                    </div>
                 </div>
             </div>
         </footer>

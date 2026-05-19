@@ -9,7 +9,7 @@ export default function page() {
                 <div className="flex-1 p-4 md:p-8">
                     <NewProjectForm />
                 </div>
-                <ConsoleFooter />
+                <ConsoleFooter className="max-w-2xl" />
             </div>
         </NewProjectContainer>
     );
