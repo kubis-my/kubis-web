@@ -40,7 +40,7 @@ const skills: Record<string, { items: string[]; color: string }> = {
         color: 'text-violet-600 dark:text-violet-400',
     },
     Frontend: {
-        items: ['Next.js', 'Vue.js'],
+        items: ['Next.js', 'Vue.js', 'Flutter'],
         color: 'text-orange-600 dark:text-orange-400',
     },
     Integrations: {
@@ -106,6 +106,22 @@ const projects = [
         description:
             'Track agent performance, manage agents, and monitor sales activities with authentication, performance tracking, and async queue processing.',
         tech: ['Laravel', 'jQuery', 'MySQL'],
+    },
+    {
+        index: '07',
+        name: 'POS Mobile & Web Application',
+        label: 'Mobile & Web App',
+        description:
+            'Full-stack POS system across mobile and web platforms with inventory, sales management, real-time synchronization, role-based access, queues, and PDF receipts and invoices.',
+        tech: ['Flutter', 'Vue.js', 'Laravel', 'MySQL', 'WebSocket'],
+    },
+    {
+        index: '08',
+        name: 'Vure',
+        label: 'SPA Starter Template',
+        description:
+            'Open-source starter template for building SPA applications with Laravel, React, Vue, TypeScript, Tailwind CSS, and Bootstrap frontend configurations.',
+        tech: ['TypeScript', 'Laravel', 'React', 'Vue', 'Tailwind CSS', 'Bootstrap'],
     },
 ];
 
