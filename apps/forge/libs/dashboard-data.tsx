@@ -6,6 +6,7 @@ import {
     IconLogout,
     IconHelp,
     IconUser,
+    IconApps,
     IconFileDescription,
     IconFlag,
     IconMessages,
@@ -66,6 +67,14 @@ export function getProjectNavigationList(projectId: string): NavigationItem[] {
 }
 
 export const navigationUserItemList: NavUserItem[] = [
+    {
+        id: 'explore-apps',
+        name: 'Explore apps',
+        icon: <IconApps />,
+        async action() {
+            window.open(`${env.NEXT_PUBLIC_MAIN_APP_BASE_URL}/explore-apps`, '_blank');
+        },
+    },
     {
         id: 'my-account',
         name: 'My account',

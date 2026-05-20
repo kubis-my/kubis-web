@@ -5,6 +5,7 @@ export const ROUTE = {
         INVITATION: '/my-account/invitation',
         YOUR_DEVICE: '/my-account/your-device',
     },
+    EXPLORE_APPS: '/explore-apps',
 };
 
 export const BRANCH_PAGINATION_SIZE = 10;
@@ -40,21 +41,3 @@ export const activityTypeConfig = {
         label: 'Logout',
     },
 };
-
-export const PHONE_CODES = [
-    { value: '+1', label: '+1 (US/Canada)' },
-    { value: '+44', label: '+44 (UK)' },
-    { value: '+81', label: '+81 (Japan)' },
-    { value: '+82', label: '+82 (South Korea)' },
-    { value: '+86', label: '+86 (China)' },
-    { value: '+91', label: '+91 (India)' },
-    { value: '+60', label: '+60 (Malaysia)' },
-    { value: '+65', label: '+65 (Singapore)' },
-    { value: '+66', label: '+66 (Thailand)' },
-    { value: '+62', label: '+62 (Indonesia)' },
-    { value: '+63', label: '+63 (Philippines)' },
-    { value: '+84', label: '+84 (Vietnam)' },
-    { value: '+61', label: '+61 (Australia)' },
-    { value: '+49', label: '+49 (Germany)' },
-    { value: '+33', label: '+33 (France)' },
-];

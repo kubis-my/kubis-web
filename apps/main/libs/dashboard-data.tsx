@@ -2,17 +2,14 @@
 
 import { NavigationItem, NavUserItem } from '@/shadcn/dashboards/dashboard-01/types';
 import {
-    IconCreditCard,
     IconHome,
     IconBuilding,
     IconLogout,
-    IconNotification,
-    IconIdBadge2,
     IconDeviceDesktopCheck,
     IconSettings,
     IconHelp,
-    IconSearch,
     IconUserPlus,
+    IconApps,
 } from '@tabler/icons-react';
 import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
@@ -58,6 +55,14 @@ export const navigationList: NavigationItem[] = [
 ];
 
 export const navigationUserItemList: NavUserItem[] = [
+    {
+        id: 'explore-apps',
+        name: 'Explore apps',
+        icon: <IconApps />,
+        async action() {
+            window.location.href = ROUTE.EXPLORE_APPS;
+        },
+    },
     {
         id: 'Settings',
         name: 'Settings',
