@@ -6,6 +6,8 @@ import { Card, CardContent } from '@repo/shadcn-ui/components/card';
 import {
     IconMapPin,
     IconBrandLinkedin,
+    IconBrandGithub,
+    IconMail,
     IconCode,
     IconRocket,
     IconBriefcase,
@@ -24,28 +26,41 @@ const skills: Record<string, { items: string[]; color: string }> = {
             'Node.js',
             'Laravel',
             '.NET (C#)',
-            'Microservices',
-            'REST APIs',
             'GraphQL',
+            'REST APIs',
             'WebSocket',
+            'Microservices',
         ],
         color: 'text-emerald-600 dark:text-emerald-400',
     },
     Database: {
-        items: ['PostgreSQL', 'MySQL', 'Prisma', 'Redis'],
+        items: ['PostgreSQL', 'MySQL', 'Prisma ORM', 'Redis', 'BullMQ'],
         color: 'text-blue-600 dark:text-blue-400',
     },
     'Cloud & DevOps': {
-        items: ['Docker', 'CI/CD', 'CircleCI', 'AWS S3'],
+        items: ['Docker', 'CI/CD', 'CircleCI', 'Fly.io', 'Digital Ocean', 'AWS S3'],
         color: 'text-violet-600 dark:text-violet-400',
     },
     Frontend: {
-        items: ['Next.js', 'Vue.js', 'Flutter'],
+        items: ['Next.js', 'Vue.js', 'React', 'Flutter (Dart)', 'Tailwind CSS', 'Bootstrap'],
         color: 'text-orange-600 dark:text-orange-400',
     },
     Integrations: {
-        items: ['Google Maps API', 'Lark API', 'Gmail API'],
+        items: ['Google Maps API', 'Lark API', 'Gmail API', 'ToyyibPay', 'AutoCount'],
         color: 'text-rose-600 dark:text-rose-400',
+    },
+    Tools: {
+        items: [
+            'Postman',
+            'Sentry',
+            'Socket.io',
+            'JWT',
+            'TypeScript',
+            'Baileys',
+            'Puppeteer',
+            'Jest',
+        ],
+        color: 'text-cyan-600 dark:text-cyan-400',
     },
 };
 
@@ -55,7 +70,7 @@ const projects = [
         name: 'TradeLink',
         label: 'Transportation Management System',
         description:
-            'Multi-tenant TMS backend managing the full freight lifecycle load management, rate confirmations, invoicing, and bulk data import supporting up to 100K rows with real-time progress via WebSocket.',
+            'Multi-tenant TMS backend managing load management, rate confirmations, invoicing, role-based access, PDF generation, AWS S3 storage, and bulk import up to 100K rows with real-time WebSocket progress.',
         tech: [
             'NestJS',
             'TypeScript',
@@ -65,6 +80,8 @@ const projects = [
             'BullMQ',
             'Socket.io',
             'AWS S3',
+            'Puppeteer',
+            'Google API',
         ],
     },
     {
@@ -80,16 +97,16 @@ const projects = [
         name: 'Business Optimization System',
         label: 'Dashboard',
         description:
-            'Real-time monitoring, reporting dashboards, and core modules for product, inventory, and order management with JWT-based auth.',
-        tech: ['Next.js', 'Socket.io'],
+            'Real-time business optimization platform with monitoring dashboards, operational reporting, RESTful backend services, middleware, and async queue processing.',
+        tech: ['Vue.js', 'Socket.io', 'Laravel', 'MySQL'],
     },
     {
         index: '04',
-        name: 'BOS RESTful API',
-        label: 'Backend API',
+        name: 'POS Mobile & Web App',
+        label: 'Point of Sale',
         description:
-            'RESTful API with CRUD endpoints, Laravel Sanctum authentication, database queue handling, and courier service management.',
-        tech: ['Laravel', 'MySQL'],
+            'Full-stack POS system for mobile and web with transaction, inventory, and sales workflows, real-time sync, JWT role access, queue-based processing, and receipt/invoice PDF generation.',
+        tech: ['Flutter', 'Vue.js', 'Laravel', 'MySQL'],
     },
     {
         index: '05',
@@ -105,23 +122,23 @@ const projects = [
         label: 'Management System',
         description:
             'Track agent performance, manage agents, and monitor sales activities with authentication, performance tracking, and async queue processing.',
-        tech: ['Laravel', 'jQuery', 'MySQL'],
+        tech: ['Vue.js', 'Laravel', 'MySQL'],
     },
     {
         index: '07',
-        name: 'POS Mobile & Web Application',
-        label: 'Mobile & Web App',
+        name: 'Vure',
+        label: 'Open Source SPA Starter',
         description:
-            'Full-stack POS system across mobile and web platforms with inventory, sales management, real-time synchronization, role-based access, queues, and PDF receipts and invoices.',
-        tech: ['Flutter', 'Vue.js', 'Laravel', 'MySQL', 'WebSocket'],
+            'Starter template supporting React and Vue with a Laravel backend, Tailwind CSS, and Bootstrap for rapid single-page application development.',
+        tech: ['Laravel', 'TypeScript', 'React', 'Vue.js'],
     },
     {
         index: '08',
-        name: 'Vure',
-        label: 'SPA Starter Template',
+        name: 'Nolla',
+        label: 'Open Source Node.js Framework',
         description:
-            'Open-source starter template for building SPA applications with Laravel, React, Vue, TypeScript, Tailwind CSS, and Bootstrap frontend configurations.',
-        tech: ['TypeScript', 'Laravel', 'React', 'Vue', 'Tailwind CSS', 'Bootstrap'],
+            'Laravel-inspired Node.js framework built with TypeScript to simplify backend development workflows for Laravel developers moving into Node.js.',
+        tech: ['TypeScript', 'Node.js', 'Tailwind CSS'],
     },
 ];
 
@@ -152,9 +169,6 @@ export default function AuthorClient() {
                         <h1 className="mb-2 text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
                             Zarkashi Zuakafli
                         </h1>
-                        <p className="mb-6 text-lg text-gray-500 dark:text-gray-400">
-                            Full-Stack Developer
-                        </p>
 
                         {/* Meta */}
                         <div className="mb-8 flex flex-wrap items-center justify-center gap-5 text-sm text-gray-500 dark:text-gray-400">
@@ -163,7 +177,24 @@ export default function AuthorClient() {
                                 Kelantan, Malaysia
                             </span>
                             <Link
-                                href="https://linkedin.com/in/muhammad-zarkashi-zuakafli"
+                                href="mailto:zarkashi@kubis.my"
+                                className="flex items-center gap-1.5 transition-colors hover:text-[#4CAF50]"
+                            >
+                                <IconMail className="h-4 w-4" />
+                                Email
+                            </Link>
+                            <Link
+                                href="https://github.com/kashi93"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1.5 transition-colors hover:text-[#4CAF50]"
+                            >
+                                <IconBrandGithub className="h-4 w-4" />
+                                GitHub
+                                <IconExternalLink className="h-3 w-3 opacity-60" />
+                            </Link>
+                            <Link
+                                href="https://linkedin.com/in/zarkashi"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-1.5 transition-colors hover:text-[#4CAF50]"
@@ -176,11 +207,11 @@ export default function AuthorClient() {
 
                         {/* Bio */}
                         <p className="mx-auto mb-10 max-w-xl text-base leading-relaxed text-gray-600 dark:text-gray-400">
-                            Full-stack developer with 5+ years of experience specializing in backend
-                            systems, API integrations, and scalable service architecture. I built
-                            KUBIS as a personal project to explore microservices, workflow
-                            automation, and centralized auth. The kind of platform I always wanted
-                            to use.
+                            Full-stack developer with 5+ years of experience building
+                            production-ready backend systems, RESTful and GraphQL APIs, and scalable
+                            service architectures. I specialize in NestJS, PostgreSQL, and Docker,
+                            with a track record delivering multi-tenant SaaS platforms, CI/CD
+                            pipelines, and third-party integrations.
                         </p>
 
                         {/* Stats */}
