@@ -1,11 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { toast } from 'sonner';
 import {
     MilestoneStatus as GqlMilestoneStatus,
     Project as GqlProject,
@@ -151,8 +152,9 @@ export default function ProjectDetailContainer({
     const { projectId } = useParams<{ projectId: string }>();
     const { authUser } = useAuth();
     const { updateBreadcrumbList } = useDashboard01();
+    const router = useRouter();
 
-    const { data } = useQuery(GET_PROJECT, {
+    const { data, loading, error } = useQuery(GET_PROJECT, {
         variables: { publicId: projectId, threadPagination: { take: THREAD_PAGINATION_SIZE } },
         skip: !projectId,
     });
@@ -206,6 +208,14 @@ export default function ProjectDetailContainer({
             data?.getProjectForForge?.threads?.pageInfo ?? { hasMore: false, total: 0 },
         [data],
     );
+
+    useEffect(() => {
+        if (loading) return;
+        if (!project || error) {
+            toast.error('Project not found', { position: 'top-center' });
+            router.replace(ROUTE.FORGE.HOME);
+        }
+    }, [loading, project, error, router]);
 
     useEffect(() => {
         if (!project) return;

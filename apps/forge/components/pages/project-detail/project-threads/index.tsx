@@ -25,13 +25,16 @@ import { MessageGroupItem } from './message-group-item';
 import { ReplyPreview } from './reply-preview';
 import { getThreadCache, setThreadCache } from './thread-cache';
 import type { Message } from './types';
-import { groupMessages, mapGqlMessage } from './utils';
+import { getPlainTextFromJson, groupMessages, mapGqlMessage } from './utils';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { toast } from 'sonner';
+import { SocketRoomEvent, ThreadEvent } from '@repo/commons/constant/web-socket';
+import { useSocket } from '@/shadcn/providers/socket-provider';
 
 export default function ProjectThreads() {
     const { projectId } = useParams<{ projectId: string }>();
     const { authUser } = useAuth();
+    const { emit, on, off, isConnected } = useSocket();
     const { initialThreads, initialThreadsPageInfo } = useProjectDetail();
 
     const authUserId = authUser?.publicId;
@@ -44,6 +47,7 @@ export default function ProjectThreads() {
     const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
     const [showScrollToBottom, setShowScrollToBottom] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [remoteTypingUserIds, setRemoteTypingUserIds] = useState<string[]>([]);
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -53,6 +57,8 @@ export default function ProjectThreads() {
     const shouldSkipNextAutoScroll = useRef(false);
     const highlightTimeoutRef = useRef<number | null>(null);
     const isLoadingMoreRef = useRef(false);
+    const isTypingRef = useRef(false);
+    const typingStopTimeoutRef = useRef<number | null>(null);
     const pageInfoRef = useRef<ThreadPageInfo>(initialThreadsPageInfo);
     const messagesRef = useRef<Message[]>(messages);
 
@@ -62,7 +68,9 @@ export default function ProjectThreads() {
     const [deleteMutation] = useMutation(DELETE_MESSAGE);
     const [restoreMutation] = useMutation(RESTORE_MESSAGE);
 
-    const [fetchMoreMessages] = useLazyQuery(GET_THREAD_MESSAGES);
+    const [fetchMoreMessages] = useLazyQuery(GET_THREAD_MESSAGES, {
+        fetchPolicy: 'network-only',
+    });
 
     const dateGroups = groupMessages(messages);
     const messagesById = useMemo(
@@ -70,6 +78,16 @@ export default function ProjectThreads() {
         [messages],
     );
     const replyingTo = replyingToId ? messagesById.get(replyingToId) : undefined;
+
+    const userNameById = useMemo(() => {
+        const map = new Map<string, string>();
+        for (const m of messages) {
+            if (m.senderId && m.senderName && !map.has(m.senderId)) {
+                map.set(m.senderId, m.senderName);
+            }
+        }
+        return map;
+    }, [messages]);
 
     useEffect(() => {
         const behavior: ScrollBehavior = isFirstRender.current ? 'instant' : 'smooth';
@@ -150,6 +168,38 @@ export default function ProjectThreads() {
         setIsLoadingMore(false);
     }, [projectId, fetchMoreMessages, authUserId]);
 
+    const refetchLatestMessages = useCallback(async () => {
+        if (!projectId) return;
+
+        const result = await fetchMoreMessages({
+            variables: {
+                projectPublicId: projectId,
+                pagination: { take: THREAD_PAGINATION_SIZE },
+            },
+        });
+
+        const fetched = result.data?.getThreadMessagesForForge;
+        if (!fetched) return;
+
+        const incoming = fetched.data.map((msg) => mapGqlMessage(msg, authUserId));
+        const mergedById = new Map(messagesRef.current.map((message) => [message.id, message]));
+
+        for (const message of incoming) {
+            mergedById.set(message.id, message);
+        }
+
+        const updated = Array.from(mergedById.values()).sort(
+            (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+        );
+
+        const nextPageInfo =
+            messagesRef.current.length <= incoming.length ? fetched.pageInfo : pageInfoRef.current;
+
+        setMessages(updated);
+        setThreadCache(projectId, updated, nextPageInfo);
+        pageInfoRef.current = nextPageInfo;
+    }, [projectId, fetchMoreMessages, authUserId]);
+
     useEffect(() => {
         const sentinel = topSentinelRef.current;
         const scrollContainer = scrollContainerRef.current;
@@ -166,10 +216,6 @@ export default function ProjectThreads() {
         return () => observer.disconnect();
     }, [loadMoreMessages]);
 
-    const handleScroll = useCallback(() => {
-        updateScrollToBottomVisibility();
-    }, [updateScrollToBottomVisibility]);
-
     useEffect(() => {
         updateScrollToBottomVisibility();
     }, [messages, updateScrollToBottomVisibility]);
@@ -178,6 +224,10 @@ export default function ProjectThreads() {
         return () => {
             if (highlightTimeoutRef.current) {
                 window.clearTimeout(highlightTimeoutRef.current);
+            }
+
+            if (typingStopTimeoutRef.current) {
+                window.clearTimeout(typingStopTimeoutRef.current);
             }
         };
     }, []);
@@ -250,6 +300,113 @@ export default function ProjectThreads() {
         };
     }, [projectId]);
 
+    useEffect(() => {
+        if (!isConnected || !projectId) return;
+
+        const room = `thread:${projectId}`;
+
+        const onTypingStart = (data: unknown) => {
+            const { userId } = (data ?? {}) as { userId?: string };
+            if (!userId || userId === authUserId) return;
+
+            setRemoteTypingUserIds((current) =>
+                current.includes(userId) ? current : [...current, userId],
+            );
+        };
+
+        const onTypingStop = (data: unknown) => {
+            const { userId } = (data ?? {}) as { userId?: string };
+            if (!userId) return;
+
+            setRemoteTypingUserIds((current) => current.filter((id) => id !== userId));
+        };
+
+        const onThreadMessageDeleted = (data: unknown) => {
+            const { publicId } = (data ?? {}) as { publicId?: string };
+            if (!publicId) return;
+
+            shouldSkipNextAutoScroll.current = true;
+            const updated = messagesRef.current.map((m) =>
+                m.id === publicId ? { ...m, deletedAt: new Date() } : m,
+            );
+            setMessages(updated);
+            setThreadCache(projectId, updated, pageInfoRef.current);
+        };
+
+        const onThreadMessageRestored = () => {
+            shouldSkipNextAutoScroll.current = true;
+            refetchLatestMessages();
+        };
+
+        emit(SocketRoomEvent.JOIN_ROOM, { room });
+        on(ThreadEvent.MESSAGE_SENT, refetchLatestMessages);
+        on(ThreadEvent.MESSAGE_DELETED, onThreadMessageDeleted);
+        on(ThreadEvent.MESSAGE_RESTORED, onThreadMessageRestored);
+        on(ThreadEvent.TYPING_START, onTypingStart);
+        on(ThreadEvent.TYPING_STOP, onTypingStop);
+
+        return () => {
+            emit(SocketRoomEvent.LEAVE_ROOM, { room });
+            off(ThreadEvent.MESSAGE_SENT, refetchLatestMessages);
+            off(ThreadEvent.MESSAGE_DELETED, onThreadMessageDeleted);
+            off(ThreadEvent.MESSAGE_RESTORED, onThreadMessageRestored);
+            off(ThreadEvent.TYPING_START, onTypingStart);
+            off(ThreadEvent.TYPING_STOP, onTypingStop);
+            setRemoteTypingUserIds([]);
+        };
+    }, [isConnected, projectId, authUserId, emit, on, off, refetchLatestMessages]);
+
+    const emitTypingStop = useCallback(() => {
+        if (!projectId || !isTypingRef.current) return;
+
+        if (typingStopTimeoutRef.current) {
+            window.clearTimeout(typingStopTimeoutRef.current);
+            typingStopTimeoutRef.current = null;
+        }
+
+        emit(ThreadEvent.TYPING_STOP, { projectPublicId: projectId });
+        isTypingRef.current = false;
+    }, [emit, projectId]);
+
+    const scheduleTypingStop = useCallback(() => {
+        if (typingStopTimeoutRef.current) {
+            window.clearTimeout(typingStopTimeoutRef.current);
+        }
+
+        typingStopTimeoutRef.current = window.setTimeout(() => {
+            emitTypingStop();
+        }, 1200);
+    }, [emitTypingStop]);
+
+    const handleInputChange = useCallback(
+        (value: object | null) => {
+            setInput(value);
+
+            if (!projectId) return;
+
+            const hasContent = getPlainTextFromJson(value).length > 0;
+
+            if (!hasContent) {
+                emitTypingStop();
+                return;
+            }
+
+            if (!isTypingRef.current) {
+                emit(ThreadEvent.TYPING_START, { projectPublicId: projectId });
+                isTypingRef.current = true;
+            }
+
+            scheduleTypingStop();
+        },
+        [emit, emitTypingStop, projectId, scheduleTypingStop],
+    );
+
+    useEffect(() => {
+        return () => {
+            emitTypingStop();
+        };
+    }, [emitTypingStop]);
+
     const sendMessage = useCallback(async () => {
         if (!input || !projectId) return;
 
@@ -271,6 +428,7 @@ export default function ProjectThreads() {
         setInput(null);
         setReplyingToId(null);
         editorRef.current?.clear();
+        emitTypingStop();
 
         const result = await sendMutation({
             variables: {
@@ -285,13 +443,21 @@ export default function ProjectThreads() {
         const confirmed = result.data?.sendThreadMessageForForge;
         if (confirmed) {
             const confirmedMessage = mapGqlMessage(confirmed, authUserId);
-            const updated = messagesRef.current.map((m) =>
-                m.id === tempId ? confirmedMessage : m,
+            const updatedById = new Map<string, Message>();
+
+            for (const message of messagesRef.current) {
+                const nextMessage = message.id === tempId ? confirmedMessage : message;
+                updatedById.set(nextMessage.id, nextMessage);
+            }
+
+            const updated = Array.from(updatedById.values()).sort(
+                (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
             );
+
             setMessages(updated);
             setThreadCache(projectId, updated, pageInfoRef.current);
         }
-    }, [input, replyingToId, projectId, authUserId, authUser, sendMutation]);
+    }, [input, replyingToId, projectId, authUserId, authUser, sendMutation, emitTypingStop]);
 
     const replyToMessage = useCallback((message: Message) => {
         setReplyingToId(message.id);
@@ -326,7 +492,7 @@ export default function ProjectThreads() {
 
                 if (gqlError) {
                     const err = gqlError.extensions?.originalError as
-                        | Record<string, any>
+                        | Record<string, unknown>
                         | undefined;
 
                     if (err?.statusCode === 403 && err?.id === 'SUPER_ADMIN_REQUIRED') {
@@ -383,7 +549,7 @@ export default function ProjectThreads() {
             <div
                 ref={scrollContainerRef}
                 className="scrollbar-hide min-h-0 flex-1 overflow-y-auto py-3"
-                onScroll={handleScroll}
+                onScroll={updateScrollToBottomVisibility}
             >
                 {messages.length === 0 ? (
                     <Empty className="flex min-h-full items-center justify-center px-4">
@@ -448,6 +614,16 @@ export default function ProjectThreads() {
 
             <div className="bg-background/95 sticky bottom-0 z-20 border-t px-4 pt-4 pb-4 shadow-[0_-14px_30px_-26px_rgba(0,0,0,0.55)] backdrop-blur md:px-6">
                 <div className="relative">
+                    {remoteTypingUserIds.length > 0 ? (
+                        <p className="text-muted-foreground mb-2 px-1 text-xs">
+                            {remoteTypingUserIds.length === 1
+                                ? `${userNameById.get(remoteTypingUserIds[0]!) ?? 'Someone'} is typing...`
+                                : remoteTypingUserIds.length === 2
+                                  ? `${userNameById.get(remoteTypingUserIds[0]!) ?? 'Someone'} and ${userNameById.get(remoteTypingUserIds[1]!) ?? 'someone'} are typing...`
+                                  : `${remoteTypingUserIds.length} people are typing...`}
+                        </p>
+                    ) : null}
+
                     {replyingToId ? (
                         <div className="bg-card mb-3 flex items-start gap-2 rounded-xl border p-2 shadow-sm">
                             <ReplyPreview message={replyingTo} className="min-w-0 flex-1" />
@@ -467,7 +643,7 @@ export default function ProjectThreads() {
                     <RichTextEditor
                         ref={editorRef}
                         value={null}
-                        onChange={setInput}
+                        onChange={handleInputChange}
                         onSubmit={sendMessage}
                         placeholder="Write a message..."
                         className="border-border/80 bg-card focus-within:border-primary/30 focus-within:ring-primary/15 overflow-hidden rounded-xl shadow-sm ring-1 ring-transparent transition-shadow"
