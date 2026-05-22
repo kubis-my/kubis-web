@@ -466,6 +466,13 @@ export default function ProjectThreads() {
 
     const deleteMessage = useCallback(
         async (message: Message) => {
+            if (message.senderId !== authUserId) {
+                toast.error("You can't delete someone else's message", {
+                    position: 'top-center',
+                });
+                return;
+            }
+
             shouldSkipNextAutoScroll.current = true;
 
             const updated = messagesRef.current.map((item) =>
