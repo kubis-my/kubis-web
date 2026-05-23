@@ -107,6 +107,9 @@ const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = 
                     date
                 }
             }
+            userOverview {
+                unreadCount
+            }
             threads(pagination: $threadPagination) {
                 data {
                     publicId

@@ -20,7 +20,13 @@ import type { ThreadPageInfo } from '@repo/commons/types/forge-service-schema.ty
 import { THREAD_PAGINATION_SIZE } from '@/root/libs/constants';
 import { useProjectDetail } from '../project-detail-container';
 import { DateSeparator } from './date-separator';
-import { DELETE_MESSAGE, GET_THREAD_MESSAGES, RESTORE_MESSAGE, SEND_MESSAGE } from './graphql';
+import {
+    DELETE_MESSAGE,
+    GET_THREAD_MESSAGES,
+    MARK_AS_READ,
+    RESTORE_MESSAGE,
+    SEND_MESSAGE,
+} from './graphql';
 import { MessageGroupItem } from './message-group-item';
 import { ReplyPreview } from './reply-preview';
 import { getThreadCache, setThreadCache } from './thread-cache';
@@ -28,7 +34,7 @@ import type { Message } from './types';
 import { getPlainTextFromJson, groupMessages, mapGqlMessage } from './utils';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { toast } from 'sonner';
-import { SocketRoomEvent, ThreadEvent } from '@repo/commons/constant/web-socket';
+import { ThreadEvent } from '@repo/commons/constant/web-socket';
 import { useSocket } from '@/shadcn/providers/socket-provider';
 
 export default function ProjectThreads() {
@@ -61,12 +67,14 @@ export default function ProjectThreads() {
     const typingStopTimeoutRef = useRef<number | null>(null);
     const pageInfoRef = useRef<ThreadPageInfo>(initialThreadsPageInfo);
     const messagesRef = useRef<Message[]>(messages);
+    const lastMarkAsReadIdRef = useRef<string | null>(null);
 
     messagesRef.current = messages;
 
     const [sendMutation] = useMutation(SEND_MESSAGE);
     const [deleteMutation] = useMutation(DELETE_MESSAGE);
     const [restoreMutation] = useMutation(RESTORE_MESSAGE);
+    const [markAsReadMutation] = useMutation(MARK_AS_READ);
 
     const [fetchMoreMessages] = useLazyQuery(GET_THREAD_MESSAGES, {
         fetchPolicy: 'network-only',
@@ -171,12 +179,18 @@ export default function ProjectThreads() {
     const refetchLatestMessages = useCallback(async () => {
         if (!projectId) return;
 
-        const result = await fetchMoreMessages({
-            variables: {
-                projectPublicId: projectId,
-                pagination: { take: THREAD_PAGINATION_SIZE },
-            },
-        });
+        let result;
+        try {
+            result = await fetchMoreMessages({
+                variables: {
+                    projectPublicId: projectId,
+                    pagination: { take: THREAD_PAGINATION_SIZE },
+                },
+            });
+        } catch (err) {
+            if (err instanceof Error && err.name === 'AbortError') return;
+            throw err;
+        }
 
         const fetched = result.data?.getThreadMessagesForForge;
         if (!fetched) return;
@@ -231,6 +245,31 @@ export default function ProjectThreads() {
             }
         };
     }, []);
+
+    useEffect(() => {
+        refetchLatestMessages();
+    }, [refetchLatestMessages]);
+
+    useEffect(() => {
+        const latest = messages.at(-1);
+        if (!latest || latest.id.startsWith('temp-') || !projectId) return;
+        if (latest.id === lastMarkAsReadIdRef.current) return;
+
+        lastMarkAsReadIdRef.current = latest.id;
+        markAsReadMutation({
+            variables: { messagePublicId: latest.id },
+            update(cache) {
+                cache.modify({
+                    id: cache.identify({ __typename: 'Project', publicId: projectId }),
+                    fields: {
+                        userOverview(existing) {
+                            return { ...existing, unreadCount: 0 };
+                        },
+                    },
+                });
+            },
+        });
+    }, [markAsReadMutation, projectId, messages]);
 
     useEffect(() => {
         if (!projectId) return;
@@ -303,8 +342,6 @@ export default function ProjectThreads() {
     useEffect(() => {
         if (!isConnected || !projectId) return;
 
-        const room = `thread:${projectId}`;
-
         const onTypingStart = (data: unknown) => {
             const { userId } = (data ?? {}) as { userId?: string };
             if (!userId || userId === authUserId) return;
@@ -338,7 +375,6 @@ export default function ProjectThreads() {
             refetchLatestMessages();
         };
 
-        emit(SocketRoomEvent.JOIN_ROOM, { room });
         on(ThreadEvent.MESSAGE_SENT, refetchLatestMessages);
         on(ThreadEvent.MESSAGE_DELETED, onThreadMessageDeleted);
         on(ThreadEvent.MESSAGE_RESTORED, onThreadMessageRestored);
@@ -346,7 +382,6 @@ export default function ProjectThreads() {
         on(ThreadEvent.TYPING_STOP, onTypingStop);
 
         return () => {
-            emit(SocketRoomEvent.LEAVE_ROOM, { room });
             off(ThreadEvent.MESSAGE_SENT, refetchLatestMessages);
             off(ThreadEvent.MESSAGE_DELETED, onThreadMessageDeleted);
             off(ThreadEvent.MESSAGE_RESTORED, onThreadMessageRestored);
@@ -626,8 +661,8 @@ export default function ProjectThreads() {
                             {remoteTypingUserIds.length === 1
                                 ? `${userNameById.get(remoteTypingUserIds[0]!) ?? 'Someone'} is typing...`
                                 : remoteTypingUserIds.length === 2
-                                  ? `${userNameById.get(remoteTypingUserIds[0]!) ?? 'Someone'} and ${userNameById.get(remoteTypingUserIds[1]!) ?? 'someone'} are typing...`
-                                  : `${remoteTypingUserIds.length} people are typing...`}
+                                    ? `${userNameById.get(remoteTypingUserIds[0]!) ?? 'Someone'} and ${userNameById.get(remoteTypingUserIds[1]!) ?? 'someone'} are typing...`
+                                    : `${remoteTypingUserIds.length} people are typing...`}
                         </p>
                     ) : null}
 

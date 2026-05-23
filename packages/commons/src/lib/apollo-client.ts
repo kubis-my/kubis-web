@@ -1,11 +1,11 @@
-import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from '@apollo/client';
+import { ApolloClient, InMemoryCache, HttpLink, ApolloLink, TypePolicies } from '@apollo/client';
 import { Observable } from '@apollo/client/utilities';
 import { getCsrfToken } from '../utils/csrf-client';
 
 // Store multiple Apollo Client instances by URI
 const apolloClients: Map<string, ApolloClient> = new Map();
 
-function createApolloClient(uri: string) {
+function createApolloClient(uri: string, typePolicies: TypePolicies = {}) {
     const httpLink = new HttpLink({
         uri,
         credentials: 'include', // Send cookies with requests
@@ -47,7 +47,7 @@ function createApolloClient(uri: string) {
 
     return new ApolloClient({
         link: ApolloLink.from([errorLink, csrfLink, httpLink]),
-        cache: new InMemoryCache(),
+        cache: new InMemoryCache({ typePolicies }),
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: 'cache-and-network',
@@ -64,11 +64,11 @@ function createApolloClient(uri: string) {
     });
 }
 
-function getOrCreateClient(key: string, uri: string): ApolloClient {
-    if (typeof window === 'undefined') return createApolloClient(uri);
+function getOrCreateClient(key: string, uri: string, typePolicies: TypePolicies = {}): ApolloClient {
+    if (typeof window === 'undefined') return createApolloClient(uri, typePolicies);
 
     if (!apolloClients.has(key)) {
-        apolloClients.set(key, createApolloClient(uri));
+        apolloClients.set(key, createApolloClient(uri, typePolicies));
     }
 
     return apolloClients.get(key)!;
@@ -79,7 +79,9 @@ export function getApolloClient() {
 }
 
 export function getForgeApolloClient() {
-    return getOrCreateClient('forge', '/api/app/graphql');
+    return getOrCreateClient('forge', '/api/app/graphql', {
+        Project: { keyFields: ['publicId'] },
+    });
 }
 
 /**

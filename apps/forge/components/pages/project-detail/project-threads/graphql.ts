@@ -101,3 +101,17 @@ export const RESTORE_MESSAGE: TypedDocumentNode<RestoreMessageResponse, RestoreM
             }
         }
     `;
+
+interface MarkAsReadResponse {
+    markThreadMessageAsReadForForge: boolean;
+}
+
+interface MarkAsReadVariables {
+    messagePublicId: string;
+}
+
+export const MARK_AS_READ: TypedDocumentNode<MarkAsReadResponse, MarkAsReadVariables> = gql`
+    mutation MarkThreadMessageAsReadForForge($messagePublicId: String!) {
+        markThreadMessageAsReadForForge(messagePublicId: $messagePublicId)
+    }
+`;

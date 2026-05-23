@@ -18,4 +18,5 @@ export type Project = {
     status: ProjectStatus;
     startDate: string;
     plan?: SubscriptionPlan;
+    unreadCount: number;
 };

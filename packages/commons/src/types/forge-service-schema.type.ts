@@ -145,6 +145,11 @@ export interface PaginatedThreadMessages {
     pageInfo: ThreadPageInfo;
 }
 
+export interface UserProjectOverview {
+    unreadCount: number;
+    lastSeenThreadMessagePublicId?: Nullable<string>;
+}
+
 export interface Project {
     publicId: string;
     name: string;
@@ -157,6 +162,7 @@ export interface Project {
     projectTeams: ProjectTeam[];
     milestones: Milestone[];
     threads?: PaginatedThreadMessages;
+    userOverview: UserProjectOverview;
 }
 
 export interface PaginatedProject {
@@ -187,6 +193,7 @@ export interface IMutation {
     ): ThreadMessage | Promise<ThreadMessage>;
     deleteThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
     restoreThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
+    markThreadMessageAsReadForForge(messagePublicId: string): boolean | Promise<boolean>;
     createMilestoneForForge(input: CreateMilestoneInput): Milestone | Promise<Milestone>;
     updateMilestoneForForge(
         publicId: string,

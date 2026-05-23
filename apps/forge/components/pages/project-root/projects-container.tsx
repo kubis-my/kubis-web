@@ -30,6 +30,9 @@ const GET_PROJECTS: TypedDocumentNode<GetProjectsResponse, GetProjectsVariables>
                 status
                 companyIds
                 createdAt
+                userOverview {
+                    unreadCount
+                }
             }
         }
     }
@@ -85,6 +88,7 @@ export default function ProjectsContainer({ children }: Readonly<{ children: Rea
             status: STATUS_MAP[p.status],
             clientName: companyNameMap.get(p.companyIds[0] ?? '') ?? p.companyIds[0] ?? '',
             startDate: p.createdAt,
+            unreadCount: p.userOverview?.unreadCount ?? 0,
         }));
     }, [data, companyNameMap]);
 

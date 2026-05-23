@@ -35,7 +35,9 @@ export function getNavigationList(): NavigationItem[] {
     ];
 }
 
-export function getProjectNavigationList(projectId: string): NavigationItem[] {
+export function getProjectNavigationList(projectId: string, unreadCount = 0): NavigationItem[] {
+    const threadsUnreadLabel = unreadCount > 99 ? '99+' : String(unreadCount);
+
     return [
         {
             id: 'app',
@@ -59,6 +61,13 @@ export function getProjectNavigationList(projectId: string): NavigationItem[] {
                     title: 'Threads',
                     url: ROUTE.FORGE.PROJECT_THREADS(projectId),
                     icon: <IconMessages />,
+                    actionButton:
+                        unreadCount > 0 ? (
+                            <span className="bg-primary text-primary-foreground flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] leading-none font-semibold tabular-nums shadow-sm group-data-[collapsible=icon]:opacity-0">
+                                {threadsUnreadLabel}
+                                <span className="sr-only">unread threads</span>
+                            </span>
+                        ) : null,
                     isActive: false,
                 },
             ],

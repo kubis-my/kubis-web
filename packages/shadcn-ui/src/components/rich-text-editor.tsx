@@ -9,7 +9,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
 
 const renderExtensions = [
-    StarterKit.configure({ heading: { levels: [2, 3] } }),
+    StarterKit.configure({ heading: { levels: [2, 3] }, link: false }),
     Link.configure({ openOnClick: false, autolink: true }),
 ];
 
@@ -102,6 +102,7 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
             extensions: [
                 StarterKit.configure({
                     heading: { levels: [2, 3] },
+                    link: false,
                 }),
                 Placeholder.configure({
                     placeholder: placeholder ?? 'Write something...',
