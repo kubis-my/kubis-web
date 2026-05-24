@@ -7,7 +7,6 @@ import { cookies } from 'next/headers';
 import {
     ACCESS_TOKEN_KEY,
     CODE_VERIFIER_KEY,
-    CSRF_TOKEN_KEY,
     OTP_TOKEN_KEY,
     REFRESH_TOKEN_KEY,
     SESSION_TOKEN_KEY,
@@ -18,7 +17,6 @@ export const COOKIE_NAMES = {
     ACCESS_TOKEN: ACCESS_TOKEN_KEY,
     REFRESH_TOKEN: REFRESH_TOKEN_KEY,
     SESSION_TOKEN: SESSION_TOKEN_KEY,
-    CSRF_TOKEN: CSRF_TOKEN_KEY,
     OTP_TOKEN: OTP_TOKEN_KEY,
     CODE_VERIFIER: CODE_VERIFIER_KEY,
 } as const;
@@ -35,8 +33,6 @@ const COOKIE_CONFIG = {
     refreshTokenMaxAge: 7 * 24 * 60 * 60,
     // Session token: 7 days
     sessionTokenMaxAge: 7 * 24 * 60 * 60,
-    // CSRF token: 7 days (matches session)
-    csrfTokenMaxAge: 7 * 24 * 60 * 60,
     // OTP token: 10 minutes (short-lived for OTP verification)
     otpTokenMaxAge: 10 * 60,
     // Code verifier: 10 minutes (short-lived, paired with OTP flow)
@@ -140,37 +136,6 @@ export async function clearSessionCookies(): Promise<void> {
 export async function clearAccessTokenCookie(): Promise<void> {
     const cookieStore = await cookies();
     cookieStore.delete(COOKIE_NAMES.ACCESS_TOKEN);
-}
-
-/**
- * Set CSRF token in readable cookie (NOT httpOnly)
- * Client needs to read this to send in X-CSRF-Token header
- */
-export async function setCsrfTokenCookie(token: string): Promise<void> {
-    const cookieStore = await cookies();
-    cookieStore.set(COOKIE_NAMES.CSRF_TOKEN, token, {
-        httpOnly: false, // MUST be readable by client JavaScript
-        secure: COOKIE_CONFIG.secure,
-        sameSite: 'strict', // Stricter than 'lax' for CSRF protection
-        path: COOKIE_CONFIG.path,
-        maxAge: COOKIE_CONFIG.csrfTokenMaxAge,
-    });
-}
-
-/**
- * Get CSRF token from cookies (server-side)
- */
-export async function getCsrfTokenCookie(): Promise<string | undefined> {
-    const cookieStore = await cookies();
-    return cookieStore.get(COOKIE_NAMES.CSRF_TOKEN)?.value;
-}
-
-/**
- * Clear CSRF token cookie
- */
-export async function clearCsrfTokenCookie(): Promise<void> {
-    const cookieStore = await cookies();
-    cookieStore.delete(COOKIE_NAMES.CSRF_TOKEN);
 }
 
 /**

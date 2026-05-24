@@ -11,7 +11,6 @@ import {
     IconUserPlus,
     IconApps,
 } from '@tabler/icons-react';
-import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
 import { openSettingsDialog } from '../components/pages/settings/setting-dialog';
@@ -87,7 +86,6 @@ export const navigationUserItemList: NavUserItem[] = [
         async action(e) {
             const response = await fetch('/api/auth/logout', {
                 method: 'POST',
-                headers: getCsrfHeaders(),
                 credentials: 'include',
             });
 

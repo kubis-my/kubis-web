@@ -11,7 +11,6 @@ import {
 } from 'react';
 import { Socket } from 'socket.io-client';
 import { createSocketClient, disconnectSocket } from '@repo/commons/lib/socket-client';
-import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
@@ -52,7 +51,6 @@ export function SocketProvider({
         try {
             const response = await fetch('/api/auth/socket-token', {
                 method: 'GET',
-                headers: getCsrfHeaders(),
                 credentials: 'include',
             });
 

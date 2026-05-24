@@ -3,23 +3,18 @@ import axios from 'axios';
 import { authClient } from '@repo/commons/lib/auth-client';
 import {
     clearCodeVerifierCookie,
-    clearCsrfTokenCookie,
     clearOtpTokenCookie,
     clearSessionCookies,
     getCodeVerifierCookie,
     getOtpTokenCookie,
     getSessionTokenCookie,
-    setCsrfTokenCookie,
     setCodeVerifierCookie,
     setOtpTokenCookie,
     setSessionTokenCookie,
 } from '@repo/commons/utils/cookie-helpers';
-import { generateCsrfToken } from '@repo/commons/utils/csrf';
-import { csrfProtection } from '@repo/commons/lib/csrf-plugin';
 import { createForwardedHeaders } from '@repo/commons/utils/client-ip';
 
 const auth = new Elysia({ prefix: '/api/auth' })
-    .use(csrfProtection())
     .post(
         '/sign-in',
         async ({ body, set, request }) => {
@@ -51,10 +46,6 @@ const auth = new Elysia({ prefix: '/api/auth' })
                         };
                     } else if (!raw.twoFactorEnabled && raw.sessionToken) {
                         await setSessionTokenCookie(raw.sessionToken);
-
-                        // Generate CSRF token for new session
-                        const csrfToken = generateCsrfToken();
-                        await setCsrfTokenCookie(csrfToken);
 
                         await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -173,9 +164,6 @@ const auth = new Elysia({ prefix: '/api/auth' })
 
                 if (code === 200 && raw.sessionToken) {
                     await setSessionTokenCookie(raw.sessionToken);
-
-                    const csrfToken = generateCsrfToken();
-                    await setCsrfTokenCookie(csrfToken);
 
                     // Clean up OTP-related cookies
                     await clearOtpTokenCookie();
@@ -514,7 +502,6 @@ const auth = new Elysia({ prefix: '/api/auth' })
     .post('/logout', async ({ set }) => {
         try {
             await clearSessionCookies();
-            await clearCsrfTokenCookie();
 
             return {
                 success: true,

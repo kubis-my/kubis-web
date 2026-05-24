@@ -1,7 +1,6 @@
 'use client';
 
 import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
-import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import React, { useEffect } from 'react';
 
 export default function RedirectAuthorize({
@@ -20,9 +19,7 @@ export default function RedirectAuthorize({
             try {
                 const response = await fetch('/api/auth/authorize', {
                     method: 'POST',
-                    headers: getCsrfHeaders({
-                        'Content-Type': 'application/json',
-                    }),
+                    headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({
                         clientId: input.clientId,
@@ -50,7 +47,6 @@ export default function RedirectAuthorize({
                 try {
                     await fetch('/api/auth/logout', {
                         method: 'POST',
-                        headers: getCsrfHeaders(),
                         credentials: 'include',
                     });
                 } catch (logoutError) {

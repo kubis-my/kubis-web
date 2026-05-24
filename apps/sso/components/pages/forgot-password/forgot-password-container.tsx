@@ -2,7 +2,6 @@
 
 import { CardContent } from '@repo/shadcn-ui/components/card';
 import KubisSvg from '@repo/shadcn-ui/custom-components/kubis-svg';
-import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { useCountdown } from '@repo/shadcn-ui/hooks/use-countdown';
 import Image from 'next/image';
 import { useCallback, useState } from 'react';
@@ -56,9 +55,7 @@ export default function ForgotPasswordContainer() {
         try {
             const response = await fetch('/api/auth/forgot-password', {
                 method: 'POST',
-                headers: getCsrfHeaders({
-                    'Content-Type': 'application/json',
-                }),
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ email, newPassword: password }),
             });
@@ -117,9 +114,7 @@ export default function ForgotPasswordContainer() {
         try {
             const response = await fetch('/api/auth/forgot-password/verify-otp', {
                 method: 'POST',
-                headers: getCsrfHeaders({
-                    'Content-Type': 'application/json',
-                }),
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ code: otp }),
             });

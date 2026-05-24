@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import { MAIN_CLIENT_ID } from '@repo/commons/constant/client-id';
 import { APP_NAME, MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
 import { useSearchParams } from 'next/navigation';
-import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import KubisSvg from '@repo/shadcn-ui/custom-components/kubis-svg';
 import { useCountdown } from '@repo/shadcn-ui/hooks/use-countdown';
 import SignInCredentialsStage from './sign-in-credentials-stage';
@@ -65,9 +64,7 @@ export default function SignInWithIdentifierForm() {
         try {
             const response = await fetch('/api/auth/sign-in', {
                 method: 'POST',
-                headers: getCsrfHeaders({
-                    'Content-Type': 'application/json',
-                }),
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
                     identifier,
@@ -135,9 +132,7 @@ export default function SignInWithIdentifierForm() {
         try {
             const response = await fetch('/api/auth/verify-otp', {
                 method: 'POST',
-                headers: getCsrfHeaders({
-                    'Content-Type': 'application/json',
-                }),
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
                     code: otp,
@@ -189,9 +184,7 @@ export default function SignInWithIdentifierForm() {
         try {
             const response = await fetch('/api/auth/resend-otp', {
                 method: 'POST',
-                headers: getCsrfHeaders({
-                    'Content-Type': 'application/json',
-                }),
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             });
 

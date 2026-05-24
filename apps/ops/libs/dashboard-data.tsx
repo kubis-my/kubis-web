@@ -9,7 +9,6 @@ import {
     IconReplace,
     IconUser,
 } from '@tabler/icons-react';
-import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
 import { env } from '@repo/commons/constant/env';
@@ -72,7 +71,6 @@ export const navigationUserItemList: NavUserItem[] = [
         async action() {
             const response = await fetch('/api/auth/logout', {
                 method: 'POST',
-                headers: getCsrfHeaders(),
                 credentials: 'include',
             });
 

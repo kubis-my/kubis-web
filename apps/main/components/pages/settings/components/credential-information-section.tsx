@@ -1,7 +1,6 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { getCsrfHeaders } from '@repo/commons/utils/csrf-client';
 import { useFormDirty } from '@repo/commons/hooks/use-form-dirty';
 import { Button } from '@/shadcn/components/button';
 import {
@@ -161,9 +160,7 @@ export default function CredentialInformationSection() {
 
             const response = await fetch('/api/auth/credential/update', {
                 method: 'POST',
-                headers: getCsrfHeaders({
-                    'Content-Type': 'application/json',
-                }),
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify(payload),
             });
@@ -231,9 +228,7 @@ export default function CredentialInformationSection() {
         try {
             const response = await fetch('/api/auth/credential/update/verify-otp', {
                 method: 'POST',
-                headers: getCsrfHeaders({
-                    'Content-Type': 'application/json',
-                }),
+                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({
                     token: verificationToken,

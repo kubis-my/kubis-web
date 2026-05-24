@@ -1,6 +1,5 @@
 import { ApolloClient, InMemoryCache, HttpLink, ApolloLink, TypePolicies } from '@apollo/client';
 import { Observable } from '@apollo/client/utilities';
-import { getCsrfToken } from '../utils/csrf-client';
 
 // Store multiple Apollo Client instances by URI
 const apolloClients: Map<string, ApolloClient> = new Map();
@@ -8,10 +7,9 @@ const apolloClients: Map<string, ApolloClient> = new Map();
 function createApolloClient(uri: string, typePolicies: TypePolicies = {}) {
     const httpLink = new HttpLink({
         uri,
-        credentials: 'include', // Send cookies with requests
+        credentials: 'include',
     });
 
-    // Error handling link
     const errorLink = new ApolloLink((operation, forward) => {
         return new Observable((observer) => {
             const subscription = forward(operation).subscribe({
@@ -29,24 +27,8 @@ function createApolloClient(uri: string, typePolicies: TypePolicies = {}) {
         });
     });
 
-    // CSRF token injection link
-    const csrfLink = new ApolloLink((operation, forward) => {
-        const csrfToken = getCsrfToken();
-
-        if (csrfToken) {
-            operation.setContext(({ headers = {} }) => ({
-                headers: {
-                    ...headers,
-                    'X-CSRF-Token': csrfToken,
-                },
-            }));
-        }
-
-        return forward(operation);
-    });
-
     return new ApolloClient({
-        link: ApolloLink.from([errorLink, csrfLink, httpLink]),
+        link: ApolloLink.from([errorLink, httpLink]),
         cache: new InMemoryCache({ typePolicies }),
         defaultOptions: {
             watchQuery: {
