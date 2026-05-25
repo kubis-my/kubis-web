@@ -22,8 +22,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'KUBIS',
-    description: 'Your unified workspace',
+    title: {
+        default: 'KUBIS',
+        template: '%s | KUBIS',
+    },
+    description:
+        'Your unified workspace for productivity and collaboration. All your essential tools in one place.',
+    metadataBase: new URL(process.env.NEXT_PUBLIC_MAIN_APP_BASE_URL ?? 'https://kubis.my'),
+    openGraph: {
+        type: 'website',
+        siteName: 'KUBIS',
+        title: 'KUBIS',
+        description: 'Your unified workspace for productivity and collaboration.',
+        url: '/',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'KUBIS',
+        description: 'Your unified workspace for productivity and collaboration.',
+    },
 };
 
 export default function RootLayout({

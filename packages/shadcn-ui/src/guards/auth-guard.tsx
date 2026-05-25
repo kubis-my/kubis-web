@@ -78,7 +78,7 @@ export default function AuthGuard({
         }
     }, [ctx.isLoading, ctx.isAuthenticated, ctx.authUser, ctx.hasIncompleteProfile]);
 
-    // Connect to socket when authenticated — pass token directly to avoid localStorage race
+    // Connect to socket when authenticated - pass token directly to avoid localStorage race
     useEffect(() => {
         if (ctx.isAuthenticated && ctx.accessToken) {
             connectRef.current(ctx.accessToken);

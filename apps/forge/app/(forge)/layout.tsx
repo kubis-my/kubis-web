@@ -2,11 +2,6 @@ import { FORGE_APP_BASE_URL } from '@repo/commons/constant/base';
 import { FORGE_CLIENT_ID } from '@repo/commons/constant/client-id';
 import AuthGuard from '@repo/shadcn-ui/guards/auth-guard';
 import { ForgeApolloProvider } from '@/root/components/providers/forge-apollo-provider';
-import { Metadata } from 'next';
-
-export const metadata: Metadata = {
-    title: 'Kubis Forge',
-};
 
 export default function layout({
     children,

@@ -22,9 +22,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: 'Kubis Forge',
+    title: {
+        default: 'Kubis Forge',
+        template: '%s | Kubis Forge',
+    },
     description:
         'Build First, Subscribe When Ready. Custom business systems built around your workflow. We build your core MVP first, then you move into a monthly subscription for hosting, maintenance, and continuous improvements.',
+    metadataBase: new URL(process.env.NEXT_PUBLIC_FORGE_APP_BASE_URL ?? 'https://forge.kubis.my'),
+    openGraph: {
+        type: 'website',
+        siteName: 'Kubis Forge',
+        title: 'Kubis Forge',
+        description:
+            'Build First, Subscribe When Ready. Custom business systems built around your workflow.',
+        url: '/',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'Kubis Forge',
+        description:
+            'Build First, Subscribe When Ready. Custom business systems built around your workflow.',
+    },
 };
 
 export default function RootLayout({

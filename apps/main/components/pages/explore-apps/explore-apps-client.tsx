@@ -31,7 +31,7 @@ export default function ExploreAppsClient({ apps }: { apps: AppSlide[] }) {
         <main className="flex min-h-screen items-center justify-center bg-[#ecf0f1] px-8 py-16 dark:bg-gray-950">
             <div className="w-full max-w-5xl">
                 <div className="grid min-h-[480px] grid-cols-1 items-center gap-10 md:grid-cols-2">
-                    {/* Left — content */}
+                    {/* Left - content */}
                     <div className="flex flex-col gap-6">
                         <div className="flex items-center gap-2">
                             <span
@@ -81,7 +81,7 @@ export default function ExploreAppsClient({ apps }: { apps: AppSlide[] }) {
                         ) : null}
                     </div>
 
-                    {/* Right — visual */}
+                    {/* Right - visual */}
                     <div
                         className={cn(
                             'relative h-72 w-full overflow-hidden rounded-2xl bg-linear-to-br md:h-[380px]',

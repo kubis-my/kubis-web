@@ -41,7 +41,7 @@ function getProjectSummary(projects: Project[]) {
         total: projects.length,
         active: projects.filter((p) => activeStatuses.includes(p.status)).length,
         review: projects.filter((p) => p.status === 'Pending Review').length,
-        topPlan: Object.entries(planCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '—',
+        topPlan: Object.entries(planCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? '-',
     };
 }
 

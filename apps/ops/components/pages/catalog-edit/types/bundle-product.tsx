@@ -516,7 +516,7 @@ export function EditBundleProductForm({
                                 {deletedItems.length > 0 && (
                                     <div className="space-y-2">
                                         <p className="text-muted-foreground px-1 text-xs">
-                                            Removed items — click restore to re-include
+                                            Removed items - click restore to re-include
                                         </p>
                                         {deletedItems.map((item) => {
                                             const productName =
@@ -590,7 +590,7 @@ export function EditBundleProductForm({
                                     'rounded-lg border px-3 py-2 text-left text-sm transition-colors',
                                     'hover:bg-accent',
                                     form.bundleProductionMode === mode &&
-                                        'border-primary bg-primary/5 font-medium',
+                                    'border-primary bg-primary/5 font-medium',
                                 )}
                             >
                                 {mode === BundleProductionMode.WHOLE

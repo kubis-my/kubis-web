@@ -1,6 +1,22 @@
+import type { Metadata } from 'next';
 import ExploreAppsClient from '@/component/pages/explore-apps/explore-apps-client';
 import Footer from '@/component/pages/landing-page/footer';
 import { env } from '@repo/commons/constant/env';
+
+export const metadata: Metadata = {
+    title: 'Explore Apps',
+    description:
+        'Discover Kubis apps - Forge for custom business systems built around your workflow, and Ops for end-to-end order and production management.',
+    alternates: {
+        canonical: '/explore-apps',
+    },
+    openGraph: {
+        title: 'Explore Apps | KUBIS',
+        description:
+            'Discover Kubis apps - Forge for custom business systems and Ops for end-to-end production management.',
+        url: '/explore-apps',
+    },
+};
 
 export default function ExploreAppsPage() {
     const apps = [

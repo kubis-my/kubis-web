@@ -301,7 +301,7 @@ export default function ProjectThreads() {
             if (notInCurrent.length === 0 && !hasStateUpdates) return;
 
             if (notInCurrent.length === 0) {
-                // Only state updates (delete/restore) — no scroll change
+                // Only state updates (delete/restore) - no scroll change
                 shouldSkipNextAutoScroll.current = true;
                 setMessages(mergedCurrent);
                 return;
@@ -329,7 +329,7 @@ export default function ProjectThreads() {
                     });
                 });
             } else {
-                // Only newer messages — scroll to bottom
+                // Only newer messages - scroll to bottom
                 setMessages([...mergedCurrent, ...newer]);
             }
         });
