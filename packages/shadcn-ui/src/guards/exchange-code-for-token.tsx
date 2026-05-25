@@ -3,6 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Loader from '../custom-components/loader';
+import { authClient } from '@repo/commons/lib/auth-client';
+import { setToken, ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 
 export default function ExchangeCodeForToken({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -37,26 +39,21 @@ export default function ExchangeCodeForToken({ children }: { children: React.Rea
             }
 
             try {
-                const response = await fetch('/api/auth/exchange', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        code,
-                        clientId,
-                        redirectUri,
-                        codeVerifier,
-                    }),
+                const { code: responseCode, raw } = await authClient.exchangeCodeForTokens({
+                    code,
+                    clientId,
+                    redirectUri,
+                    codeVerifier,
                 });
 
-                if (response.ok) {
+                if (responseCode === 200 && raw.accessToken && raw.refreshToken) {
+                    setToken(ACCESS_TOKEN_KEY, raw.accessToken);
+                    setToken(REFRESH_TOKEN_KEY, raw.refreshToken);
+
                     sessionStorage.removeItem('pkce_verifier');
                     sessionStorage.removeItem('oauth_state');
-
-                    // Mark exchange as complete before rendering children
                     sessionStorage.setItem('token_exchange_complete', 'true');
 
-                    // Clean URL first without causing navigation
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             } catch (error) {

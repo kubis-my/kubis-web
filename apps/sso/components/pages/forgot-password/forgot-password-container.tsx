@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { errorDict } from '@/root/libs/dict/error-dict';
 import ForgotPasswordForm from './forgot-password-form';
 import ForgotPasswordOtpStage from './forgot-password-otp-stage';
+import { authClient } from '@repo/commons/lib/auth-client';
 
 type ForgotPasswordStage = 'FORM' | 'OTP';
 
@@ -37,6 +38,7 @@ export default function ForgotPasswordContainer() {
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+    const [otpToken, setOtpToken] = useState('');
     const { expired: isOtpExpired, formatted: countdownFormatted } = useCountdown(
         otpExpiresAt,
         (isExpired) => {
@@ -53,43 +55,36 @@ export default function ForgotPasswordContainer() {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch('/api/auth/forgot-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ email, newPassword: password }),
-            });
+            const { code, raw } = await authClient.forgotPassword({ email, newPassword: password });
 
-            const raw = await response.json();
-
-            if (response.ok && raw.success) {
+            if (code === 200 && raw.token) {
+                setOtpToken(raw.token);
                 setStage('OTP');
                 setOtp('');
-                setOtpEmail(raw.data.email || email);
-                setOtpExpiresAt(parseOtpExpiredAt(raw.data.expiredAt));
+                setOtpEmail(raw.email || email);
+                setOtpExpiresAt(parseOtpExpiredAt(raw.expiredAt));
                 return;
             }
 
-            if (response.status === 400 && raw.details) {
-                if (raw.details.id) {
-                    const statusKey = raw.details.id;
-                    if (statusKey in errorDict) {
-                        toast.error(errorDict[statusKey as keyof typeof errorDict], {
-                            position: 'top-center',
-                        });
-                        return;
-                    }
+            if ((code === 400 || code === 404) && raw) {
+                const errorId = (raw as { id?: string }).id;
+
+                if (errorId === 'CREDENTIAL_NOT_FOUND') {
+                    setFormValidation({ email: ['No account found with this email address'] });
+                    return;
                 }
 
-                setFormValidation(raw.details);
-                return;
-            }
+                if (errorId && errorId in errorDict) {
+                    toast.error(errorDict[errorId as keyof typeof errorDict], {
+                        position: 'top-center',
+                    });
+                    return;
+                }
 
-            if (response.status === 404 && raw?.details?.id === 'CREDENTIAL_NOT_FOUND') {
-                setFormValidation({
-                    email: ['No account found with this email address'],
-                });
-                return;
+                if (typeof raw === 'object' && !errorId) {
+                    setFormValidation(raw as Record<string, string[]>);
+                    return;
+                }
             }
 
             toast.error(
@@ -112,16 +107,12 @@ export default function ForgotPasswordContainer() {
         setIsVerifyingOtp(true);
 
         try {
-            const response = await fetch('/api/auth/forgot-password/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ code: otp }),
+            const { code, raw } = await authClient.forgotPasswordVerifyOTP({
+                token: otpToken,
+                otpCode: otp,
             });
 
-            const raw = await response.json();
-
-            if (response.ok && raw.success) {
+            if (code === 200) {
                 toast.success('Your password has been reset successfully.', {
                     position: 'top-center',
                 });
@@ -129,19 +120,16 @@ export default function ForgotPasswordContainer() {
                 return;
             }
 
-            if (response.status === 400 && raw.details) {
-                setFormValidation(raw.details);
-                return;
-            }
-
-            if (raw?.details?.id) {
-                const statusKey = raw.details.id;
-                if (statusKey in errorDict) {
-                    toast.error(errorDict[statusKey as keyof typeof errorDict], {
+            if ((code === 400 || code === 403) && raw) {
+                const errorId = (raw as { id?: string }).id;
+                if (errorId && errorId in errorDict) {
+                    toast.error(errorDict[errorId as keyof typeof errorDict], {
                         position: 'top-center',
                     });
                     return;
                 }
+                setFormValidation(raw as Record<string, string[]>);
+                return;
             }
 
             toast.error(

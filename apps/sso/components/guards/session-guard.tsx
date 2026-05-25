@@ -3,6 +3,8 @@
 import { MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
 import Loader from '@repo/shadcn-ui/custom-components/loader';
 import { useEffect, useState } from 'react';
+import { authClient } from '@repo/commons/lib/auth-client';
+import { getToken, SESSION_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 
 export default function SessionGuard({ children }: { children: React.ReactNode }) {
     const [isAuthenticating, setIsAuthenticating] = useState(true);
@@ -10,14 +12,16 @@ export default function SessionGuard({ children }: { children: React.ReactNode }
     useEffect(() => {
         const guard = async () => {
             try {
-                const response = await fetch('/api/auth/session', {
-                    method: 'GET',
-                    credentials: 'include',
-                });
+                const sessionToken = getToken(SESSION_TOKEN_KEY);
 
-                const data = await response.json();
+                if (!sessionToken) {
+                    setIsAuthenticating(false);
+                    return;
+                }
 
-                if (response.ok && data.authenticated === false) {
+                const { code, raw } = await authClient.validate({ token: sessionToken });
+
+                if (code === 200 && raw.valid === false) {
                     window.location.replace(MAIN_APP_BASE_URL);
                     return;
                 }

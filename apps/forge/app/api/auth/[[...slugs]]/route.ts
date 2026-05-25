@@ -1,1 +1,0 @@
-export * from '@repo/commons/lib/auth-api-route';

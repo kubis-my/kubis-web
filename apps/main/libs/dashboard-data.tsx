@@ -11,8 +11,9 @@ import {
     IconUserPlus,
     IconApps,
 } from '@tabler/icons-react';
-import { toast } from 'sonner';
 import { ROUTE } from './constants';
+import { authClient } from '@repo/commons/lib/auth-client';
+import { getToken, clearAllTokens, REFRESH_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 import { openSettingsDialog } from '../components/pages/settings/setting-dialog';
 
 export const APP_NAME = 'My Account';
@@ -84,15 +85,14 @@ export const navigationUserItemList: NavUserItem[] = [
         icon: <IconLogout />,
         separator: true,
         async action(e) {
-            const response = await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
+            try {
+                const refreshToken = getToken(REFRESH_TOKEN_KEY);
+                if (refreshToken) {
+                    await authClient.signOut({ refreshToken });
+                }
+            } finally {
+                clearAllTokens();
                 window.location.href = '/';
-            } else {
-                toast.error('Failed to sign out. Please try again.');
             }
         },
     },

@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { errorDict } from '@/root/libs/dict/error-dict';
 import SignUpForm from './sign-up-form';
 import SignUpOtpStage from './sign-up-otp-stage';
+import { authClient } from '@repo/commons/lib/auth-client';
 
 type SignUpStage = 'FORM' | 'OTP';
 
@@ -41,6 +42,7 @@ export default function SignUpContainer() {
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+    const [otpToken, setOtpToken] = useState('');
 
     const { expired: isOtpExpired, formatted: countdownFormatted } = useCountdown(
         otpExpiresAt,
@@ -58,58 +60,51 @@ export default function SignUpContainer() {
         setIsSubmitting(true);
 
         try {
-            const response = await fetch('/api/auth/sign-up', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ email, username, password }),
+            const { code, raw } = await authClient.signUpWithIdentifier({
+                email,
+                username,
+                password,
             });
 
-            const raw = await response.json();
-
-            if (response.ok && raw.success) {
+            if (code === 200 && raw.token) {
+                setOtpToken(raw.token);
                 setStage('OTP');
                 setOtp('');
-                setOtpEmail(raw.data.email || email);
-                setOtpExpiresAt(parseOtpExpiredAt(raw.data.expiredAt));
+                setOtpEmail(raw.email || email);
+                setOtpExpiresAt(parseOtpExpiredAt(raw.expiredAt));
                 return;
             }
 
-            if (response.status === 400 && raw.details) {
-                if (raw.details.id) {
-                    const statusKey = raw.details.id;
 
-                    if (statusKey in errorDict) {
-                        toast.error(errorDict[statusKey as keyof typeof errorDict], {
-                            position: 'top-center',
-                        });
-                        return;
-                    }
+            const errorId = (raw as { id?: string })?.id;
+
+            if (code === 400 && typeof raw === 'object' && !errorId) {
+                setFormValidation(raw as Record<string, string[]>);
+                return;
+            }
+
+            if (errorId) {
+                if (errorId === 'EMAIL_ALREADY_EXISTS') {
+                    setFormValidation({ email: ['This email is already in use'] });
+                    return;
                 }
 
-                setFormValidation(raw.details);
-                return;
-            }
+                if (errorId === 'USERNAME_ALREADY_EXISTS') {
+                    setFormValidation({ username: ['This username is already in use'] });
+                    return;
+                }
 
-            if (raw?.details?.id === 'EMAIL_ALREADY_EXISTS') {
-                setFormValidation({
-                    email: ['This email is already in use'],
-                });
-                return;
-            }
+                if (errorId === 'INVALID_EMAIL') {
+                    setFormValidation({ email: ['This email address is not valid'] });
+                    return;
+                }
 
-            if (raw?.details?.id === 'USERNAME_ALREADY_EXISTS') {
-                setFormValidation({
-                    username: ['This username is already in use'],
-                });
-                return;
-            }
-
-            if (raw?.details?.id === 'INVALID_EMAIL') {
-                setFormValidation({
-                    email: ['This email address is not valid'],
-                });
-                return;
+                if (errorId && errorId in errorDict) {
+                    toast.error(errorDict[errorId as keyof typeof errorDict], {
+                        position: 'top-center',
+                    });
+                    return;
+                }
             }
 
             toast.error(
@@ -132,16 +127,9 @@ export default function SignUpContainer() {
         setIsVerifyingOtp(true);
 
         try {
-            const response = await fetch('/api/auth/sign-up/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ code: otp }),
-            });
+            const { code, raw } = await authClient.signUpVerifyOTP({ token: otpToken, otpCode: otp });
 
-            const raw = await response.json();
-
-            if (response.ok && raw.success) {
+            if (code === 200) {
                 toast.success('Your account has been created successfully.', {
                     position: 'top-center',
                 });
@@ -149,20 +137,16 @@ export default function SignUpContainer() {
                 return;
             }
 
-            if (response.status === 400 && raw.details) {
-                setFormValidation(raw.details);
-                return;
-            }
-
-            if (raw?.details?.id) {
-                const statusKey = raw.details.id;
-
-                if (statusKey in errorDict) {
-                    toast.error(errorDict[statusKey as keyof typeof errorDict], {
+            if ((code === 400 || code === 403) && raw) {
+                const errorId = (raw as { id?: string }).id;
+                if (errorId && errorId in errorDict) {
+                    toast.error(errorDict[errorId as keyof typeof errorDict], {
                         position: 'top-center',
                     });
                     return;
                 }
+                setFormValidation(raw as Record<string, string[]>);
+                return;
             }
 
             toast.error(

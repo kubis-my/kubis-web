@@ -24,7 +24,6 @@ export default function AuthGuard({
 }) {
     const ctx = useAuth();
     const { connect } = useSocket();
-    const hasConnectedSocket = useRef(false);
     const connectRef = useRef(connect);
     connectRef.current = connect;
 
@@ -79,13 +78,12 @@ export default function AuthGuard({
         }
     }, [ctx.isLoading, ctx.isAuthenticated, ctx.authUser, ctx.hasIncompleteProfile]);
 
-    // Connect to socket when authenticated
+    // Connect to socket when authenticated — pass token directly to avoid localStorage race
     useEffect(() => {
-        if (ctx.isAuthenticated && !hasConnectedSocket.current) {
-            hasConnectedSocket.current = true;
-            connectRef.current();
+        if (ctx.isAuthenticated && ctx.accessToken) {
+            connectRef.current(ctx.accessToken);
         }
-    }, [ctx.isAuthenticated]);
+    }, [ctx.isAuthenticated, ctx.accessToken]);
 
     // Show loader while AuthProvider is loading OR while redirecting to SSO
     if (ctx.isLoading || isAuthenticating) return <Loader />;

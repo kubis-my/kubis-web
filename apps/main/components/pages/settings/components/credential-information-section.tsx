@@ -41,6 +41,9 @@ import { useApolloClient } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { useProfile } from '../profile-container';
 import { errorDict } from '@/root/libs/dict/error-dict';
+import { authClient } from '@repo/commons/lib/auth-client';
+import { getToken, ACCESS_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
+import axios from 'axios';
 
 type CredentialFormData = {
     email: string;
@@ -158,24 +161,22 @@ export default function CredentialInformationSection() {
                 return;
             }
 
-            const response = await fetch('/api/auth/credential/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify(payload),
+            const accessToken = getToken(ACCESS_TOKEN_KEY);
+            const driver = axios.create({
+                headers: { Authorization: `Bearer ${accessToken}` },
             });
 
-            const raw = await response.json();
+            const { code, raw } = await authClient.updateCredential({ ...payload, driver });
 
-            if (response.ok && raw.success) {
-                const token = raw.data?.token as string | undefined;
+            if (code === 200) {
+                const token = (raw as { token?: string }).token;
 
                 if (token) {
                     setVerificationToken(token);
-                    setMaskedOtpEmail(raw.data?.email ?? '');
+                    setMaskedOtpEmail((raw as { email?: string }).email ?? '');
                     setOtpValidation({});
                     setOtpCode('');
-                    setOtpExpiresAt(parseOtpExpiredAt(raw.data?.expiredAt));
+                    setOtpExpiresAt(parseOtpExpiredAt((raw as { expiredAt?: unknown }).expiredAt));
                     setOpen(false);
                     setOpenOtpDialog(true);
 
@@ -193,8 +194,8 @@ export default function CredentialInformationSection() {
                 return;
             }
 
-            if (response.status === 400 && raw.details && typeof raw.details === 'object') {
-                setFormValidation(raw.details);
+            if (code === 400 && raw && typeof raw === 'object') {
+                setFormValidation(raw as Record<string, string[]>);
                 return;
             }
 
@@ -226,19 +227,18 @@ export default function CredentialInformationSection() {
         setOtpValidation({});
 
         try {
-            const response = await fetch('/api/auth/credential/update/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    token: verificationToken,
-                    otpCode,
-                }),
+            const accessToken = getToken(ACCESS_TOKEN_KEY);
+            const driver = axios.create({
+                headers: { Authorization: `Bearer ${accessToken}` },
             });
 
-            const raw = await response.json();
+            const { code, raw } = await authClient.updateCredentialVerifyOTP({
+                token: verificationToken,
+                otpCode,
+                driver,
+            });
 
-            if (response.ok && raw.success) {
+            if (code === 200) {
                 setOpenOtpDialog(false);
                 setVerificationToken('');
                 setMaskedOtpEmail('');
@@ -252,19 +252,16 @@ export default function CredentialInformationSection() {
                 return;
             }
 
-            if (response.status === 400 && raw.details) {
-                setFormValidation(raw.details);
-                return;
-            }
-
-            if (raw?.details?.id) {
-                const statusKey = raw.details.id;
-                if (statusKey in errorDict) {
-                    toast.error(errorDict[statusKey as keyof typeof errorDict], {
+            if ((code === 400 || code === 403) && raw) {
+                const errorId = (raw as { id?: string }).id;
+                if (errorId && errorId in errorDict) {
+                    toast.error(errorDict[errorId as keyof typeof errorDict], {
                         position: 'top-center',
                     });
                     return;
                 }
+                setFormValidation(raw as Record<string, string[]>);
+                return;
             }
 
             toast.error('Failed to verify code. Please try again.', {

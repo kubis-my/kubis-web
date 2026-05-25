@@ -9,12 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@elysiajs/node": "^1.4.2",
     "@repo/commons": "workspace:*",
     "@repo/shadcn-ui": "workspace:^",
-    "@sinclair/typebox": "^0.34.41",
     "axios": "^1.12.2",
-    "elysia": "^1.4.19",
     "exact-mirror": "^0.2.5",
     "lucide-react": "^0.523.0",
     "luxon": "^3.7.2",

@@ -19,7 +19,7 @@ export function createSocketClient(config: SocketConfig): Socket {
 
     const socket = io(socketUrl, {
         autoConnect: false,
-        transports: ['websocket', 'polling'],
+        transports: ['polling', 'websocket'],
         withCredentials: true,
         auth: token ? { token } : undefined,
         reconnection: true,

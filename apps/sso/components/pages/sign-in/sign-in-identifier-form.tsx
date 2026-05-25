@@ -7,6 +7,8 @@ import { errorDict } from '@/root/libs/dict/error-dict';
 import { toast } from 'sonner';
 import { MAIN_CLIENT_ID } from '@repo/commons/constant/client-id';
 import { APP_NAME, MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
+import { authClient } from '@repo/commons/lib/auth-client';
+import { setToken, SESSION_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 import { useSearchParams } from 'next/navigation';
 import KubisSvg from '@repo/shadcn-ui/custom-components/kubis-svg';
 import { useCountdown } from '@repo/shadcn-ui/hooks/use-countdown';
@@ -23,6 +25,8 @@ export default function SignInWithIdentifierForm() {
     const [password, setPassword] = useState('');
     const [otp, setOtp] = useState('');
     const [otpEmail, setOtpEmail] = useState('');
+    const [otpToken, setOtpToken] = useState('');
+    const [codeVerifier, setCodeVerifier] = useState('');
     const [clientId, setClientId] = useState('');
     const [redirectUri, setRedirectUri] = useState('');
     const [otpExpiresAt, setOtpExpiresAt] = useState<number>(Date.now());
@@ -62,35 +66,29 @@ export default function SignInWithIdentifierForm() {
         setIsSignIn(true);
 
         try {
-            const response = await fetch('/api/auth/sign-in', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    identifier,
-                    password,
-                    clientId,
-                    redirectUri,
-                }),
+            const { code, raw } = await authClient.signIn({
+                identifier,
+                password,
+                clientId,
+                redirectUri,
             });
 
-            const raw = await response.json();
-
-            if (response.ok && raw.success) {
-                const { twoFactorEnabled, ...data } = raw.data;
-
-                if (twoFactorEnabled === true) {
+            if (code === 200) {
+                if (raw.twoFactorEnabled === true) {
+                    setOtpToken(raw.token ?? '');
+                    setCodeVerifier(raw.verifier ?? '');
                     setStage('OTP');
                     setOtp('');
-                    setOtpEmail(data.email || '');
-                    setOtpExpiresAt(parseOtpExpiredAt(data.expiredAt));
-                } else {
-                    redirectToClient(data.redirectUrl, data.verifier);
+                    setOtpEmail(raw.email || '');
+                    setOtpExpiresAt(parseOtpExpiredAt(raw.expiredAt));
+                } else if (raw.sessionToken) {
+                    setToken(SESSION_TOKEN_KEY, raw.sessionToken);
+                    redirectToClient(raw.redirectUrl, raw.verifier);
                 }
-            } else if (response.status === 400 && raw.details) {
-                setFormValidation(raw.details);
-            } else if (!response.ok && raw.details?.id) {
-                const statusKey = raw.details?.id || '-1';
+            } else if (code === 400 && raw && typeof raw === 'object') {
+                setFormValidation(raw as Record<string, string[]>);
+            } else if (raw && 'id' in raw) {
+                const statusKey = (raw as { id: string }).id;
 
                 if (statusKey in errorDict) {
                     toast.error(errorDict[statusKey as keyof typeof errorDict], {
@@ -99,26 +97,20 @@ export default function SignInWithIdentifierForm() {
                 } else {
                     toast.error(
                         'An unexpected error occurred. Please contact our support team for assistance.',
-                        {
-                            position: 'top-center',
-                        },
+                        { position: 'top-center' },
                     );
                 }
             } else {
                 toast.error(
                     'An unexpected error occurred. Please contact our support team for assistance.',
-                    {
-                        position: 'top-center',
-                    },
+                    { position: 'top-center' },
                 );
             }
         } catch (error) {
             console.error('Sign in error:', error);
             toast.error(
                 'An unexpected error occurred. Please contact our support team for assistance.',
-                {
-                    position: 'top-center',
-                },
+                { position: 'top-center' },
             );
         }
 
@@ -130,48 +122,33 @@ export default function SignInWithIdentifierForm() {
         setIsVerifyingOtp(true);
 
         try {
-            const response = await fetch('/api/auth/verify-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    code: otp,
-                }),
-            });
+            const { code, raw } = await authClient.verifyOTP({ token: otpToken, otpCode: otp });
 
-            const raw = await response.json();
-
-            if (response.ok && raw.success) {
-                redirectToClient(raw.data.redirectUrl, raw.data.verifier);
+            if (code === 200 && raw.sessionToken) {
+                setToken(SESSION_TOKEN_KEY, raw.sessionToken);
+                redirectToClient(raw.redirectUrl, codeVerifier);
                 return;
             }
 
-            if (response.status === 400 && raw.details) {
-                setFormValidation(raw.details);
-                return;
-            }
-
-            const statusKey = raw.details?.id || '-1';
-            if (statusKey in errorDict) {
-                toast.error(errorDict[statusKey as keyof typeof errorDict], {
-                    position: 'top-center',
-                });
-                return;
+            if ((code === 400 || code === 403) && raw && 'id' in raw) {
+                const statusKey = (raw as { id: string }).id;
+                if (statusKey in errorDict) {
+                    toast.error(errorDict[statusKey as keyof typeof errorDict], {
+                        position: 'top-center',
+                    });
+                    return;
+                }
             }
 
             toast.error(
                 'An unexpected error occurred. Please contact our support team for assistance.',
-                {
-                    position: 'top-center',
-                },
+                { position: 'top-center' },
             );
         } catch (error) {
             console.error('OTP verify error:', error);
             toast.error(
                 'An unexpected error occurred. Please contact our support team for assistance.',
-                {
-                    position: 'top-center',
-                },
+                { position: 'top-center' },
             );
         } finally {
             setIsVerifyingOtp(false);
@@ -182,45 +159,36 @@ export default function SignInWithIdentifierForm() {
         setIsResendingOtp(true);
 
         try {
-            const response = await fetch('/api/auth/resend-otp', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-            });
+            const { code, raw } = await authClient.resendOTP({ existingToken: otpToken });
 
-            const raw = await response.json();
-
-            if (response.ok && raw.success) {
+            if (code === 200 && raw.token) {
+                setOtpToken(raw.token);
                 setOtp('');
-                setOtpEmail(raw.data.email || otpEmail);
-                setOtpExpiresAt(parseOtpExpiredAt(raw.data.expiredAt));
-                toast.success('Verification code resent successfully', {
-                    position: 'top-center',
-                });
+                setOtpEmail(raw.email || otpEmail);
+                setOtpExpiresAt(parseOtpExpiredAt(raw.expiredAt));
+                toast.success('Verification code resent successfully', { position: 'top-center' });
                 return;
             }
 
-            const statusKey = raw.details?.id || '-1';
-            if (statusKey in errorDict) {
-                toast.error(errorDict[statusKey as keyof typeof errorDict], {
-                    position: 'top-center',
-                });
-                return;
+            if (raw && 'id' in raw) {
+                const statusKey = (raw as { id: string }).id;
+                if (statusKey in errorDict) {
+                    toast.error(errorDict[statusKey as keyof typeof errorDict], {
+                        position: 'top-center',
+                    });
+                    return;
+                }
             }
 
             toast.error(
                 'An unexpected error occurred. Please contact our support team for assistance.',
-                {
-                    position: 'top-center',
-                },
+                { position: 'top-center' },
             );
         } catch (error) {
             console.error('Resend OTP error:', error);
             toast.error(
                 'An unexpected error occurred. Please contact our support team for assistance.',
-                {
-                    position: 'top-center',
-                },
+                { position: 'top-center' },
             );
         } finally {
             setIsResendingOtp(false);

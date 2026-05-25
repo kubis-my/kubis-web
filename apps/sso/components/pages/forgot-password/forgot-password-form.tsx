@@ -35,6 +35,7 @@ export default function ForgotPasswordForm({
                     placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => onEmailChange(e.target.value)}
+                    autoComplete='off'
                 />
                 <ShowErrorText className="-mt-2!" error={formValidation} field="email" />
             </div>

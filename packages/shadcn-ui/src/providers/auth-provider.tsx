@@ -7,6 +7,14 @@ import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { User } from '@repo/commons/types/account-service-schema.type';
 import { useQuery } from '@apollo/client/react';
+import { authClient } from '@repo/commons/lib/auth-client';
+import {
+    getToken,
+    setToken,
+    clearAllTokens,
+    ACCESS_TOKEN_KEY,
+    REFRESH_TOKEN_KEY,
+} from '@repo/commons/utils/storage-helpers';
 
 const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
     query GetAuthUser {
@@ -47,6 +55,7 @@ const GET_AUTH_USER: TypedDocumentNode<{ getAuthUser: User }> = gql`
 
 interface AuthContextType {
     isAuthenticated: boolean;
+    accessToken: string | null;
     authUser: User | undefined;
     isLoading: boolean;
     hasIncompleteProfile: boolean;
@@ -60,27 +69,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [accessToken, setAccessToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [authUser, setAuthUser] = useState<User | undefined>(undefined);
     const [hasIncompleteProfile, setHasIncompleteProfile] = useState(false);
 
     const router = useRouter();
 
-    // Fetch user data from GraphQL only when authenticated
     const { data: userData, error: userError } = useQuery(GET_AUTH_USER, {
         skip: !isAuthenticated,
     });
 
-    // Track ongoing authorization to prevent race conditions
     const authorizationPromiseRef = useRef<Promise<void> | null>(null);
 
     const logout = useCallback(async () => {
         try {
-            await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
+            const refreshToken = getToken(REFRESH_TOKEN_KEY);
+            if (refreshToken) {
+                await authClient.signOut({ refreshToken });
+            }
         } finally {
+            clearAllTokens();
+            setAccessToken(null);
             setIsAuthenticated(false);
             setAuthUser(undefined);
             router.push('/');
@@ -88,50 +98,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [router]);
 
     const authorize = useCallback(async () => {
-        // If authorization is already in progress, wait for it to complete
         if (authorizationPromiseRef.current) {
             return authorizationPromiseRef.current;
         }
 
-        // Create new authorization promise
         const authPromise = (async () => {
             try {
-                // Attempt to refresh tokens via API endpoint
-                const refreshResponse = await fetch('/api/auth/refresh', {
-                    method: 'POST',
-                    credentials: 'include',
-                });
+                const refreshToken = getToken(REFRESH_TOKEN_KEY);
 
-                if (refreshResponse.ok) {
-                    // Small delay to ensure cookies are set
-                    await new Promise((resolve) => setTimeout(resolve, 500));
+                if (!refreshToken) {
+                    setAccessToken(null);
+                    setIsAuthenticated(false);
+                    setAuthUser(undefined);
+                    return;
+                }
 
-                    // Validate session via API endpoint
-                    const sessionResponse = await fetch('/api/auth/session', {
-                        method: 'GET',
-                        credentials: 'include',
+                const { code, raw } = await authClient.refresh({ refreshToken });
+
+                if (code === 200 && raw.token) {
+                    setToken(ACCESS_TOKEN_KEY, raw.token);
+                    if (raw.refreshToken) {
+                        setToken(REFRESH_TOKEN_KEY, raw.refreshToken);
+                    }
+
+                    const token = raw.token;
+                    const { code: validateCode, raw: validateRaw } = await authClient.validate({
+                        token,
                     });
 
-                    if (sessionResponse.ok) {
-                        const sessionData = await sessionResponse.json();
-
-                        if (sessionData.authenticated) {
-                            setIsAuthenticated(true);
-                            // User data will be fetched via GraphQL query
-                            return;
-                        }
+                    if (validateCode === 200 && validateRaw.valid) {
+                        setAccessToken(token);
+                        setIsAuthenticated(true);
+                        return;
                     }
                 }
 
-                // Refresh or validation failed
+                clearAllTokens();
+                setAccessToken(null);
                 setIsAuthenticated(false);
                 setAuthUser(undefined);
             } catch (error) {
                 console.error('Authorization error:', error);
+                setAccessToken(null);
                 setIsAuthenticated(false);
                 setAuthUser(undefined);
             } finally {
-                // Clear the promise reference when done
                 authorizationPromiseRef.current = null;
             }
         })();
@@ -148,19 +159,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setHasIncompleteProfile(false);
     };
 
-    // Set user data from GraphQL when available
     useEffect(() => {
         if (userData?.getAuthUser) {
             setAuthUser(userData.getAuthUser);
         }
     }, [userData]);
 
-    // Handle GraphQL errors and auth failures
     useEffect(() => {
         if (!userError) return;
 
         if (hasGraphQLError(userError)) {
-            // Check both 'errors' and 'graphQLErrors' properties
             const gqlError = userError.errors?.[0] || userError.graphQLErrors?.[0];
 
             if (gqlError) {
@@ -173,11 +181,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [userError]);
 
-    // Periodic token refresh - refresh every 25 minutes (before 30-minute expiration)
     useEffect(() => {
         if (!isAuthenticated) return;
 
-        const REFRESH_INTERVAL = 25 * 60 * 1000; // 25 minutes in milliseconds
+        const REFRESH_INTERVAL = 25 * 60 * 1000;
         const refreshInterval = setInterval(async () => {
             await authorize();
         }, REFRESH_INTERVAL);
@@ -187,13 +194,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         };
     }, [isAuthenticated, authorize]);
 
-    // Validate session when user returns to tab/window
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
         const handleVisibilityChange = async () => {
             if (document.visibilityState === 'visible' && isAuthenticated) {
-                // Re-validate session when tab becomes visible
                 await authorize();
             }
         };
@@ -210,21 +215,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         let timeoutId: NodeJS.Timeout;
 
         const initAuth = async () => {
-            // Check if we just completed token exchange (SSR-safe)
             const justExchanged =
                 typeof window !== 'undefined'
                     ? sessionStorage.getItem('token_exchange_complete')
                     : null;
 
             if (justExchanged) {
-                // Wait for token storage to complete after OAuth exchange
                 await new Promise((resolve) => setTimeout(resolve, 500));
                 if (typeof window !== 'undefined') {
                     sessionStorage.removeItem('token_exchange_complete');
                 }
             }
 
-            // Set a timeout to prevent infinite loading
             timeoutId = setTimeout(() => {
                 if (mounted) {
                     setIsLoading(false);
@@ -254,6 +256,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         <AuthContext.Provider
             value={{
                 isAuthenticated,
+                accessToken,
                 isLoading,
                 authUser,
                 hasIncompleteProfile,

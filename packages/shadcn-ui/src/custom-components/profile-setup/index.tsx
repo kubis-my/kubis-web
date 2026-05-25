@@ -140,6 +140,7 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
                                     disabled={loading}
+                                    autoComplete='off'
                                 />
                                 <ShowErrorText
                                     className="-mt-2!"
@@ -156,6 +157,7 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
                                     disabled={loading}
+                                    autoComplete='off'
                                 />
                                 <ShowErrorText
                                     className="-mt-2!"
@@ -172,6 +174,7 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                                     value={nickname}
                                     onChange={(e) => setNickname(e.target.value)}
                                     disabled={loading}
+                                    autoComplete='off'
                                 />
                                 <ShowErrorText
                                     className="-mt-2!"

@@ -2,6 +2,8 @@
 
 import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
 import React, { useEffect } from 'react';
+import { authClient } from '@repo/commons/lib/auth-client';
+import { getToken, clearToken, SESSION_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 
 export default function RedirectAuthorize({
     children,
@@ -17,41 +19,31 @@ export default function RedirectAuthorize({
     useEffect(() => {
         const authorize = async () => {
             try {
-                const response = await fetch('/api/auth/authorize', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        clientId: input.clientId,
-                        redirectUri: input.redirectUri,
-                        codeChallenge: input.codeChallenge,
-                        scope: input.scope,
-                        state: input.state,
-                    }),
+                const sessionToken = getToken(SESSION_TOKEN_KEY);
+
+                if (!sessionToken) {
+                    throw new Error('No session token');
+                }
+
+                const { code, raw } = await authClient.redirectAuthorize({
+                    sessionToken,
+                    clientId: input.clientId,
+                    redirectUri: input.redirectUri,
+                    codeChallenge: input.codeChallenge,
+                    scope: input.scope,
+                    state: input.state,
                 });
 
-                const data = await response.json();
-
-                // Successful authorization - redirect to client app
-                if (response.ok && data.success) {
-                    window.location.replace(data.data.redirectUrl);
+                if (code === 200 && raw.redirectUrl) {
+                    window.location.replace(raw.redirectUrl);
                     return;
                 }
 
-                // Authorization failed - redirect to sign-in
                 throw new Error('Authorization failed');
             } catch (error) {
-                // On any error: logout first, then redirect to sign-in
                 console.error('OAuth authorization error:', error);
 
-                try {
-                    await fetch('/api/auth/logout', {
-                        method: 'POST',
-                        credentials: 'include',
-                    });
-                } catch (logoutError) {
-                    console.error('Logout error:', logoutError);
-                }
+                clearToken(SESSION_TOKEN_KEY);
 
                 const signInUrl = new URL(`${SSO_APP_BASE_URL}/sign-in`);
                 signInUrl.searchParams.set('client_id', input.clientId);

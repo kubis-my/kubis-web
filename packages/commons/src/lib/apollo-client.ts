@@ -1,13 +1,22 @@
 import { ApolloClient, InMemoryCache, HttpLink, ApolloLink, TypePolicies } from '@apollo/client';
 import { Observable } from '@apollo/client/utilities';
+import { env } from '../constant/env';
+import { getToken, ACCESS_TOKEN_KEY } from '../utils/storage-helpers';
 
-// Store multiple Apollo Client instances by URI
 const apolloClients: Map<string, ApolloClient> = new Map();
 
 function createApolloClient(uri: string, typePolicies: TypePolicies = {}) {
     const httpLink = new HttpLink({
         uri,
         credentials: 'include',
+    });
+
+    const authLink = new ApolloLink((operation, forward) => {
+        const token = getToken(ACCESS_TOKEN_KEY);
+        if (token) {
+            operation.setContext({ headers: { Authorization: `Bearer ${token}` } });
+        }
+        return forward(operation);
     });
 
     const errorLink = new ApolloLink((operation, forward) => {
@@ -28,7 +37,7 @@ function createApolloClient(uri: string, typePolicies: TypePolicies = {}) {
     });
 
     return new ApolloClient({
-        link: ApolloLink.from([errorLink, httpLink]),
+        link: ApolloLink.from([authLink, errorLink, httpLink]),
         cache: new InMemoryCache({ typePolicies }),
         defaultOptions: {
             watchQuery: {
@@ -57,29 +66,21 @@ function getOrCreateClient(key: string, uri: string, typePolicies: TypePolicies 
 }
 
 export function getApolloClient() {
-    return getOrCreateClient('account', '/api/graphql');
+    return getOrCreateClient('account', env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL);
 }
 
 export function getForgeApolloClient() {
-    return getOrCreateClient('forge', '/api/app/graphql', {
+    return getOrCreateClient('forge', env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL, {
         Project: { keyFields: ['publicId'] },
     });
 }
 
-/**
- * Reset the Apollo Client cache
- * Useful after logout or when authentication state changes
- */
 export function resetApolloClient() {
     apolloClients.forEach((client) => {
         client.clearStore();
     });
 }
 
-/**
- * Completely reset Apollo Client instance
- * Creates a new client on next access and clears the cache
- */
 export function reinitializeApolloClient() {
     apolloClients.clear();
     return getApolloClient();

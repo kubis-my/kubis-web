@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { Socket } from 'socket.io-client';
 import { createSocketClient, disconnectSocket } from '@repo/commons/lib/socket-client';
+import { getToken, ACCESS_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 
 type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
@@ -18,7 +19,7 @@ interface SocketContextType {
     socket: Socket | null;
     isConnected: boolean;
     connectionStatus: ConnectionStatus;
-    connect: () => Promise<void>;
+    connect: (token?: string) => Promise<void>;
     disconnect: () => void;
     emit: <T = unknown>(event: string, data?: T) => void;
     on: <T = unknown>(event: string, callback: (data: T) => void) => void;
@@ -47,27 +48,11 @@ export function SocketProvider({
 
     const isConnected = connectionStatus === 'connected';
 
-    const fetchSocketToken = useCallback(async (): Promise<string | null> => {
-        try {
-            const response = await fetch('/api/auth/socket-token', {
-                method: 'GET',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                return data.token;
-            }
-
-            return null;
-        } catch (error) {
-            console.error('[Socket] Failed to fetch token:', error);
-            return null;
-        }
+    const fetchSocketToken = useCallback((): string | null => {
+        return getToken(ACCESS_TOKEN_KEY);
     }, []);
 
-    const connect = useCallback(async () => {
-        // Prevent multiple connection attempts
+    const connect = useCallback(async (providedToken?: string) => {
         if (socketRef.current?.connected || isConnectingRef.current) {
             return;
         }
@@ -76,8 +61,7 @@ export function SocketProvider({
         setConnectionStatus('connecting');
 
         try {
-            // Fetch token first
-            const token = await fetchSocketToken();
+            const token = providedToken ?? fetchSocketToken();
 
             if (!token) {
                 console.error('[Socket] No token available');
@@ -110,11 +94,10 @@ export function SocketProvider({
                 setConnectionStatus('connected');
             });
 
-            // Refresh token before each reconnect attempt
             newSocket.io.on('reconnect_attempt', async () => {
                 console.log('[Socket] Reconnection attempt - refreshing token');
                 setConnectionStatus('connecting');
-                const freshToken = await fetchSocketToken();
+                const freshToken = fetchSocketToken();
                 if (freshToken) {
                     newSocket.auth = { token: freshToken };
                 }
@@ -170,14 +153,12 @@ export function SocketProvider({
         }
     }, []);
 
-    // Auto-connect if enabled
     useEffect(() => {
         if (autoConnect) {
             connect();
         }
     }, [autoConnect, connect]);
 
-    // Cleanup on unmount
     useEffect(() => {
         return () => {
             disconnect();

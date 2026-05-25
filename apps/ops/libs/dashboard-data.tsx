@@ -12,6 +12,8 @@ import {
 import { toast } from 'sonner';
 import { ROUTE } from './constants';
 import { env } from '@repo/commons/constant/env';
+import { authClient } from '@repo/commons/lib/auth-client';
+import { getToken, clearAllTokens, REFRESH_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 import { openSwitchCompanyDialog } from '../components/pages/switch-company/switch-company-dialog';
 
 export const APP_NAME = 'Process Management';
@@ -69,15 +71,14 @@ export const navigationUserItemList: NavUserItem[] = [
         icon: <IconLogout />,
         separator: true,
         async action() {
-            const response = await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
+            try {
+                const refreshToken = getToken(REFRESH_TOKEN_KEY);
+                if (refreshToken) {
+                    await authClient.signOut({ refreshToken });
+                }
+            } finally {
+                clearAllTokens();
                 window.location.href = env.NEXT_PUBLIC_MAIN_APP_BASE_URL;
-            } else {
-                toast.error('Failed to sign out. Please try again.');
             }
         },
     },
