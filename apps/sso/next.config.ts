@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
         ];
     },
     async headers() {
-        return getDefaultHeaders([]);
+        return getDefaultHeaders([process.env.NEXT_PUBLIC_AUTH_URL!]);
     },
 };
 

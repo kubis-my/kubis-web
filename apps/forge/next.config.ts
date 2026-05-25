@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
         return getDefaultHeaders([
             process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL!,
             process.env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL!,
+            process.env.NEXT_PUBLIC_AUTH_URL!,
         ]);
     },
 };
