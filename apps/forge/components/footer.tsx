@@ -74,13 +74,13 @@ export default function Footer() {
                         </span>
                         <div className="flex flex-col gap-3 text-sm">
                             <Link
-                                href="/"
+                                href={pathname}
                                 className={`transition-colors ${locale === 'en' ? 'font-medium text-[#4CAF50]' : 'text-gray-400 hover:text-white'}`}
                             >
                                 English
                             </Link>
                             <Link
-                                href="/?lang=ms"
+                                href={`${pathname}?lang=ms`}
                                 className={`transition-colors ${locale === 'ms' ? 'font-medium text-[#4CAF50]' : 'text-gray-400 hover:text-white'}`}
                             >
                                 Bahasa Melayu

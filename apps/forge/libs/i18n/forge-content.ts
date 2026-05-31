@@ -34,25 +34,11 @@ export type ForgeContent = {
         subtitle: string;
         cta: string;
         monthLabel: string;
-        plans: Array<{
-            name: string;
-            price: string;
-            description: string;
-            badge: string | null;
-            included: string[];
-            excluded: string[];
-            support: string | null;
-            featurePolicy: string | null;
-        }>;
     };
     addOns: {
         title: string;
         subtitle: string;
         optionalTitle: string;
-        items: Array<{
-            name: string;
-        }>;
-        optional: string[];
     };
     whyItWorks: {
         title: string;
@@ -155,92 +141,11 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             subtitle: 'Move into production with a plan that grows with your business.',
             cta: 'Get Started',
             monthLabel: '/month',
-            plans: [
-                {
-                    name: 'Maintenance',
-                    price: 'RM200',
-                    description: 'For stable systems with no active development needs.',
-                    badge: null,
-                    included: [
-                        'Production hosting',
-                        'Uptime monitoring',
-                        'Bug fixes only',
-                        'Email support',
-                        '72-hour response time',
-                    ],
-                    excluded: [],
-                    support: null,
-                    featurePolicy: null,
-                },
-                {
-                    name: 'Starter',
-                    price: 'RM500',
-                    description: 'Suitable for small businesses getting started.',
-                    badge: null,
-                    included: [
-                        'Production hosting',
-                        'Maintenance and monitoring',
-                        'Bug fixes',
-                        'Basic support',
-                        '1 active feature request at a time',
-                        '48-72 hour response time',
-                    ],
-                    excluded: [],
-                    support: null,
-                    featurePolicy: null,
-                },
-                {
-                    name: 'Growth',
-                    price: 'RM1,000',
-                    description: 'Suitable for growing businesses.',
-                    badge: 'Most Popular',
-                    included: [
-                        'Everything in Starter',
-                        'Continuous improvements',
-                        '1-2 small feature requests per month',
-                        'Priority support',
-                        'Managed DB and auto updates',
-                        'Performance server',
-                        '24-48 hour response time',
-                    ],
-                    excluded: [],
-                    support: null,
-                    featurePolicy: null,
-                },
-                {
-                    name: 'Scale',
-                    price: 'RM2,000+',
-                    description: 'Suitable for advanced or business-critical usage.',
-                    badge: null,
-                    included: [
-                        'Everything in Growth',
-                        '3-5 feature requests per month',
-                        'Faster turnaround time',
-                        'Higher priority handling',
-                        'Under 24 hour response time',
-                    ],
-                    excluded: [],
-                    support: null,
-                    featurePolicy: null,
-                },
-            ],
         },
         addOns: {
             title: 'Add-Ons',
             subtitle: 'Extend your system beyond the subscription scope with scoped add-ons.',
             optionalTitle: 'Optional Add-Ons',
-            items: [
-                { name: 'Minor Changes' },
-                { name: 'New Module' },
-                { name: 'Integration' },
-                { name: 'Complex Automation' },
-            ],
-            optional: [
-                'Data migration',
-                'Multi-branch setup',
-                'Role and permission expansion',
-                'Audit trail enhancements',
-            ],
         },
         whyItWorks: {
             title: 'Why This Model Works',
@@ -397,92 +302,11 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             subtitle: 'Masuk ke produksi dengan pelan yang berkembang bersama perniagaan anda.',
             cta: 'Mula Sekarang',
             monthLabel: '/bulan',
-            plans: [
-                {
-                    name: 'Maintenance',
-                    price: 'RM200',
-                    description: 'Untuk sistem stabil yang tiada keperluan pembangunan aktif.',
-                    badge: null,
-                    included: [
-                        'Hosting produksi',
-                        'Pemantauan uptime',
-                        'Pembetulan pepijat sahaja',
-                        'Sokongan emel',
-                        'Masa respons 72 jam',
-                    ],
-                    excluded: [],
-                    support: null,
-                    featurePolicy: null,
-                },
-                {
-                    name: 'Starter',
-                    price: 'RM500',
-                    description: 'Sesuai untuk perniagaan kecil yang baru bermula.',
-                    badge: null,
-                    included: [
-                        'Hosting produksi',
-                        'Penyelenggaraan dan pemantauan',
-                        'Pembetulan pepijat',
-                        'Sokongan asas',
-                        '1 permintaan ciri aktif pada satu masa',
-                        'Masa respons 48-72 jam',
-                    ],
-                    excluded: [],
-                    support: null,
-                    featurePolicy: null,
-                },
-                {
-                    name: 'Growth',
-                    price: 'RM1,000',
-                    description: 'Sesuai untuk perniagaan yang sedang berkembang.',
-                    badge: 'Paling Popular',
-                    included: [
-                        'Semua dalam Starter',
-                        'Penambahbaikan berterusan',
-                        '1-2 permintaan ciri kecil setiap bulan',
-                        'Sokongan keutamaan',
-                        'DB terurus dan kemaskini automatik',
-                        'Pelayan berprestasi',
-                        'Masa respons 24-48 jam',
-                    ],
-                    excluded: [],
-                    support: null,
-                    featurePolicy: null,
-                },
-                {
-                    name: 'Scale',
-                    price: 'RM2,000+',
-                    description: 'Sesuai untuk penggunaan lanjutan atau kritikal perniagaan.',
-                    badge: null,
-                    included: [
-                        'Semua dalam Growth',
-                        '3-5 permintaan ciri setiap bulan',
-                        'Masa siap lebih cepat',
-                        'Keutamaan lebih tinggi',
-                        'Masa respons bawah 24 jam',
-                    ],
-                    excluded: [],
-                    support: null,
-                    featurePolicy: null,
-                },
-            ],
         },
         addOns: {
             title: 'Add-On',
             subtitle: 'Luaskan sistem anda di luar skop langganan melalui add-on berasaskan skop.',
             optionalTitle: 'Add-On Pilihan',
-            items: [
-                { name: 'Perubahan Kecil' },
-                { name: 'Modul Baharu' },
-                { name: 'Integrasi' },
-                { name: 'Automasi Kompleks' },
-            ],
-            optional: [
-                'Migrasi data',
-                'Tetapan multi-cawangan',
-                'Pengembangan peranan dan kebenaran',
-                'Penambahbaikan audit trail',
-            ],
         },
         whyItWorks: {
             title: 'Kenapa Model Ini Berkesan',
