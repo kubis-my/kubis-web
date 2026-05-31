@@ -24,6 +24,11 @@ export enum ProjectStatus {
     CANCELLED = 'CANCELLED',
 }
 
+export enum AddOnCategory {
+    STANDARD = 'STANDARD',
+    OPTIONAL = 'OPTIONAL',
+}
+
 export interface ThreadPaginationInput {
     cursor?: Nullable<number>;
     take: number;
@@ -170,6 +175,37 @@ export interface PaginatedProject {
     pageInfo: PageInfo;
 }
 
+export interface PlanFeature {
+    id: string;
+    label: string;
+    sortOrder: number;
+}
+
+export interface Plan {
+    publicId: string;
+    name: string;
+    priceAmount: number;
+    priceLabel: string;
+    description: string;
+    badge?: Nullable<string>;
+    isCustomPricing: boolean;
+    sortOrder: number;
+    features?: PlanFeature[];
+}
+
+export interface AddOn {
+    publicId: string;
+    name: string;
+    slug: string;
+    category: AddOnCategory;
+    sortOrder: number;
+}
+
+export interface PackagePlan {
+    plans?: Plan[];
+    addons?: AddOn[];
+}
+
 export interface IQuery {
     health(): string | Promise<string>;
     getProjectsForForge(
@@ -182,6 +218,7 @@ export interface IQuery {
     ): PaginatedThreadMessages | Promise<PaginatedThreadMessages>;
     getMilestonesForForge(projectPublicId: string): Milestone[] | Promise<Milestone[]>;
     getMilestoneForForge(publicId: string): Milestone | Promise<Milestone>;
+    getPackagePlan(): PackagePlan | Promise<PackagePlan>;
 }
 
 export interface IMutation {

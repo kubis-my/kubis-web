@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import Footer from '@/component/footer';
 import AddOns from '@/component/pages/forge/add-ons';
 import Pricing from '@/component/pages/forge/pricing';
+import { fetchPackagePlan } from '@/root/components/pages/forge/pricing/fetch';
 import { FORGE_CONTENT, resolveForgeLocale } from '@/root/libs/i18n/forge-content';
+import { bySortOrder } from '@repo/commons/utils/pagination-helpers';
 
 export const metadata: Metadata = {
     title: 'Pricing',
@@ -39,14 +41,17 @@ export default async function ForgePricingPage(props: {
     const locale = resolveForgeLocale(searchParams.lang);
     const content = FORGE_CONTENT[locale];
 
+    const packagePlan = await fetchPackagePlan(locale);
+    const plans = [...(packagePlan?.plans ?? [])].sort(bySortOrder);
+
     return (
         <main className="flex min-h-screen flex-col justify-between">
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
             />
-            <Pricing content={content.pricing} />
-            <AddOns content={content.addOns} />
+            <Pricing content={content.pricing} plans={plans} />
+            <AddOns content={content.addOns} addons={packagePlan?.addons ?? []} />
             <Footer />
         </main>
     );

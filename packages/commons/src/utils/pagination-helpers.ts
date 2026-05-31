@@ -1,3 +1,6 @@
+export const bySortOrder = (a: { sortOrder: number }, b: { sortOrder: number }) =>
+    a.sortOrder - b.sortOrder;
+
 export const createInitialPaginatedData = <T>() => ({
     data: [] as T[],
     pageInfo: {
