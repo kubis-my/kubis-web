@@ -23,7 +23,7 @@ export function StatsSection() {
                         Start Date
                     </p>
                     <p className="mt-1 text-sm font-semibold">
-                        {dateFormatter.format(new Date(project.startDate))}
+                        {dateFormatter.format(new Date(project.startAt ?? project.createdAt))}
                     </p>
                 </div>
 

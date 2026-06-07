@@ -10,8 +10,9 @@ import {
     IconFileDescription,
     IconFlag,
     IconMessages,
+    IconSettings,
+    IconStack,
 } from '@tabler/icons-react';
-import { toast } from 'sonner';
 import { ROUTE } from './constants';
 import { env } from '@repo/commons/constant/env';
 import { authClient } from '@repo/commons/lib/auth-client';
@@ -71,6 +72,20 @@ export function getProjectNavigationList(projectId: string, unreadCount = 0): Na
                         ) : null,
                     isActive: false,
                 },
+                {
+                    id: 'project-context',
+                    title: 'Context',
+                    url: ROUTE.FORGE.PROJECT_CONTEXT(projectId),
+                    icon: <IconStack />,
+                    isActive: false,
+                },
+                {
+                    id: 'project-settings',
+                    title: 'Settings',
+                    url: ROUTE.FORGE.PROJECT_SETTINGS(projectId),
+                    icon: <IconSettings />,
+                    isActive: false,
+                },
             ],
         },
     ];
@@ -97,7 +112,7 @@ export const navigationUserItemList: NavUserItem[] = [
         id: 'help',
         name: 'Get Help',
         icon: <IconHelp />,
-        async action() {},
+        async action() { },
     },
     {
         id: 'log-out',

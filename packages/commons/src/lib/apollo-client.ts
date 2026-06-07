@@ -76,6 +76,7 @@ export function getOpsApolloClient() {
 export function getForgeApolloClient() {
     return getOrCreateClient('forge', env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL, {
         Project: { keyFields: ['publicId'] },
+        ProjectSetting: { keyFields: ['publicId'] },
     });
 }
 

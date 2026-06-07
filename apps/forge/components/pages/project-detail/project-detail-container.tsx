@@ -11,6 +11,8 @@ import {
     MilestoneStatus as GqlMilestoneStatus,
     Project as GqlProject,
     ProjectStatus as GqlProjectStatus,
+    type ProjectSetting as GqlProjectSetting,
+    type ProjectSubscription as GqlProjectSubscription,
     type ThreadMessage,
     type ThreadPageInfo,
     type ThreadPaginationInput,
@@ -46,10 +48,15 @@ export type ProjectDetail = {
     name: string;
     companyNames: string[];
     status: ProjectStatus;
-    startDate: string;
+    createdAt: string;
+    startAt?: string;
+    expectedGoLiveAt?: string;
     stagingUrl?: string;
+    productionUrl?: string;
     brief: ProjectBriefData;
     milestones: Milestone[];
+    projectSettings?: GqlProjectSetting | null;
+    subscription?: Pick<GqlProjectSubscription, 'publicId' | 'status' | 'plan' | 'addOns'> | null;
 };
 
 const PROJECT_STATUS_MAP: Record<GqlProjectStatus, ProjectStatus> = {
@@ -84,9 +91,10 @@ const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = 
             publicId
             name
             status
-            stagingUrl
             companyIds
             createdAt
+            startAt
+            expectedGoLiveAt
             brief {
                 background
                 problem
@@ -125,6 +133,58 @@ const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = 
                     endCursor
                     hasMore
                     total
+                }
+            }
+            projectSettings {
+                publicId
+                stagingUrl
+                productionUrl
+                visibility {
+                    brief
+                    milestones
+                    threads
+                    devNotes
+                }
+                environment {
+                    id
+                    key
+                    type
+                    value
+                    isAdminOwned
+                    createdAt
+                    updatedAt
+                }
+                userPreference {
+                    clientMilestoneCompleted
+                    clientNewMessage
+                    devClientReplied
+                    emailEnabled
+                }
+            }
+            subscription {
+                publicId
+                status
+                plan {
+                    publicId
+                    name
+                    priceAmount
+                    priceLabel
+                    description
+                    badge
+                    isCustomPricing
+                    sortOrder
+                    features {
+                        id
+                        label
+                        sortOrder
+                    }
+                }
+                addOns {
+                    publicId
+                    name
+                    slug
+                    category
+                    sortOrder
                 }
             }
         }
@@ -179,8 +239,11 @@ export default function ProjectDetailContainer({
             name: raw.name,
             status: PROJECT_STATUS_MAP[raw.status],
             companyNames,
-            startDate: raw.createdAt,
-            stagingUrl: raw.stagingUrl ?? undefined,
+            createdAt: raw.createdAt,
+            startAt: raw.startAt,
+            expectedGoLiveAt: raw.expectedGoLiveAt,
+            stagingUrl: raw.projectSettings?.stagingUrl ?? undefined,
+            productionUrl: raw.projectSettings?.productionUrl ?? undefined,
             brief: {
                 background: raw.brief?.background ?? '',
                 problem: raw.brief?.problem ?? null,
@@ -198,6 +261,15 @@ export default function ProjectDetailContainer({
                     estimatedDate: m.estimatedAt,
                     notes: m.notes.map((n) => ({ id: n.publicId, date: n.date, content: n.content })),
                 })),
+            projectSettings: raw.projectSettings,
+            subscription: raw.subscription
+                ? {
+                    publicId: raw.subscription.publicId,
+                    status: raw.subscription.status,
+                    plan: raw.subscription.plan,
+                    addOns: raw.subscription.addOns,
+                }
+                : null,
         };
     }, [data, companyNameMap]);
 
