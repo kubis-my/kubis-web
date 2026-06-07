@@ -14,6 +14,28 @@ export enum MilestoneStatus {
     CANCELLED = 'CANCELLED',
 }
 
+export enum AddOnCategory {
+    STANDARD = 'STANDARD',
+    OPTIONAL = 'OPTIONAL',
+}
+
+export enum InvoiceItemType {
+    Plan = 'Plan',
+    Addon = 'Addon',
+}
+
+export enum InvoiceStatus {
+    PENDING = 'PENDING',
+    PAID = 'PAID',
+    CANCELLED = 'CANCELLED',
+}
+
+export enum SubscriptionStatus {
+    ACTIVE = 'ACTIVE',
+    PAUSED = 'PAUSED',
+    CANCELLED = 'CANCELLED',
+}
+
 export enum ProjectStatus {
     PENDING_REVIEW = 'PENDING_REVIEW',
     DISCOVERY = 'DISCOVERY',
@@ -24,9 +46,9 @@ export enum ProjectStatus {
     CANCELLED = 'CANCELLED',
 }
 
-export enum AddOnCategory {
-    STANDARD = 'STANDARD',
-    OPTIONAL = 'OPTIONAL',
+export enum ProjectContextValueType {
+    STRING = 'STRING',
+    SECURE = 'SECURE',
 }
 
 export interface ThreadPaginationInput {
@@ -56,6 +78,58 @@ export interface AddProjectTeamMemberInput {
     userPublicId: string;
 }
 
+export interface UpdateProjectStatusInput {
+    publicId: string;
+    name: string;
+    stagingUrl?: Nullable<string>;
+    productionUrl?: Nullable<string>;
+    status: ProjectStatus;
+    startAt?: Nullable<DateTime>;
+    expectedGoLiveAt?: Nullable<DateTime>;
+}
+
+export interface UpsertProjectContextEnvironmentInput {
+    projectPublicId: string;
+    entry: EnvironmentEntryInput;
+}
+
+export interface EnvironmentEntryInput {
+    id?: Nullable<string>;
+    key: string;
+    type: ProjectContextValueType;
+    value?: Nullable<string>;
+    isDeleted?: Nullable<boolean>;
+}
+
+export interface UpgradeSubscriptionPlanInput {
+    projectPublicId: string;
+    planPublicId: string;
+}
+
+export interface UpdateProjectSettingVisibilityInput {
+    projectPublicId: string;
+    visibility: ProjectVisibilityInput;
+}
+
+export interface ProjectVisibilityInput {
+    brief?: Nullable<boolean>;
+    milestones?: Nullable<boolean>;
+    threads?: Nullable<boolean>;
+    devNotes?: Nullable<boolean>;
+}
+
+export interface UpsertNotificationPreferenceInput {
+    projectPublicId: string;
+    notification: NotificationPreferenceInput;
+}
+
+export interface NotificationPreferenceInput {
+    clientMilestoneCompleted?: Nullable<boolean>;
+    clientNewMessage?: Nullable<boolean>;
+    devClientReplied?: Nullable<boolean>;
+    emailEnabled?: Nullable<boolean>;
+}
+
 export interface SendThreadMessageInput {
     projectPublicId: string;
     content: JSON;
@@ -80,6 +154,28 @@ export interface AddMilestoneNoteInput {
     milestonePublicId: string;
     content: JSON;
     date: DateTime;
+}
+
+export interface CreateInvoiceInput {
+    projectPublicId: string;
+    amount: number;
+    dueAt: DateTime;
+    items: CreateInvoiceItemInput[];
+}
+
+export interface CreateInvoiceItemInput {
+    type: InvoiceItemType;
+    description: string;
+    amount: number;
+    sortOrder: number;
+}
+
+export interface UpdateInvoiceInput {
+    publicId: string;
+    amount?: Nullable<number>;
+    dueAt?: Nullable<DateTime>;
+    status?: Nullable<InvoiceStatus>;
+    items?: Nullable<CreateInvoiceItemInput[]>;
 }
 
 export interface PageInfo {
@@ -121,11 +217,105 @@ export interface Milestone {
     notes: MilestoneNote[];
 }
 
+export interface ProjectNotificationPreference {
+    clientMilestoneCompleted: boolean;
+    clientNewMessage: boolean;
+    devClientReplied: boolean;
+    emailEnabled: boolean;
+}
+
+export interface ProjectVisibility {
+    brief: boolean;
+    milestones: boolean;
+    threads: boolean;
+    devNotes: boolean;
+}
+
+export interface EnvironmentEntry {
+    id: string;
+    key: string;
+    type: string;
+    value: string;
+    isAdminOwned: boolean;
+    createdAt: DateTime;
+    updatedAt: DateTime;
+}
+
+export interface ProjectSetting {
+    publicId: string;
+    stagingUrl?: Nullable<string>;
+    productionUrl?: Nullable<string>;
+    visibility: ProjectVisibility;
+    environment: EnvironmentEntry[];
+    userPreference?: Nullable<ProjectNotificationPreference>;
+    createdAt: DateTime;
+    updatedAt: DateTime;
+}
+
 export interface ProjectTeam {
     publicId: string;
     userPublicId: string;
     isActive: boolean;
     isOwner: boolean;
+}
+
+export interface AddOn {
+    publicId: string;
+    name: string;
+    slug: string;
+    category: AddOnCategory;
+    sortOrder: number;
+}
+
+export interface InvoiceItem {
+    publicId: string;
+    type: InvoiceItemType;
+    description: string;
+    amount: number;
+    sortOrder: number;
+}
+
+export interface Invoice {
+    publicId: string;
+    status: InvoiceStatus;
+    amount: number;
+    dueAt: DateTime;
+    paidAt?: Nullable<DateTime>;
+    externalBillId: string;
+    paymentUrl: string;
+    items: InvoiceItem[];
+    createdAt: DateTime;
+    updatedAt: DateTime;
+}
+
+export interface PlanFeature {
+    id: string;
+    label: string;
+    sortOrder: number;
+}
+
+export interface Plan {
+    publicId: string;
+    name: string;
+    priceAmount: number;
+    priceLabel: string;
+    description: string;
+    badge?: Nullable<string>;
+    isCustomPricing: boolean;
+    sortOrder: number;
+    features?: PlanFeature[];
+}
+
+export interface ProjectSubscription {
+    publicId: string;
+    status: SubscriptionStatus;
+    plan?: Plan;
+    addOns?: AddOn[];
+    invoices: Invoice[];
+    startedAt: DateTime;
+    endedAt?: Nullable<DateTime>;
+    createdAt: DateTime;
+    updatedAt: DateTime;
 }
 
 export interface ThreadMessage {
@@ -159,46 +349,23 @@ export interface Project {
     publicId: string;
     name: string;
     status: ProjectStatus;
-    stagingUrl?: Nullable<string>;
     companyIds: string[];
     createdAt: DateTime;
     updatedAt: DateTime;
+    startAt?: Nullable<DateTime>;
+    expectedGoLiveAt?: Nullable<DateTime>;
     brief?: Nullable<Brief>;
     projectTeams: ProjectTeam[];
     milestones: Milestone[];
     threads?: PaginatedThreadMessages;
     userOverview: UserProjectOverview;
+    subscription?: Nullable<ProjectSubscription>;
+    projectSettings?: Nullable<ProjectSetting>;
 }
 
 export interface PaginatedProject {
     data: Project[];
     pageInfo: PageInfo;
-}
-
-export interface PlanFeature {
-    id: string;
-    label: string;
-    sortOrder: number;
-}
-
-export interface Plan {
-    publicId: string;
-    name: string;
-    priceAmount: number;
-    priceLabel: string;
-    description: string;
-    badge?: Nullable<string>;
-    isCustomPricing: boolean;
-    sortOrder: number;
-    features?: PlanFeature[];
-}
-
-export interface AddOn {
-    publicId: string;
-    name: string;
-    slug: string;
-    category: AddOnCategory;
-    sortOrder: number;
 }
 
 export interface PackagePlan {
@@ -212,6 +379,10 @@ export interface IQuery {
         pagination: ProjectPaginationInput,
     ): PaginatedProject | Promise<PaginatedProject>;
     getProjectForForge(publicId: string): Project | Promise<Project>;
+    revealProjectContextEnvironmentSecretForForge(
+        projectPublicId: string,
+        entryId: string,
+    ): string | Promise<string>;
     getThreadMessagesForForge(
         projectPublicId: string,
         pagination: ThreadPaginationInput,
@@ -219,12 +390,26 @@ export interface IQuery {
     getMilestonesForForge(projectPublicId: string): Milestone[] | Promise<Milestone[]>;
     getMilestoneForForge(publicId: string): Milestone | Promise<Milestone>;
     getPackagePlan(): PackagePlan | Promise<PackagePlan>;
+    getInvoiceForForge(publicId: string): Invoice | Promise<Invoice>;
 }
 
 export interface IMutation {
     createProjectForForge(input: CreateProjectInput): Project | Promise<Project>;
     addProjectTeamMember(input: AddProjectTeamMemberInput): ProjectTeam | Promise<ProjectTeam>;
     removeProjectTeamMember(projectTeamPublicId: string): ProjectTeam | Promise<ProjectTeam>;
+    updateProjectStatusForForge(input: UpdateProjectStatusInput): Project | Promise<Project>;
+    upsertProjectContextEnvironmentForForge(
+        input: UpsertProjectContextEnvironmentInput,
+    ): Project | Promise<Project>;
+    upgradeSubscriptionPlanForForge(
+        input: UpgradeSubscriptionPlanInput,
+    ): ProjectSubscription | Promise<ProjectSubscription>;
+    updateProjectSettingVisibilityForForge(
+        input: UpdateProjectSettingVisibilityInput,
+    ): ProjectSetting | Promise<ProjectSetting>;
+    upsertNotificationPreferenceForForge(
+        input: UpsertNotificationPreferenceInput,
+    ): ProjectSetting | Promise<ProjectSetting>;
     sendThreadMessageForForge(
         input: SendThreadMessageInput,
     ): ThreadMessage | Promise<ThreadMessage>;
@@ -237,6 +422,8 @@ export interface IMutation {
         input: UpdateMilestoneInput,
     ): Milestone | Promise<Milestone>;
     addMilestoneNoteForForge(input: AddMilestoneNoteInput): MilestoneNote | Promise<MilestoneNote>;
+    createInvoiceForForge(input: CreateInvoiceInput): Invoice | Promise<Invoice>;
+    updateInvoiceForForge(input: UpdateInvoiceInput): Invoice | Promise<Invoice>;
 }
 
 export type JSON = any;
