@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { IconMenu2 } from '@tabler/icons-react';
 import { Button } from '@repo/shadcn-ui/components/button';
 import {
@@ -14,6 +15,7 @@ import {
 } from '@repo/shadcn-ui/components/sheet';
 import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
 import { getInitials } from '@repo/commons/utils/initials';
+import { scrollToSection } from '@repo/commons/utils/dom';
 import { useAuth } from '@repo/shadcn-ui/providers/auth-provider';
 
 const NAV_LINKS = [
@@ -24,6 +26,7 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
+    const pathname = usePathname();
     const { isAuthenticated, authUser } = useAuth();
 
     const initials = getInitials(
@@ -47,6 +50,11 @@ export default function Navbar() {
                         <Link
                             key={href}
                             href={href}
+                            onClick={(e) => {
+                                if (href.startsWith('/#') && pathname === '/') {
+                                    scrollToSection(e, href.slice(2));
+                                }
+                            }}
                             className="text-sm text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                         >
                             {label}
@@ -118,6 +126,11 @@ export default function Navbar() {
                                     <SheetClose asChild key={href}>
                                         <Link
                                             href={href}
+                                            onClick={(e) => {
+                                                if (href.startsWith('/#') && pathname === '/') {
+                                                    scrollToSection(e, href.slice(2));
+                                                }
+                                            }}
                                             className="rounded-lg px-3 py-2.5 text-base font-medium text-gray-700 transition-colors hover:bg-[#4CAF50]/10 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
                                         >
                                             {label}
