@@ -10,6 +10,7 @@ import { Toaster } from '@repo/shadcn-ui/components/sonner';
 import { env } from '@repo/commons/constant/env';
 
 const SOCKET_URL = env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL.replace(/\/graphql\/?$/, '');
+const SITE_URL = process.env.NEXT_PUBLIC_MAIN_APP_BASE_URL ?? 'https://kubis.my';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -22,26 +23,60 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+    metadataBase: new URL(SITE_URL),
     title: {
-        default: 'KUBIS',
+        default: 'KUBIS — A Modular Business Software Ecosystem',
         template: '%s | KUBIS',
     },
     description:
         'KUBIS is a modular business software ecosystem: one platform of purpose-built applications that replace spreadsheets, manual workflows, and disconnected tools for growing businesses.',
-    metadataBase: new URL(process.env.NEXT_PUBLIC_MAIN_APP_BASE_URL ?? 'https://kubis.my'),
+    applicationName: 'KUBIS',
+    keywords: [
+        'business software ecosystem',
+        'modular SaaS platform',
+        'operations software',
+        'spreadsheet replacement',
+        'multi-tenant SaaS',
+        'KUBIS',
+    ],
+    authors: [{ name: 'Muhammad Zarkashi Zuakafli', url: `${SITE_URL}/author` }],
+    creator: 'Muhammad Zarkashi Zuakafli',
+    publisher: 'KUBIS',
+    category: 'technology',
+    alternates: {
+        canonical: '/',
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            'max-image-preview': 'large',
+            'max-snippet': -1,
+            'max-video-preview': -1,
+        },
+    },
     openGraph: {
         type: 'website',
         siteName: 'KUBIS',
-        title: 'KUBIS',
+        locale: 'en_MY',
+        title: 'KUBIS — A Modular Business Software Ecosystem',
         description:
             'One ecosystem. Multiple purpose-built applications. Built to replace spreadsheets and disconnected tools.',
         url: '/',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'KUBIS',
+        title: 'KUBIS — A Modular Business Software Ecosystem',
         description:
             'A modular business software ecosystem. One ecosystem. Multiple purpose-built applications.',
+    },
+    verification: {
+        google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || undefined,
+        other: {
+            'msvalidate.01': process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION || '',
+        },
     },
 };
 
@@ -51,7 +86,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en-MY">
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
                 <Suspense fallback={null}>
                     <ExchangeCodeForToken>
