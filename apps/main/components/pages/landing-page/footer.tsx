@@ -102,7 +102,7 @@ export default function Footer() {
                         that outgrew their tools.
                     </p>
                     <Link
-                        href="https://github.com/kubis-my/kubis-web"
+                        href="https://github.com/kubis-my"
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label="View source on GitHub"
