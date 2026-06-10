@@ -10,6 +10,7 @@ import HowItWorks from '@/component/pages/landing-page/how-it-works';
 import FutureVision from '@/component/pages/landing-page/future-vision';
 import FinalCta from '@/component/pages/landing-page/final-cta';
 import Footer from '@/component/pages/landing-page/footer';
+import { OrganizationSchema, WebSiteSchema } from '@/component/seo/structured-data';
 
 export const metadata: Metadata = {
     title: {
@@ -28,35 +29,11 @@ export const metadata: Metadata = {
     },
 };
 
-const jsonLd = {
-    '@context': 'https://schema.org',
-    '@graph': [
-        {
-            '@type': 'Organization',
-            '@id': 'https://kubis.my/#organization',
-            name: 'KUBIS',
-            url: 'https://kubis.my',
-            logo: 'https://kubis.my/logo.png',
-            description:
-                'A modular business software ecosystem of purpose-built applications for growing businesses.',
-        },
-        {
-            '@type': 'WebSite',
-            '@id': 'https://kubis.my/#website',
-            url: 'https://kubis.my',
-            name: 'KUBIS',
-            publisher: { '@id': 'https://kubis.my/#organization' },
-        },
-    ],
-};
-
 export default function Home() {
     return (
         <>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
+            <OrganizationSchema />
+            <WebSiteSchema />
             <Navbar />
             <main>
                 <Hero />

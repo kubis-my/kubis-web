@@ -68,14 +68,15 @@ export default function AuthorHero() {
                         </div>
 
                         <h1 className="mt-8 max-w-xl text-4xl leading-[1.1] font-bold tracking-tight text-gray-900 md:text-5xl dark:text-white">
-                            I build production ready SaaS products from{' '}
-                            <span className="text-[#4CAF50]">idea to production.</span>
+                            Senior Backend Engineer &amp; Full-Stack Developer building{' '}
+                            <span className="text-[#4CAF50]">production-ready SaaS.</span>
                         </h1>
 
                         <p className="mt-6 max-w-xl text-base leading-relaxed text-gray-600 md:text-lg dark:text-gray-400">
-                            Full-stack engineer with 5+ years of experience building production grade
-                            backend systems, RESTful and GraphQL APIs, multi-tenant platforms,
-                            real-time workflows and business automation tools.
+                            Full-stack engineer from Kelantan, Malaysia with 5+ years building
+                            production-grade NestJS &amp; PostgreSQL backends, RESTful and GraphQL
+                            APIs, multi-tenant SaaS platforms, real-time workflows and business
+                            automation tools. Available for remote work.
                         </p>
 
                         {/* Contact meta */}
