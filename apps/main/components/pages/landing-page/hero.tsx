@@ -21,7 +21,7 @@ export default function Hero() {
                 </span>
 
                 <h1 className="max-w-[900px] text-4xl leading-[1.08] font-bold tracking-tight text-balance text-gray-900 sm:text-5xl sm:leading-[1.05] md:text-7xl dark:text-white">
-                    Run your business on <span className="text-[#4CAF50]">software</span>, not
+                    Run your business on <span className="text-[#4CAF50]">software</span> not
                     spreadsheets
                 </h1>
 
