@@ -1,6 +1,7 @@
 import { IconArrowRight } from '@tabler/icons-react';
 import { Badge } from '@repo/shadcn-ui/components/badge';
 import { cn } from '@repo/shadcn-ui/lib/utils';
+import { getInitials } from '@repo/commons/utils/initials';
 import { type Project } from './types';
 import { StatusBadge } from './status-badge';
 
@@ -9,11 +10,7 @@ function formatDate(value: string) {
 }
 
 function ProjectAvatar({ name }: { name: string }) {
-    const initials = name
-        .split(' ')
-        .slice(0, 2)
-        .map((w) => w[0]?.toUpperCase() ?? '')
-        .join('');
+    const initials = getInitials(name);
 
     return (
         <div className="from-primary/15 to-primary/5 text-primary ring-primary/10 flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br text-xs font-bold tracking-wide ring-1 ring-inset">

@@ -1,18 +1,22 @@
 import type { Metadata } from 'next';
-import AuthorClient from '@/component/pages/author/author-client';
+import Navbar from '@/component/pages/landing-page/navbar';
 import Footer from '@/component/pages/landing-page/footer';
+import AuthorHero from '@/component/pages/author/author-hero';
+import AuthorStory from '@/component/pages/author/author-story';
+import AuthorWork from '@/component/pages/author/author-work';
+import AuthorContact from '@/component/pages/author/author-contact';
 
 export const metadata: Metadata = {
-    title: 'Zarkashi Zuakafli - Author',
+    title: 'The Founder',
     description:
-        'Meet Zarkashi Zuakafli, the author of KUBIS. Full-stack developer from Kelantan, Malaysia with 5+ years of experience building custom business systems.',
+        'Meet Zarkashi Zuakafli, the engineer behind KUBIS. A full-stack developer from Kelantan, Malaysia with 5+ years building multi-tenant SaaS platforms and custom business systems.',
     alternates: {
         canonical: '/author',
     },
     openGraph: {
-        title: 'Zarkashi Zuakafli - Author | KUBIS',
+        title: 'The Founder | KUBIS',
         description:
-            'Full-stack developer with 5+ years of experience building custom business systems.',
+            'The engineer behind KUBIS, with 5+ years building multi-tenant SaaS platforms, custom business systems, and production software with real users.',
         url: '/author',
     },
 };
@@ -20,7 +24,13 @@ export const metadata: Metadata = {
 export default function AuthorPage() {
     return (
         <>
-            <AuthorClient />
+            <Navbar />
+            <main>
+                <AuthorHero />
+                <AuthorStory />
+                <AuthorWork />
+                <AuthorContact />
+            </main>
             <Footer />
         </>
     );

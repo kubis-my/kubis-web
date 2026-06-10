@@ -27,19 +27,21 @@ export const metadata: Metadata = {
         template: '%s | KUBIS',
     },
     description:
-        'Your unified workspace for productivity and collaboration. All your essential tools in one place.',
+        'KUBIS is a modular business software ecosystem: one platform of purpose-built applications that replace spreadsheets, manual workflows, and disconnected tools for growing businesses.',
     metadataBase: new URL(process.env.NEXT_PUBLIC_MAIN_APP_BASE_URL ?? 'https://kubis.my'),
     openGraph: {
         type: 'website',
         siteName: 'KUBIS',
         title: 'KUBIS',
-        description: 'Your unified workspace for productivity and collaboration.',
+        description:
+            'One ecosystem. Multiple purpose-built applications. Built to replace spreadsheets and disconnected tools.',
         url: '/',
     },
     twitter: {
         card: 'summary_large_image',
         title: 'KUBIS',
-        description: 'Your unified workspace for productivity and collaboration.',
+        description:
+            'A modular business software ecosystem. One ecosystem. Multiple purpose-built applications.',
     },
 };
 

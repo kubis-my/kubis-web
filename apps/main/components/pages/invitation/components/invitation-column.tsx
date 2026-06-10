@@ -20,6 +20,7 @@ import {
 import { IconCheck, IconDots, IconX } from '@tabler/icons-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@repo/shadcn-ui/components/avatar';
 import { formatDateTime } from '@repo/commons/utils/date';
+import { getInitials } from '@repo/commons/utils/initials';
 import { ColumnDef } from '@tanstack/react-table';
 import { useState } from 'react';
 import { UserAccount, UserAccountStatus } from '@repo/commons/types/account-service-schema.type';
@@ -151,12 +152,7 @@ export function createInvitationColumns(
             header: 'Company / Branch',
             cell: ({ row }) => {
                 const company = row.original.companyEmployee.company;
-                const initials = company.name
-                    .split(' ')
-                    .map((word) => word[0])
-                    .join('')
-                    .slice(0, 2)
-                    .toUpperCase();
+                const initials = getInitials(company.name);
 
                 return (
                     <div className="flex items-center gap-3">

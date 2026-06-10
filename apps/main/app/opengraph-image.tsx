@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og';
 
-export const alt = 'KUBIS - Your Unified Workspace';
+export const alt = 'KUBIS: A Modular Business Software Ecosystem';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -30,7 +30,7 @@ export default function Image() {
                     KUBIS
                 </div>
                 <div style={{ fontSize: 32, color: '#4b5563', marginTop: 20 }}>
-                    Your Unified Workspace
+                    A Modular Business Software Ecosystem
                 </div>
                 <div
                     style={{

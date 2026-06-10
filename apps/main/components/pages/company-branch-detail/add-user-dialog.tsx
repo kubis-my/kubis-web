@@ -30,6 +30,7 @@ import {
 } from '@repo/commons/types/account-service-schema.type';
 import { toast } from 'sonner';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { getInitials } from '@repo/commons/utils/initials';
 
 const SEARCH_CREDENTIALS_FOR_BRANCH: TypedDocumentNode<
     { searchCredentialsForBranch: User[] },
@@ -207,15 +208,6 @@ export default function AddUserDialog() {
                 position: 'top-center',
             });
         }
-    };
-
-    const getInitials = (name: string) => {
-        if (!name) return 'U';
-        const parts = name.split(' ');
-        if (parts.length >= 2 && parts[0]?.[0] && parts[1]?.[0]) {
-            return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-        }
-        return name.slice(0, 2).toUpperCase();
     };
 
     const getDisplayName = (user: User) => {

@@ -1,13 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/shadcn/components/avatar';
 import { Company } from '@repo/commons/types/account-service-schema.type';
+import { getInitials } from '@repo/commons/utils/initials';
 
 export default function TableCellViewer({ item }: { item: Company }) {
-    const initials = item.name
-        .split(' ')
-        .map((word) => word[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
+    const initials = getInitials(item.name);
 
     return (
         <div className="flex items-center gap-3">

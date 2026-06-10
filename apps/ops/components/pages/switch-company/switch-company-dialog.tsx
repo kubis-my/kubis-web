@@ -23,6 +23,7 @@ import {
 import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ROUTE } from '@/root/libs/constants';
 import { Branch } from '@repo/commons/types/account-service-schema.type';
+import { getInitials } from '@repo/commons/utils/initials';
 import { useCompany } from '@/component/container/company-provider';
 
 export const OPEN_SWITCH_COMPANY_EVENT = 'open-switch-company-dialog';
@@ -45,15 +46,6 @@ const AVATAR_COLORS = [
 function getAvatarColor(name: string) {
     const hash = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
     return AVATAR_COLORS[hash % AVATAR_COLORS.length] ?? AVATAR_COLORS[0];
-}
-
-function getInitials(name: string) {
-    return name
-        .split(' ')
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((s) => s[0]?.toUpperCase())
-        .join('');
 }
 
 export default function SwitchCompanyDialog() {
