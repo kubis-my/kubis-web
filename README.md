@@ -1,35 +1,47 @@
 # Kubis Web
 
-Kubis Web is a Turborepo monorepo containing the main product app, an SSO app, and shared UI/utility packages.
+Kubis Web is a Turborepo monorepo containing the Kubis product apps (main, ops, forge), an SSO app, and shared UI/utility packages.
 
 ## Tech Stack
 
-- Next.js 16 (apps)
+- Next.js 16 + Turbopack (apps)
 - React 19 + TypeScript
+- Apollo Client + GraphQL, socket.io-client
 - Turborepo
 - pnpm workspaces
 - Tailwind CSS v4
-- ESLint + Prettier
+- ESLint (flat config) + Prettier
 
 ## Monorepo Layout
 
 ```txt
 apps/
-  main/  Main product app (dashboard/workspace) - default dev port 3001
-  sso/   Authentication and OAuth app - default dev port 3000
+  sso/    Authentication and OAuth app - default dev port 3000
+  main/   Main product app (your all-in-one workspace) - default dev port 3001
+  ops/    Process/production management console - default dev port 3002
+  forge/  Forge client project portal - default dev port 3003
 
 packages/
-  commons/            Shared constants, API clients, utilities, typed helpers
+  commons/            Shared constants, env schema, API clients, hooks, utilities
   shadcn-ui/          Shared UI components, guards, providers, dashboard blocks
-  ui/                 Additional shared UI package and generators
-  tailwind-config/    Shared Tailwind/PostCSS setup
-  eslint-config/      Shared ESLint config package
-  typescript-config/  Shared TS config package
+  ui/                 Additional shared UI package and component generators
+  tailwind-config/    Shared Tailwind v4 / PostCSS setup
+  eslint-config/      Shared ESLint flat-config presets
+  typescript-config/  Shared TS config presets
 ```
+
+## Apps
+
+- **sso** (`:3000`) — Authentication and Single Sign-On. Handles user auth, OAuth authorization, and session management for all Kubis apps.
+- **main** (`:3001`) — The all-in-one workspace. Public product homepage (`kubis.my`), author/profile entity, account management, and app discovery.
+- **ops** (`:3002`) — Process/production management console for pre-order batch and production workflow tracking (`ops.kubis.my`).
+- **forge** (`:3003`) — Client-facing project portal that powers the Forge service model (`forge.kubis.my`).
+
+All apps are Next.js 16 (App Router) + Turbopack, with App Router routes in `app/`, UI composition in `components/`, app-local helpers in `libs/`, and an `eslint.config.mjs` flat config that imports `@repo/eslint-config/next-js`.
 
 ## Requirements
 
-- Node.js >= 18 (Dockerfile uses Node 22.13)
+- Node.js >= 18 (CI uses Node 22)
 - pnpm 9.x
 
 ## Getting Started
@@ -38,6 +50,12 @@ Install dependencies:
 
 ```bash
 pnpm install
+```
+
+Copy the example env and fill in values (see [Environment Variables](#environment-variables)):
+
+```bash
+cp .env.example .env
 ```
 
 Run all workspace `dev` tasks with Turborepo:
@@ -49,39 +67,43 @@ pnpm dev
 Run a single app:
 
 ```bash
-# SSO app on http://localhost:3000
-turbo dev --filter=sso
-
-# Main app on http://localhost:3001
-turbo dev --filter=main
+turbo dev --filter=sso     # http://localhost:3000
+turbo dev --filter=main    # http://localhost:3001
+turbo dev --filter=ops     # http://localhost:3002
+turbo dev --filter=forge   # http://localhost:3003
 ```
 
 ## Environment Variables
 
-The workspace validates env values via `@repo/commons` (`packages/commons/src/constant/env.ts`).
+The workspace validates env values via `@repo/commons` (`packages/commons/src/constant/env.ts`) using `@t3-oss/env-core` + Zod. All `NEXT_PUBLIC_*` URL variables must be valid URLs and client IDs non-empty, or startup/build fails schema validation.
 
-Create `.env.local` files for app development with at least:
+Start from `.env.example`:
 
 ```bash
 APP_ENV=development
-NEXT_PUBLIC_AUTH_URL=http://localhost:3000/api/auth
-NEXT_PUBLIC_MAIN_APP_BASE_URL=http://localhost:3001
+NEXT_PUBLIC_AUTH_URL=http://localhost:8000
 NEXT_PUBLIC_SSO_APP_BASE_URL=http://localhost:3000
-NEXT_PUBLIC_MAIN_CLIENT_ID=main-web
-NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL=http://localhost:4000/graphql
+NEXT_PUBLIC_MAIN_APP_BASE_URL=http://localhost:3001
+NEXT_PUBLIC_OPS_APP_BASE_URL=http://localhost:3002
+NEXT_PUBLIC_FORGE_APP_BASE_URL=http://localhost:3003
+NEXT_PUBLIC_MAIN_CLIENT_ID=
+NEXT_PUBLIC_OPS_CLIENT_ID=
+NEXT_PUBLIC_FORGE_CLIENT_ID=
+NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL=http://localhost:8003/graphql
+NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL=http://localhost:8001/graphql
+NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL=http://localhost:8002/graphql
+
+# SEO — search engine site verification (optional; leave blank to omit the tags)
+NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
+NEXT_PUBLIC_BING_SITE_VERIFICATION=
 ```
-
-Notes:
-
-- All `NEXT_PUBLIC_*` variables must be valid URLs/strings or startup will fail due to schema validation.
-- `NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL` is used by the main app GraphQL proxy and socket setup.
 
 ## Scripts
 
 From repo root:
 
 ```bash
-pnpm dev          # turbo run dev
+pnpm dev          # turbo run dev (loads .env)
 pnpm build        # turbo run build
 pnpm lint         # turbo run lint
 pnpm check-types  # turbo run check-types
@@ -93,19 +115,19 @@ Useful filtered commands:
 
 ```bash
 turbo build --filter=main
-turbo build --filter=sso
-turbo lint --filter=main
-turbo lint --filter=sso
+turbo lint --filter=ops
+turbo dev --filter=forge
 ```
 
-## Deployment Notes
+## Deployment
 
-- The repo includes a multi-stage `Dockerfile` that supports app-scoped builds via `APP_NAME`.
-- Fly.io templates are provided:
-    - `fly.prod.toml` for main branch/production
-    - `fly.staging.toml` for non-main/staging-like deployments
+Deployment is handled by GitHub Actions to Vercel:
+
+- `.github/workflows/deploy-vercel-prod.yml` — on push to `release`, deploys each app to its own Vercel project (SSO first, then Forge and Main).
+- `.github/workflows/build-check.yml` — on push to any other branch, runs `pnpm build` as a CI check.
 
 ## Reference Docs
 
-- `apps/main/README.md`
-- `apps/sso/README.md`
+- `docs/ops-app-plan.md` — ops app product spec
+- `docs/forge-app-plan.md`, `docs/kubis-forge.md` — Forge product spec
+- `AGENTS.md` — contributor/agent guidelines
