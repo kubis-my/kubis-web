@@ -9,6 +9,20 @@ jobs:
     build:
         name: Build
         runs-on: ubuntu-latest
+        environment: production
+        env:
+            NEXT_PUBLIC_AUTH_URL: ${{ vars.NEXT_PUBLIC_AUTH_URL }}
+            NEXT_PUBLIC_MAIN_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_MAIN_APP_BASE_URL }}
+            NEXT_PUBLIC_SSO_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_SSO_APP_BASE_URL }}
+            NEXT_PUBLIC_MAIN_CLIENT_ID: ${{ vars.NEXT_PUBLIC_MAIN_CLIENT_ID }}
+            NEXT_PUBLIC_OPS_CLIENT_ID: ${{ vars.NEXT_PUBLIC_OPS_CLIENT_ID }}
+            NEXT_PUBLIC_OPS_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_OPS_APP_BASE_URL }}
+            NEXT_PUBLIC_FORGE_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_FORGE_APP_BASE_URL }}
+            NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL }}
+            NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL }}
+            NEXT_PUBLIC_FORGE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_FORGE_CLIENT_ID }}
+            NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL }}
+            NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL }}
 
         steps:
             - name: Checkout code
@@ -28,15 +42,3 @@ jobs:
 
             - name: Build
               run: pnpm build
-              env:
-                  NEXT_PUBLIC_AUTH_URL: 'http://localhost:8000'
-                  NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL: 'http://localhost:8000/graphql'
-                  NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL: 'http://localhost:8000/graphql'
-                  NEXT_PUBLIC_SSO_APP_BASE_URL: 'http://localhost:3000'
-                  NEXT_PUBLIC_MAIN_CLIENT_ID: '1eKFy7eh9sbXHo68isagb2TM'
-                  NEXT_PUBLIC_MAIN_APP_BASE_URL: 'http://localhost:3001'
-                  NEXT_PUBLIC_OPS_CLIENT_ID: '1eKFy7eh9sbXHo68isagb3TM'
-                  NEXT_PUBLIC_OPS_APP_BASE_URL: 'http://localhost:3002'
-                  NEXT_PUBLIC_FORGE_CLIENT_ID: '6Kg4fvBWnmW5v1aHx0jMOffr'
-                  NEXT_PUBLIC_FORGE_APP_BASE_URL: 'http://localhost:3003'
-                  NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: 'http://localhost:8002/graphql'
