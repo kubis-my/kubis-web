@@ -330,7 +330,7 @@ export default function ProjectContext() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="w-full overflow-hidden rounded-xl border bg-muted/40 p-4">
+                    <div className="w-full overflow-hidden rounded-xl border bg-muted/40 p-4 max-h-80 overflow-y-auto scrollbar-hide">
                         <code className="block break-all font-mono text-sm leading-6">
                             {revealDialog?.value ?? ''}
                         </code>
