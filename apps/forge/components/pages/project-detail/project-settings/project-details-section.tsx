@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useState } from 'react';
+import { useFormDirty } from '@repo/commons/hooks/use-form-dirty';
 import { format } from 'date-fns';
 import { CalendarIcon, Loader2Icon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -94,6 +95,16 @@ export default function ProjectDetailsSection() {
     const [goLiveCalendarOpen, setGoLiveCalendarOpen] = useState(false);
     const [saving, setSaving] = useState(false);
 
+    const formData = {
+        name,
+        status,
+        startDate: startDate?.toISOString() ?? null,
+        goLiveDate: goLiveDate?.toISOString() ?? null,
+        stagingUrl,
+        productionUrl,
+    };
+    const { isDirty, setOriginal } = useFormDirty(formData);
+
     const handleSave = useCallback(async () => {
         if (!name.trim()) {
             toast.error('Project name is required.', { position: 'top-center' });
@@ -116,6 +127,7 @@ export default function ProjectDetailsSection() {
                     },
                 },
             });
+            setOriginal(formData);
             toast.success('Project details updated.', { position: 'top-center' });
         } catch {
             toast.error('Failed to update project details.', { position: 'top-center' });
@@ -258,7 +270,7 @@ export default function ProjectDetailsSection() {
 
             {isKubisTeam && (
                 <div className="flex justify-end p-3 sm:px-5">
-                    <Button onClick={handleSave} disabled={saving} size="sm">
+                    <Button onClick={handleSave} disabled={saving || !isDirty} size="sm">
                         {saving ? (
                             <>
                                 <Loader2Icon className="animate-spin" />
