@@ -206,7 +206,7 @@ export function EntryDialogForm({
                         placeholder="value"
                         disabled={loading}
                         autoComplete="off"
-                        className="font-mono resize-none"
+                        className="font-mono max-h-40 overflow-y-auto"
                         rows={3}
                     />
                     <ShowErrorText field='entry_value' error={formValidation} />
