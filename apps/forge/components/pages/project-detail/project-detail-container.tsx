@@ -16,9 +16,11 @@ import {
     type ThreadMessage,
     type ThreadPageInfo,
     type ThreadPaginationInput,
+    type PaginatedInvoice,
+    type InvoicePaginationInput,
 } from '@repo/commons/types/forge-service-schema.type';
 import { type MilestoneStatus, type ProjectStatus } from '../project-root/types';
-import { ROUTE, THREAD_PAGINATION_SIZE } from '@/root/libs/constants';
+import { ROUTE, THREAD_PAGINATION_SIZE, INVOICE_PAGINATION_SIZE } from '@/root/libs/constants';
 
 export type ProjectBriefData = {
     background: string;
@@ -83,10 +85,11 @@ interface GetProjectResponse {
 interface GetProjectVariables {
     publicId: string;
     threadPagination: ThreadPaginationInput;
+    invoicePagination: InvoicePaginationInput;
 }
 
 const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = gql`
-    query GetProjectForForge($publicId: String!, $threadPagination: ThreadPaginationInput!) {
+    query GetProjectForForge($publicId: String!, $threadPagination: ThreadPaginationInput!, $invoicePagination: InvoicePaginationInput!) {
         getProjectForForge(publicId: $publicId) {
             publicId
             name
@@ -187,6 +190,31 @@ const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = 
                     sortOrder
                 }
             }
+            projectInvoice(pagination: $invoicePagination) {
+                data {
+                    publicId
+                    status
+                    amount
+                    dueAt
+                    paidAt
+                    paymentUrl
+                    items {
+                        publicId
+                        type
+                        description
+                        amount
+                        sortOrder
+                    }
+                    createdAt
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                    total
+                    currentPage
+                    totalPages
+                }
+            }
         }
     }
 `;
@@ -195,6 +223,7 @@ type ProjectDetailContextType = {
     project: ProjectDetail;
     initialThreads: ThreadMessage[];
     initialThreadsPageInfo: ThreadPageInfo;
+    initialInvoices: PaginatedInvoice;
 };
 
 const ProjectDetailContext = createContext<ProjectDetailContextType | undefined>(undefined);
@@ -218,7 +247,11 @@ export default function ProjectDetailContainer({
     const router = useRouter();
 
     const { data, loading, error } = useQuery(GET_PROJECT, {
-        variables: { publicId: projectId, threadPagination: { take: THREAD_PAGINATION_SIZE } },
+        variables: {
+            publicId: projectId,
+            threadPagination: { take: THREAD_PAGINATION_SIZE },
+            invoicePagination: { take: INVOICE_PAGINATION_SIZE, projectPublicId: projectId },
+        },
         skip: !projectId,
     });
 
@@ -284,6 +317,15 @@ export default function ProjectDetailContainer({
         [data],
     );
 
+    const initialInvoices = useMemo(
+        (): PaginatedInvoice =>
+            data?.getProjectForForge?.projectInvoice ?? {
+                data: [],
+                pageInfo: { endCursor: null, hasNextPage: false, total: 0, currentPage: 1, totalPages: 1 },
+            },
+        [data],
+    );
+
     useEffect(() => {
         if (loading) return;
         if (!project || error) {
@@ -303,7 +345,7 @@ export default function ProjectDetailContainer({
     if (!project) return null;
 
     return (
-        <ProjectDetailContext.Provider value={{ project, initialThreads, initialThreadsPageInfo }}>
+        <ProjectDetailContext.Provider value={{ project, initialThreads, initialThreadsPageInfo, initialInvoices }}>
             {children}
         </ProjectDetailContext.Provider>
     );

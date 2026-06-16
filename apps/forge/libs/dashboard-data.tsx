@@ -12,6 +12,7 @@ import {
     IconMessages,
     IconSettings,
     IconStack,
+    IconReceipt,
 } from '@tabler/icons-react';
 import { ROUTE } from './constants';
 import { env } from '@repo/commons/constant/env';
@@ -77,6 +78,13 @@ export function getProjectNavigationList(projectId: string, unreadCount = 0): Na
                     title: 'Context',
                     url: ROUTE.FORGE.PROJECT_CONTEXT(projectId),
                     icon: <IconStack />,
+                    isActive: false,
+                },
+                {
+                    id: 'project-billing',
+                    title: 'Billing',
+                    url: ROUTE.FORGE.PROJECT_BILLING(projectId),
+                    icon: <IconReceipt />,
                     isActive: false,
                 },
                 {

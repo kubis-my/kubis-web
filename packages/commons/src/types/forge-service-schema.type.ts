@@ -56,6 +56,13 @@ export interface ThreadPaginationInput {
     take: number;
 }
 
+export interface InvoicePaginationInput {
+    cursor?: Nullable<number>;
+    take: number;
+    projectPublicId?: Nullable<string>;
+    status?: Nullable<InvoiceStatus>;
+}
+
 export interface ProjectPaginationInput {
     cursor?: Nullable<number>;
     take: number;
@@ -136,26 +143,6 @@ export interface SendThreadMessageInput {
     replyToPublicId?: Nullable<string>;
 }
 
-export interface CreateMilestoneInput {
-    projectPublicId: string;
-    name: string;
-    estimatedAt?: Nullable<DateTime>;
-    order?: Nullable<number>;
-}
-
-export interface UpdateMilestoneInput {
-    name?: Nullable<string>;
-    status?: Nullable<MilestoneStatus>;
-    estimatedAt?: Nullable<DateTime>;
-    order?: Nullable<number>;
-}
-
-export interface AddMilestoneNoteInput {
-    milestonePublicId: string;
-    content: JSON;
-    date: DateTime;
-}
-
 export interface CreateInvoiceInput {
     projectPublicId: string;
     amount: number;
@@ -176,6 +163,26 @@ export interface UpdateInvoiceInput {
     dueAt?: Nullable<DateTime>;
     status?: Nullable<InvoiceStatus>;
     items?: Nullable<CreateInvoiceItemInput[]>;
+}
+
+export interface CreateMilestoneInput {
+    projectPublicId: string;
+    name: string;
+    estimatedAt?: Nullable<DateTime>;
+    order?: Nullable<number>;
+}
+
+export interface UpdateMilestoneInput {
+    name?: Nullable<string>;
+    status?: Nullable<MilestoneStatus>;
+    estimatedAt?: Nullable<DateTime>;
+    order?: Nullable<number>;
+}
+
+export interface AddMilestoneNoteInput {
+    milestonePublicId: string;
+    content: JSON;
+    date: DateTime;
 }
 
 export interface PageInfo {
@@ -345,6 +352,11 @@ export interface UserProjectOverview {
     lastSeenThreadMessagePublicId?: Nullable<string>;
 }
 
+export interface PaginatedInvoice {
+    data: Invoice[];
+    pageInfo: PageInfo;
+}
+
 export interface Project {
     publicId: string;
     name: string;
@@ -361,6 +373,7 @@ export interface Project {
     userOverview: UserProjectOverview;
     subscription?: Nullable<ProjectSubscription>;
     projectSettings?: Nullable<ProjectSetting>;
+    projectInvoice?: PaginatedInvoice;
 }
 
 export interface PaginatedProject {
@@ -387,10 +400,13 @@ export interface IQuery {
         projectPublicId: string,
         pagination: ThreadPaginationInput,
     ): PaginatedThreadMessages | Promise<PaginatedThreadMessages>;
+    getInvoicesForForge(
+        pagination: InvoicePaginationInput,
+    ): PaginatedInvoice | Promise<PaginatedInvoice>;
+    getInvoiceForForge(publicId: string): Invoice | Promise<Invoice>;
+    getPackagePlan(): PackagePlan | Promise<PackagePlan>;
     getMilestonesForForge(projectPublicId: string): Milestone[] | Promise<Milestone[]>;
     getMilestoneForForge(publicId: string): Milestone | Promise<Milestone>;
-    getPackagePlan(): PackagePlan | Promise<PackagePlan>;
-    getInvoiceForForge(publicId: string): Invoice | Promise<Invoice>;
 }
 
 export interface IMutation {
@@ -416,14 +432,14 @@ export interface IMutation {
     deleteThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
     restoreThreadMessageForForge(publicId: string): ThreadMessage | Promise<ThreadMessage>;
     markThreadMessageAsReadForForge(messagePublicId: string): boolean | Promise<boolean>;
+    createInvoiceForForge(input: CreateInvoiceInput): Invoice | Promise<Invoice>;
+    updateInvoiceForForge(input: UpdateInvoiceInput): Invoice | Promise<Invoice>;
     createMilestoneForForge(input: CreateMilestoneInput): Milestone | Promise<Milestone>;
     updateMilestoneForForge(
         publicId: string,
         input: UpdateMilestoneInput,
     ): Milestone | Promise<Milestone>;
     addMilestoneNoteForForge(input: AddMilestoneNoteInput): MilestoneNote | Promise<MilestoneNote>;
-    createInvoiceForForge(input: CreateInvoiceInput): Invoice | Promise<Invoice>;
-    updateInvoiceForForge(input: UpdateInvoiceInput): Invoice | Promise<Invoice>;
 }
 
 export type JSON = any;

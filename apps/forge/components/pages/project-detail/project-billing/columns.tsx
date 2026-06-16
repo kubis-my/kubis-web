@@ -1,0 +1,111 @@
+'use client';
+
+import { ColumnDef } from '@tanstack/react-table';
+import { ExternalLink } from 'lucide-react';
+import { Badge } from '@/shadcn/components/badge';
+import { Button } from '@/shadcn/components/button';
+import { cn } from '@repo/shadcn-ui/lib/utils';
+import { Invoice, InvoiceStatus } from '@repo/commons/types/forge-service-schema.type';
+
+const STATUS_STYLES: Record<InvoiceStatus, string> = {
+    PAID: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800',
+    PENDING:
+        'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800',
+    CANCELLED:
+        'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
+};
+
+const STATUS_LABEL: Record<InvoiceStatus, string> = {
+    PAID: 'Paid',
+    PENDING: 'Pending',
+    CANCELLED: 'Cancelled',
+};
+
+function formatAmount(cents: number) {
+    return new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(
+        cents,
+    );
+}
+
+function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString('en-MY', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+}
+
+export const invoiceColumns: ColumnDef<Invoice>[] = [
+    {
+        accessorKey: 'createdAt',
+        header: 'Date',
+        cell: ({ row }) => (
+            <div className="text-muted-foreground text-sm">{formatDate(row.original.createdAt)}</div>
+        ),
+        size: 130,
+    },
+    {
+        accessorKey: 'items',
+        header: 'Description',
+        cell: ({ row }) => {
+            const items = [...(row.original.items ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+            return (
+                <div className="text-sm">
+                    {items.length > 0
+                        ? items.map((item) => item.description).join(', ')
+                        : <span className="text-muted-foreground">—</span>}
+                </div>
+            );
+        },
+        enableHiding: false,
+    },
+    {
+        accessorKey: 'dueAt',
+        header: 'Due',
+        cell: ({ row }) => (
+            <div className="text-muted-foreground text-sm">{formatDate(row.original.dueAt)}</div>
+        ),
+        size: 130,
+    },
+    {
+        accessorKey: 'amount',
+        header: 'Amount',
+        cell: ({ row }) => (
+            <div className="text-sm font-medium tabular-nums">{formatAmount(row.original.amount)}</div>
+        ),
+        size: 120,
+    },
+    {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => {
+            const status = row.original.status as InvoiceStatus;
+            return (
+                <Badge variant="outline" className={cn('text-xs', STATUS_STYLES[status])}>
+                    {STATUS_LABEL[status] ?? status}
+                </Badge>
+            );
+        },
+        size: 100,
+    },
+    {
+        accessorKey: 'action',
+        header: '',
+        cell: ({ row }) => {
+            const { status, paymentUrl } = row.original;
+            if (status !== InvoiceStatus.PENDING || !paymentUrl) return null;
+            return (
+                <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 gap-1.5 text-xs"
+                    onClick={() => window.open(paymentUrl, '_blank')}
+                >
+                    <ExternalLink className="size-3" />
+                    Pay now
+                </Button>
+            );
+        },
+        size: 100,
+    },
+];
