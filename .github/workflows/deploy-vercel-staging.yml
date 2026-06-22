@@ -1,0 +1,150 @@
+name: Staging Deploy (Vercel)
+
+on:
+    push:
+        branches-ignore:
+            - release
+
+jobs:
+    deploy-sso:
+        name: Deploy SSO to Vercel
+        runs-on: ubuntu-latest
+        environment: staging
+        env:
+            VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+            VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID_SSO }}
+            NEXT_PUBLIC_AUTH_URL: ${{ vars.NEXT_PUBLIC_AUTH_URL }}
+            NEXT_PUBLIC_MAIN_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_MAIN_APP_BASE_URL }}
+            NEXT_PUBLIC_SSO_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_SSO_APP_BASE_URL }}
+            NEXT_PUBLIC_MAIN_CLIENT_ID: ${{ vars.NEXT_PUBLIC_MAIN_CLIENT_ID }}
+            NEXT_PUBLIC_OPS_CLIENT_ID: ${{ vars.NEXT_PUBLIC_OPS_CLIENT_ID }}
+            NEXT_PUBLIC_OPS_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_OPS_APP_BASE_URL }}
+            NEXT_PUBLIC_FORGE_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_FORGE_APP_BASE_URL }}
+            NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL }}
+            NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL }}
+            NEXT_PUBLIC_FORGE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_FORGE_CLIENT_ID }}
+            NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL }}
+            NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v5
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 22
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Install Vercel CLI
+              run: pnpm add -g vercel@latest
+
+            - name: Pull Vercel environment
+              run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+            - name: Build
+              run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+            - name: Deploy
+              run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    deploy-forge:
+        name: Deploy Forge to Vercel
+        runs-on: ubuntu-latest
+        environment: staging
+        needs: [deploy-sso]
+        env:
+            VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+            VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID_FORGE }}
+            NEXT_PUBLIC_AUTH_URL: ${{ vars.NEXT_PUBLIC_AUTH_URL }}
+            NEXT_PUBLIC_MAIN_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_MAIN_APP_BASE_URL }}
+            NEXT_PUBLIC_SSO_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_SSO_APP_BASE_URL }}
+            NEXT_PUBLIC_MAIN_CLIENT_ID: ${{ vars.NEXT_PUBLIC_MAIN_CLIENT_ID }}
+            NEXT_PUBLIC_OPS_CLIENT_ID: ${{ vars.NEXT_PUBLIC_OPS_CLIENT_ID }}
+            NEXT_PUBLIC_OPS_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_OPS_APP_BASE_URL }}
+            NEXT_PUBLIC_FORGE_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_FORGE_APP_BASE_URL }}
+            NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL }}
+            NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL }}
+            NEXT_PUBLIC_FORGE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_FORGE_CLIENT_ID }}
+            NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL }}
+            NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v5
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 22
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Install Vercel CLI
+              run: pnpm add -g vercel@latest
+
+            - name: Pull Vercel environment
+              run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+            - name: Build
+              run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+            - name: Deploy
+              run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    deploy-main:
+        name: Deploy Main to Vercel
+        runs-on: ubuntu-latest
+        environment: staging
+        needs: [deploy-sso]
+        env:
+            VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+            VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID_MAIN }}
+            NEXT_PUBLIC_AUTH_URL: ${{ vars.NEXT_PUBLIC_AUTH_URL }}
+            NEXT_PUBLIC_MAIN_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_MAIN_APP_BASE_URL }}
+            NEXT_PUBLIC_SSO_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_SSO_APP_BASE_URL }}
+            NEXT_PUBLIC_MAIN_CLIENT_ID: ${{ vars.NEXT_PUBLIC_MAIN_CLIENT_ID }}
+            NEXT_PUBLIC_OPS_CLIENT_ID: ${{ vars.NEXT_PUBLIC_OPS_CLIENT_ID }}
+            NEXT_PUBLIC_OPS_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_OPS_APP_BASE_URL }}
+            NEXT_PUBLIC_FORGE_APP_BASE_URL: ${{ vars.NEXT_PUBLIC_FORGE_APP_BASE_URL }}
+            NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_KUBIS_GATEWAY_GRAPHQL_URL }}
+            NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL }}
+            NEXT_PUBLIC_FORGE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_FORGE_CLIENT_ID }}
+            NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL }}
+            NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL: ${{ vars.NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v6
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v5
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 22
+                  cache: pnpm
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Install Vercel CLI
+              run: pnpm add -g vercel@latest
+
+            - name: Pull Vercel environment
+              run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+            - name: Build
+              run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+            - name: Deploy
+              run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
