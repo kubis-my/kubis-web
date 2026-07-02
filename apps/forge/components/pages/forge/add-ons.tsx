@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import type { ForgeContent } from '@/root/libs/i18n/forge-content';
+import { ROUTE } from '@/root/libs/constants';
 import { AddOn, AddOnCategory } from '@repo/commons/types/forge-service-schema.type';
 import { bySortOrder } from '@repo/commons/utils/pagination-helpers';
 
@@ -42,6 +44,18 @@ export default function AddOns({ content, addons }: AddOnsProps) {
                             </li>
                         ))}
                     </ul>
+                </div>
+                <div className="mt-12 text-center">
+                    <h3 className="text-foreground font-semibold">{content.noteTitle}</h3>
+                    <p className="text-muted-foreground mt-2 text-sm">
+                        {content.note}{' '}
+                        <Link
+                            href={ROUTE.FORGE.HOME}
+                            className="text-foreground font-medium underline underline-offset-2"
+                        >
+                            {content.noteCta}
+                        </Link>
+                    </p>
                 </div>
             </div>
         </section>

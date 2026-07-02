@@ -18,9 +18,13 @@ import InvoiceLineItemsSection from './line-items-section';
 import InvoiceDueDateSection from './due-date-section';
 import InvoicePreviewPanel from './preview-panel';
 
-export default function CreateInvoiceDialog() {
+interface CreateInvoiceDialogProps {
+    activePlanId?: string;
+}
+
+export default function CreateInvoiceDialog({ activePlanId }: CreateInvoiceDialogProps) {
     const [open, setOpen] = useState(false);
-    const form = useInvoiceForm(() => setOpen(false));
+    const form = useInvoiceForm(() => setOpen(false), activePlanId);
     const { loading, resetForm, handleSubmit, handleFormKeyDown } = form;
 
     return (
@@ -60,7 +64,7 @@ export default function CreateInvoiceDialog() {
                     className="flex flex-1 flex-col overflow-hidden"
                 >
                     <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
-                        <div className="flex-1 overflow-y-auto px-6 py-5 sm:px-7 scrollbar-hide">
+                        <div className="scrollbar-hide flex-1 overflow-y-auto px-6 py-5 sm:px-7">
                             <InvoiceLineItemsSection form={form} />
                             <Separator className="my-5" />
                             <InvoiceDueDateSection form={form} />

@@ -15,6 +15,7 @@ export interface ValidationErrorPayload {
 export const TYPE_LABEL: Record<InvoiceItemType, string> = {
     [InvoiceItemType.Plan]: 'Plan',
     [InvoiceItemType.Addon]: 'Add-on',
+    [InvoiceItemType.Service]: 'Service',
 };
 
 export const DUE_PRESETS = [

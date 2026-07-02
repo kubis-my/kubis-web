@@ -23,6 +23,8 @@ interface InvoiceLineItemsSectionProps {
 export default function InvoiceLineItemsSection({ form }: InvoiceLineItemsSectionProps) {
     const {
         items,
+        plans,
+        activePlanId,
         descRefs,
         amountRefs,
         formValidation,
@@ -62,100 +64,157 @@ export default function InvoiceLineItemsSection({ form }: InvoiceLineItemsSectio
                 </div>
 
                 <div className="divide-y">
-                    {items.map((item, index) => (
-                        <div key={item.id} className={cn('px-3 py-2 transition-colors')}>
-                            <div className={cn('grid items-center gap-2', GRID_COLS)}>
-                                <span className="bg-muted text-muted-foreground mx-auto flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums">
-                                    {index + 1}
-                                </span>
+                    {items.map((item, index) => {
+                        const selectedPlan =
+                            item.type === InvoiceItemType.Plan
+                                ? plans.find((plan) => plan.name === item.description)
+                                : undefined;
+                        const isAmountReadOnly = Boolean(
+                            selectedPlan && !selectedPlan.isCustomPricing,
+                        );
 
-                                <Select
-                                    value={item.type}
-                                    onValueChange={(val) =>
-                                        updateItem(item.id, {
-                                            type: val as InvoiceItemType,
-                                        })
-                                    }
-                                >
-                                    <SelectTrigger className="bg-background h-9 w-full data-[size=default]:h-9">
-                                        <SelectValue placeholder="Package" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value={InvoiceItemType.Plan}>Plan</SelectItem>
-                                        <SelectItem value={InvoiceItemType.Addon}>
-                                            Add-on
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-
-                                <Input
-                                    ref={(el) => {
-                                        descRefs.current[item.id] = el;
-                                    }}
-                                    value={item.description}
-                                    onChange={(e) =>
-                                        updateItem(item.id, {
-                                            description: e.target.value,
-                                        })
-                                    }
-                                    onKeyDown={(e) => handleDescKeyDown(e, item)}
-                                    placeholder="e.g. Monthly retainer - Growth plan"
-                                    className="bg-background h-9 w-full text-sm"
-                                    autoComplete="off"
-                                />
-
-                                <div className="relative">
-                                    <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold select-none">
-                                        RM
+                        return (
+                            <div key={item.id} className={cn('px-3 py-2 transition-colors')}>
+                                <div className={cn('grid items-center gap-2', GRID_COLS)}>
+                                    <span className="bg-muted text-muted-foreground mx-auto flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums">
+                                        {index + 1}
                                     </span>
-                                    <Input
-                                        ref={(el) => {
-                                            amountRefs.current[item.id] = el;
-                                        }}
-                                        value={item.amount}
-                                        onChange={(e) =>
+
+                                    <Select
+                                        value={item.type}
+                                        onValueChange={(val) =>
                                             updateItem(item.id, {
-                                                amount: sanitizeAmount(e.target.value),
+                                                type: val as InvoiceItemType,
+                                                description: '',
+                                                amount: '',
                                             })
                                         }
-                                        onFocus={(e) =>
-                                            updateItem(item.id, {
-                                                amount: e.target.value.replace(/,/g, ''),
-                                            })
-                                        }
-                                        onBlur={(e) =>
-                                            updateItem(item.id, {
-                                                amount: formatAmount(e.target.value),
-                                            })
-                                        }
-                                        onKeyDown={(e) => handleAmountKeyDown(e, index)}
-                                        placeholder="0.00"
-                                        className="bg-background h-9 w-full pl-10 text-right text-sm tabular-nums"
-                                        inputMode="decimal"
-                                        autoComplete="off"
-                                    />
+                                    >
+                                        <SelectTrigger className="bg-background h-9 w-full data-[size=default]:h-9">
+                                            <SelectValue placeholder="Package" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value={InvoiceItemType.Plan}>
+                                                Plan
+                                            </SelectItem>
+                                            <SelectItem value={InvoiceItemType.Addon}>
+                                                Add-on
+                                            </SelectItem>
+                                            <SelectItem value={InvoiceItemType.Service}>
+                                                Service
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+
+                                    {item.type === InvoiceItemType.Plan ? (
+                                        <Select
+                                            value={item.description}
+                                            onValueChange={(val) => {
+                                                const plan = plans.find((p) => p.name === val);
+
+                                                updateItem(item.id, {
+                                                    description: val,
+                                                    amount:
+                                                        plan && !plan.isCustomPricing
+                                                            ? formatAmount(
+                                                                String(plan.priceAmount / 100),
+                                                            )
+                                                            : '',
+                                                });
+                                            }}
+                                        >
+                                            <SelectTrigger className="bg-background h-9 w-full data-[size=default]:h-9">
+                                                <SelectValue placeholder="Select a plan" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {plans.map((plan) => (
+                                                    <SelectItem
+                                                        key={plan.publicId}
+                                                        value={plan.name}
+                                                        disabled={plan.publicId !== activePlanId}
+                                                    >
+                                                        {plan.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    ) : (
+                                        <Input
+                                            ref={(el) => {
+                                                descRefs.current[item.id] = el;
+                                            }}
+                                            value={item.description}
+                                            onChange={(e) =>
+                                                updateItem(item.id, {
+                                                    description: e.target.value,
+                                                })
+                                            }
+                                            onKeyDown={(e) => handleDescKeyDown(e, item)}
+                                            placeholder="e.g. Monthly retainer - Growth plan"
+                                            className="bg-background h-9 w-full text-sm"
+                                            autoComplete="off"
+                                        />
+                                    )}
+
+                                    <div className="relative">
+                                        <span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-semibold select-none">
+                                            RM
+                                        </span>
+                                        <Input
+                                            ref={(el) => {
+                                                amountRefs.current[item.id] = el;
+                                            }}
+                                            value={item.amount}
+                                            onChange={(e) =>
+                                                updateItem(item.id, {
+                                                    amount: sanitizeAmount(e.target.value),
+                                                })
+                                            }
+                                            onFocus={(e) => {
+                                                if (isAmountReadOnly) return;
+                                                updateItem(item.id, {
+                                                    amount: e.target.value.replace(/,/g, ''),
+                                                });
+                                            }}
+                                            onBlur={(e) => {
+                                                if (isAmountReadOnly) return;
+                                                updateItem(item.id, {
+                                                    amount: formatAmount(e.target.value),
+                                                });
+                                            }}
+                                            onKeyDown={(e) => handleAmountKeyDown(e, index)}
+                                            placeholder="0.00"
+                                            readOnly={isAmountReadOnly}
+                                            className={cn(
+                                                'bg-background h-9 w-full pl-10 text-right text-sm tabular-nums',
+                                                isAmountReadOnly && 'bg-muted/40 cursor-default',
+                                            )}
+                                            inputMode="decimal"
+                                            autoComplete="off"
+                                        />
+                                    </div>
+
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive size-8 shrink-0 disabled:opacity-30"
+                                        onClick={() => removeItem(item.id)}
+                                        disabled={items.length === 1}
+                                        aria-label={`Remove line item ${index + 1}`}
+                                    >
+                                        <Trash2 className="size-4" />
+                                    </Button>
                                 </div>
 
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive size-8 shrink-0 disabled:opacity-30"
-                                    onClick={() => removeItem(item.id)}
-                                    disabled={items.length === 1}
-                                    aria-label={`Remove line item ${index + 1}`}
-                                >
-                                    <Trash2 className="size-4" />
-                                </Button>
+                                <ShowErrorText
+                                    field={`line.${index}`}
+                                    error={formValidation}
+                                    className="mt-1.5 block pl-9 text-xs font-medium"
+                                />
                             </div>
-
-                            <ShowErrorText
-                                field={`line.${index}`}
-                                error={formValidation}
-                                className="mt-1.5 block pl-9 text-xs font-medium"
-                            />
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             </div>
 

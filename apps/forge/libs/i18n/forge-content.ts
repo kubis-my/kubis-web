@@ -39,6 +39,9 @@ export type ForgeContent = {
         title: string;
         subtitle: string;
         optionalTitle: string;
+        noteTitle: string;
+        note: string;
+        noteCta: string;
     };
     whyItWorks: {
         title: string;
@@ -146,6 +149,9 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             title: 'Add-Ons',
             subtitle: 'Extend your system beyond the subscription scope with scoped add-ons.',
             optionalTitle: 'Optional Add-Ons',
+            noteTitle: 'Have a request that does not fit into these plans?',
+            note: 'Forge can also support one-off engagements for custom or ad-hoc work, with no subscription required. Just let the Kubis team know in your',
+            noteCta: 'project thread.',
         },
         whyItWorks: {
             title: 'Why This Model Works',
@@ -307,6 +313,9 @@ export const FORGE_CONTENT: Record<ForgeLocale, ForgeContent> = {
             title: 'Add-On',
             subtitle: 'Luaskan sistem anda di luar skop langganan melalui add-on berasaskan skop.',
             optionalTitle: 'Add-On Pilihan',
+            noteTitle: 'Ada permintaan yang tidak sesuai dengan pelan ini?',
+            note: 'Forge turut boleh menyokong tugasan sekali sahaja untuk kerja khas atau ad-hoc, tanpa perlu langganan. Beritahu pasukan Kubis dalam',
+            noteCta: 'thread projek anda.',
         },
         whyItWorks: {
             title: 'Kenapa Model Ini Berkesan',

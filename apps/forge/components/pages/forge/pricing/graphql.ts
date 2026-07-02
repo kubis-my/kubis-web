@@ -15,6 +15,7 @@ export const GET_PACKAGE_PLAN: TypedDocumentNode<GetPackagePlanResponse, GetPlan
             plans(locale: $locale) {
                 publicId
                 name
+                priceAmount
                 priceLabel
                 description
                 badge

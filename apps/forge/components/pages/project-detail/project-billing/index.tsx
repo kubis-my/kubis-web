@@ -21,7 +21,7 @@ export default function ProjectBilling() {
     const { authUser } = useAuth();
     const { updateHeaderAction } = useDashboard01();
     const isKubisTeam = useMemo(() => hasSuperAdminAccess(authUser?.companies ?? []), [authUser]);
-    const { initialInvoices } = useProjectDetail();
+    const { project, initialInvoices } = useProjectDetail();
 
     const [getInvoices, { data, loading }] = useLazyQuery(GET_INVOICES_FOR_FORGE);
     const [pageSize, setPageSize] = useState(INVOICE_PAGINATION_SIZE);
@@ -29,7 +29,10 @@ export default function ProjectBilling() {
     const [cursorHistory, setCursorHistory] = useState<(number | null | undefined)[]>([null]);
 
     const goToNextPage = useCallback(() => {
-        if (paginatedInvoices.pageInfo.hasNextPage && paginatedInvoices.pageInfo.endCursor !== null) {
+        if (
+            paginatedInvoices.pageInfo.hasNextPage &&
+            paginatedInvoices.pageInfo.endCursor !== null
+        ) {
             setCursorHistory((prev) => [...prev, paginatedInvoices.pageInfo.endCursor]);
             getInvoices({
                 variables: {
@@ -68,14 +71,14 @@ export default function ProjectBilling() {
     useEffect(() => {
         if (isKubisTeam) {
             updateHeaderAction(
-                <CreateInvoiceDialog />
+                <CreateInvoiceDialog activePlanId={project.subscription?.plan?.publicId} />,
             );
         }
 
         return () => {
             updateHeaderAction(undefined);
         };
-    }, [isKubisTeam]);
+    }, [isKubisTeam, project.subscription?.plan?.publicId]);
 
     return (
         <div className="flex w-full flex-col gap-6 py-2">

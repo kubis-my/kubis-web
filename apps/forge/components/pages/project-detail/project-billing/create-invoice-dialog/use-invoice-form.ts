@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useApolloClient, useMutation } from '@apollo/client/react';
+import { useApolloClient, useMutation, useQuery } from '@apollo/client/react';
 import { addDays, isSameDay, startOfDay } from 'date-fns';
 import { toast } from 'sonner';
 import { InvoiceItemType } from '@repo/commons/types/forge-service-schema.type';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
+import { bySortOrder } from '@repo/commons/utils/pagination-helpers';
+import { GET_PACKAGE_PLAN } from '@/root/components/pages/forge/pricing/graphql';
 import { CREATE_INVOICE_FOR_FORGE } from '../graphql';
 import { DUE_PRESETS, LineItem, ValidationErrorPayload } from './types';
 import { defaultDueAt, newItem, parseMYR, parseAmount, formatMYR } from './utils';
 
-export function useInvoiceForm(onSuccess: () => void) {
+export function useInvoiceForm(onSuccess: () => void, activePlanId?: string) {
     const client = useApolloClient();
     const { projectId } = useParams<{ projectId: string }>();
     const [items, setItems] = useState<LineItem[]>([newItem()]);
@@ -24,6 +26,9 @@ export function useInvoiceForm(onSuccess: () => void) {
     const [createInvoice, { loading }] = useMutation(CREATE_INVOICE_FOR_FORGE, {
         errorPolicy: 'all',
     });
+
+    const { data: planData } = useQuery(GET_PACKAGE_PLAN);
+    const plans = [...(planData?.getPackagePlan?.plans ?? [])].sort(bySortOrder);
 
     const totalCents = items.reduce((sum, item) => sum + parseMYR(item.amount), 0);
     const formattedTotal = formatMYR(totalCents);
@@ -224,6 +229,8 @@ export function useInvoiceForm(onSuccess: () => void) {
 
     return {
         items,
+        plans,
+        activePlanId,
         dueAt,
         calendarOpen,
         setCalendarOpen,

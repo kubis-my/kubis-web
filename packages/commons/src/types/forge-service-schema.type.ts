@@ -22,6 +22,7 @@ export enum AddOnCategory {
 export enum InvoiceItemType {
     Plan = 'Plan',
     Addon = 'Addon',
+    Service = 'Service',
 }
 
 export enum InvoiceStatus {
