@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/shadcn/components/card';
 import { Skeleton } from '@/shadcn/components/skeleton';
 import type { Invoice, InvoiceItem } from '@repo/commons/types/forge-service-schema.type';
-import { ITEM_TYPE_LABEL, formatAmount, formatDate } from './utils';
+import { formatDateTime } from '@repo/commons/utils/date';
+import { ITEM_TYPE_LABEL, formatAmount } from './utils';
 
 interface InvoiceSummaryProps {
     invoice: Invoice | undefined;
@@ -41,7 +42,9 @@ export default function InvoiceSummary({
                         <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
                             <div className="min-w-0">
                                 <p className="text-muted-foreground text-xs">Due date</p>
-                                <p className="mt-0.5 font-medium wrap-break-word">{formatDate(invoice.dueAt)}</p>
+                                <p className="mt-0.5 font-medium wrap-break-word">
+                                    {formatDateTime(invoice.dueAt, { format: 'dd MMM yyyy' })}
+                                </p>
                             </div>
                             {projectName && (
                                 <div className="min-w-0">

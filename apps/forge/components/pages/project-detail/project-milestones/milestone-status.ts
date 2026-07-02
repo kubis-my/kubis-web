@@ -33,5 +33,3 @@ export const STATUS_CONFIG: Record<
             'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
     },
 };
-
-export const dateFormatter = new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' });

@@ -1,8 +1,8 @@
+import { formatDateTime } from '@repo/commons/utils/date';
 import { useProjectDetail } from '../project-detail-container';
 
 export function StatsSection() {
     const { project } = useProjectDetail();
-    const dateFormatter = new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' });
     const activeMilestone =
         project.milestones.find((milestone) => milestone.status === 'In Progress') ??
         project.milestones.find((milestone) => milestone.status === 'Done') ??
@@ -23,7 +23,7 @@ export function StatsSection() {
                         Start Date
                     </p>
                     <p className="mt-1 text-sm font-semibold">
-                        {dateFormatter.format(new Date(project.startAt ?? project.createdAt))}
+                        {formatDateTime(project.startAt ?? project.createdAt, { format: 'dd MMM yyyy' })}
                     </p>
                 </div>
 

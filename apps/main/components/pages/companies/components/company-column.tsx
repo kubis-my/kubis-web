@@ -1,5 +1,6 @@
 import { Company } from '@repo/commons/types/account-service-schema.type';
 import { ColumnDef } from '@tanstack/react-table';
+import { formatDateTime } from '@repo/commons/utils/date';
 import TableCellViewer from './table-cell-viewer';
 
 export const CompanyColumn: ColumnDef<Company>[] = [
@@ -24,18 +25,11 @@ export const CompanyColumn: ColumnDef<Company>[] = [
     {
         accessorKey: 'registeredAt',
         header: 'Registered Date',
-        cell: ({ row }) => {
-            const date = new Date(row.original.createdAt);
-            return (
-                <div className="text-muted-foreground">
-                    {date.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                    })}
-                </div>
-            );
-        },
+        cell: ({ row }) => (
+            <div className="text-muted-foreground">
+                {formatDateTime(row.original.createdAt, { format: 'dd MMM yyyy' })}
+            </div>
+        ),
         size: 140,
     },
     {

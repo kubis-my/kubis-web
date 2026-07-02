@@ -42,6 +42,7 @@ import { UPSERT_CONTEXT_ENVIRONMENT, REVEAL_CONTEXT_ENVIRONMENT_SECRET } from '.
 import { AddContextEntryDialog, EditContextEntryDialog } from './entry-dialogs';
 import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { truncateWord } from '@repo/commons/utils/string';
+import { formatDateTime } from '@repo/commons/utils/date';
 
 export default function ProjectContext() {
     const client = useApolloClient();
@@ -243,10 +244,10 @@ export default function ProjectContext() {
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground text-xs">
-                                            {new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' }).format(new Date(entry.createdAt))}
+                                            {formatDateTime(entry.createdAt, { format: 'dd MMM yyyy' })}
                                         </TableCell>
                                         <TableCell className="text-muted-foreground text-xs">
-                                            {new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' }).format(new Date(entry.updatedAt))}
+                                            {formatDateTime(entry.updatedAt, { format: 'dd MMM yyyy' })}
                                         </TableCell>
                                         <TableCell className="px-4 sm:px-5">
                                             <div className="flex justify-end">

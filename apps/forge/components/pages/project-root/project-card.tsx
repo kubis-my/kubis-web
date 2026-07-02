@@ -2,12 +2,9 @@ import { IconArrowRight } from '@tabler/icons-react';
 import { Badge } from '@repo/shadcn-ui/components/badge';
 import { cn } from '@repo/shadcn-ui/lib/utils';
 import { getInitials } from '@repo/commons/utils/initials';
+import { formatDateTime } from '@repo/commons/utils/date';
 import { type Project } from './types';
 import { StatusBadge } from './status-badge';
-
-function formatDate(value: string) {
-    return new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' }).format(new Date(value));
-}
 
 function ProjectAvatar({ name }: { name: string }) {
     const initials = getInitials(name);
@@ -64,7 +61,7 @@ export function ProjectCard({
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="text-muted-foreground text-xs">
-                            {formatDate(project.startDate)}
+                            {formatDateTime(project.startDate, { format: 'dd MMM yyyy' })}
                         </span>
                         {project.plan && (
                             <Badge

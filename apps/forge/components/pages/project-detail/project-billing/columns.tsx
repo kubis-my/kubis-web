@@ -6,6 +6,7 @@ import { Badge } from '@/shadcn/components/badge';
 import { Button } from '@/shadcn/components/button';
 import { cn } from '@repo/shadcn-ui/lib/utils';
 import { Invoice, InvoiceStatus } from '@repo/commons/types/forge-service-schema.type';
+import { formatDateTime } from '@repo/commons/utils/date';
 
 const STATUS_STYLES: Record<InvoiceStatus, string> = {
     PAID: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800',
@@ -33,21 +34,15 @@ function formatAmount(cents: number) {
     );
 }
 
-function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-}
-
 export function createInvoiceColumns(projectId: string): ColumnDef<Invoice>[] {
     return [
         {
             accessorKey: 'createdAt',
             header: 'Date',
             cell: ({ row }) => (
-                <div className="text-muted-foreground text-sm">{formatDate(row.original.createdAt)}</div>
+                <div className="text-muted-foreground text-sm">
+                    {formatDateTime(row.original.createdAt, { format: 'dd MMM yyyy' })}
+                </div>
             ),
             size: 130,
         },
@@ -77,7 +72,9 @@ export function createInvoiceColumns(projectId: string): ColumnDef<Invoice>[] {
             accessorKey: 'dueAt',
             header: 'Due',
             cell: ({ row }) => (
-                <div className="text-muted-foreground text-sm">{formatDate(row.original.dueAt)}</div>
+                <div className="text-muted-foreground text-sm">
+                    {formatDateTime(row.original.dueAt, { format: 'dd MMM yyyy' })}
+                </div>
             ),
             size: 130,
         },

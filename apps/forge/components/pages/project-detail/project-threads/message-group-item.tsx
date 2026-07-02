@@ -10,7 +10,8 @@ import { IconCornerUpLeft, IconRestore, IconTrash } from '@tabler/icons-react';
 import { richTextToHtml } from '@repo/shadcn-ui/components/rich-text-editor';
 import { ReplyPreview } from './reply-preview';
 import type { Message, MessageGroup } from './types';
-import { deletedAtFormatter, timeFormatter } from './utils';
+import { formatDateTime } from '@repo/commons/utils/date';
+import { timeFormatter } from './utils';
 
 export function MessageGroupItem({
     group,
@@ -85,7 +86,9 @@ export function MessageGroupItem({
                                                 <div className="min-w-0">
                                                     <p className="text-muted-foreground bg-muted/50 rounded-md px-3 py-2 text-sm leading-6 italic">
                                                         This message was deleted on{' '}
-                                                        {deletedAtFormatter.format(msg.deletedAt)}
+                                                        {formatDateTime(msg.deletedAt.toISOString(), {
+                                                            format: 'dd MMM yyyy, hh:mm a',
+                                                        })}
                                                     </p>
                                                 </div>
                                             ) : (

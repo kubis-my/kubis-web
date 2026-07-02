@@ -10,11 +10,3 @@ export const MAX_POLL_DURATION_MS = 60_000;
 export function formatAmount(amount: number) {
     return new Intl.NumberFormat('en-MY', { style: 'currency', currency: 'MYR' }).format(amount);
 }
-
-export function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString('en-MY', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-}

@@ -7,6 +7,7 @@ import { DataTable } from '@repo/shadcn-ui/components/data-table';
 import { ColumnDef, Row } from '@tanstack/react-table';
 import { IconChevronDown, IconChevronRight, IconPencil } from '@tabler/icons-react';
 import { cn } from '@repo/shadcn-ui/lib/utils';
+import { formatDateTime } from '@repo/commons/utils/date';
 import {
     Product,
     ProductBundleItem,
@@ -57,12 +58,6 @@ function formatPrice(price?: number) {
     }).format(price);
 }
 
-function formatDate(value?: string) {
-    if (!value) return '-';
-
-    return new Intl.DateTimeFormat('en-MY', { dateStyle: 'medium' }).format(new Date(value));
-}
-
 function VariantSubRows({ variants }: { variants: ProductVariant[] }) {
     return (
         <div className="border-border/50 border-t px-5 py-2 pl-10">
@@ -98,7 +93,7 @@ function VariantSubRows({ variants }: { variants: ProductVariant[] }) {
                                 {v.attributeValues.join(' / ')}
                             </td>
                             <td className="text-muted-foreground py-2">
-                                {formatDate(v.deletedAt)}
+                                {formatDateTime(v.deletedAt, { format: 'dd MMM yyyy' })}
                             </td>
                         </tr>
                     ))}
@@ -139,7 +134,7 @@ function BundleSubRows({ items }: { items: ProductBundleItem[] }) {
                                 {item.qty}
                             </td>
                             <td className="text-muted-foreground py-2">
-                                {formatDate(item.deletedAt)}
+                                {formatDateTime(item.deletedAt, { format: 'dd MMM yyyy' })}
                             </td>
                         </tr>
                     ))}
@@ -261,7 +256,9 @@ export default function CatalogList() {
             accessorKey: 'archivedAt',
             header: 'Archived At',
             cell: ({ row }) => (
-                <div className="text-muted-foreground">{formatDate(row.original.archivedAt)}</div>
+                <div className="text-muted-foreground">
+                    {formatDateTime(row.original.archivedAt, { format: 'dd MMM yyyy' })}
+                </div>
             ),
             size: 150,
         },

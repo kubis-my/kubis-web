@@ -8,8 +8,9 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from '@/shadcn/components/empty';
+import { formatDateTime } from '@repo/commons/utils/date';
 import type { Milestone } from '../project-detail-container';
-import { STATUS_CONFIG, dateFormatter } from './milestone-status';
+import { STATUS_CONFIG } from './milestone-status';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shadcn/components/dropdown-menu';
 import { Button } from '@/shadcn/components/button';
 import { useAuth } from '@/shadcn/providers/auth-provider';
@@ -70,7 +71,7 @@ export default function MilestoneCard({ milestone, highlightedMilestoneId, highl
                     </span>
                     {milestone.estimatedDate && (
                         <span className="text-muted-foreground text-xs">
-                            Due {dateFormatter.format(new Date(milestone.estimatedDate))}
+                            Due {formatDateTime(milestone.estimatedDate, { format: 'dd MMM yyyy' })}
                         </span>
                     )}
                 </div>
@@ -126,7 +127,7 @@ export default function MilestoneCard({ milestone, highlightedMilestoneId, highl
                         >
                             <div className="sm:pt-1">
                                 <p className="text-muted-foreground text-xs font-medium">
-                                    {dateFormatter.format(new Date(note.date))}
+                                    {formatDateTime(note.date, { format: 'dd MMM yyyy' })}
                                 </p>
                             </div>
 

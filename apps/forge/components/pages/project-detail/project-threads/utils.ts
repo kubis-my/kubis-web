@@ -5,13 +5,6 @@ export const timeFormatter = new Intl.DateTimeFormat('en-MY', {
     hour: '2-digit',
     minute: '2-digit',
 });
-export const deletedAtFormatter = new Intl.DateTimeFormat('en-MY', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-});
 
 export function mapGqlMessage(msg: ThreadMessage, authUserId?: string): Message {
     return {

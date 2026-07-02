@@ -1,6 +1,7 @@
 import { cn } from '@repo/shadcn-ui/lib/utils';
+import { formatDateTime } from '@repo/commons/utils/date';
 import type { ProjectDetail } from '../project-detail-container';
-import { STATUS_CONFIG, dateFormatter } from './milestone-status';
+import { STATUS_CONFIG } from './milestone-status';
 
 type Props = {
     milestones: ProjectDetail['milestones'];
@@ -57,7 +58,7 @@ export default function MilestoneStepper({ milestones }: Props) {
                             </span>
                             {milestone.estimatedDate ? (
                                 <p className="text-muted-foreground text-xs">
-                                    Est. {dateFormatter.format(new Date(milestone.estimatedDate))}
+                                    Est. {formatDateTime(milestone.estimatedDate, { format: 'dd MMM yyyy' })}
                                 </p>
                             ) : null}
                         </div>
