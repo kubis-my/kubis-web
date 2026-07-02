@@ -79,6 +79,23 @@ export function createInvoiceColumns(projectId: string): ColumnDef<Invoice>[] {
             size: 130,
         },
         {
+            accessorKey: 'paidAt',
+            header: 'Paid',
+            cell: ({ row }) => {
+                const { paidAt } = row.original;
+                if (!paidAt) {
+                    return <span className="text-muted-foreground text-sm">-</span>;
+                }
+
+                return (
+                    <div className="text-muted-foreground text-sm">
+                        {formatDateTime(paidAt, { format: 'dd MMM yyyy' })}
+                    </div>
+                );
+            },
+            size: 130,
+        },
+        {
             accessorKey: 'amount',
             header: 'Amount',
             cell: ({ row }) => (
