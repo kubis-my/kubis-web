@@ -8,7 +8,7 @@ import { PaginatedInvoice } from '@repo/commons/types/forge-service-schema.type'
 import { INVOICE_PAGINATION_SIZE } from '@/root/libs/constants';
 import { useProjectDetail } from '../project-detail-container';
 import { GET_INVOICES_FOR_FORGE } from './graphql';
-import { invoiceColumns } from './columns';
+import { createInvoiceColumns } from './columns';
 import { InvoiceSkeletonRow } from './invoice-skeleton-row';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
 import { useAuth } from '@/shadcn/providers/auth-provider';
@@ -87,7 +87,7 @@ export default function ProjectBilling() {
             </div>
 
             <DataTable
-                columns={invoiceColumns}
+                columns={createInvoiceColumns(projectId)}
                 data={paginatedInvoices.data}
                 pageInfo={paginatedInvoices.pageInfo}
                 isLoading={loading}

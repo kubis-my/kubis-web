@@ -8,11 +8,18 @@ const nextConfig: NextConfig = {
         root: path.join(__dirname, '../../'),
     },
     async headers() {
-        return getDefaultHeaders([
-            process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL!,
-            process.env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL!,
-            process.env.NEXT_PUBLIC_AUTH_URL!,
-        ]);
+        return getDefaultHeaders(
+            [
+                process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL!,
+                process.env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL!,
+                process.env.NEXT_PUBLIC_AUTH_URL!,
+                'https://api.stripe.com',
+            ],
+            {
+                scriptSrc: ['https://js.stripe.com'],
+                frameSrc: ['https://js.stripe.com', 'https://hooks.stripe.com'],
+            },
+        );
     },
 };
 

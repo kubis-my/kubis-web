@@ -290,6 +290,7 @@ export interface Invoice {
     paidAt?: Nullable<DateTime>;
     externalBillId: string;
     paymentUrl: string;
+    invoicePdf?: Nullable<string>;
     items: InvoiceItem[];
     createdAt: DateTime;
     updatedAt: DateTime;
@@ -404,6 +405,7 @@ export interface IQuery {
         pagination: InvoicePaginationInput,
     ): PaginatedInvoice | Promise<PaginatedInvoice>;
     getInvoiceForForge(publicId: string): Invoice | Promise<Invoice>;
+    getInvoiceClientSecretForForge(publicId: string): string | Promise<string>;
     getPackagePlan(): PackagePlan | Promise<PackagePlan>;
     getMilestonesForForge(projectPublicId: string): Milestone[] | Promise<Milestone[]>;
     getMilestoneForForge(publicId: string): Milestone | Promise<Milestone>;

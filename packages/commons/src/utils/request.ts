@@ -1,4 +1,7 @@
-export const getDefaultHeaders = (endpoints: string[]) => {
+export const getDefaultHeaders = (
+    endpoints: string[],
+    options?: { scriptSrc?: string[]; frameSrc?: string[] },
+) => {
     const origins = endpoints.filter(Boolean).map((val) => new URL(val).origin);
 
     // Add wss:// variants for https:// origins (for WebSocket connections)
@@ -15,10 +18,19 @@ export const getDefaultHeaders = (endpoints: string[]) => {
     }
 
     // Script CSP - allow inline scripts for Next.js
-    const scriptSrc =
-        process.env.NODE_ENV === 'development'
-            ? "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com" // Dev: Allow for Next.js hot reload
-            : "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com"; // Production: Allow inline scripts
+    const scriptSrc = [
+        "script-src 'self'",
+        process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : '', // Dev: Allow for Next.js hot reload
+        "'unsafe-inline'",
+        'https://static.cloudflareinsights.com',
+        ...(options?.scriptSrc ?? []),
+    ]
+        .filter(Boolean)
+        .join(' ');
+
+    const frameSrc = options?.frameSrc?.length
+        ? `frame-src 'self' ${options.frameSrc.join(' ')}`
+        : null;
 
     return [
         {
@@ -62,10 +74,13 @@ export const getDefaultHeaders = (endpoints: string[]) => {
                         "img-src 'self' data: https:",
                         "font-src 'self' data:",
                         `connect-src ${sources.join(' ')}`,
+                        frameSrc,
                         "frame-ancestors 'self'",
                         "base-uri 'self'",
                         "form-action 'self'",
-                    ].join('; '),
+                    ]
+                        .filter(Boolean)
+                        .join('; '),
                 },
             ],
         },

@@ -18,6 +18,7 @@ export const env = createEnv({
         NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL: z.url(),
         NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL: z.url(),
         NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: z.url(),
+        NEXT_PUBLIC_FORGE_STRIPE_PUBLISHABLE_KEY: z.string().min(1),
     },
     emptyStringAsUndefined: true,
     runtimeEnvStrict: {
@@ -34,5 +35,7 @@ export const env = createEnv({
             process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL,
         NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL: process.env.NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL,
         NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL: process.env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL,
+        NEXT_PUBLIC_FORGE_STRIPE_PUBLISHABLE_KEY:
+            process.env.NEXT_PUBLIC_FORGE_STRIPE_PUBLISHABLE_KEY,
     },
 });
