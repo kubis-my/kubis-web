@@ -25,6 +25,7 @@ export default function InvoiceLineItemsSection({ form }: InvoiceLineItemsSectio
         items,
         plans,
         activePlanId,
+        isOneTimePayOff,
         descRefs,
         amountRefs,
         formValidation,
@@ -94,7 +95,10 @@ export default function InvoiceLineItemsSection({ form }: InvoiceLineItemsSectio
                                             <SelectValue placeholder="Package" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value={InvoiceItemType.Plan}>
+                                            <SelectItem
+                                                value={InvoiceItemType.Plan}
+                                                disabled={isOneTimePayOff}
+                                            >
                                                 Plan
                                             </SelectItem>
                                             <SelectItem value={InvoiceItemType.Addon}>

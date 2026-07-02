@@ -71,14 +71,17 @@ export default function ProjectBilling() {
     useEffect(() => {
         if (isKubisTeam) {
             updateHeaderAction(
-                <CreateInvoiceDialog activePlanId={project.subscription?.plan?.publicId} />,
+                <CreateInvoiceDialog
+                    activePlanId={project.subscription?.plan?.publicId}
+                    isOneTimePayOff={project.projectSettings?.isOneTimePayOff}
+                />,
             );
         }
 
         return () => {
             updateHeaderAction(undefined);
         };
-    }, [isKubisTeam, project.subscription?.plan?.publicId]);
+    }, [isKubisTeam, project.subscription?.plan?.publicId, project.projectSettings?.isOneTimePayOff]);
 
     return (
         <div className="flex w-full flex-col gap-6 py-2">

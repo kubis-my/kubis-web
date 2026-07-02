@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Check, Loader2, Zap } from 'lucide-react';
+import { Check, Info, Loader2, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { Badge } from '@/shadcn/components/badge';
 import { Button } from '@/shadcn/components/button';
 import { Skeleton } from '@/shadcn/components/skeleton';
+import { Switch } from '@/shadcn/components/switch';
+import { Label } from '@/shadcn/components/label';
 import {
     Dialog,
     DialogContent,
@@ -19,14 +21,18 @@ import {
     DialogFooter,
 } from '@/shadcn/components/dialog';
 import { Input } from '@/shadcn/components/input';
-import { Label } from '@/shadcn/components/label';
+import { useAuth } from '@/shadcn/providers/auth-provider';
+import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
 import { ROUTE } from '@/root/libs/constants';
 import { GET_PACKAGE_PLAN } from '@/root/components/pages/forge/pricing/graphql';
 import { bySortOrder } from '@repo/commons/utils/pagination-helpers';
 import { useProjectDetail } from '../project-detail-container';
-import type {
-    UpgradeSubscriptionPlanInput,
-    ProjectSubscription,
+import {
+    SubscriptionStatus,
+    type UpgradeSubscriptionPlanInput,
+    type UpdateProjectSettingVisibilityInput,
+    type ProjectSubscription,
+    type ProjectSetting,
 } from '@repo/commons/types/forge-service-schema.type';
 
 interface UpgradeSubscriptionPlanResponse {
@@ -53,11 +59,34 @@ const UPGRADE_SUBSCRIPTION_PLAN: TypedDocumentNode<
     }
 `;
 
+interface UpdateOneTimePayOffResponse {
+    updateProjectSettingVisibilityForForge: Pick<ProjectSetting, 'publicId' | 'isOneTimePayOff'>;
+}
+
+interface UpdateOneTimePayOffVariables {
+    input: UpdateProjectSettingVisibilityInput;
+}
+
+const UPDATE_ONE_TIME_PAYOFF: TypedDocumentNode<
+    UpdateOneTimePayOffResponse,
+    UpdateOneTimePayOffVariables
+> = gql`
+    mutation UpdateOneTimePayOffForForge($input: UpdateProjectSettingVisibilityInput!) {
+        updateProjectSettingVisibilityForForge(input: $input) {
+            publicId
+            isOneTimePayOff
+        }
+    }
+`;
+
 export default function SubscriptionPlanSection() {
     const { projectId } = useParams<{ projectId: string }>();
     const { project } = useProjectDetail();
+    const { authUser } = useAuth();
+    const isKubisTeam = useMemo(() => hasSuperAdminAccess(authUser?.companies ?? []), [authUser]);
     const { data, loading } = useQuery(GET_PACKAGE_PLAN);
     const [upgradePlan] = useMutation(UPGRADE_SUBSCRIPTION_PLAN);
+    const [updateOneTimePayOff, { loading: updatingOneTimePayOff }] = useMutation(UPDATE_ONE_TIME_PAYOFF);
     const [upgradingPlanId, setUpgradingPlanId] = useState<string | null>(null);
     const [confirmDialog, setConfirmDialog] = useState<{ publicId: string; name: string } | null>(null);
     const [confirmInput, setConfirmInput] = useState('');
@@ -65,6 +94,29 @@ export default function SubscriptionPlanSection() {
     const plans = [...(data?.getPackagePlan?.plans ?? [])].sort(bySortOrder);
     const activePlanId = project.subscription?.plan?.publicId;
     const activePlanSortOrder = plans.find((p) => p.publicId === activePlanId)?.sortOrder ?? -Infinity;
+    const isOneTimePayOff = project.projectSettings?.isOneTimePayOff ?? false;
+
+    const toggleOneTimePayOff = async () => {
+        try {
+            await updateOneTimePayOff({
+                variables: {
+                    input: {
+                        projectPublicId: project.id,
+                        visibility: {
+                            brief: project.projectSettings?.visibility?.brief,
+                            milestones: project.projectSettings?.visibility?.milestones,
+                            threads: project.projectSettings?.visibility?.threads,
+                            devNotes: project.projectSettings?.visibility?.devNotes,
+                        },
+                        isOneTimePayOff: !isOneTimePayOff,
+                    },
+                },
+                refetchQueries: ['GetProjectForForge'],
+            });
+        } catch {
+            toast.error('Failed to update billing mode.', { position: 'top-center' });
+        }
+    };
 
     const openConfirmDialog = (planPublicId: string, planName: string) => {
         setConfirmInput('');
@@ -97,12 +149,39 @@ export default function SubscriptionPlanSection() {
 
     return (
         <section className="bg-card overflow-hidden rounded-xl border shadow-sm">
-            <div className="bg-muted/30 border-b px-4 py-3 sm:px-5">
-                <h2 className="text-base font-semibold">Subscription Plan</h2>
-                <p className="text-muted-foreground mt-0.5 text-sm">
-                    Your current plan and available upgrades.
-                </p>
+            <div className="bg-muted/30 flex items-start justify-between gap-4 border-b px-4 py-3 sm:px-5">
+                <div>
+                    <h2 className="text-base font-semibold">Subscription Plan</h2>
+                    <p className="text-muted-foreground mt-0.5 text-sm">
+                        {isOneTimePayOff
+                            ? 'This project is billed via one-time invoices. Plan changes are disabled.'
+                            : 'Your current plan and available upgrades.'}
+                    </p>
+                </div>
+
+                {isKubisTeam && (
+                    <div className="flex shrink-0 items-center gap-2 mt-auto">
+                        <Label htmlFor="one-time-payoff" className="text-muted-foreground cursor-pointer text-xs">
+                            One-time pay-off
+                        </Label>
+                        <Switch
+                            id="one-time-payoff"
+                            checked={isOneTimePayOff}
+                            onCheckedChange={toggleOneTimePayOff}
+                            disabled={updatingOneTimePayOff}
+                        />
+                    </div>
+                )}
             </div>
+
+            {!isOneTimePayOff && project.subscription?.status === SubscriptionStatus.PAUSED && (
+                <div className="flex items-start gap-2 border-b bg-blue-50 px-4 py-2.5 dark:bg-blue-950/30 sm:px-5">
+                    <Info className="mt-0.5 size-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                    <p className="text-xs text-blue-700 dark:text-blue-400">
+                        Your subscription is currently paused. Kubis won&apos;t charge you until your project reaches Production status.
+                    </p>
+                </div>
+            )}
 
             <div className="grid gap-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-4">
                 {loading
@@ -148,7 +227,7 @@ export default function SubscriptionPlanSection() {
                                     ))}
                                 </ul>
 
-                                <div className="mt-auto">
+                                {!isOneTimePayOff && <div className="mt-auto">
                                     {isActive ? (
                                         <Button variant="outline" size="sm" className="w-full" disabled>
                                             Active
@@ -162,7 +241,7 @@ export default function SubscriptionPlanSection() {
                                             size="sm"
                                             className="w-full gap-1.5"
                                             variant="outline"
-                                            disabled={isUpgrading || upgradingPlanId !== null}
+                                            disabled={isUpgrading || upgradingPlanId !== null || isOneTimePayOff}
                                             onClick={() => openConfirmDialog(plan.publicId, plan.name)}
                                         >
                                             {isUpgrading ? (
@@ -178,7 +257,7 @@ export default function SubscriptionPlanSection() {
                                             )}
                                         </Button>
                                     )}
-                                </div>
+                                </div>}
                             </div>
                         );
                     })

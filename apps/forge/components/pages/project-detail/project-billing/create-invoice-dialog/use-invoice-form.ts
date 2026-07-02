@@ -11,7 +11,11 @@ import { CREATE_INVOICE_FOR_FORGE } from '../graphql';
 import { DUE_PRESETS, LineItem, ValidationErrorPayload } from './types';
 import { defaultDueAt, newItem, parseMYR, parseAmount, formatMYR } from './utils';
 
-export function useInvoiceForm(onSuccess: () => void, activePlanId?: string) {
+export function useInvoiceForm(
+    onSuccess: () => void,
+    activePlanId?: string,
+    isOneTimePayOff?: boolean,
+) {
     const client = useApolloClient();
     const { projectId } = useParams<{ projectId: string }>();
     const [items, setItems] = useState<LineItem[]>([newItem()]);
@@ -231,6 +235,7 @@ export function useInvoiceForm(onSuccess: () => void, activePlanId?: string) {
         items,
         plans,
         activePlanId,
+        isOneTimePayOff,
         dueAt,
         calendarOpen,
         setCalendarOpen,

@@ -142,6 +142,7 @@ const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = 
                 publicId
                 stagingUrl
                 productionUrl
+                isOneTimePayOff
                 visibility {
                     brief
                     milestones

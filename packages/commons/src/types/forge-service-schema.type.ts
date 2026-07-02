@@ -117,6 +117,7 @@ export interface UpgradeSubscriptionPlanInput {
 export interface UpdateProjectSettingVisibilityInput {
     projectPublicId: string;
     visibility: ProjectVisibilityInput;
+    isOneTimePayOff?: Nullable<boolean>;
 }
 
 export interface ProjectVisibilityInput {
@@ -256,6 +257,7 @@ export interface ProjectSetting {
     visibility: ProjectVisibility;
     environment: EnvironmentEntry[];
     userPreference?: Nullable<ProjectNotificationPreference>;
+    isOneTimePayOff: boolean;
     createdAt: DateTime;
     updatedAt: DateTime;
 }

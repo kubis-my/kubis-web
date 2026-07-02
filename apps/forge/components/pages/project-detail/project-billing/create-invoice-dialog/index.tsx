@@ -20,11 +20,12 @@ import InvoicePreviewPanel from './preview-panel';
 
 interface CreateInvoiceDialogProps {
     activePlanId?: string;
+    isOneTimePayOff?: boolean;
 }
 
-export default function CreateInvoiceDialog({ activePlanId }: CreateInvoiceDialogProps) {
+export default function CreateInvoiceDialog({ activePlanId, isOneTimePayOff }: CreateInvoiceDialogProps) {
     const [open, setOpen] = useState(false);
-    const form = useInvoiceForm(() => setOpen(false), activePlanId);
+    const form = useInvoiceForm(() => setOpen(false), activePlanId, isOneTimePayOff);
     const { loading, resetForm, handleSubmit, handleFormKeyDown } = form;
 
     return (
