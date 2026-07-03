@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { scrollToSection } from '@repo/commons/utils/dom';
+import KubisSvg from '@repo/shadcn-ui/custom-components/kubis-svg';
 import { FORGE_CONTENT, type ForgeLocale } from '@/root/libs/i18n/forge-content';
 
 export default function Footer() {
@@ -13,13 +14,18 @@ export default function Footer() {
     const { footer } = FORGE_CONTENT[locale];
 
     return (
-        <footer className="bg-gray-900 dark:bg-gray-950">
+        <footer className="bg-gray-950">
             <div className="h-px bg-linear-to-r from-transparent via-[#4CAF50]/50 to-transparent" />
 
             <div className="mx-auto max-w-6xl px-6">
-                <div className="grid grid-cols-1 gap-12 py-16 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-10 py-14 sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr] md:gap-12">
                     <div className="flex flex-col gap-4">
-                        <span className="text-lg font-semibold text-white">Kubis Forge</span>
+                        <span className="flex items-center gap-2">
+                            <KubisSvg className="h-6 w-6" />
+                            <span className="text-lg font-semibold tracking-tight text-white">
+                                Kubis Forge
+                            </span>
+                        </span>
                         <p className="max-w-xs text-sm leading-relaxed text-gray-400">
                             {footer.description}
                         </p>
@@ -89,13 +95,9 @@ export default function Footer() {
                     </div>
                 </div>
 
-                <div className="py-6 text-xs text-gray-600 flex justify-between">
-                    <div>
-                        © {new Date().getFullYear()} Kubis Forge
-                    </div>
-                    <div>
-                        All rights reserved
-                    </div>
+                <div className="flex flex-col gap-2 border-t border-gray-800/80 py-6 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                    <div>© {new Date().getFullYear()} Kubis Forge</div>
+                    <div>Part of the Kubis ecosystem · All rights reserved</div>
                 </div>
             </div>
         </footer>

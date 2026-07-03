@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Footer from '@/component/footer';
 import Hero from '@/component/pages/forge/hero';
+import PainPoints from '@/component/pages/forge/pain-points';
+import IdealClients from '@/component/pages/forge/ideal-clients';
 import HowItWorks from '@/component/pages/forge/how-it-works';
 import MvpScope from '@/component/pages/forge/mvp-scope';
 import WhyItWorks from '@/component/pages/forge/why-it-works';
-import IdealClients from '@/component/pages/forge/ideal-clients';
 import Faq from '@/component/pages/forge/faq';
 import FinalCta from '@/component/pages/forge/final-cta';
 import { FORGE_CONTENT, resolveForgeLocale } from '@/root/libs/i18n/forge-content';
@@ -64,10 +65,11 @@ export default async function ForgePage(props: { searchParams: Promise<{ lang?: 
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             <Hero content={content.hero} />
+            <PainPoints content={content.painPoints} />
+            <IdealClients content={content.idealClients} primaryCta={content.hero.primaryCta} />
             <HowItWorks content={content.howItWorks} />
             <MvpScope content={content.mvpScope} />
             <WhyItWorks content={content.whyItWorks} />
-            <IdealClients content={content.idealClients} />
             <Faq content={content.faq} />
             <FinalCta content={content.finalCta} />
             <Footer />
