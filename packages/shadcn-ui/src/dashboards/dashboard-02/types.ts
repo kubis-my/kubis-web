@@ -6,15 +6,15 @@ export type DashboardContextType = {
     user: User | undefined;
     workspaces: Workspace[];
     navMain: NavMainItem[];
-    projects: Project[];
     breadcrumbList: BreadcrumbItem[];
     headerAction: React.ReactNode;
+    showWorkspaceSwitcher: boolean;
     updateUser: Dispatch<SetStateAction<User | undefined>>;
     updateWorkspaces: Dispatch<SetStateAction<Workspace[]>>;
     updateNavMain: Dispatch<SetStateAction<NavMainItem[]>>;
-    updateProjects: Dispatch<SetStateAction<Project[]>>;
     updateBreadcrumbList: Dispatch<SetStateAction<BreadcrumbItem[]>>;
     updateHeaderAction: Dispatch<SetStateAction<React.ReactNode>>;
+    updateShowWorkspaceSwitcher: Dispatch<SetStateAction<boolean>>;
 };
 
 // Generic switcher entity — represents a team, company, project, etc.
@@ -23,6 +23,8 @@ export type Workspace = {
     name: string;
     logo: LucideIcon;
     subtitle: string;
+    // When set, the switcher item navigates here and derives its active state from the route.
+    url?: string;
 };
 
 export type NavMainItem = {
@@ -31,6 +33,7 @@ export type NavMainItem = {
     url: string;
     icon?: LucideIcon;
     isActive?: boolean;
+    badge?: React.ReactNode;
     items?: {
         id: string;
         title: string;
@@ -38,41 +41,38 @@ export type NavMainItem = {
     }[];
 };
 
-export type Project = {
-    id: string;
-    name: string;
-    url: string;
-    icon: LucideIcon;
-};
-
 export type DashboardProviderProps = {
     workspaces: Workspace[];
     navMain: NavMainItem[];
-    projects: Project[];
     userCardItems: NavUserItem[];
     user?: User;
+    appName?: string;
+    switcherCta?: React.ReactNode;
+    switcherLabel?: string;
     children: React.ReactNode;
 };
 
 export type AppSidebarProps = {
     workspaces: Workspace[];
     navMain: NavMainItem[];
-    projects: Project[];
+    navMainLabel?: string;
     user?: User;
+    appName?: string;
     navigationUserItems: NavUserItem[];
+    switcherCta?: React.ReactNode;
+    switcherLabel?: string;
+    showWorkspaceSwitcher?: boolean;
 } & React.ComponentProps<typeof Sidebar>;
 
 export type WorkspaceSwitcherProps = {
     workspaces: Workspace[];
     cta?: React.ReactNode;
+    label?: string;
 };
 
 export type NavMainProps = {
     items: NavMainItem[];
-};
-
-export type NavProjectsProps = {
-    projects: Project[];
+    label?: string;
 };
 
 export type NavUserItem = {

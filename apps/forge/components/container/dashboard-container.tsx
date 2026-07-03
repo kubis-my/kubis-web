@@ -1,16 +1,18 @@
 'use client';
 
-import { getNavigationList, getProjectNavigationList } from '@/root/libs/dashboard-data';
-import { ROUTE } from '@/root/libs/constants';
-import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { getProjectNavMain, getProjectsNavMain } from '@/root/libs/dashboard-data';
+import { PROJECT_PAGINATION_SIZE, ROUTE, STATUS_LABEL } from '@/root/libs/constants';
+import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { useParams, usePathname } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Credential } from '@repo/commons/types/account-service-schema.type';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { SocketRoomEvent, ThreadEvent } from '@repo/commons/constant/web-socket';
 import { useSocket } from '@/shadcn/providers/socket-provider';
+import { Folder } from 'lucide-react';
+import { GET_PROJECTS } from '@/root/components/pages/project-root/projects-container';
 
 interface GetProjectUnreadResponse {
     getProjectForForge: { publicId: string; userOverview: { unreadCount: number } };
@@ -37,7 +39,7 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     const params = useParams();
 
     const { authUser } = useAuth();
-    const { updateUser, updateNavigationList } = useDashboard01();
+    const { updateUser, updateNavMain, updateWorkspaces, updateShowWorkspaceSwitcher } = useDashboard02();
 
     const projectId = params?.projectId as string | undefined;
 
@@ -55,6 +57,28 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     });
 
     const unreadCount = unreadData?.getProjectForForge?.userOverview?.unreadCount ?? 0;
+
+    const { data: projectsData } = useQuery(GET_PROJECTS, {
+        variables: { pagination: { take: PROJECT_PAGINATION_SIZE } },
+        skip: !projectId,
+    });
+
+    const workspaces = useMemo(() => {
+        return (projectsData?.getProjectsForForge.data ?? [])
+            .slice(0, 5)
+            .filter(Boolean)
+            .map((project) => ({
+                id: project.publicId,
+                name: project.name,
+                logo: Folder,
+                subtitle: STATUS_LABEL[project.status] ?? '',
+                url: ROUTE.FORGE.PROJECT_DETAIL(project.publicId),
+            }));
+    }, [projectsData]);
+
+    useEffect(() => {
+        updateWorkspaces(workspaces);
+    }, [workspaces, updateWorkspaces]);
 
     useEffect(() => {
         if (!isConnected || !projectId) return;
@@ -90,24 +114,31 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     }, [authUser, updateUser]);
 
     useEffect(() => {
-        const navList = projectId
-            ? getProjectNavigationList(projectId, unreadCount)
-            : getNavigationList();
+        updateShowWorkspaceSwitcher(!!projectId);
 
-        updateNavigationList(() =>
-            navList.map((group) => ({
-                ...group,
-                items: group.items.map((item) => ({
+        if (!projectId) {
+            updateNavMain(
+                getProjectsNavMain().map((item) => ({
                     ...item,
-                    isActive: projectId
-                        ? currentPathname === item.url
-                        : item.url === ROUTE.FORGE.HOME
-                            ? currentPathname === item.url
-                            : currentPathname.startsWith(item.url),
+                    isActive: currentPathname === item.url,
                 })),
+            );
+            return;
+        }
+
+        const overviewUrl = ROUTE.FORGE.PROJECT_DETAIL(projectId);
+
+        updateNavMain(
+            getProjectNavMain(projectId, unreadCount).map((item) => ({
+                ...item,
+                isActive:
+                    item.url === overviewUrl
+                        ? currentPathname === item.url
+                        : currentPathname === item.url ||
+                        currentPathname.startsWith(`${item.url}/`),
             })),
         );
-    }, [projectId, currentPathname, unreadCount, updateNavigationList]);
+    }, [projectId, currentPathname, unreadCount, updateNavMain, updateShowWorkspaceSwitcher]);
 
     return children;
 }

@@ -12,14 +12,14 @@ import { createInvoiceColumns } from './columns';
 import { InvoiceSkeletonRow } from './invoice-skeleton-row';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
 import { useAuth } from '@/shadcn/providers/auth-provider';
-import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 import CreateInvoiceDialog from './create-invoice-dialog';
 
 export default function ProjectBilling() {
     const router = useRouter();
     const { projectId } = useParams<{ projectId: string }>();
     const { authUser } = useAuth();
-    const { updateHeaderAction } = useDashboard01();
+    const { updateHeaderAction } = useDashboard02();
     const isKubisTeam = useMemo(() => hasSuperAdminAccess(authUser?.companies ?? []), [authUser]);
     const { project, initialInvoices } = useProjectDetail();
 

@@ -31,7 +31,7 @@ import {
     TableRow,
 } from '@/shadcn/components/table';
 import { useAuth } from '@/shadcn/providers/auth-provider';
-import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
 import {
     ProjectContextValueType,
@@ -48,7 +48,7 @@ export default function ProjectContext() {
     const client = useApolloClient();
     const { project } = useProjectDetail();
     const { authUser } = useAuth();
-    const { updateHeaderAction } = useDashboard01();
+    const { updateHeaderAction } = useDashboard02();
     const isKubisTeam = useMemo(() => hasSuperAdminAccess(authUser?.companies ?? []), [authUser]);
 
     const entries = project.projectSettings?.environment ?? [];

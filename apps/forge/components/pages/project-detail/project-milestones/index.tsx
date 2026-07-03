@@ -6,14 +6,14 @@ import MilestoneCard from './milestone-card';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { useEffect } from 'react';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
-import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
+import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 import { CreateMilestoneDialog } from './create-milestone-dialog';
 import { useSearchParams } from 'next/navigation';
 
 export default function ProjectMilestones() {
     const { project } = useProjectDetail();
     const { milestones } = project;
-    const { updateHeaderAction } = useDashboard01();
+    const { updateHeaderAction } = useDashboard02();
     const auth = useAuth();
     const searchParams = useSearchParams();
     const highlightedMilestoneId = searchParams.get('id') ?? undefined;

@@ -1,3 +1,5 @@
+import { ProjectStatus } from '@repo/commons/types/forge-service-schema.type';
+
 export const ROUTE = {
     FORGE: {
         HOME: '/projects',
@@ -11,6 +13,16 @@ export const ROUTE = {
     },
 };
 
-export const PROJECT_PAGINATION_SIZE = 50;
+export const PROJECT_PAGINATION_SIZE = 10;
 export const THREAD_PAGINATION_SIZE = 100;
 export const INVOICE_PAGINATION_SIZE = 10;
+
+export const STATUS_LABEL: Record<ProjectStatus, string> = {
+    PENDING_REVIEW: 'Pending Review',
+    DISCOVERY: 'Discovery',
+    MVP_BUILD: 'MVP Build',
+    VALIDATION: 'Validation',
+    PRODUCTION: 'Production',
+    ON_HOLD: 'On Hold',
+    CANCELLED: 'Cancelled',
+};

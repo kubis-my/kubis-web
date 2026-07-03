@@ -3,6 +3,22 @@ import { Observable } from '@apollo/client/utilities';
 import { env } from '../constant/env';
 import { getToken, ACCESS_TOKEN_KEY } from '../utils/storage-helpers';
 
+declare module '@apollo/client' {
+    namespace ApolloClient {
+        namespace DeclareDefaultOptions {
+            interface WatchQuery {
+                errorPolicy: 'all';
+            }
+            interface Query {
+                errorPolicy: 'all';
+            }
+            interface Mutate {
+                errorPolicy: 'all';
+            }
+        }
+    }
+}
+
 const apolloClients: Map<string, ApolloClient> = new Map();
 
 function createApolloClient(uri: string, typePolicies: TypePolicies = {}) {
@@ -77,6 +93,16 @@ export function getForgeApolloClient() {
     return getOrCreateClient('forge', env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL, {
         Project: { keyFields: ['publicId'] },
         ProjectSetting: { keyFields: ['publicId'] },
+        ProjectSubscription: { keyFields: ['publicId'] },
+        Plan: { keyFields: ['publicId'] },
+        AddOn: { keyFields: ['publicId'] },
+        Query: {
+            fields: {
+                getProjectsForForge: {
+                    merge: false,
+                },
+            },
+        },
     });
 }
 

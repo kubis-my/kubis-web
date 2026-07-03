@@ -9,7 +9,6 @@ import {
     DashboardContextType,
     DashboardProviderProps,
     NavMainItem,
-    Project,
     User,
     Workspace,
 } from './types';
@@ -19,27 +18,27 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 export function DashboardProvider({ children, ...props }: DashboardProviderProps) {
     const [workspaces, setWorkspaces] = useState<Workspace[]>(props.workspaces);
     const [navMain, setNavMain] = useState<NavMainItem[]>(props.navMain);
-    const [projects, setProjects] = useState<Project[]>(props.projects);
     const [user, setUser] = useState<User | undefined>(props.user);
     const [breadcrumbList, setBreadcrumbList] = useState<BreadcrumbItem[]>([]);
     const [headerAction, setHeaderAction] = useState<React.ReactNode>(undefined);
+    const [showWorkspaceSwitcher, setShowWorkspaceSwitcher] = useState(true);
 
     const contextValue = useMemo(
         () => ({
             user,
             workspaces,
             navMain,
-            projects,
             breadcrumbList,
             headerAction,
+            showWorkspaceSwitcher,
             updateUser: setUser,
             updateWorkspaces: setWorkspaces,
             updateNavMain: setNavMain,
-            updateProjects: setProjects,
             updateBreadcrumbList: setBreadcrumbList,
             updateHeaderAction: setHeaderAction,
+            updateShowWorkspaceSwitcher: setShowWorkspaceSwitcher,
         }),
-        [user, workspaces, navMain, projects, breadcrumbList, headerAction],
+        [user, workspaces, navMain, breadcrumbList, headerAction, showWorkspaceSwitcher],
     );
 
     return (
@@ -57,9 +56,12 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
                     variant="inset"
                     workspaces={workspaces}
                     navMain={navMain}
-                    projects={projects}
                     navigationUserItems={props.userCardItems}
                     user={user}
+                    appName={props.appName}
+                    switcherCta={props.switcherCta}
+                    switcherLabel={props.switcherLabel}
+                    showWorkspaceSwitcher={showWorkspaceSwitcher}
                 />
                 <SidebarInset>
                     <SiteHeader items={breadcrumbList} action={headerAction} />

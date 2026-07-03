@@ -1,27 +1,24 @@
 'use client';
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
-import { useAuth } from '@/shadcn/providers/auth-provider';
-import {
-    Project as GqlProject,
-    ProjectPaginationInput,
-    ProjectStatus as GqlProjectStatus,
-} from '@repo/commons/types/forge-service-schema.type';
+import { Button } from '@repo/shadcn-ui/components/button';
+import { IconPlus } from '@tabler/icons-react';
+import { PaginatedProject, ProjectPaginationInput } from '@repo/commons/types/forge-service-schema.type';
 import { PROJECT_PAGINATION_SIZE, ROUTE } from '@/root/libs/constants';
-import { type Project, type ProjectStatus } from './types';
+import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 
 interface GetProjectsResponse {
-    getProjectsForForge: { data: GqlProject[] };
+    getProjectsForForge: PaginatedProject;
 }
 
 interface GetProjectsVariables {
     pagination: ProjectPaginationInput;
 }
 
-const GET_PROJECTS: TypedDocumentNode<GetProjectsResponse, GetProjectsVariables> = gql`
+export const GET_PROJECTS: TypedDocumentNode<GetProjectsResponse, GetProjectsVariables> = gql`
     query GetProjectsForForge($pagination: ProjectPaginationInput!) {
         getProjectsForForge(pagination: $pagination) {
             data {
@@ -33,24 +30,32 @@ const GET_PROJECTS: TypedDocumentNode<GetProjectsResponse, GetProjectsVariables>
                 userOverview {
                     unreadCount
                 }
+                subscription {
+                    publicId
+                    plan {
+                        publicId
+                        name
+                    }
+                }
+                projectSettings {
+                    publicId
+                    isOneTimePayOff
+                }
+            }
+            pageInfo {
+                endCursor
+                hasNextPage
+                total
+                currentPage
+                totalPages
             }
         }
     }
 `;
 
-const STATUS_MAP: Record<GqlProjectStatus, ProjectStatus> = {
-    PENDING_REVIEW: 'Pending Review',
-    DISCOVERY: 'Discovery',
-    MVP_BUILD: 'MVP Build',
-    VALIDATION: 'Validation',
-    PRODUCTION: 'Production',
-    ON_HOLD: 'On Hold',
-    CANCELLED: 'Cancelled',
-};
-
 type ProjectsContextType = {
-    projects: Project[];
-    loading: boolean;
+    paginatedProjects?: PaginatedProject;
+    isFetchingProjects: boolean;
     onOpenProject: (id: string) => void;
     onNewProject: () => void;
 };
@@ -69,28 +74,11 @@ export function useProjects() {
 
 export default function ProjectsContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const router = useRouter();
-    const { authUser } = useAuth();
+    const { updateBreadcrumbList, updateHeaderAction } = useDashboard02();
 
-    const { data, loading } = useQuery(GET_PROJECTS, {
+    const { data, loading: isFetchingProjects } = useQuery(GET_PROJECTS, {
         variables: { pagination: { take: PROJECT_PAGINATION_SIZE } },
     });
-
-    const companyNameMap = useMemo(() => {
-        const map = new Map<string, string>();
-        (authUser?.companies ?? []).forEach((c) => map.set(c.publicId, c.name));
-        return map;
-    }, [authUser]);
-
-    const projects = useMemo((): Project[] => {
-        return (data?.getProjectsForForge.data ?? []).map((p) => ({
-            id: p.publicId,
-            name: p.name,
-            status: STATUS_MAP[p.status],
-            clientName: companyNameMap.get(p.companyIds[0] ?? '') ?? p.companyIds[0] ?? '',
-            startDate: p.createdAt,
-            unreadCount: p.userOverview?.unreadCount ?? 0,
-        }));
-    }, [data, companyNameMap]);
 
     function onOpenProject(id: string) {
         router.push(ROUTE.FORGE.PROJECT_DETAIL(id));
@@ -100,9 +88,28 @@ export default function ProjectsContainer({ children }: Readonly<{ children: Rea
         router.push(ROUTE.FORGE.PROJECT_NEW);
     }
 
-    return (
-        <ProjectsContext.Provider value={{ projects, loading, onOpenProject, onNewProject }}>
-            {children}
-        </ProjectsContext.Provider>
-    );
+    useEffect(() => {
+        updateBreadcrumbList([{ name: 'Projects' }]);
+        updateHeaderAction(
+            <Button variant="ghost" size="icon" className="size-7" onClick={onNewProject}>
+                <IconPlus />
+            </Button>,
+        );
+
+        return () => {
+            updateBreadcrumbList([]);
+            updateHeaderAction(undefined);
+        };
+    }, [updateBreadcrumbList, updateHeaderAction]);
+
+    const contextValue = useMemo(() => {
+        return {
+            paginatedProjects: data?.getProjectsForForge,
+            isFetchingProjects,
+            onOpenProject,
+            onNewProject,
+        }
+    }, [data, isFetchingProjects]);
+
+    return <ProjectsContext.Provider value={contextValue}>{children}</ProjectsContext.Provider>;
 }

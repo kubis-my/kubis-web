@@ -1,103 +1,101 @@
 'use client';
 
-import { NavigationItem, NavUserItem } from '@/shadcn/dashboards/dashboard-01/types';
+import Link from 'next/link';
+import { NavMainItem, NavUserItem } from '@/shadcn/dashboards/dashboard-02/types';
 import {
-    IconHome,
     IconLogout,
     IconHelp,
     IconUser,
     IconApps,
-    IconFileDescription,
-    IconFlag,
-    IconMessages,
-    IconSettings,
-    IconStack,
-    IconReceipt,
 } from '@tabler/icons-react';
+import {
+    FileText,
+    Flag,
+    Layers,
+    LayoutGrid,
+    MessageSquare,
+    Receipt,
+    Settings,
+} from 'lucide-react';
 import { ROUTE } from './constants';
 import { env } from '@repo/commons/constant/env';
 import { authClient } from '@repo/commons/lib/auth-client';
 import { getToken, clearAllTokens, REFRESH_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 
-export const APP_NAME = 'Forge Console';
-
-export function getNavigationList(): NavigationItem[] {
-    return [
-        {
-            id: 'app',
-            items: [
-                {
-                    id: 'app-home',
-                    title: 'Home',
-                    url: ROUTE.FORGE.HOME,
-                    icon: <IconHome />,
-                    isActive: false,
-                },
-            ],
-        },
-    ];
-}
-
-export function getProjectNavigationList(projectId: string, unreadCount = 0): NavigationItem[] {
+export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainItem[] {
     const threadsUnreadLabel = unreadCount > 99 ? '99+' : String(unreadCount);
 
     return [
         {
-            id: 'app',
-            items: [
-                {
-                    id: 'project-overview',
-                    title: 'Overview',
-                    url: ROUTE.FORGE.PROJECT_DETAIL(projectId),
-                    icon: <IconFileDescription />,
-                    isActive: false,
-                },
-                {
-                    id: 'project-milestones',
-                    title: 'Milestones',
-                    url: ROUTE.FORGE.PROJECT_MILESTONES(projectId),
-                    icon: <IconFlag />,
-                    isActive: false,
-                },
-                {
-                    id: 'project-threads',
-                    title: 'Threads',
-                    url: ROUTE.FORGE.PROJECT_THREADS(projectId),
-                    icon: <IconMessages />,
-                    actionButton:
-                        unreadCount > 0 ? (
-                            <span className="bg-primary text-primary-foreground flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] leading-none font-semibold tabular-nums shadow-sm group-data-[collapsible=icon]:opacity-0">
-                                {threadsUnreadLabel}
-                                <span className="sr-only">unread threads</span>
-                            </span>
-                        ) : null,
-                    isActive: false,
-                },
-                {
-                    id: 'project-context',
-                    title: 'Context',
-                    url: ROUTE.FORGE.PROJECT_CONTEXT(projectId),
-                    icon: <IconStack />,
-                    isActive: false,
-                },
-                {
-                    id: 'project-billing',
-                    title: 'Billing',
-                    url: ROUTE.FORGE.PROJECT_BILLING(projectId),
-                    icon: <IconReceipt />,
-                    isActive: false,
-                },
-                {
-                    id: 'project-settings',
-                    title: 'Settings',
-                    url: ROUTE.FORGE.PROJECT_SETTINGS(projectId),
-                    icon: <IconSettings />,
-                    isActive: false,
-                },
-            ],
+            id: 'project-overview',
+            title: 'Overview',
+            url: ROUTE.FORGE.PROJECT_DETAIL(projectId),
+            icon: FileText,
+            isActive: false,
+        },
+        {
+            id: 'project-milestones',
+            title: 'Milestones',
+            url: ROUTE.FORGE.PROJECT_MILESTONES(projectId),
+            icon: Flag,
+            isActive: false,
+        },
+        {
+            id: 'project-threads',
+            title: 'Threads',
+            url: ROUTE.FORGE.PROJECT_THREADS(projectId),
+            icon: MessageSquare,
+            badge:
+                unreadCount > 0 ? (
+                    <span className="bg-primary text-primary-foreground flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] leading-none font-semibold tabular-nums shadow-sm group-data-[collapsible=icon]:opacity-0">
+                        {threadsUnreadLabel}
+                        <span className="sr-only">unread threads</span>
+                    </span>
+                ) : undefined,
+            isActive: false,
+        },
+        {
+            id: 'project-context',
+            title: 'Context',
+            url: ROUTE.FORGE.PROJECT_CONTEXT(projectId),
+            icon: Layers,
+            isActive: false,
+        },
+        {
+            id: 'project-billing',
+            title: 'Billing',
+            url: ROUTE.FORGE.PROJECT_BILLING(projectId),
+            icon: Receipt,
+            isActive: false,
+        },
+        {
+            id: 'project-settings',
+            title: 'Settings',
+            url: ROUTE.FORGE.PROJECT_SETTINGS(projectId),
+            icon: Settings,
+            isActive: false,
         },
     ];
 }
+
+export function getProjectsNavMain(): NavMainItem[] {
+    return [
+        {
+            id: 'projects',
+            title: 'Projects',
+            url: ROUTE.FORGE.HOME,
+            icon: LayoutGrid,
+            isActive: false,
+        },
+    ];
+}
+
+export const showAllProjectsCta = (
+    <Link href={ROUTE.FORGE.HOME} className="text-muted-foreground flex w-full items-center gap-2">
+        <LayoutGrid className="size-4 shrink-0" />
+        <span>Show all projects</span>
+    </Link>
+);
 
 export const navigationUserItemList: NavUserItem[] = [
     {

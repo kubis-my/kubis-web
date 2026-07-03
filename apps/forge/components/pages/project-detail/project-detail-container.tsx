@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { useAuth } from '@/shadcn/providers/auth-provider';
-import { useDashboard01 } from '@/shadcn/dashboards/dashboard-01';
 import { toast } from 'sonner';
 import {
     MilestoneStatus as GqlMilestoneStatus,
@@ -244,7 +243,6 @@ export default function ProjectDetailContainer({
 }: Readonly<{ children: React.ReactNode }>) {
     const { projectId } = useParams<{ projectId: string }>();
     const { authUser } = useAuth();
-    const { updateBreadcrumbList } = useDashboard01();
     const router = useRouter();
 
     const { data, loading, error } = useQuery(GET_PROJECT, {
@@ -334,14 +332,6 @@ export default function ProjectDetailContainer({
             router.replace(ROUTE.FORGE.HOME);
         }
     }, [loading, project, error, router]);
-
-    useEffect(() => {
-        if (!project) return;
-
-        updateBreadcrumbList([{ name: 'Projects', url: ROUTE.FORGE.HOME }, { name: project.name }]);
-
-        return () => updateBreadcrumbList([]);
-    }, [project, updateBreadcrumbList]);
 
     if (!project) return null;
 
