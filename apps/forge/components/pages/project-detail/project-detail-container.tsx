@@ -4,7 +4,6 @@ import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
-import { useAuth } from '@/shadcn/providers/auth-provider';
 import { toast } from 'sonner';
 import {
     MilestoneStatus as GqlMilestoneStatus,
@@ -93,7 +92,11 @@ const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = 
             publicId
             name
             status
-            companyIds
+            companies {
+                publicId
+                name
+                logo
+            }
             createdAt
             startAt
             expectedGoLiveAt
@@ -242,7 +245,6 @@ export default function ProjectDetailContainer({
     children,
 }: Readonly<{ children: React.ReactNode }>) {
     const { projectId } = useParams<{ projectId: string }>();
-    const { authUser } = useAuth();
     const router = useRouter();
 
     const { data, loading, error } = useQuery(GET_PROJECT, {
@@ -254,17 +256,11 @@ export default function ProjectDetailContainer({
         skip: !projectId,
     });
 
-    const companyNameMap = useMemo(() => {
-        const map = new Map<string, string>();
-        (authUser?.companies ?? []).forEach((c) => map.set(c.publicId, c.name));
-        return map;
-    }, [authUser]);
-
     const project = useMemo((): ProjectDetail | null => {
         const raw = data?.getProjectForForge;
         if (!raw) return null;
 
-        const companyNames = raw.companyIds.map((id) => companyNameMap.get(id) ?? id);
+        const companyNames = raw.companies.map((c) => c.name);
 
         return {
             id: raw.publicId,
@@ -303,7 +299,7 @@ export default function ProjectDetailContainer({
                 }
                 : null,
         };
-    }, [data, companyNameMap]);
+    }, [data]);
 
     const initialThreads = useMemo(
         () => (data?.getProjectForForge?.threads?.data as ThreadMessage[]) ?? [],

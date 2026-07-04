@@ -25,7 +25,11 @@ export const GET_PROJECTS: TypedDocumentNode<GetProjectsResponse, GetProjectsVar
                 publicId
                 name
                 status
-                companyIds
+                companies {
+                    publicId
+                    name
+                    logo
+                }
                 createdAt
                 userOverview {
                     unreadCount

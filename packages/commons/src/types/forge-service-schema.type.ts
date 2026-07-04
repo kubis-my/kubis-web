@@ -361,11 +361,17 @@ export interface PaginatedInvoice {
     pageInfo: PageInfo;
 }
 
+export interface Company {
+    publicId: string;
+    name: string;
+    logo?: Nullable<string>;
+}
+
 export interface Project {
     publicId: string;
     name: string;
     status: ProjectStatus;
-    companyIds: string[];
+    companies: Company[];
     createdAt: DateTime;
     updatedAt: DateTime;
     startAt?: Nullable<DateTime>;
