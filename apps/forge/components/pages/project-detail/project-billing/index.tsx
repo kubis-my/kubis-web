@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useLazyQuery } from '@apollo/client/react';
 import { DataTable } from '@repo/shadcn-ui/components/data-table';
 import { PaginatedInvoice } from '@repo/commons/types/forge-service-schema.type';
@@ -16,10 +16,9 @@ import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 import CreateInvoiceDialog from './create-invoice-dialog';
 
 export default function ProjectBilling() {
-    const router = useRouter();
     const { projectId } = useParams<{ projectId: string }>();
     const { authUser } = useAuth();
-    const { updateHeaderAction } = useDashboard02();
+    const { updateHeaderAction, updateBreadcrumbList } = useDashboard02();
     const isKubisTeam = useMemo(() => hasSuperAdminAccess(authUser?.companies ?? []), [authUser]);
     const { project, initialInvoices } = useProjectDetail();
 
@@ -82,6 +81,21 @@ export default function ProjectBilling() {
             updateHeaderAction(undefined);
         };
     }, [isKubisTeam, project.subscription?.plan?.publicId, project.projectSettings?.isOneTimePayOff]);
+
+    useEffect(() => {
+        updateBreadcrumbList([
+            {
+                name: "Manage"
+            },
+            {
+                name: "Billing"
+            }
+        ])
+
+        return () => {
+            updateBreadcrumbList([])
+        }
+    }, [updateBreadcrumbList])
 
     return (
         <div className="flex w-full flex-col gap-6 py-2">

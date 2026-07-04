@@ -18,6 +18,7 @@ import KubisSvg from '../../custom-components/kubis-svg';
 
 export function AppSidebar({
     workspaces,
+    workspacesLoading,
     navMain,
     navMainLabel,
     user,
@@ -34,6 +35,7 @@ export function AppSidebar({
                 {showWorkspaceSwitcher ? (
                     <WorkspaceSwitcher
                         workspaces={workspaces}
+                        loading={workspacesLoading}
                         cta={switcherCta}
                         label={switcherLabel}
                     />

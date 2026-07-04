@@ -14,11 +14,33 @@ import {
     DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from '../../components/dropdown-menu';
+import { Skeleton } from '../../components/skeleton';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from './sidebar';
 import { Workspace, WorkspaceSwitcherProps } from './types';
 import KubisSvg from '../../custom-components/kubis-svg';
 
-export function WorkspaceSwitcher({ workspaces, cta, label = 'Workspaces' }: WorkspaceSwitcherProps) {
+function WorkspaceSwitcherSkeleton() {
+    return (
+        <SidebarMenu>
+            <SidebarMenuItem>
+                <div className="flex h-12 w-full items-center gap-2 rounded-md p-2">
+                    <Skeleton className="size-8 shrink-0 rounded-lg" />
+                    <div className="grid flex-1 gap-1.5">
+                        <Skeleton className="h-3.5 w-3/5" />
+                        <Skeleton className="h-3 w-2/5" />
+                    </div>
+                </div>
+            </SidebarMenuItem>
+        </SidebarMenu>
+    );
+}
+
+export function WorkspaceSwitcher({
+    workspaces,
+    loading = false,
+    cta,
+    label = 'Workspaces',
+}: WorkspaceSwitcherProps) {
     const { isMobile } = useSidebar();
     const pathname = usePathname();
     const router = useRouter();
@@ -53,7 +75,7 @@ export function WorkspaceSwitcher({ workspaces, cta, label = 'Workspaces' }: Wor
     }, [workspaces, router]);
 
     if (!activeWorkspace) {
-        return null;
+        return loading ? <WorkspaceSwitcherSkeleton /> : null;
     }
 
     return (

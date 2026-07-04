@@ -21,9 +21,10 @@ import { ROUTE } from './constants';
 import { env } from '@repo/commons/constant/env';
 import { authClient } from '@repo/commons/lib/auth-client';
 import { getToken, clearAllTokens, REFRESH_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
+import { formatCount } from '@repo/commons/utils/number';
 
 export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainItem[] {
-    const threadsUnreadLabel = unreadCount > 99 ? '99+' : String(unreadCount);
+    const threadsUnreadLabel = formatCount(unreadCount);
 
     return [
         {
@@ -31,6 +32,7 @@ export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainIt
             title: 'Overview',
             url: ROUTE.FORGE.PROJECT_DETAIL(projectId),
             icon: FileText,
+            group: 'Project',
             isActive: false,
         },
         {
@@ -38,6 +40,7 @@ export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainIt
             title: 'Milestones',
             url: ROUTE.FORGE.PROJECT_MILESTONES(projectId),
             icon: Flag,
+            group: 'Project',
             isActive: false,
         },
         {
@@ -45,6 +48,7 @@ export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainIt
             title: 'Threads',
             url: ROUTE.FORGE.PROJECT_THREADS(projectId),
             icon: MessageSquare,
+            group: 'Project',
             badge:
                 unreadCount > 0 ? (
                     <span className="bg-primary text-primary-foreground flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] leading-none font-semibold tabular-nums shadow-sm group-data-[collapsible=icon]:opacity-0">
@@ -59,6 +63,7 @@ export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainIt
             title: 'Context',
             url: ROUTE.FORGE.PROJECT_CONTEXT(projectId),
             icon: Layers,
+            group: 'Manage',
             isActive: false,
         },
         {
@@ -66,6 +71,7 @@ export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainIt
             title: 'Billing',
             url: ROUTE.FORGE.PROJECT_BILLING(projectId),
             icon: Receipt,
+            group: 'Manage',
             isActive: false,
         },
         {
@@ -73,6 +79,7 @@ export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainIt
             title: 'Settings',
             url: ROUTE.FORGE.PROJECT_SETTINGS(projectId),
             icon: Settings,
+            group: 'Manage',
             isActive: false,
         },
     ];

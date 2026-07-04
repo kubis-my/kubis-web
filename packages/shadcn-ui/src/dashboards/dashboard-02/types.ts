@@ -5,12 +5,14 @@ import React, { Dispatch, SetStateAction } from 'react';
 export type DashboardContextType = {
     user: User | undefined;
     workspaces: Workspace[];
+    workspacesLoading: boolean;
     navMain: NavMainItem[];
     breadcrumbList: BreadcrumbItem[];
     headerAction: React.ReactNode;
     showWorkspaceSwitcher: boolean;
     updateUser: Dispatch<SetStateAction<User | undefined>>;
     updateWorkspaces: Dispatch<SetStateAction<Workspace[]>>;
+    updateWorkspacesLoading: Dispatch<SetStateAction<boolean>>;
     updateNavMain: Dispatch<SetStateAction<NavMainItem[]>>;
     updateBreadcrumbList: Dispatch<SetStateAction<BreadcrumbItem[]>>;
     updateHeaderAction: Dispatch<SetStateAction<React.ReactNode>>;
@@ -34,6 +36,7 @@ export type NavMainItem = {
     icon?: LucideIcon;
     isActive?: boolean;
     badge?: React.ReactNode;
+    group?: string;
     items?: {
         id: string;
         title: string;
@@ -54,6 +57,7 @@ export type DashboardProviderProps = {
 
 export type AppSidebarProps = {
     workspaces: Workspace[];
+    workspacesLoading?: boolean;
     navMain: NavMainItem[];
     navMainLabel?: string;
     user?: User;
@@ -66,6 +70,7 @@ export type AppSidebarProps = {
 
 export type WorkspaceSwitcherProps = {
     workspaces: Workspace[];
+    loading?: boolean;
     cta?: React.ReactNode;
     label?: string;
 };

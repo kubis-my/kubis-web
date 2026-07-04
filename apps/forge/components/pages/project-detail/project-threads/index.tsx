@@ -36,12 +36,14 @@ import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { toast } from 'sonner';
 import { ThreadEvent } from '@repo/commons/constant/web-socket';
 import { useSocket } from '@/shadcn/providers/socket-provider';
+import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 
 export default function ProjectThreads() {
     const { projectId } = useParams<{ projectId: string }>();
     const { authUser } = useAuth();
     const { emit, on, off, isConnected } = useSocket();
     const { initialThreads, initialThreadsPageInfo } = useProjectDetail();
+    const { updateBreadcrumbList } = useDashboard02();
 
     const authUserId = authUser?.publicId;
 
@@ -585,6 +587,21 @@ export default function ProjectThreads() {
             behavior: 'smooth',
         });
     }, []);
+
+    useEffect(() => {
+        updateBreadcrumbList([
+            {
+                name: "Project"
+            },
+            {
+                name: "Threads"
+            }
+        ])
+
+        return () => {
+            updateBreadcrumbList([])
+        }
+    }, [updateBreadcrumbList])
 
     return (
         <div className="from-background via-background to-muted/20 relative flex min-h-0 flex-1 flex-col overflow-hidden bg-linear-to-b">

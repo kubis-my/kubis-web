@@ -48,7 +48,7 @@ export default function ProjectContext() {
     const client = useApolloClient();
     const { project } = useProjectDetail();
     const { authUser } = useAuth();
-    const { updateHeaderAction } = useDashboard02();
+    const { updateHeaderAction, updateBreadcrumbList } = useDashboard02();
     const isKubisTeam = useMemo(() => hasSuperAdminAccess(authUser?.companies ?? []), [authUser]);
 
     const entries = project.projectSettings?.environment ?? [];
@@ -179,6 +179,21 @@ export default function ProjectContext() {
             setDeletingId(null);
         }
     };
+
+    useEffect(() => {
+        updateBreadcrumbList([
+            {
+                name: "Manage"
+            },
+            {
+                name: "Context"
+            }
+        ])
+
+        return () => {
+            updateBreadcrumbList([])
+        }
+    }, [updateBreadcrumbList])
 
     return (
         <div className="flex w-full flex-col gap-6 py-2">

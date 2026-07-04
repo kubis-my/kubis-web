@@ -1,6 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@repo/shadcn-ui/components/badge';
 import { formatDateTime } from '@repo/commons/utils/date';
+import { formatCount } from '@repo/commons/utils/number';
 import { Project } from '@repo/commons/types/forge-service-schema.type';
 import ProjectCellViewer from './project-cell-viewer';
 import { StatusBadge } from '../status-badge';
@@ -47,12 +48,12 @@ export const ProjectColumn: ColumnDef<Project>[] = [
     },
     {
         accessorKey: 'unreadCount',
-        header: () => <div className="text-right">Unread</div>,
+        header: () => <div className="text-center">Unread</div>,
         cell: ({ row }) => {
             const unreadCount = row.original.userOverview?.unreadCount ?? 0;
             return (
-                <div className="text-right font-medium tabular-nums">
-                    {unreadCount > 0 ? unreadCount : '-'}
+                <div className="text-center font-medium tabular-nums">
+                    {unreadCount > 0 ? formatCount(unreadCount) : '-'}
                 </div>
             );
         },

@@ -13,7 +13,7 @@ import { useSearchParams } from 'next/navigation';
 export default function ProjectMilestones() {
     const { project } = useProjectDetail();
     const { milestones } = project;
-    const { updateHeaderAction } = useDashboard02();
+    const { updateHeaderAction, updateBreadcrumbList } = useDashboard02();
     const auth = useAuth();
     const searchParams = useSearchParams();
     const highlightedMilestoneId = searchParams.get('id') ?? undefined;
@@ -34,6 +34,21 @@ export default function ProjectMilestones() {
             updateHeaderAction(undefined);
         };
     }, [])
+
+    useEffect(() => {
+        updateBreadcrumbList([
+            {
+                name: "Project"
+            },
+            {
+                name: "Milestones"
+            }
+        ])
+
+        return () => {
+            updateBreadcrumbList([])
+        }
+    }, [updateBreadcrumbList])
 
     return (
         <div className="flex w-full flex-col gap-8 py-2">

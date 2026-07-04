@@ -30,14 +30,15 @@ export function SiteHeader({ items, action }: SiteHeaderProps) {
                                 return (
                                     <Fragment key={i}>
                                         <BreadcrumbItem className="hidden md:block">
-                                            <BreadcrumbLink asChild className="cursor-pointer">
-                                                <Link
-                                                    className="cursor-pointer"
-                                                    href={item.url || ''}
-                                                >
-                                                    {item.name}
-                                                </Link>
-                                            </BreadcrumbLink>
+                                            {item.url ? (
+                                                <BreadcrumbLink asChild className="cursor-pointer">
+                                                    <Link className="cursor-pointer" href={item.url}>
+                                                        {item.name}
+                                                    </Link>
+                                                </BreadcrumbLink>
+                                            ) : (
+                                                <span>{item.name}</span>
+                                            )}
                                         </BreadcrumbItem>
                                         <BreadcrumbSeparator className="hidden md:block" />
                                     </Fragment>

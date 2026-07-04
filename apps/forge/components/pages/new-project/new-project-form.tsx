@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNewProject } from './new-project-container';
 import { Button } from '@repo/shadcn-ui/components/button';
 import { Input } from '@repo/shadcn-ui/components/input';
@@ -12,8 +12,10 @@ import RichTextEditor from '@repo/shadcn-ui/components/rich-text-editor';
 import Link from 'next/link';
 import { ROUTE } from '@/root/libs/constants';
 import { TriangleAlert } from 'lucide-react';
+import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 
 export default function NewProjectForm() {
+    const { updateBreadcrumbList } = useDashboard02();
     const { form, availableCompanies, isSubmitting, onChange, onToggleCompany, onSubmit } =
         useNewProject();
 
@@ -29,6 +31,22 @@ export default function NewProjectForm() {
         setHasAttemptedSubmit(true);
         if (isValid) onSubmit();
     }
+
+    useEffect(() => {
+        updateBreadcrumbList([
+            {
+                name: "Projects",
+                url: ROUTE.FORGE.HOME
+            },
+            {
+                name: "New"
+            }
+        ]);
+
+        return () => {
+            updateBreadcrumbList([]);
+        }
+    }, [updateBreadcrumbList])
 
     return (
         <div className="mx-auto w-full max-w-2xl">

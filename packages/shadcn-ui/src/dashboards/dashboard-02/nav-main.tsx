@@ -21,28 +21,46 @@ import {
 } from './sidebar';
 import { NavMainItem, NavMainProps } from './types';
 
-export function NavMain({ items, label = 'Platform' }: NavMainProps) {
+export function NavMain({ items, label }: NavMainProps) {
+    const groups = new Map<string | undefined, NavMainItem[]>();
+
+    for (const item of items) {
+        const groupLabel = item.group ?? label;
+        const groupItems = groups.get(groupLabel) ?? [];
+
+        groupItems.push(item);
+        groups.set(groupLabel, groupItems);
+    }
+
     return (
-        <SidebarGroup>
-            <SidebarGroupLabel>{label}</SidebarGroupLabel>
-            <SidebarMenu>
-                {items.map((item) =>
-                    item.items && item.items.length > 0 ? (
-                        <CollapsibleNavItem key={item.id} item={item} />
-                    ) : (
-                        <SidebarMenuItem key={item.id}>
-                            <SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
-                                <Link href={item.url}>
-                                    {item.icon && <item.icon />}
-                                    <span>{item.title}</span>
-                                </Link>
-                            </SidebarMenuButton>
-                            {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
-                        </SidebarMenuItem>
-                    ),
-                )}
-            </SidebarMenu>
-        </SidebarGroup>
+        <>
+            {Array.from(groups.entries()).map(([groupLabel, groupItems], index) => (
+                <SidebarGroup key={groupLabel ?? index}>
+                    {groupLabel && <SidebarGroupLabel>{groupLabel}</SidebarGroupLabel>}
+                    <SidebarMenu>
+                        {groupItems.map((item) =>
+                            item.items && item.items.length > 0 ? (
+                                <CollapsibleNavItem key={item.id} item={item} />
+                            ) : (
+                                <SidebarMenuItem key={item.id}>
+                                    <SidebarMenuButton
+                                        asChild
+                                        tooltip={item.title}
+                                        isActive={item.isActive}
+                                    >
+                                        <Link href={item.url}>
+                                            {item.icon && <item.icon />}
+                                            <span>{item.title}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                    {item.badge && <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>}
+                                </SidebarMenuItem>
+                            ),
+                        )}
+                    </SidebarMenu>
+                </SidebarGroup>
+            ))}
+        </>
     );
 }
 

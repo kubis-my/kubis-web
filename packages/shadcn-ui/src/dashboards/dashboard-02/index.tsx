@@ -17,6 +17,7 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 
 export function DashboardProvider({ children, ...props }: DashboardProviderProps) {
     const [workspaces, setWorkspaces] = useState<Workspace[]>(props.workspaces);
+    const [workspacesLoading, setWorkspacesLoading] = useState(false);
     const [navMain, setNavMain] = useState<NavMainItem[]>(props.navMain);
     const [user, setUser] = useState<User | undefined>(props.user);
     const [breadcrumbList, setBreadcrumbList] = useState<BreadcrumbItem[]>([]);
@@ -27,18 +28,20 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
         () => ({
             user,
             workspaces,
+            workspacesLoading,
             navMain,
             breadcrumbList,
             headerAction,
             showWorkspaceSwitcher,
             updateUser: setUser,
             updateWorkspaces: setWorkspaces,
+            updateWorkspacesLoading: setWorkspacesLoading,
             updateNavMain: setNavMain,
             updateBreadcrumbList: setBreadcrumbList,
             updateHeaderAction: setHeaderAction,
             updateShowWorkspaceSwitcher: setShowWorkspaceSwitcher,
         }),
-        [user, workspaces, navMain, breadcrumbList, headerAction, showWorkspaceSwitcher],
+        [user, workspaces, workspacesLoading, navMain, breadcrumbList, headerAction, showWorkspaceSwitcher],
     );
 
     return (
@@ -55,6 +58,7 @@ export function DashboardProvider({ children, ...props }: DashboardProviderProps
                 <AppSidebar
                     variant="inset"
                     workspaces={workspaces}
+                    workspacesLoading={workspacesLoading}
                     navMain={navMain}
                     navigationUserItems={props.userCardItems}
                     user={user}

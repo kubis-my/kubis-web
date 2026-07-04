@@ -39,7 +39,13 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     const params = useParams();
 
     const { authUser } = useAuth();
-    const { updateUser, updateNavMain, updateWorkspaces, updateShowWorkspaceSwitcher } = useDashboard02();
+    const {
+        updateUser,
+        updateNavMain,
+        updateWorkspaces,
+        updateWorkspacesLoading,
+        updateShowWorkspaceSwitcher,
+    } = useDashboard02();
 
     const projectId = params?.projectId as string | undefined;
 
@@ -58,7 +64,7 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
 
     const unreadCount = unreadData?.getProjectForForge?.userOverview?.unreadCount ?? 0;
 
-    const { data: projectsData } = useQuery(GET_PROJECTS, {
+    const { data: projectsData, loading: projectsLoading } = useQuery(GET_PROJECTS, {
         variables: { pagination: { take: PROJECT_PAGINATION_SIZE } },
         skip: !projectId,
     });
@@ -79,6 +85,10 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     useEffect(() => {
         updateWorkspaces(workspaces);
     }, [workspaces, updateWorkspaces]);
+
+    useEffect(() => {
+        updateWorkspacesLoading(!!projectId && projectsLoading);
+    }, [projectId, projectsLoading, updateWorkspacesLoading]);
 
     useEffect(() => {
         if (!isConnected || !projectId) return;
@@ -120,7 +130,8 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
             updateNavMain(
                 getProjectsNavMain().map((item) => ({
                     ...item,
-                    isActive: currentPathname === item.url,
+                    isActive:
+                        currentPathname === item.url || currentPathname.startsWith(`${item.url}/`),
                 })),
             );
             return;
