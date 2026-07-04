@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
     turbopack: {
         root: path.join(__dirname, '../../'),
     },
+    experimental: {
+        staleTimes: { dynamic: 30 },
+    },
     async headers() {
         return getDefaultHeaders(
             [
