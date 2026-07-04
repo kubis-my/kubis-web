@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { NavMainItem, NavUserItem } from '@/shadcn/dashboards/dashboard-02/types';
+import { BreadcrumbItem, NavMainItem, NavUserItem } from '@/shadcn/dashboards/dashboard-02/types';
 import {
     IconLogout,
     IconHelp,
@@ -83,6 +83,38 @@ export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainIt
             isActive: false,
         },
     ];
+}
+
+export function getBreadcrumbForPath(pathname: string, projectId?: string): BreadcrumbItem[] {
+    if (!projectId) {
+        if (pathname === ROUTE.FORGE.PROJECT_NEW || pathname.startsWith(`${ROUTE.FORGE.PROJECT_NEW}/`)) {
+            return [{ name: 'Projects', url: ROUTE.FORGE.HOME }, { name: 'New' }];
+        }
+
+        return [{ name: 'Projects' }];
+    }
+
+    if (pathname === ROUTE.FORGE.PROJECT_MILESTONES(projectId)) {
+        return [{ name: 'Project' }, { name: 'Milestones' }];
+    }
+
+    if (pathname === ROUTE.FORGE.PROJECT_THREADS(projectId)) {
+        return [{ name: 'Project' }, { name: 'Threads' }];
+    }
+
+    if (pathname === ROUTE.FORGE.PROJECT_CONTEXT(projectId)) {
+        return [{ name: 'Manage' }, { name: 'Context' }];
+    }
+
+    if (pathname.startsWith(ROUTE.FORGE.PROJECT_BILLING(projectId))) {
+        return [{ name: 'Manage' }, { name: 'Billing' }];
+    }
+
+    if (pathname === ROUTE.FORGE.PROJECT_SETTINGS(projectId)) {
+        return [{ name: 'Manage' }, { name: 'Settings' }];
+    }
+
+    return [{ name: 'Project' }, { name: 'Overview' }];
 }
 
 export function getProjectsNavMain(): NavMainItem[] {

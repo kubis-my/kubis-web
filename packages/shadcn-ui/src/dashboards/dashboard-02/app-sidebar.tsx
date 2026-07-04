@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { NavMain } from './nav-main';
 import { NavUser } from './nav-user';
 import { WorkspaceSwitcher } from './workspace-switcher';
@@ -16,7 +17,7 @@ import {
 import { AppSidebarProps } from './types';
 import KubisSvg from '../../custom-components/kubis-svg';
 
-export function AppSidebar({
+export const AppSidebar = memo(function AppSidebar({
     workspaces,
     workspacesLoading,
     navMain,
@@ -61,4 +62,4 @@ export function AppSidebar({
             <SidebarRail />
         </Sidebar>
     );
-}
+});

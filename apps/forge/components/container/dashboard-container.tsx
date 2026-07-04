@@ -1,6 +1,6 @@
 'use client';
 
-import { getProjectNavMain, getProjectsNavMain } from '@/root/libs/dashboard-data';
+import { getBreadcrumbForPath, getProjectNavMain, getProjectsNavMain } from '@/root/libs/dashboard-data';
 import { PROJECT_PAGINATION_SIZE, ROUTE, STATUS_LABEL } from '@/root/libs/constants';
 import { useDashboard02 } from '@/shadcn/dashboards/dashboard-02';
 import { useAuth } from '@/shadcn/providers/auth-provider';
@@ -42,6 +42,7 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     const {
         updateUser,
         updateNavMain,
+        updateBreadcrumbList,
         updateWorkspaces,
         updateWorkspacesLoading,
         updateShowWorkspaceSwitcher,
@@ -125,6 +126,7 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
 
     useEffect(() => {
         updateShowWorkspaceSwitcher(!!projectId);
+        updateBreadcrumbList(getBreadcrumbForPath(currentPathname, projectId));
 
         if (!projectId) {
             updateNavMain(
@@ -149,7 +151,14 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
                         currentPathname.startsWith(`${item.url}/`),
             })),
         );
-    }, [projectId, currentPathname, unreadCount, updateNavMain, updateShowWorkspaceSwitcher]);
+    }, [
+        projectId,
+        currentPathname,
+        unreadCount,
+        updateNavMain,
+        updateBreadcrumbList,
+        updateShowWorkspaceSwitcher,
+    ]);
 
     return children;
 }

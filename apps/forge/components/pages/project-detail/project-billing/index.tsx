@@ -18,7 +18,7 @@ import CreateInvoiceDialog from './create-invoice-dialog';
 export default function ProjectBilling() {
     const { projectId } = useParams<{ projectId: string }>();
     const { authUser } = useAuth();
-    const { updateHeaderAction, updateBreadcrumbList } = useDashboard02();
+    const { updateHeaderAction } = useDashboard02();
     const isKubisTeam = useMemo(() => hasSuperAdminAccess(authUser?.companies ?? []), [authUser]);
     const { project, initialInvoices } = useProjectDetail();
 
@@ -81,21 +81,6 @@ export default function ProjectBilling() {
             updateHeaderAction(undefined);
         };
     }, [isKubisTeam, project.subscription?.plan?.publicId, project.projectSettings?.isOneTimePayOff]);
-
-    useEffect(() => {
-        updateBreadcrumbList([
-            {
-                name: "Manage"
-            },
-            {
-                name: "Billing"
-            }
-        ])
-
-        return () => {
-            updateBreadcrumbList([])
-        }
-    }, [updateBreadcrumbList])
 
     return (
         <div className="flex w-full flex-col gap-6 py-2">

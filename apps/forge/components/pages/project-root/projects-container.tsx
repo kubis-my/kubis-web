@@ -78,7 +78,7 @@ export function useProjects() {
 
 export default function ProjectsContainer({ children }: Readonly<{ children: React.ReactNode }>) {
     const router = useRouter();
-    const { updateBreadcrumbList, updateHeaderAction } = useDashboard02();
+    const { updateHeaderAction } = useDashboard02();
 
     const { data, loading: isFetchingProjects } = useQuery(GET_PROJECTS, {
         variables: { pagination: { take: PROJECT_PAGINATION_SIZE } },
@@ -93,7 +93,6 @@ export default function ProjectsContainer({ children }: Readonly<{ children: Rea
     }
 
     useEffect(() => {
-        updateBreadcrumbList([{ name: 'Projects' }]);
         updateHeaderAction(
             <Button variant="ghost" size="icon" className="size-7" onClick={onNewProject}>
                 <IconPlus />
@@ -101,10 +100,9 @@ export default function ProjectsContainer({ children }: Readonly<{ children: Rea
         );
 
         return () => {
-            updateBreadcrumbList([]);
             updateHeaderAction(undefined);
         };
-    }, [updateBreadcrumbList, updateHeaderAction]);
+    }, [updateHeaderAction]);
 
     const contextValue = useMemo(() => {
         return {
