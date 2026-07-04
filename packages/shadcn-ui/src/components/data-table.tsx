@@ -38,6 +38,7 @@ export interface DataTableProps<TData> {
     emptyMessage?: string;
     getRowId?: (row: TData) => string;
     onRowClick?: (row: TData, event: React.MouseEvent) => void;
+    onRowMouseEnter?: (row: TData) => void;
     renderRow?: (row: Row<TData>) => React.ReactNode;
     renderSubRow?: (row: Row<TData>) => React.ReactNode;
     renderSkeletonRow?: () => React.ReactNode;
@@ -62,10 +63,12 @@ function DefaultRow<TData>({
     row,
     flexColumnId,
     onRowClick,
+    onRowMouseEnter,
 }: {
     row: Row<TData>;
     flexColumnId?: string;
     onRowClick?: (row: TData, event: React.MouseEvent) => void;
+    onRowMouseEnter?: (row: TData) => void;
 }) {
     const handleRowClick = (e: React.MouseEvent) => {
         if (onRowClick) {
@@ -78,9 +81,15 @@ function DefaultRow<TData>({
         }
     };
 
+    const handleRowMouseEnter = onRowMouseEnter
+        ? () => onRowMouseEnter(row.original)
+        : undefined;
+
     return (
         <TableRow
             onClick={handleRowClick}
+            onMouseEnter={handleRowMouseEnter}
+            onFocus={handleRowMouseEnter}
             className={onRowClick ? 'hover:bg-muted/50 cursor-pointer transition-colors' : ''}
         >
             {row.getVisibleCells().map((cell) => {
@@ -116,6 +125,7 @@ export function DataTable<TData>({
     emptyMessage = 'No results found.',
     getRowId,
     onRowClick,
+    onRowMouseEnter,
     renderRow,
     renderSubRow,
     renderSkeletonRow,
@@ -149,7 +159,12 @@ export function DataTable<TData>({
         if (subRow) {
             return (
                 <React.Fragment key={row.id}>
-                    <DefaultRow row={row} flexColumnId={flexColumnId} onRowClick={onRowClick} />
+                    <DefaultRow
+                        row={row}
+                        flexColumnId={flexColumnId}
+                        onRowClick={onRowClick}
+                        onRowMouseEnter={onRowMouseEnter}
+                    />
                     <TableRow className="bg-muted/30 hover:bg-muted/30">
                         <TableCell colSpan={columns.length} className="p-0">
                             {subRow}
@@ -165,6 +180,7 @@ export function DataTable<TData>({
                 row={row}
                 flexColumnId={flexColumnId}
                 onRowClick={onRowClick}
+                onRowMouseEnter={onRowMouseEnter}
             />
         );
     };

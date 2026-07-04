@@ -87,7 +87,7 @@ interface GetProjectVariables {
     invoicePagination: InvoicePaginationInput;
 }
 
-const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = gql`
+export const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariables> = gql`
     query GetProjectForForge($publicId: String!, $threadPagination: ThreadPaginationInput!, $invoicePagination: InvoicePaginationInput!) {
         getProjectForForge(publicId: $publicId) {
             publicId

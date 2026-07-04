@@ -74,6 +74,7 @@ export function ProjectDataTable() {
             emptyMessage="No projects found."
             getRowId={(row) => row.publicId.toString()}
             onRowClick={(row) => ctx.onOpenProject(row.publicId)}
+            onRowMouseEnter={(row) => ctx.onPrefetchProject(row.publicId)}
             renderSkeletonRow={() => <ProjectSkeletonRow />}
             flexColumnId="name"
         />
