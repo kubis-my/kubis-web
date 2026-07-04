@@ -15,7 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '@/shadcn/components/button';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { AddNoteDialog } from './add-note-dialog';
 import { EditMilestoneDialog } from './edit-milestone-dialog';
 
@@ -24,6 +24,18 @@ type Props = {
     highlightedMilestoneId?: string;
     highlightedNoteId?: string;
 };
+
+const MilestoneNoteContent = memo(function MilestoneNoteContent({
+    content,
+}: {
+    content: object | null;
+}) {
+    const html = useMemo(() => richTextToHtml(content), [content]);
+
+    return (
+        <div className="prose-editor text-sm leading-6" dangerouslySetInnerHTML={{ __html: html }} />
+    );
+});
 
 export default function MilestoneCard({ milestone, highlightedMilestoneId, highlightedNoteId }: Props) {
     const config = STATUS_CONFIG[milestone.status];
@@ -131,10 +143,7 @@ export default function MilestoneCard({ milestone, highlightedMilestoneId, highl
                                 </p>
                             </div>
 
-                            <div
-                                className="prose-editor text-sm leading-6"
-                                dangerouslySetInnerHTML={{ __html: richTextToHtml(note.content) }}
-                            />
+                            <MilestoneNoteContent content={note.content} />
                         </article>
                     ))
                 )}

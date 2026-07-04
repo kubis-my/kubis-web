@@ -1,3 +1,4 @@
+import { memo, useMemo } from 'react';
 import { Avatar, AvatarFallback } from '@repo/shadcn-ui/components/avatar';
 import {
     ContextMenu,
@@ -13,7 +14,18 @@ import type { Message, MessageGroup } from './types';
 import { formatDateTime } from '@repo/commons/utils/date';
 import { timeFormatter } from './utils';
 
-export function MessageGroupItem({
+const MessageContent = memo(function MessageContent({ content }: { content: object | null }) {
+    const html = useMemo(() => richTextToHtml(content), [content]);
+
+    return (
+        <div
+            className="prose-editor text-foreground/90 min-w-0 text-[15px] leading-7"
+            dangerouslySetInnerHTML={{ __html: html }}
+        />
+    );
+});
+
+export const MessageGroupItem = memo(function MessageGroupItem({
     group,
     messagesById,
     highlightedMessageId,
@@ -92,12 +104,7 @@ export function MessageGroupItem({
                                                     </p>
                                                 </div>
                                             ) : (
-                                                <div
-                                                    className="prose-editor text-foreground/90 min-w-0 text-[15px] leading-7"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: richTextToHtml(msg.content),
-                                                    }}
-                                                />
+                                                <MessageContent content={msg.content} />
                                             )}
 
                                             <p className="text-muted-foreground/70 shrink-0 text-[11px] leading-6 sm:pt-0.5">
@@ -133,4 +140,4 @@ export function MessageGroupItem({
             </div>
         </div>
     );
-}
+});

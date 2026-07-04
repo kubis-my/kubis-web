@@ -80,7 +80,7 @@ export default function ProjectThreads() {
         fetchPolicy: 'network-only',
     });
 
-    const dateGroups = groupMessages(messages);
+    const dateGroups = useMemo(() => groupMessages(messages), [messages]);
     const messagesById = useMemo(
         () => new Map(messages.map((message) => [message.id, message])),
         [messages],
