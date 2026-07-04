@@ -19,6 +19,7 @@ import {
 } from '@repo/commons/types/forge-service-schema.type';
 import { type MilestoneStatus, type ProjectStatus } from '../project-root/types';
 import { ROUTE, THREAD_PAGINATION_SIZE, INVOICE_PAGINATION_SIZE } from '@/root/libs/constants';
+import ProjectDetailSkeleton from './project-detail-skeleton';
 
 export type ProjectBriefData = {
     background: string;
@@ -254,6 +255,7 @@ export default function ProjectDetailContainer({
             invoicePagination: { take: INVOICE_PAGINATION_SIZE, projectPublicId: projectId },
         },
         skip: !projectId,
+        fetchPolicy: 'cache-first',
     });
 
     const project = useMemo((): ProjectDetail | null => {
@@ -329,7 +331,7 @@ export default function ProjectDetailContainer({
         }
     }, [loading, project, error, router]);
 
-    if (!project) return null;
+    if (!project) return <ProjectDetailSkeleton />;
 
     return (
         <ProjectDetailContext.Provider value={{ project, initialThreads, initialThreadsPageInfo, initialInvoices }}>
