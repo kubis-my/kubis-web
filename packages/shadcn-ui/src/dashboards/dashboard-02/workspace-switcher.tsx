@@ -144,10 +144,10 @@ type WorkspaceItemProps = {
 function WorkspaceItem({ workspace, index, isActive, onSelect }: WorkspaceItemProps) {
     const content = (
         <>
-            <div className="flex size-6 items-center justify-center rounded-md border">
+            <div className="flex size-6 shrink-0 items-center justify-center rounded-md border">
                 <workspace.logo className="size-3.5 shrink-0" />
             </div>
-            <span className="truncate">{workspace.name}</span>
+            <span className="min-w-0 flex-1 truncate">{workspace.name}</span>
             <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
         </>
     );
