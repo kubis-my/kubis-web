@@ -5,8 +5,7 @@ import { BreadcrumbItem, NavMainItem, NavUserItem } from '@/shadcn/dashboards/da
 import {
     IconLogout,
     IconHelp,
-    IconUser,
-    IconApps,
+    IconInfoCircle,
 } from '@tabler/icons-react';
 import {
     FileText,
@@ -138,26 +137,20 @@ export const showAllProjectsCta = (
 
 export const navigationUserItemList: NavUserItem[] = [
     {
-        id: 'explore-apps',
-        name: 'Explore apps',
-        icon: <IconApps />,
+        id: 'about',
+        name: 'About',
+        icon: <IconInfoCircle />,
         async action() {
-            window.open(`${env.NEXT_PUBLIC_MAIN_APP_BASE_URL}/explore-apps`, '_blank');
-        },
-    },
-    {
-        id: 'my-account',
-        name: 'My account',
-        icon: <IconUser />,
-        async action() {
-            window.open(`${env.NEXT_PUBLIC_MAIN_APP_BASE_URL}/my-account`, '_blank');
+            window.open(`${env.NEXT_PUBLIC_FORGE_APP_BASE_URL}`, '_blank');
         },
     },
     {
         id: 'help',
         name: 'Get Help',
         icon: <IconHelp />,
-        async action() { },
+        async action() {
+            window.open('mailto:zarkashi@kubis.my', '_blank');
+        },
     },
     {
         id: 'log-out',

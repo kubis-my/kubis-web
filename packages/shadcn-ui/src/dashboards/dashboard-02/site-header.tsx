@@ -12,6 +12,7 @@ import { Separator } from '../../components/separator';
 import { SidebarTrigger } from './sidebar';
 import { SiteHeaderProps } from './types';
 import Link from 'next/link';
+import { AppsPanel } from '../../custom-components/apps-panel';
 
 export const SiteHeader = memo(function SiteHeader({ items, action }: SiteHeaderProps) {
     return (
@@ -54,7 +55,10 @@ export const SiteHeader = memo(function SiteHeader({ items, action }: SiteHeader
                         })}
                     </BreadcrumbList>
                 </Breadcrumb>
-                {action && <div className="ml-auto">{action}</div>}
+                <div className="ml-auto flex">
+                    <AppsPanel />
+                    {action}
+                </div>
             </div>
         </header>
     );

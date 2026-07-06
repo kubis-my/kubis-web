@@ -9,7 +9,6 @@ import {
     IconSettings,
     IconHelp,
     IconUserPlus,
-    IconApps,
 } from '@tabler/icons-react';
 import { ROUTE } from './constants';
 import { authClient } from '@repo/commons/lib/auth-client';
@@ -55,14 +54,6 @@ export const navigationList: NavigationItem[] = [
 ];
 
 export const navigationUserItemList: NavUserItem[] = [
-    {
-        id: 'explore-apps',
-        name: 'Explore apps',
-        icon: <IconApps />,
-        async action() {
-            window.location.href = ROUTE.EXPLORE_APPS;
-        },
-    },
     {
         id: 'Settings',
         name: 'Settings',
