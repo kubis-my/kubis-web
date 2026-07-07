@@ -2,21 +2,56 @@
 
 import * as React from 'react';
 import { createPortal } from 'react-dom';
-import { generateHTML } from '@tiptap/core';
+import { generateHTML, mergeAttributes } from '@tiptap/core';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
 
-const renderExtensions = [
-    StarterKit.configure({ heading: { levels: [2, 3] }, link: false }),
-    Link.configure({ openOnClick: false, autolink: true }),
-];
+function isSameTabLink(href: string | null | undefined, sameTabOrigins: string[]): boolean {
+    if (!href || sameTabOrigins.length === 0) return false;
+    try {
+        const origin = new URL(href).origin;
+        return sameTabOrigins.includes(origin);
+    } catch {
+        return false;
+    }
+}
 
-export function richTextToHtml(json: object | null): string {
+function buildRenderExtensions(sameTabOrigins: string[]) {
+    return [
+        StarterKit.configure({ heading: { levels: [2, 3] }, link: false }),
+        Link.extend({
+            renderHTML(props) {
+                const [tag, attrs, content] = (this.parent?.(props) ?? [
+                    'a',
+                    props.HTMLAttributes,
+                    0,
+                ]) as [string, Record<string, unknown>, number];
+                const sameTab = isSameTabLink(props.HTMLAttributes.href as string | null, sameTabOrigins);
+
+                return [
+                    tag,
+                    mergeAttributes(attrs, {
+                        target: sameTab ? null : '_blank',
+                        rel: sameTab ? null : 'noopener noreferrer nofollow',
+                    }),
+                    content,
+                ];
+            },
+        }).configure({ openOnClick: false, autolink: true }),
+    ];
+}
+
+const defaultRenderExtensions = buildRenderExtensions([]);
+
+export function richTextToHtml(json: object | null, options?: { sameTabOrigins?: string[] }): string {
     if (!json) return '';
     try {
-        return generateHTML(json as Parameters<typeof generateHTML>[0], renderExtensions);
+        const extensions = options?.sameTabOrigins?.length
+            ? buildRenderExtensions(options.sameTabOrigins)
+            : defaultRenderExtensions;
+        return generateHTML(json as Parameters<typeof generateHTML>[0], extensions);
     } catch {
         return '';
     }

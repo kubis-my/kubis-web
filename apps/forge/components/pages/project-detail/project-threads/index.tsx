@@ -68,6 +68,8 @@ export default function ProjectThreads() {
     const pageInfoRef = useRef<ThreadPageInfo>(initialThreadsPageInfo);
     const messagesRef = useRef<Message[]>(messages);
     const lastMarkAsReadIdRef = useRef<string | null>(null);
+    const isRefetchingLatestRef = useRef(false);
+    const refetchLatestPendingRef = useRef(false);
 
     messagesRef.current = messages;
 
@@ -152,15 +154,14 @@ export default function ProjectThreads() {
 
         const fetched = result.data?.getThreadMessagesForForge;
         if (fetched) {
-            const existingIds = new Set(messagesRef.current.map((m) => m.id));
-            const incoming = fetched.data
-                .map((msg) => mapGqlMessage(msg, authUserId))
-                .filter((m) => !existingIds.has(m.id));
-            const accumulated = [...incoming, ...messagesRef.current];
-
-            setMessages(accumulated);
+            setMessages((prev) => {
+                const existingIds = new Set(prev.map((m) => m.id));
+                const incoming = fetched.data
+                    .map((msg) => mapGqlMessage(msg, authUserId))
+                    .filter((m) => !existingIds.has(m.id));
+                return [...incoming, ...prev];
+            });
             pageInfoRef.current = fetched.pageInfo;
-            setThreadCache(projectId, accumulated, fetched.pageInfo);
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
@@ -179,39 +180,55 @@ export default function ProjectThreads() {
     const refetchLatestMessages = useCallback(async () => {
         if (!projectId) return;
 
-        let result;
+        if (isRefetchingLatestRef.current) {
+            refetchLatestPendingRef.current = true;
+            return;
+        }
+
+        isRefetchingLatestRef.current = true;
+
         try {
-            result = await fetchMoreMessages({
-                variables: {
-                    projectPublicId: projectId,
-                    pagination: { take: THREAD_PAGINATION_SIZE },
-                },
+            let result;
+            try {
+                result = await fetchMoreMessages({
+                    variables: {
+                        projectPublicId: projectId,
+                        pagination: { take: THREAD_PAGINATION_SIZE },
+                    },
+                });
+            } catch (err) {
+                if (err instanceof Error && err.name === 'AbortError') return;
+                throw err;
+            }
+
+            const fetched = result.data?.getThreadMessagesForForge;
+            if (!fetched) return;
+
+            const incoming = fetched.data.map((msg) => mapGqlMessage(msg, authUserId));
+
+            setMessages((prev) => {
+                const mergedById = new Map(prev.map((message) => [message.id, message]));
+
+                for (const message of incoming) {
+                    mergedById.set(message.id, message);
+                }
+
+                return Array.from(mergedById.values()).sort(
+                    (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+                );
             });
-        } catch (err) {
-            if (err instanceof Error && err.name === 'AbortError') return;
-            throw err;
+
+            const nextPageInfo =
+                messagesRef.current.length <= incoming.length ? fetched.pageInfo : pageInfoRef.current;
+            pageInfoRef.current = nextPageInfo;
+        } finally {
+            isRefetchingLatestRef.current = false;
+
+            if (refetchLatestPendingRef.current) {
+                refetchLatestPendingRef.current = false;
+                refetchLatestMessages();
+            }
         }
-
-        const fetched = result.data?.getThreadMessagesForForge;
-        if (!fetched) return;
-
-        const incoming = fetched.data.map((msg) => mapGqlMessage(msg, authUserId));
-        const mergedById = new Map(messagesRef.current.map((message) => [message.id, message]));
-
-        for (const message of incoming) {
-            mergedById.set(message.id, message);
-        }
-
-        const updated = Array.from(mergedById.values()).sort(
-            (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
-        );
-
-        const nextPageInfo =
-            messagesRef.current.length <= incoming.length ? fetched.pageInfo : pageInfoRef.current;
-
-        setMessages(updated);
-        setThreadCache(projectId, updated, nextPageInfo);
-        pageInfoRef.current = nextPageInfo;
     }, [projectId, fetchMoreMessages, authUserId]);
 
     useEffect(() => {
@@ -274,6 +291,12 @@ export default function ProjectThreads() {
     useEffect(() => {
         if (!projectId) return;
 
+        setThreadCache(projectId, messages, pageInfoRef.current);
+    }, [messages, projectId]);
+
+    useEffect(() => {
+        if (!projectId) return;
+
         let cancelled = false;
 
         getThreadCache(projectId).then((cached) => {
@@ -282,20 +305,18 @@ export default function ProjectThreads() {
             pageInfoRef.current = cached.pageInfo;
 
             const currentMessages = messagesRef.current;
+            const cachedById = new Map(cached.messages.map((m) => [m.id, m]));
+            const applyCachedState = (list: Message[]) => list.map((m) => cachedById.get(m.id) ?? m);
 
             if (currentMessages.length === 0) {
                 shouldSkipNextAutoScroll.current = true;
-                setMessages(cached.messages);
+                setMessages((prev) => (prev.length === 0 ? cached.messages : applyCachedState(prev)));
                 return;
             }
 
-            const cachedById = new Map(cached.messages.map((m) => [m.id, m]));
             const existingIds = new Set(currentMessages.map((m) => m.id));
-
-            // Apply cached state to existing messages (picks up deletedAt, content changes)
-            const mergedCurrent = currentMessages.map((m) => cachedById.get(m.id) ?? m);
+            const mergedCurrent = applyCachedState(currentMessages);
             const hasStateUpdates = mergedCurrent.some((m, i) => m !== currentMessages[i]);
-
             const notInCurrent = cached.messages.filter((m) => !existingIds.has(m.id));
 
             if (notInCurrent.length === 0 && !hasStateUpdates) return;
@@ -303,7 +324,7 @@ export default function ProjectThreads() {
             if (notInCurrent.length === 0) {
                 // Only state updates (delete/restore) - no scroll change
                 shouldSkipNextAutoScroll.current = true;
-                setMessages(mergedCurrent);
+                setMessages((prev) => applyCachedState(prev));
                 return;
             }
 
@@ -318,7 +339,7 @@ export default function ProjectThreads() {
                 const prevScrollTop = scrollContainer?.scrollTop ?? 0;
 
                 shouldSkipNextAutoScroll.current = true;
-                setMessages([...older, ...mergedCurrent, ...newer]);
+                setMessages((prev) => [...older, ...applyCachedState(prev), ...newer]);
 
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
@@ -330,7 +351,7 @@ export default function ProjectThreads() {
                 });
             } else {
                 // Only newer messages - scroll to bottom
-                setMessages([...mergedCurrent, ...newer]);
+                setMessages((prev) => [...applyCachedState(prev), ...newer]);
             }
         });
 
@@ -363,11 +384,9 @@ export default function ProjectThreads() {
             if (!publicId) return;
 
             shouldSkipNextAutoScroll.current = true;
-            const updated = messagesRef.current.map((m) =>
-                m.id === publicId ? { ...m, deletedAt: new Date() } : m,
+            setMessages((prev) =>
+                prev.map((m) => (m.id === publicId ? { ...m, deletedAt: new Date() } : m)),
             );
-            setMessages(updated);
-            setThreadCache(projectId, updated, pageInfoRef.current);
         };
 
         const onThreadMessageRestored = () => {
@@ -478,19 +497,19 @@ export default function ProjectThreads() {
         const confirmed = result.data?.sendThreadMessageForForge;
         if (confirmed) {
             const confirmedMessage = mapGqlMessage(confirmed, authUserId);
-            const updatedById = new Map<string, Message>();
 
-            for (const message of messagesRef.current) {
-                const nextMessage = message.id === tempId ? confirmedMessage : message;
-                updatedById.set(nextMessage.id, nextMessage);
-            }
+            setMessages((prev) => {
+                const updatedById = new Map<string, Message>();
 
-            const updated = Array.from(updatedById.values()).sort(
-                (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
-            );
+                for (const message of prev) {
+                    const nextMessage = message.id === tempId ? confirmedMessage : message;
+                    updatedById.set(nextMessage.id, nextMessage);
+                }
 
-            setMessages(updated);
-            setThreadCache(projectId, updated, pageInfoRef.current);
+                return Array.from(updatedById.values()).sort(
+                    (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+                );
+            });
         }
     }, [input, replyingToId, projectId, authUserId, authUser, sendMutation, emitTypingStop]);
 
@@ -510,17 +529,17 @@ export default function ProjectThreads() {
 
             shouldSkipNextAutoScroll.current = true;
 
-            const updated = messagesRef.current.map((item) =>
-                item.id === message.id ? { ...item, deletedAt: new Date() } : item,
+            setMessages((prev) =>
+                prev.map((item) =>
+                    item.id === message.id ? { ...item, deletedAt: new Date() } : item,
+                ),
             );
-            setMessages(updated);
-            setThreadCache(projectId, updated, pageInfoRef.current);
 
             setReplyingToId((currentId) => (currentId === message.id ? null : currentId));
 
             await deleteMutation({ variables: { publicId: message.id } });
         },
-        [deleteMutation, projectId],
+        [deleteMutation, authUserId],
     );
 
     const restoreMessage = useCallback(
@@ -549,16 +568,16 @@ export default function ProjectThreads() {
             const restored = result.data?.restoreThreadMessageForForge;
 
             if (restored) {
-                const updated = messagesRef.current.map((item) =>
-                    item.id === restored.publicId
-                        ? { ...item, content: restored.content, deletedAt: undefined }
-                        : item,
+                setMessages((prev) =>
+                    prev.map((item) =>
+                        item.id === restored.publicId
+                            ? { ...item, content: restored.content, deletedAt: undefined }
+                            : item,
+                    ),
                 );
-                setMessages(updated);
-                setThreadCache(projectId, updated, pageInfoRef.current);
             }
         },
-        [restoreMutation, projectId],
+        [restoreMutation],
     );
 
     const jumpToMessage = useCallback((messageId: string) => {
