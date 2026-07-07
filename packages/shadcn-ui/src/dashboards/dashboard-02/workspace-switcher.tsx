@@ -88,15 +88,14 @@ export function WorkspaceSwitcher({
                         <DropdownMenuLabel className="text-muted-foreground text-xs">
                             {label}
                         </DropdownMenuLabel>
-                        {workspaces
-                            .filter((workspace) => workspace.id !== activeWorkspace.id)
-                            .map((workspace) => (
-                                <WorkspaceItem
-                                    key={workspace.id}
-                                    workspace={workspace}
-                                    onSelect={setSelectedWorkspace}
-                                />
-                            ))}
+                        {workspaces.map((workspace) => (
+                            <WorkspaceItem
+                                key={workspace.id}
+                                workspace={workspace}
+                                isActive={workspace.id === activeWorkspace.id}
+                                onSelect={setSelectedWorkspace}
+                            />
+                        ))}
                         {cta && (
                             <>
                                 <DropdownMenuSeparator />
@@ -114,10 +113,11 @@ export function WorkspaceSwitcher({
 
 type WorkspaceItemProps = {
     workspace: Workspace;
+    isActive: boolean;
     onSelect: (workspace: Workspace) => void;
 };
 
-function WorkspaceItem({ workspace, onSelect }: WorkspaceItemProps) {
+function WorkspaceItem({ workspace, isActive, onSelect }: WorkspaceItemProps) {
     const content = (
         <>
             <div className="flex size-6 shrink-0 items-center justify-center rounded-md border">
@@ -127,16 +127,18 @@ function WorkspaceItem({ workspace, onSelect }: WorkspaceItemProps) {
         </>
     );
 
+    const itemClassName = `gap-2 p-2 ${isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-border' : ''}`;
+
     if (workspace.url) {
         return (
-            <DropdownMenuItem asChild className="gap-2 p-2">
+            <DropdownMenuItem asChild className={itemClassName}>
                 <Link href={workspace.url}>{content}</Link>
             </DropdownMenuItem>
         );
     }
 
     return (
-        <DropdownMenuItem onClick={() => onSelect(workspace)} className="gap-2 p-2">
+        <DropdownMenuItem onClick={() => onSelect(workspace)} className={itemClassName}>
             {content}
         </DropdownMenuItem>
     );
