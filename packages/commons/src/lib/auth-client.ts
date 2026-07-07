@@ -11,6 +11,7 @@ export const authClient = {
         redirectUri: string;
         scope?: string;
         state?: string;
+        deviceId?: string;
         driver?: AxiosInstance;
     }) {
         const driver = props.driver || axios;
@@ -23,6 +24,7 @@ export const authClient = {
             redirectUri: props.redirectUri,
             scope: props.scope,
             state: props.state,
+            deviceId: props.deviceId,
             codeChallenge,
         };
 
@@ -238,7 +240,11 @@ export const authClient = {
             };
         }
     },
-    async signOut(props: { refreshToken: string; driver?: AxiosInstance }) {
+    async signOut(props: {
+        refreshToken: string;
+        untrustThisDevice?: boolean;
+        driver?: AxiosInstance;
+    }) {
         const driver = props.driver || axios;
 
         try {
@@ -246,6 +252,9 @@ export const authClient = {
                 headers: {
                     Authorization: `Bearer ${props.refreshToken}`,
                 },
+                ...(props.untrustThisDevice && {
+                    data: { untrustThisDevice: true },
+                }),
             });
 
             return {

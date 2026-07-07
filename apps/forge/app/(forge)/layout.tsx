@@ -1,5 +1,6 @@
-import { FORGE_APP_BASE_URL } from '@repo/commons/constant/base';
+import { FORGE_APP_BASE_URL, MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
 import { FORGE_CLIENT_ID } from '@repo/commons/constant/client-id';
+import LogoutConfirmDialog from '@repo/shadcn-ui/custom-components/logout-confirm-dialog';
 import AuthGuard from '@repo/shadcn-ui/guards/auth-guard';
 import { ForgeApolloProvider } from '@/root/components/providers/forge-apollo-provider';
 import DashboardContainer from '@/root/components/container/dashboard-container';
@@ -23,6 +24,7 @@ export default function layout({
                     switcherLabel="Projects"
                 >
                     <DashboardContainer>{children}</DashboardContainer>
+                    <LogoutConfirmDialog redirectTo={MAIN_APP_BASE_URL} />
                 </DashboardProvider>
             </ForgeApolloProvider>
         </AuthGuard>

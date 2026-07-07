@@ -4,6 +4,7 @@ import { APP_NAME, navigationList, navigationUserItemList } from '@/root/libs/da
 import { DashboardProvider } from '@/shadcn/dashboards/dashboard-01';
 import { MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
 import { MAIN_CLIENT_ID } from '@repo/commons/constant/client-id';
+import LogoutConfirmDialog from '@repo/shadcn-ui/custom-components/logout-confirm-dialog';
 import AuthGuard from '@repo/shadcn-ui/guards/auth-guard';
 import { Metadata } from 'next';
 
@@ -25,6 +26,7 @@ export default function layout({
             >
                 <DashboardContainer>{children}</DashboardContainer>
                 <SettingDialog />
+                <LogoutConfirmDialog redirectTo="/" />
             </DashboardProvider>
         </AuthGuard>
     );

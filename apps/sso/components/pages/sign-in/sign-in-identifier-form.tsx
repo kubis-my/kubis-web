@@ -8,7 +8,11 @@ import { toast } from 'sonner';
 import { MAIN_CLIENT_ID } from '@repo/commons/constant/client-id';
 import { APP_NAME, MAIN_APP_BASE_URL } from '@repo/commons/constant/base';
 import { authClient } from '@repo/commons/lib/auth-client';
-import { setToken, SESSION_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
+import {
+    getOrCreateDeviceId,
+    setToken,
+    SESSION_TOKEN_KEY,
+} from '@repo/commons/utils/storage-helpers';
 import { useSearchParams } from 'next/navigation';
 import KubisSvg from '@repo/shadcn-ui/custom-components/kubis-svg';
 import { useCountdown } from '@repo/shadcn-ui/hooks/use-countdown';
@@ -71,6 +75,7 @@ export default function SignInWithIdentifierForm() {
                 password,
                 clientId,
                 redirectUri,
+                deviceId: getOrCreateDeviceId() ?? undefined,
             });
 
             if (code === 200) {

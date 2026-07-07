@@ -2,25 +2,12 @@
 
 import Link from 'next/link';
 import { BreadcrumbItem, NavMainItem, NavUserItem } from '@/shadcn/dashboards/dashboard-02/types';
-import {
-    IconLogout,
-    IconHelp,
-    IconInfoCircle,
-} from '@tabler/icons-react';
-import {
-    FileText,
-    Flag,
-    Layers,
-    LayoutGrid,
-    MessageSquare,
-    Receipt,
-    Settings,
-} from 'lucide-react';
+import { IconLogout, IconHelp, IconInfoCircle } from '@tabler/icons-react';
+import { FileText, Flag, Layers, LayoutGrid, MessageSquare, Receipt, Settings } from 'lucide-react';
 import { ROUTE } from './constants';
 import { env } from '@repo/commons/constant/env';
-import { authClient } from '@repo/commons/lib/auth-client';
-import { getToken, clearAllTokens, REFRESH_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
 import { formatCount } from '@repo/commons/utils/number';
+import { openLogoutConfirmDialog } from '@repo/shadcn-ui/custom-components/logout-confirm-dialog';
 
 export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainItem[] {
     const threadsUnreadLabel = formatCount(unreadCount);
@@ -86,7 +73,10 @@ export function getProjectNavMain(projectId: string, unreadCount = 0): NavMainIt
 
 export function getBreadcrumbForPath(pathname: string, projectId?: string): BreadcrumbItem[] {
     if (!projectId) {
-        if (pathname === ROUTE.FORGE.PROJECT_NEW || pathname.startsWith(`${ROUTE.FORGE.PROJECT_NEW}/`)) {
+        if (
+            pathname === ROUTE.FORGE.PROJECT_NEW ||
+            pathname.startsWith(`${ROUTE.FORGE.PROJECT_NEW}/`)
+        ) {
             return [{ name: 'Projects', url: ROUTE.FORGE.HOME }, { name: 'New' }];
         }
 
@@ -158,15 +148,7 @@ export const navigationUserItemList: NavUserItem[] = [
         icon: <IconLogout />,
         separator: true,
         async action() {
-            try {
-                const refreshToken = getToken(REFRESH_TOKEN_KEY);
-                if (refreshToken) {
-                    await authClient.signOut({ refreshToken });
-                }
-            } finally {
-                clearAllTokens();
-                window.location.href = env.NEXT_PUBLIC_MAIN_APP_BASE_URL;
-            }
+            openLogoutConfirmDialog();
         },
     },
 ];

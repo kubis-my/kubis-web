@@ -11,8 +11,7 @@ import {
     IconUserPlus,
 } from '@tabler/icons-react';
 import { ROUTE } from './constants';
-import { authClient } from '@repo/commons/lib/auth-client';
-import { getToken, clearAllTokens, REFRESH_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
+import { openLogoutConfirmDialog } from '@repo/shadcn-ui/custom-components/logout-confirm-dialog';
 import { openSettingsDialog } from '../components/pages/settings/setting-dialog';
 
 export const APP_NAME = 'My Account';
@@ -75,16 +74,8 @@ export const navigationUserItemList: NavUserItem[] = [
         name: 'Log out',
         icon: <IconLogout />,
         separator: true,
-        async action(e) {
-            try {
-                const refreshToken = getToken(REFRESH_TOKEN_KEY);
-                if (refreshToken) {
-                    await authClient.signOut({ refreshToken });
-                }
-            } finally {
-                clearAllTokens();
-                window.location.href = '/';
-            }
+        async action() {
+            openLogoutConfirmDialog();
         },
     },
 ];
