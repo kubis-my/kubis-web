@@ -47,6 +47,12 @@ export enum ProjectStatus {
     CANCELLED = 'CANCELLED',
 }
 
+export enum PinnedPlace {
+    TOP = 'TOP',
+    MIDDLE = 'MIDDLE',
+    BOTTOM = 'BOTTOM',
+}
+
 export enum ProjectContextValueType {
     STRING = 'STRING',
     SECURE = 'SECURE',
@@ -68,6 +74,9 @@ export interface ProjectPaginationInput {
     cursor?: Nullable<number>;
     take: number;
     status?: Nullable<ProjectStatus>;
+    includeProjectIds?: Nullable<string[]>;
+    pinnedPlace?: Nullable<PinnedPlace>;
+    keepCurrentPage?: Nullable<boolean>;
 }
 
 export interface CreateProjectInput {

@@ -13,6 +13,7 @@ import { SocketRoomEvent, ThreadEvent } from '@repo/commons/constant/web-socket'
 import { useSocket } from '@/shadcn/providers/socket-provider';
 import { Folder } from 'lucide-react';
 import { GET_PROJECTS } from '@/root/components/pages/project-root/projects-container';
+import { PinnedPlace } from '@repo/commons/types/forge-service-schema.type';
 
 interface GetProjectUnreadResponse {
     getProjectForForge: { publicId: string; userOverview: { unreadCount: number } };
@@ -66,22 +67,32 @@ export default function DashboardContainer({ children }: Readonly<{ children: Re
     const unreadCount = unreadData?.getProjectForForge?.userOverview?.unreadCount ?? 0;
 
     const { data: projectsData, loading: projectsLoading } = useQuery(GET_PROJECTS, {
-        variables: { pagination: { take: PROJECT_PAGINATION_SIZE } },
+        variables: {
+            pagination: {
+                take: 6,
+                includeProjectIds: [projectId ?? ""].filter(Boolean),
+                pinnedPlace: PinnedPlace.MIDDLE,
+                keepCurrentPage: false
+            }
+        },
         skip: !projectId,
     });
 
     const workspaces = useMemo(() => {
         return (projectsData?.getProjectsForForge.data ?? [])
-            .slice(0, 5)
-            .filter(Boolean)
             .map((project) => ({
                 id: project.publicId,
                 name: project.name,
                 logo: Folder,
                 subtitle: STATUS_LABEL[project.status] ?? '',
-                url: ROUTE.FORGE.PROJECT_DETAIL(project.publicId),
+                url: projectId
+                    ? currentPathname.replace(
+                        ROUTE.FORGE.PROJECT_DETAIL(projectId),
+                        ROUTE.FORGE.PROJECT_DETAIL(project.publicId),
+                    )
+                    : ROUTE.FORGE.PROJECT_DETAIL(project.publicId),
             }));
-    }, [projectsData]);
+    }, [projectsData, projectId, currentPathname]);
 
     useEffect(() => {
         updateWorkspaces(workspaces);
