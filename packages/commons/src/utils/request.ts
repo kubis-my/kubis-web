@@ -1,6 +1,6 @@
 export const getDefaultHeaders = (
     endpoints: string[],
-    options?: { scriptSrc?: string[]; frameSrc?: string[] },
+    options?: { scriptSrc?: string[]; frameSrc?: string[]; frameAncestors?: string[] },
 ) => {
     const origins = endpoints.filter(Boolean).map((val) => new URL(val).origin);
 
@@ -31,6 +31,10 @@ export const getDefaultHeaders = (
     const frameSrc = options?.frameSrc?.length
         ? `frame-src 'self' ${options.frameSrc.join(' ')}`
         : null;
+
+    const frameAncestors = options?.frameAncestors?.length
+        ? `frame-ancestors 'self' ${options.frameAncestors.join(' ')}`
+        : "frame-ancestors 'self'";
 
     return [
         {
@@ -75,7 +79,7 @@ export const getDefaultHeaders = (
                         "font-src 'self' data:",
                         `connect-src ${sources.join(' ')}`,
                         frameSrc,
-                        "frame-ancestors 'self'",
+                        frameAncestors,
                         "base-uri 'self'",
                         "form-action 'self'",
                     ]

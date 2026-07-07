@@ -8,10 +8,10 @@ const nextConfig: NextConfig = {
         root: path.join(__dirname, '../../'),
     },
     async headers() {
-        return getDefaultHeaders([
-            process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL!,
-            process.env.NEXT_PUBLIC_AUTH_URL!,
-        ]);
+        return getDefaultHeaders(
+            [process.env.NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL!, process.env.NEXT_PUBLIC_AUTH_URL!],
+            { frameSrc: [process.env.NEXT_PUBLIC_FORGE_APP_BASE_URL!] },
+        );
     },
 };
 

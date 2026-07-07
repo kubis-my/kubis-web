@@ -136,22 +136,50 @@ export default function AppShowcase() {
                         </div>
 
                         {/* Visual */}
-                        <div
-                            className={cn(
-                                'relative hidden h-64 w-full overflow-hidden rounded-2xl bg-linear-to-br md:block md:h-[360px]',
-                                app.gradient,
-                                i % 2 === 1 && 'md:order-1',
-                            )}
-                        >
-                            <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                                <div className="h-64 w-64 rounded-full bg-white blur-3xl" />
-                            </div>
-                            <div className="absolute right-6 bottom-6">
-                                <span className="text-6xl font-black tracking-tighter text-white/20 md:text-7xl">
-                                    {app.name}
+                        {!app.comingSoon ? (
+                            <div
+                                className={cn(
+                                    'relative flex h-48 w-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl shadow-gray-900/5 md:h-[360px] dark:border-gray-800 dark:bg-gray-950 dark:shadow-black/20',
+                                    i % 2 === 1 && 'md:order-1',
+                                )}
+                            >
+                                <div className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-green-500/20 blur-3xl" />
+
+                                <span className="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-white/90 px-2 py-0.5 text-[11px] font-medium text-green-700 shadow-sm dark:border-green-900 dark:bg-gray-950/80 dark:text-green-400">
+                                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
+                                    Live preview
                                 </span>
+
+                                {/* Scaled iframe preview */}
+                                <div className="relative flex-1 overflow-hidden bg-gray-100 dark:bg-gray-900">
+                                    <iframe
+                                        src={FORGE_APP_BASE_URL || '/forge'}
+                                        title="Forge live preview"
+                                        tabIndex={-1}
+                                        loading="lazy"
+                                        className="pointer-events-none absolute top-0 left-0 origin-top-left border-0"
+                                        style={{ width: '265%', height: '250%', transform: 'scale(0.4)' }}
+                                    />
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div
+                                className={cn(
+                                    'relative hidden h-64 w-full overflow-hidden rounded-2xl bg-linear-to-br md:block md:h-[360px]',
+                                    app.gradient,
+                                    i % 2 === 1 && 'md:order-1',
+                                )}
+                            >
+                                <div className="absolute inset-0 flex items-center justify-center opacity-10">
+                                    <div className="h-64 w-64 rounded-full bg-white blur-3xl" />
+                                </div>
+                                <div className="absolute right-6 bottom-6">
+                                    <span className="text-6xl font-black tracking-tighter text-white/20 md:text-7xl">
+                                        {app.name}
+                                    </span>
+                                </div>
+                            </div>
+                        )}
                     </article>
                 ))}
             </div>
