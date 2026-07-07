@@ -64,7 +64,7 @@ export default function Footer() {
                                 {footer.nav.pricing}
                             </Link>
                             <Link
-                                href={`${process.env.NEXT_PUBLIC_MAIN_APP_BASE_URL ?? 'https://kubis.my'}/author`}
+                                href={process.env.NEXT_PUBLIC_MAIN_APP_BASE_URL ?? 'https://kubis.my'}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-sm text-gray-400 transition-colors hover:text-white"
