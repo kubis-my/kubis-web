@@ -369,11 +369,20 @@ export interface UserAccount {
     branch: Branch;
 }
 
+export interface CredentialTelegramTwoFactor {
+    linkedAt: DateTime;
+}
+
+export interface CredentialTwoFactor {
+    email: boolean;
+    telegram?: Nullable<CredentialTelegramTwoFactor>;
+}
+
 export interface Credential {
     publicId: string;
     email: string;
     username?: Nullable<string>;
-    isEnable2FA: boolean;
+    twoFactor: CredentialTwoFactor;
     createdAt: DateTime;
     updatedAt: DateTime;
 }

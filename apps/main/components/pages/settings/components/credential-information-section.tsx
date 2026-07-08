@@ -42,8 +42,7 @@ import { toast } from 'sonner';
 import { useProfile } from '../profile-container';
 import { errorDict } from '@/root/libs/dict/error-dict';
 import { authClient } from '@repo/commons/lib/auth-client';
-import { getToken, ACCESS_TOKEN_KEY } from '@repo/commons/utils/storage-helpers';
-import axios from 'axios';
+import { createAuthDriver } from '@repo/commons/utils/auth';
 
 type CredentialFormData = {
     email: string;
@@ -161,10 +160,7 @@ export default function CredentialInformationSection() {
                 return;
             }
 
-            const accessToken = getToken(ACCESS_TOKEN_KEY);
-            const driver = axios.create({
-                headers: { Authorization: `Bearer ${accessToken}` },
-            });
+            const driver = createAuthDriver();
 
             const { code, raw } = await authClient.updateCredential({ ...payload, driver });
 
@@ -227,10 +223,7 @@ export default function CredentialInformationSection() {
         setOtpValidation({});
 
         try {
-            const accessToken = getToken(ACCESS_TOKEN_KEY);
-            const driver = axios.create({
-                headers: { Authorization: `Bearer ${accessToken}` },
-            });
+            const driver = createAuthDriver();
 
             const { code, raw } = await authClient.updateCredentialVerifyOTP({
                 token: verificationToken,

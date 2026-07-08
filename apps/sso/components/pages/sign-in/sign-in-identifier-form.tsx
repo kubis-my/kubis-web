@@ -29,6 +29,7 @@ export default function SignInWithIdentifierForm() {
     const [password, setPassword] = useState('');
     const [otp, setOtp] = useState('');
     const [otpEmail, setOtpEmail] = useState('');
+    const [otpChannel, setOtpChannel] = useState<'EMAIL' | 'TELEGRAM'>('EMAIL');
     const [otpToken, setOtpToken] = useState('');
     const [codeVerifier, setCodeVerifier] = useState('');
     const [clientId, setClientId] = useState('');
@@ -84,6 +85,7 @@ export default function SignInWithIdentifierForm() {
                     setCodeVerifier(raw.verifier ?? '');
                     setStage('OTP');
                     setOtp('');
+                    setOtpChannel(raw.channel === 'TELEGRAM' ? 'TELEGRAM' : 'EMAIL');
                     setOtpEmail(raw.email || '');
                     setOtpExpiresAt(parseOtpExpiredAt(raw.expiredAt));
                 } else if (raw.sessionToken) {
@@ -169,6 +171,7 @@ export default function SignInWithIdentifierForm() {
             if (code === 200 && raw.token) {
                 setOtpToken(raw.token);
                 setOtp('');
+                setOtpChannel(raw.channel === 'TELEGRAM' ? 'TELEGRAM' : 'EMAIL');
                 setOtpEmail(raw.email || otpEmail);
                 setOtpExpiresAt(parseOtpExpiredAt(raw.expiredAt));
                 toast.success('Verification code resent successfully', { position: 'top-center' });
@@ -236,10 +239,17 @@ export default function SignInWithIdentifierForm() {
                         ) : (
                             <>
                                 <h1 className="text-xl font-bold">Verify your login</h1>
-                                <p className="text-muted-foreground text-sm">
-                                    Enter the verification code we sent to your email address:{' '}
-                                    <span className="font-medium">{otpEmail}</span>.
-                                </p>
+                                {otpChannel === 'TELEGRAM' ? (
+                                    <p className="text-muted-foreground text-sm">
+                                        Enter the verification code we sent to your{' '}
+                                        <span className="font-medium">Telegram</span> account.
+                                    </p>
+                                ) : (
+                                    <p className="text-muted-foreground text-sm">
+                                        Enter the verification code we sent to your email address:{' '}
+                                        <span className="font-medium">{otpEmail}</span>.
+                                    </p>
+                                )}
                             </>
                         )}
                     </div>

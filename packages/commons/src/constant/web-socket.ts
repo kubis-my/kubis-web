@@ -1,5 +1,6 @@
 export const NotificationEvent = {
     NEW_LOGIN: 'new-login',
+    TELEGRAM_2FA_UPDATED: 'telegram-2fa-updated',
 };
 
 export const SocketRoomEvent = {

@@ -552,6 +552,64 @@ export const authClient = {
             };
         }
     },
+    async setupTelegram2FA(props: { driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
+
+        try {
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.TELEGRAM.CREDENTIAL_SETUP);
+
+            return {
+                code: 200,
+                raw: data as { link: string; expiredAt: string },
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
+    async disableTelegram2FA(props: { driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
+
+        try {
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.TELEGRAM.CREDENTIAL_DISABLE);
+
+            return {
+                code: 200,
+                raw: data as { success: boolean },
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
     async updateCredentialVerifyOTP(props: {
         token: string;
         otpCode: string;

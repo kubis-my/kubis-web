@@ -20,7 +20,12 @@ const GET_CREDENTIAL: TypedDocumentNode<GetCredentialResponse, GetCredentialVari
             publicId
             email
             username
-            isEnable2FA
+            twoFactor {
+                email
+                telegram {
+                    linkedAt
+                }
+            }
             createdAt
             updatedAt
         }

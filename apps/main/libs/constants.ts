@@ -17,6 +17,8 @@ export const COMPANY_PAGINATION_SIZE = 10;
 export const CREDENTIAL_DEVICE_PAGINATION_SIZE = 10;
 export const INVITATION_PAGINATION_SIZE = 10;
 
+export const FALLBACK_SETUP_TELEGRAM_EXPIRE_MS = 10 * 60 * 1_000;
+
 export const activityTypeConfig = {
     create: {
         variant: 'default' as const,
