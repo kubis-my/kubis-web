@@ -13,7 +13,6 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@repo/shadcn-ui/components/sheet';
-import { SSO_APP_BASE_URL } from '@repo/commons/constant/base';
 import { getInitials } from '@repo/commons/utils/initials';
 import { scrollToSection } from '@repo/commons/utils/dom';
 import { useAuth } from '@repo/shadcn-ui/providers/auth-provider';
@@ -31,8 +30,8 @@ export default function Navbar() {
 
     const initials = getInitials(
         authUser?.displayName ||
-            `${authUser?.firstName ?? ''} ${authUser?.lastName ?? ''}`.trim() ||
-            authUser?.nickname,
+        `${authUser?.firstName ?? ''} ${authUser?.lastName ?? ''}`.trim() ||
+        authUser?.nickname,
     );
 
     return (
@@ -89,7 +88,7 @@ export default function Navbar() {
                             asChild
                             className="hidden bg-[#4CAF50] hover:bg-[#43A047] sm:inline-flex"
                         >
-                            <Link href={`${SSO_APP_BASE_URL}/sign-in`}>Sign In</Link>
+                            <Link href={"/my-account"}>Sign In</Link>
                         </Button>
                     )}
 
@@ -146,7 +145,7 @@ export default function Navbar() {
                                             asChild
                                             className="w-full bg-[#4CAF50] hover:bg-[#43A047]"
                                         >
-                                            <Link href={`${SSO_APP_BASE_URL}/sign-in`}>
+                                            <Link href={"/my-account"}>
                                                 Sign In
                                             </Link>
                                         </Button>
