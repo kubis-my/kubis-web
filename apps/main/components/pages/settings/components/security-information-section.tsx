@@ -172,7 +172,9 @@ export default function SecurityInformationSection() {
                                     Email
                                 </Label>
                                 <p className="text-muted-foreground text-xs">
-                                    Primary channel for sign-in verification and account recovery
+                                    {telegram
+                                        ? 'Fallback channel, also used to verify email address changes'
+                                        : 'Primary channel for sign-in verification and account recovery'}
                                 </p>
                             </div>
                             <Switch checked disabled />
@@ -184,7 +186,7 @@ export default function SecurityInformationSection() {
                                 </Label>
                                 <p className="text-muted-foreground text-xs">
                                     {telegram
-                                        ? 'Optional channel for sign-in verification, security alerts and Kubis notifications'
+                                        ? 'Primary channel for verification codes, security alerts and Kubis notifications'
                                         : 'Connect Telegram to receive verification codes, security alerts and Kubis notifications'}
                                 </p>
                             </div>

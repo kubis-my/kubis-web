@@ -85,6 +85,7 @@ export default function CredentialInformationSection() {
     const [otpValidation, setOtpValidation] = useState<Record<string, string[]>>({});
     const [verificationToken, setVerificationToken] = useState('');
     const [maskedOtpEmail, setMaskedOtpEmail] = useState('');
+    const [otpChannel, setOtpChannel] = useState<'EMAIL' | 'TELEGRAM'>('EMAIL');
     const [otpCode, setOtpCode] = useState('');
     const [otpExpiresAt, setOtpExpiresAt] = useState<number>(Date.now() + FALLBACK_OTP_EXPIRE_MS);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -168,7 +169,11 @@ export default function CredentialInformationSection() {
                 const token = (raw as { token?: string }).token;
 
                 if (token) {
+                    const channel =
+                        (raw as { channel?: string }).channel === 'TELEGRAM' ? 'TELEGRAM' : 'EMAIL';
+
                     setVerificationToken(token);
+                    setOtpChannel(channel);
                     setMaskedOtpEmail((raw as { email?: string }).email ?? '');
                     setOtpValidation({});
                     setOtpCode('');
@@ -176,9 +181,12 @@ export default function CredentialInformationSection() {
                     setOpen(false);
                     setOpenOtpDialog(true);
 
-                    toast.success('Verification code sent to your email.', {
-                        position: 'top-center',
-                    });
+                    toast.success(
+                        channel === 'TELEGRAM'
+                            ? 'Verification code sent to your Telegram.'
+                            : 'Verification code sent to your email.',
+                        { position: 'top-center' },
+                    );
                     return;
                 }
 
@@ -438,13 +446,23 @@ export default function CredentialInformationSection() {
                         <DialogHeader>
                             <DialogTitle>Verify OTP</DialogTitle>
                             <DialogDescription>
-                                Enter the OTP code sent to your email{' '}
-                                {maskedOtpEmail ? (
-                                    <span className="font-medium">{maskedOtpEmail}</span>
+                                {otpChannel === 'TELEGRAM' ? (
+                                    <>
+                                        Enter the OTP code sent to your{' '}
+                                        <span className="font-medium">Telegram</span> account to
+                                        confirm credential changes.
+                                    </>
                                 ) : (
-                                    'address'
-                                )}{' '}
-                                to confirm credential changes.
+                                    <>
+                                        Enter the OTP code sent to your email{' '}
+                                        {maskedOtpEmail ? (
+                                            <span className="font-medium">{maskedOtpEmail}</span>
+                                        ) : (
+                                            'address'
+                                        )}{' '}
+                                        to confirm credential changes.
+                                    </>
+                                )}
                             </DialogDescription>
                         </DialogHeader>
 

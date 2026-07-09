@@ -34,6 +34,7 @@ export default function ForgotPasswordContainer() {
     const [password, setPassword] = useState('');
     const [otp, setOtp] = useState('');
     const [otpEmail, setOtpEmail] = useState('');
+    const [otpChannel, setOtpChannel] = useState<'EMAIL' | 'TELEGRAM'>('EMAIL');
     const [otpExpiresAt, setOtpExpiresAt] = useState<number>(Date.now() + FALLBACK_OTP_EXPIRE_MS);
     const [formValidation, setFormValidation] = useState<Record<string, string[]>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,6 +62,7 @@ export default function ForgotPasswordContainer() {
                 setOtpToken(raw.token);
                 setStage('OTP');
                 setOtp('');
+                setOtpChannel(raw.channel === 'TELEGRAM' ? 'TELEGRAM' : 'EMAIL');
                 setOtpEmail(raw.email || email);
                 setOtpExpiresAt(parseOtpExpiredAt(raw.expiredAt));
                 return;
@@ -177,11 +179,22 @@ export default function ForgotPasswordContainer() {
                             </>
                         ) : (
                             <>
-                                <h1 className="text-xl font-bold">Verify your email</h1>
-                                <p className="text-muted-foreground text-sm">
-                                    Enter the verification code we sent to your email address:{' '}
-                                    <span className="font-medium">{otpEmail}</span>.
-                                </p>
+                                <h1 className="text-xl font-bold">
+                                    {otpChannel === 'TELEGRAM'
+                                        ? 'Verify your identity'
+                                        : 'Verify your email'}
+                                </h1>
+                                {otpChannel === 'TELEGRAM' ? (
+                                    <p className="text-muted-foreground text-sm">
+                                        Enter the verification code we sent to your{' '}
+                                        <span className="font-medium">Telegram</span> account.
+                                    </p>
+                                ) : (
+                                    <p className="text-muted-foreground text-sm">
+                                        Enter the verification code we sent to your email address:{' '}
+                                        <span className="font-medium">{otpEmail}</span>.
+                                    </p>
+                                )}
                             </>
                         )}
                     </div>
