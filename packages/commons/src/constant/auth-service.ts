@@ -24,6 +24,7 @@ export const AUTH_SERVICE_ROUTE = {
     CREDENTIAL: {
         UPDATE: `${AUTH_SVC_URL}/credential/update`,
         UPDATE_VERIFY_OTP: `${AUTH_SVC_URL}/credential/update/verify-otp`,
+        UPDATE_SESSION_TTL: `${AUTH_SVC_URL}/credential/update-session-ttl`,
     },
     TELEGRAM: {
         CREDENTIAL_SETUP: `${AUTH_SVC_URL}/telegram/credential-setup`,

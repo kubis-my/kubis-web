@@ -383,6 +383,7 @@ export interface Credential {
     email: string;
     username?: Nullable<string>;
     twoFactor: CredentialTwoFactor;
+    sessionTtlSeconds: number;
     createdAt: DateTime;
     updatedAt: DateTime;
 }

@@ -18,6 +18,8 @@ export const CREDENTIAL_DEVICE_PAGINATION_SIZE = 10;
 export const INVITATION_PAGINATION_SIZE = 10;
 
 export const FALLBACK_SETUP_TELEGRAM_EXPIRE_MS = 10 * 60 * 1_000;
+export const DAY_IN_SECONDS = 86400;
+export const DEFAULT_SESSION_TTL_SECONDS = 7 * DAY_IN_SECONDS;
 
 export const activityTypeConfig = {
     create: {
@@ -43,3 +45,9 @@ export const activityTypeConfig = {
         label: 'Logout',
     },
 };
+
+export const SESSION_TTL_OPTIONS = [
+    { label: '7 days', value: DEFAULT_SESSION_TTL_SECONDS },
+    { label: '14 days', value: 14 * DAY_IN_SECONDS },
+    { label: '30 days', value: 30 * DAY_IN_SECONDS },
+];

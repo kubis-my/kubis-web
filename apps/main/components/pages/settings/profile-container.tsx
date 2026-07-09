@@ -26,6 +26,7 @@ const GET_CREDENTIAL: TypedDocumentNode<GetCredentialResponse, GetCredentialVari
                     linkedAt
                 }
             }
+            sessionTtlSeconds
             createdAt
             updatedAt
         }

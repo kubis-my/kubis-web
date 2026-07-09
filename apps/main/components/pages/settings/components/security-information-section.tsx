@@ -6,7 +6,6 @@ import { useApolloClient } from '@apollo/client/react';
 import { authClient } from '@repo/commons/lib/auth-client';
 import { NotificationEvent } from '@repo/commons/constant/web-socket';
 import { createAuthDriver } from '@repo/commons/utils/auth';
-import { Badge } from '@/shadcn/components/badge';
 import {
     Card,
     CardContent,
@@ -30,7 +29,7 @@ import { useSocket } from '@/shadcn/providers/socket-provider';
 import { errorDict } from '@/root/libs/dict/error-dict';
 import { useProfile } from '../profile-container';
 import TelegramTwoFactorDialog from './telegram-2fa-dialog';
-import { FALLBACK_SETUP_TELEGRAM_EXPIRE_MS } from '@/root/libs/constants';
+import { DEFAULT_SESSION_TTL_SECONDS, FALLBACK_SETUP_TELEGRAM_EXPIRE_MS, SESSION_TTL_OPTIONS } from '@/root/libs/constants';
 
 export default function SecurityInformationSection() {
     const client = useApolloClient();
@@ -41,6 +40,7 @@ export default function SecurityInformationSection() {
     const [setupExpiresAt, setSetupExpiresAt] = useState<number>(Date.now());
     const [isRequestingSetup, setIsRequestingSetup] = useState(false);
     const [isDisabling, setIsDisabling] = useState(false);
+    const [isUpdatingSessionTtl, setIsUpdatingSessionTtl] = useState(false);
 
     const telegram = credential?.twoFactor?.telegram;
 
@@ -143,6 +143,49 @@ export default function SecurityInformationSection() {
         }
     };
 
+    const updateSessionTtl = async (ttlSeconds: number) => {
+        setIsUpdatingSessionTtl(true);
+
+        try {
+            const { code, raw } = await authClient.updateSessionTtl({
+                ttlSeconds,
+                driver: createAuthDriver(),
+            });
+
+            if (code === 200) {
+                await client.refetchQueries({ include: ['GetCredential'] });
+
+                const label = SESSION_TTL_OPTIONS.find(
+                    (option) => option.value === ttlSeconds,
+                )?.label;
+
+                toast.success(`Session timeout updated${label ? ` to ${label}` : ''}.`, {
+                    position: 'top-center',
+                });
+                return;
+            }
+
+            const errorId = (raw as { id?: string }).id;
+            if (errorId && errorId in errorDict) {
+                toast.error(errorDict[errorId as keyof typeof errorDict], {
+                    position: 'top-center',
+                });
+                return;
+            }
+
+            toast.error('Failed to update session timeout. Please try again.', {
+                position: 'top-center',
+            });
+        } catch (error) {
+            console.error('Session timeout update error:', error);
+            toast.error('Failed to update session timeout. Please try again.', {
+                position: 'top-center',
+            });
+        } finally {
+            setIsUpdatingSessionTtl(false);
+        }
+    };
+
     if (isFetchingCredential)
         return (
             <TabsContent value="security" className="flex-1">
@@ -211,31 +254,39 @@ export default function SecurityInformationSection() {
                     <div className="flex items-center justify-between">
                         <div>
                             <CardTitle className="font-semibold">Session Preferences</CardTitle>
-                            <CardDescription className="text-xs">
-                                Configure your session timeout settings
+                            <CardDescription className="text-xs mt-1">
+                                Control how long you stay signed in
                             </CardDescription>
                         </div>
-                        <Badge variant="secondary">Coming Soon</Badge>
                     </div>
                 </CardHeader>
                 <CardContent>
                     <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label className="text-muted-foreground cursor-not-allowed">
-                                Session Timeout
-                            </Label>
+                            <Label htmlFor="session-timeout-select">Session Timeout</Label>
                             <p className="text-muted-foreground text-xs">
-                                How long before your session expires
+                                How long before you must sign in again. Applies from your next
+                                sign-in.
                             </p>
                         </div>
-                        <Select defaultValue="30" disabled>
-                            <SelectTrigger className="w-40">
+                        <Select
+                            value={String(
+                                credential?.sessionTtlSeconds ?? DEFAULT_SESSION_TTL_SECONDS,
+                            )}
+                            disabled={isUpdatingSessionTtl}
+                            onValueChange={(value) => {
+                                void updateSessionTtl(Number(value));
+                            }}
+                        >
+                            <SelectTrigger id="session-timeout-select" className="w-40">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="15">15 minutes</SelectItem>
-                                <SelectItem value="30">30 minutes</SelectItem>
-                                <SelectItem value="60">60 minutes</SelectItem>
+                                {SESSION_TTL_OPTIONS.map((option) => (
+                                    <SelectItem key={option.value} value={String(option.value)}>
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>

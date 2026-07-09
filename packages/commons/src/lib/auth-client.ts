@@ -552,6 +552,37 @@ export const authClient = {
             };
         }
     },
+    async updateSessionTtl(props: { ttlSeconds: number; driver?: AxiosInstance }) {
+        const driver = props.driver || axios;
+
+        try {
+            const { data } = await driver.post(AUTH_SERVICE_ROUTE.CREDENTIAL.UPDATE_SESSION_TTL, {
+                ttlSeconds: props.ttlSeconds,
+            });
+
+            return {
+                code: 200,
+                raw: data as { success: boolean; ttlSeconds: number },
+            };
+        } catch (error) {
+            if (error instanceof AxiosError && error.response) {
+                const response = error.response;
+                const data = response.data;
+
+                if (data.id) {
+                    return {
+                        code: response.status,
+                        raw: data,
+                    };
+                }
+            }
+
+            return {
+                code: 500,
+                raw: {},
+            };
+        }
+    },
     async setupTelegram2FA(props: { driver?: AxiosInstance }) {
         const driver = props.driver || axios;
 
