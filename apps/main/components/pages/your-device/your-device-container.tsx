@@ -145,12 +145,7 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
                 if (data) {
                     client.refetchQueries({ include: ['GetCredentialDevices'] });
                     toast.success('Device access revoked', { position: 'top-center' });
-                    return;
                 }
-
-                toast.error('An unexpected error occurred. Please try again.', {
-                    position: 'top-center',
-                });
             } catch {
                 toast.error('Network error occurred. Please check your connection.', {
                     position: 'top-center',
@@ -180,12 +175,7 @@ export default function YourDeviceContainer({ children }: Readonly<{ children: R
                     `Revoked access from ${count} ${count === 1 ? 'device' : 'devices'}`,
                     { position: 'top-center' },
                 );
-                return;
             }
-
-            toast.error('An unexpected error occurred. Please try again.', {
-                position: 'top-center',
-            });
         } catch {
             toast.error('Network error occurred. Please check your connection.', {
                 position: 'top-center',

@@ -155,17 +155,17 @@ export function EditMilestoneDialog({ open, onOpenChange, milestone }: Props) {
                             return;
                         }
                     }
+
+                    toast.error('Something went wrong. Please try again.', {
+                        position: 'top-center',
+                    });
+                    return;
                 }
 
                 if (data) {
                     toast.success('Milestone updated successfully!', { position: 'top-center' });
                     onOpenChange(false);
-                    return;
                 }
-
-                toast.error('An unexpected error occurred. Please try again.', {
-                    position: 'top-center',
-                });
             } catch {
                 toast.error('Network error occurred. Please check your connection.', {
                     position: 'top-center',

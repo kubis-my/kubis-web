@@ -484,31 +484,49 @@ export default function ProjectThreads() {
         editorRef.current?.clear();
         emitTypingStop();
 
-        const result = await sendMutation({
-            variables: {
-                input: {
-                    projectPublicId: projectId,
-                    content: input,
-                    replyToPublicId: replyingToId ?? undefined,
+        try {
+            const result = await sendMutation({
+                variables: {
+                    input: {
+                        projectPublicId: projectId,
+                        content: input,
+                        replyToPublicId: replyingToId ?? undefined,
+                    },
                 },
-            },
-        });
+                errorPolicy: 'all',
+            });
 
-        const confirmed = result.data?.sendThreadMessageForForge;
-        if (confirmed) {
-            const confirmedMessage = mapGqlMessage(confirmed, authUserId);
+            if (hasGraphQLError(result.error)) {
+                setMessages((prev) => prev.filter((item) => item.id !== tempId));
 
-            setMessages((prev) => {
-                const updatedById = new Map<string, Message>();
+                toast.error('Something went wrong. Please try again.', {
+                    position: 'top-center',
+                });
+                return;
+            }
 
-                for (const message of prev) {
-                    const nextMessage = message.id === tempId ? confirmedMessage : message;
-                    updatedById.set(nextMessage.id, nextMessage);
-                }
+            const confirmed = result.data?.sendThreadMessageForForge;
+            if (confirmed) {
+                const confirmedMessage = mapGqlMessage(confirmed, authUserId);
 
-                return Array.from(updatedById.values()).sort(
-                    (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
-                );
+                setMessages((prev) => {
+                    const updatedById = new Map<string, Message>();
+
+                    for (const message of prev) {
+                        const nextMessage = message.id === tempId ? confirmedMessage : message;
+                        updatedById.set(nextMessage.id, nextMessage);
+                    }
+
+                    return Array.from(updatedById.values()).sort(
+                        (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+                    );
+                });
+            }
+        } catch {
+            setMessages((prev) => prev.filter((item) => item.id !== tempId));
+
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
             });
         }
     }, [input, replyingToId, projectId, authUserId, authUser, sendMutation, emitTypingStop]);
@@ -537,7 +555,33 @@ export default function ProjectThreads() {
 
             setReplyingToId((currentId) => (currentId === message.id ? null : currentId));
 
-            await deleteMutation({ variables: { publicId: message.id } });
+            const revertDelete = () =>
+                setMessages((prev) =>
+                    prev.map((item) =>
+                        item.id === message.id ? { ...item, deletedAt: undefined } : item,
+                    ),
+                );
+
+            try {
+                const { error } = await deleteMutation({
+                    variables: { publicId: message.id },
+                    errorPolicy: 'all',
+                });
+
+                if (hasGraphQLError(error)) {
+                    revertDelete();
+
+                    toast.error('Something went wrong. Please try again.', {
+                        position: 'top-center',
+                    });
+                }
+            } catch {
+                revertDelete();
+
+                toast.error('Network error occurred. Please check your connection.', {
+                    position: 'top-center',
+                });
+            }
         },
         [deleteMutation, authUserId],
     );
@@ -546,35 +590,49 @@ export default function ProjectThreads() {
         async (message: Message) => {
             shouldSkipNextAutoScroll.current = true;
 
-            const result = await restoreMutation({ variables: { publicId: message.id } });
+            try {
+                const result = await restoreMutation({
+                    variables: { publicId: message.id },
+                    errorPolicy: 'all',
+                });
 
-            if (hasGraphQLError(result.error)) {
-                const gqlError = result.error.errors?.[0] || result.error.graphQLErrors?.[0];
+                if (hasGraphQLError(result.error)) {
+                    const gqlError = result.error.errors?.[0] || result.error.graphQLErrors?.[0];
 
-                if (gqlError) {
-                    const err = gqlError.extensions?.originalError as
-                        | Record<string, unknown>
-                        | undefined;
+                    if (gqlError) {
+                        const err = gqlError.extensions?.originalError as
+                            | Record<string, unknown>
+                            | undefined;
 
-                    if (err?.statusCode === 403 && err?.id === 'SUPER_ADMIN_REQUIRED') {
-                        toast.error('Only Kubis Team can restore deleted messages', {
-                            position: 'top-center',
-                        });
-                        return;
+                        if (err?.statusCode === 403 && err?.id === 'SUPER_ADMIN_REQUIRED') {
+                            toast.error('Only Kubis Team can restore deleted messages', {
+                                position: 'top-center',
+                            });
+                            return;
+                        }
                     }
+
+                    toast.error('Something went wrong. Please try again.', {
+                        position: 'top-center',
+                    });
+                    return;
                 }
-            }
 
-            const restored = result.data?.restoreThreadMessageForForge;
+                const restored = result.data?.restoreThreadMessageForForge;
 
-            if (restored) {
-                setMessages((prev) =>
-                    prev.map((item) =>
-                        item.id === restored.publicId
-                            ? { ...item, content: restored.content, deletedAt: undefined }
-                            : item,
-                    ),
-                );
+                if (restored) {
+                    setMessages((prev) =>
+                        prev.map((item) =>
+                            item.id === restored.publicId
+                                ? { ...item, content: restored.content, deletedAt: undefined }
+                                : item,
+                        ),
+                    );
+                }
+            } catch {
+                toast.error('Network error occurred. Please check your connection.', {
+                    position: 'top-center',
+                });
             }
         },
         [restoreMutation],

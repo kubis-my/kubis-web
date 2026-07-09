@@ -96,34 +96,47 @@ export default function CompanyBillingAddressCard() {
 
         if (!ctx.company?.publicId) return;
 
-        const { data, error } = await upsertBillingAddress({
-            variables: {
-                companyPublicId: ctx.company.publicId,
-                input: formData,
-            },
-            errorPolicy: 'all',
-        });
+        try {
+            const { data, error } = await upsertBillingAddress({
+                variables: {
+                    companyPublicId: ctx.company.publicId,
+                    input: formData,
+                },
+                errorPolicy: 'all',
+            });
 
-        if (hasGraphQLError(error)) {
-            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+            if (hasGraphQLError(error)) {
+                const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
 
-            if (gqlError) {
-                const err = gqlError.extensions?.originalError as Record<string, any> | undefined;
+                if (gqlError) {
+                    const err = gqlError.extensions?.originalError as
+                        | Record<string, any>
+                        | undefined;
 
-                if (err?.statusCode === 400 && Array.isArray(err?.message)) {
-                    setFormValidation(
-                        convertErrorMessageListToObject(Object.keys(formData), err.message),
-                    );
-                    return;
+                    if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                        setFormValidation(
+                            convertErrorMessageListToObject(Object.keys(formData), err.message),
+                        );
+                        return;
+                    }
                 }
+
+                toast.error('Something went wrong. Please try again.', {
+                    position: 'top-center',
+                });
+                return;
             }
-        }
 
-        if (data) {
-            client.refetchQueries({ include: ['GetCompanyDetail'] });
+            if (data) {
+                client.refetchQueries({ include: ['GetCompanyDetail'] });
 
-            setOpen(false);
-            toast.success('Billing address updated successfully!', {
+                setOpen(false);
+                toast.success('Billing address updated successfully!', {
+                    position: 'top-center',
+                });
+            }
+        } catch {
+            toast.error('Network error occurred. Please check your connection.', {
                 position: 'top-center',
             });
         }

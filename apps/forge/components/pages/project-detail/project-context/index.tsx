@@ -62,7 +62,10 @@ export default function ProjectContext() {
     const [copied, setCopied] = useState(false);
 
     const [upsertEntry] = useMutation(UPSERT_CONTEXT_ENVIRONMENT);
-    const [revealSecret] = useLazyQuery(REVEAL_CONTEXT_ENVIRONMENT_SECRET, { fetchPolicy: 'no-cache' });
+    const [revealSecret] = useLazyQuery(REVEAL_CONTEXT_ENVIRONMENT_SECRET, {
+        fetchPolicy: 'no-cache',
+        errorPolicy: 'all',
+    });
 
     useEffect(() => {
         updateHeaderAction(
@@ -108,6 +111,9 @@ export default function ProjectContext() {
                         return;
                     }
                 }
+
+                toast.error('Something went wrong. Please try again.', { position: 'top-center' });
+                return;
             }
 
             if (data) {
@@ -115,7 +121,9 @@ export default function ProjectContext() {
                 setRevealDialog({ entry, value: data.revealProjectContextEnvironmentSecretForForge });
             }
         } catch {
-            toast.error('Failed to reveal secret.', { position: 'top-center' });
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         } finally {
             setRevealingId(null);
         }
@@ -151,7 +159,7 @@ export default function ProjectContext() {
                         },
                     },
                 },
-                errorPolicy: 'all'
+                errorPolicy: 'all',
             });
 
             if (hasGraphQLError(error)) {
@@ -167,6 +175,9 @@ export default function ProjectContext() {
                         return;
                     }
                 }
+
+                toast.error('Something went wrong. Please try again.', { position: 'top-center' });
+                return;
             }
 
             if (data) {
@@ -174,7 +185,9 @@ export default function ProjectContext() {
                 toast.success('Entry removed.', { position: 'top-center' });
             }
         } catch {
-            toast.error('Failed to remove entry.', { position: 'top-center' });
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         } finally {
             setDeletingId(null);
         }

@@ -158,6 +158,18 @@ export default function InvitationContainer({ children }: Readonly<{ children: R
                 });
 
                 if (hasGraphQLError(error)) {
+                    const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+                    const err = gqlError?.extensions?.originalError as
+                        | Record<string, any>
+                        | undefined;
+
+                    if (err?.statusCode === 409 && err?.id === 'INVITATION_ALREADY_RESPONDED') {
+                        toast.error('This invitation has already been responded to.', {
+                            position: 'top-center',
+                        });
+                        return;
+                    }
+
                     toast.error('Failed to accept invitation', { position: 'top-center' });
                     return;
                 }
@@ -165,12 +177,7 @@ export default function InvitationContainer({ children }: Readonly<{ children: R
                 if (data) {
                     client.refetchQueries({ include: ['GetCredentialInvitations'] });
                     toast.success('Invitation accepted', { position: 'top-center' });
-                    return;
                 }
-
-                toast.error('An unexpected error occurred. Please try again.', {
-                    position: 'top-center',
-                });
             } catch {
                 toast.error('Network error occurred. Please check your connection.', {
                     position: 'top-center',
@@ -189,6 +196,18 @@ export default function InvitationContainer({ children }: Readonly<{ children: R
                 });
 
                 if (hasGraphQLError(error)) {
+                    const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+                    const err = gqlError?.extensions?.originalError as
+                        | Record<string, any>
+                        | undefined;
+
+                    if (err?.statusCode === 409 && err?.id === 'INVITATION_ALREADY_RESPONDED') {
+                        toast.error('This invitation has already been responded to.', {
+                            position: 'top-center',
+                        });
+                        return;
+                    }
+
                     toast.error('Failed to decline invitation', { position: 'top-center' });
                     return;
                 }
@@ -196,12 +215,7 @@ export default function InvitationContainer({ children }: Readonly<{ children: R
                 if (data) {
                     client.refetchQueries({ include: ['GetCredentialInvitations'] });
                     toast.success('Invitation declined', { position: 'top-center' });
-                    return;
                 }
-
-                toast.error('An unexpected error occurred. Please try again.', {
-                    position: 'top-center',
-                });
             } catch {
                 toast.error('Network error occurred. Please check your connection.', {
                     position: 'top-center',

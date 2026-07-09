@@ -86,6 +86,11 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                             return;
                         }
                     }
+
+                    toast.error('Something went wrong. Please try again.', {
+                        position: 'top-center',
+                    });
+                    return;
                 }
 
                 if (data) {
@@ -94,14 +99,8 @@ export default function ProfileSetup({ onSuccess }: ProfileSetupProps) {
                     });
 
                     window.location.reload();
-
-                    return;
                 }
-
-                toast.error('An unexpected error occurred. Please try again.', {
-                    position: 'top-center',
-                });
-            } catch (error) {
+            } catch {
                 toast.error('Network error occurred. Please check your connection.', {
                     position: 'top-center',
                 });

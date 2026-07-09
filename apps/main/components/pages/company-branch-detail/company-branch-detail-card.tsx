@@ -82,45 +82,58 @@ export default function CompanyBranchDetailCard() {
         e.preventDefault();
         setFormValidation({});
 
-        const { data, error } = await upsertBranch({
-            variables: {
-                input: {
-                    ...formData,
-                    publicId: ctx.branch?.publicId,
-                    companyPublicId: ctx.branch?.company.publicId!,
+        try {
+            const { data, error } = await upsertBranch({
+                variables: {
+                    input: {
+                        ...formData,
+                        publicId: ctx.branch?.publicId,
+                        companyPublicId: ctx.branch?.company.publicId!,
+                    },
                 },
-            },
-            errorPolicy: 'all',
-        });
+                errorPolicy: 'all',
+            });
 
-        if (hasGraphQLError(error)) {
-            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+            if (hasGraphQLError(error)) {
+                const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
 
-            if (gqlError) {
-                const err = gqlError.extensions?.originalError as Record<string, any> | undefined;
+                if (gqlError) {
+                    const err = gqlError.extensions?.originalError as
+                        | Record<string, any>
+                        | undefined;
 
-                if (err?.statusCode === 400 && Array.isArray(err?.message)) {
-                    setFormValidation(
-                        convertErrorMessageListToObject(Object.keys(formData), err.message),
-                    );
-                    return;
+                    if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                        setFormValidation(
+                            convertErrorMessageListToObject(Object.keys(formData), err.message),
+                        );
+                        return;
+                    }
+
+                    const id = err?.id;
+
+                    if (err?.statusCode === 409 && id === 'BRANCH_CODE_ALREADY_EXISTS') {
+                        setFormValidation({
+                            code: ['A branch with this code already exists.'],
+                        });
+                        return;
+                    }
                 }
 
-                const id = err?.id;
-
-                if (err?.statusCode === 409 && id === 'BRANCH_CODE_ALREADY_EXISTS') {
-                    setFormValidation({
-                        code: ['A branch with this code already exists.'],
-                    });
-                    return;
-                }
+                toast.error('Something went wrong. Please try again.', {
+                    position: 'top-center',
+                });
+                return;
             }
-        }
 
-        if (data) {
-            client.refetchQueries({ include: ['GetBranchDetail'] });
-            toast.success('Branch updated successfully!', { position: 'top-center' });
-            setOpen(false);
+            if (data) {
+                client.refetchQueries({ include: ['GetBranchDetail'] });
+                toast.success('Branch updated successfully!', { position: 'top-center' });
+                setOpen(false);
+            }
+        } catch {
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         }
     };
 

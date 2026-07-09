@@ -86,36 +86,47 @@ export default function PersonalInformationSection() {
         e.preventDefault();
         setFormValidation({});
 
-        const { data, error } = await updateProfile({
-            variables: {
-                input: formData,
-            },
-            errorPolicy: 'all',
-        });
+        try {
+            const { data, error } = await updateProfile({
+                variables: {
+                    input: formData,
+                },
+                errorPolicy: 'all',
+            });
 
-        if (hasGraphQLError(error)) {
-            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+            if (hasGraphQLError(error)) {
+                const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
 
-            if (gqlError) {
-                const err = gqlError.extensions?.originalError as
-                    | ValidationErrorPayload
-                    | undefined;
+                if (gqlError) {
+                    const err = gqlError.extensions?.originalError as
+                        | ValidationErrorPayload
+                        | undefined;
 
-                if (err?.statusCode === 400 && Array.isArray(err?.message)) {
-                    setFormValidation(
-                        convertErrorMessageListToObject(Object.keys(formData), err.message),
-                    );
+                    if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                        setFormValidation(
+                            convertErrorMessageListToObject(Object.keys(formData), err.message),
+                        );
 
-                    return;
+                        return;
+                    }
                 }
-            }
-        }
 
-        if (data) {
-            updateAuthUser(data.updateProfile);
-            client.refetchQueries({ include: ['GetAuthUser'] });
-            setOpen(false);
-            toast.success('Personal information updated successfully!', {
+                toast.error('Something went wrong. Please try again.', {
+                    position: 'top-center',
+                });
+                return;
+            }
+
+            if (data) {
+                updateAuthUser(data.updateProfile);
+                client.refetchQueries({ include: ['GetAuthUser'] });
+                setOpen(false);
+                toast.success('Personal information updated successfully!', {
+                    position: 'top-center',
+                });
+            }
+        } catch {
+            toast.error('Network error occurred. Please check your connection.', {
                 position: 'top-center',
             });
         }

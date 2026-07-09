@@ -2,9 +2,11 @@
 
 import React, { createContext, useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { gql, TypedDocumentNode } from '@apollo/client';
 import { useMutation } from '@apollo/client/react';
 import { useAuth } from '@/shadcn/providers/auth-provider';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { Company } from '@repo/commons/types/account-service-schema.type';
 import { CreateProjectInput } from '@repo/commons/types/forge-service-schema.type';
 import { ROUTE } from '@/root/libs/constants';
@@ -94,25 +96,39 @@ export default function NewProjectContainer({ children }: Readonly<{ children: R
     }
 
     async function onSubmit() {
-        const result = await createProject({
-            variables: {
-                input: {
-                    name: form.name,
-                    companyIds: form.companyIds,
-                    background: form.background || undefined,
-                    problem: form.problem,
-                    systemNeeds: form.systemNeeds,
-                    references: form.references || undefined,
-                    expectedUsers: form.expectedUsers || undefined,
-                    notes: form.notes || undefined,
+        try {
+            const { data, error } = await createProject({
+                variables: {
+                    input: {
+                        name: form.name,
+                        companyIds: form.companyIds,
+                        background: form.background || undefined,
+                        problem: form.problem,
+                        systemNeeds: form.systemNeeds,
+                        references: form.references || undefined,
+                        expectedUsers: form.expectedUsers || undefined,
+                        notes: form.notes || undefined,
+                    },
                 },
-            },
-        });
+                errorPolicy: 'all',
+            });
 
-        const publicId = result.data?.createProjectForForge.publicId;
+            if (hasGraphQLError(error)) {
+                toast.error('Failed to create project. Please try again.', {
+                    position: 'top-center',
+                });
+                return;
+            }
 
-        if (publicId) {
-            router.push(ROUTE.FORGE.PROJECT_DETAIL(publicId));
+            const publicId = data?.createProjectForForge.publicId;
+
+            if (publicId) {
+                router.push(ROUTE.FORGE.PROJECT_DETAIL(publicId));
+            }
+        } catch {
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         }
     }
 

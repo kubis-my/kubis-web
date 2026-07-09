@@ -9,6 +9,7 @@ import { Label } from '@/shadcn/components/label';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
 import { useProjectDetail } from '../project-detail-container';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import type {
     UpdateProjectSettingVisibilityInput,
     ProjectSetting,
@@ -64,17 +65,25 @@ export default function VisibilityControlsSection() {
         setVisibility(newState);
 
         try {
-            await updateVisibility({
+            const { error } = await updateVisibility({
                 variables: {
                     input: {
                         projectPublicId: project.id,
                         visibility: newState,
                     },
                 },
+                errorPolicy: 'all',
             });
+
+            if (hasGraphQLError(error)) {
+                setVisibility(visibility);
+                toast.error('Failed to update visibility settings.', { position: 'top-center' });
+            }
         } catch {
             setVisibility(visibility);
-            toast.error('Failed to update visibility settings.', { position: 'top-center' });
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         }
     };
 

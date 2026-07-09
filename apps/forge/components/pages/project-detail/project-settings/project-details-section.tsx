@@ -21,6 +21,7 @@ import {
 } from '@/shadcn/components/select';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { useProjectDetail } from '../project-detail-container';
 import { type ProjectStatus } from '../../project-root/types';
 import {
@@ -114,7 +115,7 @@ export default function ProjectDetailsSection() {
         setSaving(true);
 
         try {
-            await updateProjectStatus({
+            const { data, error } = await updateProjectStatus({
                 variables: {
                     input: {
                         publicId: project.id,
@@ -126,11 +127,22 @@ export default function ProjectDetailsSection() {
                         expectedGoLiveAt: goLiveDate ?? null,
                     },
                 },
+                errorPolicy: 'all',
             });
-            setOriginal(formData);
-            toast.success('Project details updated.', { position: 'top-center' });
+
+            if (hasGraphQLError(error)) {
+                toast.error('Failed to update project details.', { position: 'top-center' });
+                return;
+            }
+
+            if (data) {
+                setOriginal(formData);
+                toast.success('Project details updated.', { position: 'top-center' });
+            }
         } catch {
-            toast.error('Failed to update project details.', { position: 'top-center' });
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         } finally {
             setSaving(false);
         }

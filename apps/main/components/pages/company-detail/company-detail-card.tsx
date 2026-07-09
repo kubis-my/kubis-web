@@ -78,45 +78,60 @@ export default function CompanyDetailCard() {
         e.preventDefault();
         setFormValidation({});
 
-        const { data, error } = await upsertCompany({
-            variables: {
-                input: {
-                    ...formData,
-                    publicId: ctx.company?.publicId,
+        try {
+            const { data, error } = await upsertCompany({
+                variables: {
+                    input: {
+                        ...formData,
+                        publicId: ctx.company?.publicId,
+                    },
                 },
-            },
-            errorPolicy: 'all',
-        });
+                errorPolicy: 'all',
+            });
 
-        if (hasGraphQLError(error)) {
-            const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+            if (hasGraphQLError(error)) {
+                const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
 
-            if (gqlError) {
-                const err = gqlError.extensions?.originalError as Record<string, any> | undefined;
+                if (gqlError) {
+                    const err = gqlError.extensions?.originalError as
+                        | Record<string, any>
+                        | undefined;
 
-                if (err?.statusCode === 400 && Array.isArray(err?.message)) {
-                    setFormValidation(
-                        convertErrorMessageListToObject(Object.keys(formData), err.message),
-                    );
-                    return;
+                    if (err?.statusCode === 400 && Array.isArray(err?.message)) {
+                        setFormValidation(
+                            convertErrorMessageListToObject(Object.keys(formData), err.message),
+                        );
+                        return;
+                    }
+
+                    const id = err?.id;
+
+                    if (err?.statusCode === 409 && id === 'COMPANY_REGISTRATION_NUMBER_EXISTS') {
+                        setFormValidation({
+                            registrationNo: [
+                                'A company with this registration number already exists.',
+                            ],
+                        });
+                        return;
+                    }
                 }
 
-                const id = err?.id;
-
-                if (err?.statusCode === 409 && id === 'COMPANY_REGISTRATION_NUMBER_EXISTS') {
-                    setFormValidation({
-                        registrationNo: ['A company with this registration number already exists.'],
-                    });
-                    return;
-                }
+                toast.error('Something went wrong. Please try again.', {
+                    position: 'top-center',
+                });
+                return;
             }
-        }
 
-        if (data) {
-            client.refetchQueries({ include: ['GetCompanyDetail'] });
+            if (data) {
+                client.refetchQueries({ include: ['GetCompanyDetail'] });
 
-            setOpen(false);
-            toast.success('Company updated successfully!', {
+                setOpen(false);
+                toast.success('Company updated successfully!', {
+                    position: 'top-center',
+                });
+            }
+        } catch {
+            toast.error('Network error occurred. Please check your connection.', {
                 position: 'top-center',
             });
         }

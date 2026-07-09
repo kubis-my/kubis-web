@@ -7,6 +7,7 @@ import { useMutation } from '@apollo/client/react';
 import { Switch } from '@/shadcn/components/switch';
 import { Label } from '@/shadcn/components/label';
 import { useProjectDetail } from '../project-detail-container';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import type {
     UpsertNotificationPreferenceInput,
     ProjectSetting,
@@ -60,17 +61,25 @@ export default function NotificationsSection() {
         setNotifications(newState);
 
         try {
-            await upsertNotificationPreference({
+            const { error } = await upsertNotificationPreference({
                 variables: {
                     input: {
                         projectPublicId: project.id,
                         notification: newState,
                     },
                 },
+                errorPolicy: 'all',
             });
+
+            if (hasGraphQLError(error)) {
+                setNotifications(notifications);
+                toast.error('Failed to update notification preference.', { position: 'top-center' });
+            }
         } catch {
             setNotifications(notifications);
-            toast.error('Failed to update notification preference.', { position: 'top-center' });
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         }
     };
 

@@ -249,6 +249,11 @@ export function EditVariantProductForm({
                         return;
                     }
                 }
+
+                toast.error('Something went wrong. Please try again.', {
+                    position: 'top-center',
+                });
+                return;
             }
 
             if (data) {
@@ -257,10 +262,6 @@ export function EditVariantProductForm({
                 onClose();
                 return;
             }
-
-            toast.error('An unexpected error occurred. Please try again.', {
-                position: 'top-center',
-            });
         } catch {
             toast.error('Network error occurred. Please check your connection.', {
                 position: 'top-center',

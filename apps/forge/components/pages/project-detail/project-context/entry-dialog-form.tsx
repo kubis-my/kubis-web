@@ -86,7 +86,7 @@ export function EntryDialogForm({
                     variables: {
                         input
                     },
-                    errorPolicy: 'all'
+                    errorPolicy: 'all',
                 });
 
                 if (hasGraphQLError(error)) {
@@ -120,6 +120,11 @@ export function EntryDialogForm({
                             return;
                         }
                     }
+
+                    toast.error('Something went wrong. Please try again.', {
+                        position: 'top-center',
+                    });
+                    return;
                 }
 
                 if (data) {
@@ -130,7 +135,7 @@ export function EntryDialogForm({
                     onSuccess();
                 }
             } catch {
-                toast.error(isEdit ? 'Failed to update entry.' : 'Failed to add entry.', {
+                toast.error('Network error occurred. Please check your connection.', {
                     position: 'top-center',
                 });
             }

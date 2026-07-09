@@ -218,6 +218,11 @@ export function useInvoiceForm(
                         return;
                     }
                 }
+
+                toast.error('Something went wrong. Please try again.', {
+                    position: 'top-center',
+                });
+                return;
             }
 
             if (data) {
@@ -227,7 +232,9 @@ export function useInvoiceForm(
                 onSuccess();
             }
         } catch {
-            toast.error('Failed to create invoice.', { position: 'top-center' });
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         }
     }
 

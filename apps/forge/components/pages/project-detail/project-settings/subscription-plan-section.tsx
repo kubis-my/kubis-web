@@ -23,6 +23,7 @@ import {
 import { Input } from '@/shadcn/components/input';
 import { useAuth } from '@/shadcn/providers/auth-provider';
 import { hasSuperAdminAccess } from '@repo/commons/utils/auth';
+import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { ROUTE } from '@/root/libs/constants';
 import { GET_PACKAGE_PLAN } from '@/root/components/pages/forge/pricing/graphql';
 import { bySortOrder } from '@repo/commons/utils/pagination-helpers';
@@ -79,6 +80,13 @@ const UPDATE_ONE_TIME_PAYOFF: TypedDocumentNode<
     }
 `;
 
+const UPGRADE_PLAN_ERROR_MESSAGES: Record<string, string> = {
+    PLAN_UPGRADE_NOT_ALLOWED: 'This plan upgrade is not allowed.',
+    PLAN_DOWNGRADE_NOT_ALLOWED: 'You cannot downgrade to a lower plan.',
+    PLAN_SELECTION_DISABLED: 'Plan selection is disabled for this project.',
+    PLAN_NOT_FOUND: 'The selected plan could not be found.',
+};
+
 export default function SubscriptionPlanSection() {
     const { projectId } = useParams<{ projectId: string }>();
     const { project } = useProjectDetail();
@@ -98,7 +106,7 @@ export default function SubscriptionPlanSection() {
 
     const toggleOneTimePayOff = async () => {
         try {
-            await updateOneTimePayOff({
+            const { error } = await updateOneTimePayOff({
                 variables: {
                     input: {
                         projectPublicId: project.id,
@@ -111,10 +119,17 @@ export default function SubscriptionPlanSection() {
                         isOneTimePayOff: !isOneTimePayOff,
                     },
                 },
+                errorPolicy: 'all',
                 refetchQueries: ['GetProjectForForge'],
             });
+
+            if (hasGraphQLError(error)) {
+                toast.error('Failed to update billing mode.', { position: 'top-center' });
+            }
         } catch {
-            toast.error('Failed to update billing mode.', { position: 'top-center' });
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         }
     };
 
@@ -130,18 +145,36 @@ export default function SubscriptionPlanSection() {
         setUpgradingPlanId(confirmDialog.publicId);
 
         try {
-            await upgradePlan({
+            const { data, error } = await upgradePlan({
                 variables: {
                     input: {
                         projectPublicId: projectId,
                         planPublicId: confirmDialog.publicId,
                     },
                 },
+                errorPolicy: 'all',
                 refetchQueries: ['GetProjectForForge'],
             });
-            toast.success('Subscription plan upgraded.', { position: 'top-center' });
+
+            if (hasGraphQLError(error)) {
+                const gqlError = error.errors?.[0] || error.graphQLErrors?.[0];
+                const err = gqlError?.extensions?.originalError as Record<string, any> | undefined;
+                const id = err?.id;
+
+                toast.error(
+                    (id && UPGRADE_PLAN_ERROR_MESSAGES[id]) || 'Failed to upgrade plan.',
+                    { position: 'top-center' },
+                );
+                return;
+            }
+
+            if (data) {
+                toast.success('Subscription plan upgraded.', { position: 'top-center' });
+            }
         } catch {
-            toast.error('Failed to upgrade plan.', { position: 'top-center' });
+            toast.error('Network error occurred. Please check your connection.', {
+                position: 'top-center',
+            });
         } finally {
             setUpgradingPlanId(null);
         }
