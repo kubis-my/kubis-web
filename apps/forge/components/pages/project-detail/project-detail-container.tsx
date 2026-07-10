@@ -17,6 +17,7 @@ import {
     type PaginatedInvoice,
     type InvoicePaginationInput,
 } from '@repo/commons/types/forge-service-schema.type';
+import type { Attachment } from '@repo/commons/types/forge-service-schema.type';
 import { type MilestoneStatus, type ProjectStatus } from '../project-root/types';
 import { ROUTE, THREAD_PAGINATION_SIZE, INVOICE_PAGINATION_SIZE } from '@/root/libs/constants';
 import ProjectDetailSkeleton from './project-detail-skeleton';
@@ -28,12 +29,14 @@ export type ProjectBriefData = {
     references: string;
     expectedUsers: string;
     notes: object | null;
+    attachments: Attachment[];
 };
 
 export type MilestoneNote = {
     id: string;
     date: string;
     content: object | null;
+    attachments: Attachment[];
 };
 
 export type Milestone = {
@@ -108,6 +111,15 @@ export const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariab
                 references
                 expectedUsers
                 notes
+                attachments {
+                    publicId
+                    status
+                    category
+                    filename
+                    mimeType
+                    size
+                    createdAt
+                }
             }
             milestones {
                 publicId
@@ -119,6 +131,15 @@ export const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariab
                     publicId
                     content
                     date
+                    attachments {
+                        publicId
+                        status
+                        category
+                        filename
+                        mimeType
+                        size
+                        createdAt
+                    }
                 }
             }
             userOverview {
@@ -134,6 +155,15 @@ export const GET_PROJECT: TypedDocumentNode<GetProjectResponse, GetProjectVariab
                     replyToId
                     deletedAt
                     createdAt
+                    attachments {
+                        publicId
+                        status
+                        category
+                        filename
+                        mimeType
+                        size
+                        createdAt
+                    }
                 }
                 pageInfo {
                     endCursor
@@ -281,6 +311,7 @@ export default function ProjectDetailContainer({
                 references: raw.brief?.references ?? '',
                 expectedUsers: raw.brief?.expectedUsers ?? '',
                 notes: raw.brief?.notes ?? null,
+                attachments: raw.brief?.attachments ?? [],
             },
             milestones: [...raw.milestones]
                 .sort((a, b) => a.order - b.order)
@@ -289,7 +320,12 @@ export default function ProjectDetailContainer({
                     name: m.name,
                     status: MILESTONE_STATUS_MAP[m.status],
                     estimatedDate: m.estimatedAt,
-                    notes: m.notes.map((n) => ({ id: n.publicId, date: n.date, content: n.content })),
+                    notes: m.notes.map((n) => ({
+                        id: n.publicId,
+                        date: n.date,
+                        content: n.content,
+                        attachments: n.attachments ?? [],
+                    })),
                 })),
             projectSettings: raw.projectSettings,
             subscription: raw.subscription

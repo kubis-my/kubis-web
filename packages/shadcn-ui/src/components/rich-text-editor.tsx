@@ -78,31 +78,7 @@ import {
     IconPencil,
     IconTrash,
 } from '@tabler/icons-react';
-
-type ToolbarButtonProps = {
-    onClick: () => void;
-    isActive?: boolean;
-    children: React.ReactNode;
-    title: string;
-};
-
-function ToolbarButton({ onClick, isActive, children, title }: ToolbarButtonProps) {
-    return (
-        <button
-            type="button"
-            title={title}
-            onClick={onClick}
-            className={cn(
-                'flex size-8 items-center justify-center rounded-md text-sm transition-colors',
-                isActive
-                    ? 'bg-foreground text-background'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-            )}
-        >
-            {children}
-        </button>
-    );
-}
+import ToolbarButton from '@repo/shadcn-ui/components/rich-text-editor-toolbar-button';
 
 export type RichTextEditorRef = {
     clear: () => void;
@@ -117,11 +93,21 @@ type RichTextEditorProps = {
     editorClassName?: string;
     onSubmit?: () => void;
     toolbarRightContent?: React.ReactNode;
+    toolbarLeftContent?: React.ReactNode;
 };
 
 const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
     function RichTextEditor(
-        { value, onChange, placeholder, className, editorClassName, onSubmit, toolbarRightContent },
+        {
+            value,
+            onChange,
+            placeholder,
+            className,
+            editorClassName,
+            onSubmit,
+            toolbarRightContent,
+            toolbarLeftContent,
+        },
         ref,
     ) {
         const [linkDialogOpen, setLinkDialogOpen] = React.useState(false);
@@ -325,6 +311,13 @@ const RichTextEditor = React.forwardRef<RichTextEditorRef, RichTextEditorProps>(
                         >
                             <IconLink size={14} />
                         </ToolbarButton>
+
+                        {toolbarLeftContent ? (
+                            <>
+                                <div className="bg-border mx-1 h-4 w-px" />
+                                {toolbarLeftContent}
+                            </>
+                        ) : null}
 
                         {toolbarRightContent ? (
                             <div className="ml-auto flex items-center pl-2">{toolbarRightContent}</div>

@@ -36,6 +36,9 @@ import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { toast } from 'sonner';
 import { ThreadEvent } from '@repo/commons/constant/web-socket';
 import { useSocket } from '@/shadcn/providers/socket-provider';
+import { useAttachmentUpload } from '@/root/libs/attachments/use-attachment-upload';
+import AttachmentPickerButton from '../shared/attachment-picker-button';
+import AttachmentPreviewList from '../shared/attachment-preview-list';
 
 export default function ProjectThreads() {
     const { projectId } = useParams<{ projectId: string }>();
@@ -54,6 +57,15 @@ export default function ProjectThreads() {
     const [showScrollToBottom, setShowScrollToBottom] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [remoteTypingUserIds, setRemoteTypingUserIds] = useState<string[]>([]);
+
+    const {
+        attachments: pendingAttachments,
+        addFiles,
+        removeAttachment,
+        reset: resetAttachments,
+        completedPublicIds,
+        isUploading,
+    } = useAttachmentUpload();
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -462,7 +474,10 @@ export default function ProjectThreads() {
     }, [emitTypingStop]);
 
     const sendMessage = useCallback(async () => {
-        if (!input || !projectId) return;
+        if (isUploading) return;
+        if ((!input && completedPublicIds.length === 0) || !projectId) return;
+
+        const messageContent = input ?? { type: 'doc', content: [] };
 
         const tempId = `temp-${Date.now()}`;
         const tempMessage: Message = {
@@ -473,9 +488,10 @@ export default function ProjectThreads() {
                 (authUser?.nickname ?? authUser?.displayName ?? 'Y').at(0) ?? 'Y'
             ).toUpperCase(),
             avatarClass: 'bg-violet-500 text-white',
-            content: input,
+            content: messageContent,
             timestamp: new Date(),
             replyToId: replyingToId ?? undefined,
+            attachments: [],
         };
 
         setMessages((prev) => [...prev, tempMessage]);
@@ -483,14 +499,16 @@ export default function ProjectThreads() {
         setReplyingToId(null);
         editorRef.current?.clear();
         emitTypingStop();
+        resetAttachments();
 
         try {
             const result = await sendMutation({
                 variables: {
                     input: {
                         projectPublicId: projectId,
-                        content: input,
+                        content: messageContent,
                         replyToPublicId: replyingToId ?? undefined,
+                        attachmentPublicIds: completedPublicIds.length > 0 ? completedPublicIds : undefined,
                     },
                 },
                 errorPolicy: 'all',
@@ -529,7 +547,18 @@ export default function ProjectThreads() {
                 position: 'top-center',
             });
         }
-    }, [input, replyingToId, projectId, authUserId, authUser, sendMutation, emitTypingStop]);
+    }, [
+        input,
+        replyingToId,
+        projectId,
+        authUserId,
+        authUser,
+        sendMutation,
+        emitTypingStop,
+        isUploading,
+        completedPublicIds,
+        resetAttachments,
+    ]);
 
     const replyToMessage = useCallback((message: Message) => {
         setReplyingToId(message.id);
@@ -759,6 +788,11 @@ export default function ProjectThreads() {
                         </div>
                     ) : null}
 
+                    <AttachmentPreviewList
+                        attachments={pendingAttachments}
+                        onRemove={removeAttachment}
+                    />
+
                     <RichTextEditor
                         ref={editorRef}
                         value={null}
@@ -767,9 +801,10 @@ export default function ProjectThreads() {
                         placeholder="Write a message..."
                         className="border-border/80 bg-card focus-within:border-primary/30 focus-within:ring-primary/15 overflow-hidden rounded-xl shadow-sm ring-1 ring-transparent transition-shadow"
                         editorClassName="prose-editor min-h-[46px] max-h-52 overflow-y-auto py-3 pl-4 pr-28 text-sm leading-6 focus:outline-none"
+                        toolbarLeftContent={<AttachmentPickerButton onFilesSelected={addFiles} />}
                         toolbarRightContent={
                             <p className="text-muted-foreground/75 text-[11px]">
-                                ⌘↵ / Ctrl↵ to send
+                                {isUploading ? 'Uploading…' : '⌘↵ / Ctrl↵ to send'}
                             </p>
                         }
                     />

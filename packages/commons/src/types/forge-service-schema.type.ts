@@ -58,6 +58,19 @@ export enum ProjectContextValueType {
     SECURE = 'SECURE',
 }
 
+export enum AttachmentStatus {
+    PENDING = 'PENDING',
+    PROCESSING = 'PROCESSING',
+    COMPLETED = 'COMPLETED',
+    FAILED = 'FAILED',
+}
+
+export enum AttachmentCategory {
+    IMAGE = 'IMAGE',
+    VIDEO = 'VIDEO',
+    DOCUMENT = 'DOCUMENT',
+}
+
 export interface ThreadPaginationInput {
     cursor?: Nullable<number>;
     take: number;
@@ -88,6 +101,7 @@ export interface CreateProjectInput {
     references?: Nullable<string>;
     expectedUsers?: Nullable<string>;
     notes?: Nullable<JSON>;
+    attachmentPublicIds?: Nullable<string[]>;
 }
 
 export interface AddProjectTeamMemberInput {
@@ -152,6 +166,13 @@ export interface SendThreadMessageInput {
     projectPublicId: string;
     content: JSON;
     replyToPublicId?: Nullable<string>;
+    attachmentPublicIds?: Nullable<string[]>;
+}
+
+export interface PresignAttachmentUploadInput {
+    filename: string;
+    mimeType: string;
+    size: number;
 }
 
 export interface CreateInvoiceInput {
@@ -194,6 +215,7 @@ export interface AddMilestoneNoteInput {
     milestonePublicId: string;
     content: JSON;
     date: DateTime;
+    attachmentPublicIds?: Nullable<string[]>;
 }
 
 export interface PageInfo {
@@ -214,6 +236,23 @@ export interface Brief {
     notes?: Nullable<JSON>;
     createdAt: DateTime;
     updatedAt: DateTime;
+    attachments: Attachment[];
+}
+
+export interface Attachment {
+    publicId: string;
+    status: AttachmentStatus;
+    category: AttachmentCategory;
+    filename: string;
+    mimeType: string;
+    size: number;
+    createdAt: DateTime;
+}
+
+export interface PresignedAttachmentUpload {
+    publicId: string;
+    uploadUrl: string;
+    expiresInSeconds: number;
 }
 
 export interface MilestoneNote {
@@ -222,6 +261,7 @@ export interface MilestoneNote {
     date: DateTime;
     createdAt: DateTime;
     updatedAt: DateTime;
+    attachments: Attachment[];
 }
 
 export interface Milestone {
@@ -347,6 +387,7 @@ export interface ThreadMessage {
     replyToId?: Nullable<string>;
     deletedAt?: Nullable<DateTime>;
     createdAt: DateTime;
+    attachments: Attachment[];
 }
 
 export interface ThreadPageInfo {
@@ -460,6 +501,10 @@ export interface IMutation {
         input: UpdateMilestoneInput,
     ): Milestone | Promise<Milestone>;
     addMilestoneNoteForForge(input: AddMilestoneNoteInput): MilestoneNote | Promise<MilestoneNote>;
+    presignAttachmentUploadForForge(
+        input: PresignAttachmentUploadInput,
+    ): PresignedAttachmentUpload | Promise<PresignedAttachmentUpload>;
+    completeAttachmentUploadForForge(publicId: string): boolean | Promise<boolean>;
 }
 
 export type JSON = any;

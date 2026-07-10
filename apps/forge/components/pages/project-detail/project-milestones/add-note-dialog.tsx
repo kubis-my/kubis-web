@@ -27,6 +27,9 @@ import { format } from 'date-fns';
 import { CalendarIcon, Loader2Icon } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useAttachmentUpload } from '@/root/libs/attachments/use-attachment-upload';
+import AttachmentPickerButton from '../shared/attachment-picker-button';
+import AttachmentPreviewList from '../shared/attachment-preview-list';
 
 const ADD_MILESTONE_NOTE: TypedDocumentNode<
     { addMilestoneNoteForForge: MilestoneNote },
@@ -37,6 +40,15 @@ const ADD_MILESTONE_NOTE: TypedDocumentNode<
             publicId
             content
             date
+            attachments {
+                publicId
+                status
+                category
+                filename
+                mimeType
+                size
+                createdAt
+            }
         }
     }
 `;
@@ -47,7 +59,7 @@ type Props = {
     milestonePublicId: string;
 };
 
-export function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) {
+export default function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) {
     const [content, setContent] = useState<object | null>(null);
     const [date, setDate] = useState<Date | undefined>(new Date());
     const [calendarOpen, setCalendarOpen] = useState(false);
@@ -55,11 +67,22 @@ export function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) 
 
     const [addNote, { loading }] = useMutation(ADD_MILESTONE_NOTE);
 
+    const {
+        attachments: pendingAttachments,
+        addFiles,
+        removeAttachment,
+        reset: resetAttachments,
+        completedPublicIds,
+        isUploading,
+    } = useAttachmentUpload();
+
     useEffect(() => {
         if (open) {
             setContent(null);
             setDate(new Date());
             setFormValidation({});
+        } else {
+            resetAttachments();
         }
     }, [open]);
 
@@ -73,11 +96,19 @@ export function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) 
                 return;
             }
 
+            if (isUploading) {
+                toast.error('Please wait for attachments to finish uploading.', {
+                    position: 'top-center',
+                });
+                return;
+            }
+
             try {
                 const input: AddMilestoneNoteInput = {
                     milestonePublicId,
-                    content,
+                    content: content ?? { type: 'doc', content: [] },
                     date: format(date, 'yyyy-MM-dd'),
+                    attachmentPublicIds: completedPublicIds.length > 0 ? completedPublicIds : undefined,
                 };
 
                 const { data, error } = await addNote({
@@ -118,7 +149,7 @@ export function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) 
                 });
             }
         },
-        [content, date, milestonePublicId, addNote, onOpenChange],
+        [content, date, milestonePublicId, addNote, onOpenChange, completedPublicIds, isUploading],
     );
 
     return (
@@ -163,11 +194,16 @@ export function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) 
                         </div>
                         <div className="grid gap-2">
                             <Label>Note</Label>
+                            <AttachmentPreviewList
+                                attachments={pendingAttachments}
+                                onRemove={removeAttachment}
+                            />
                             <div className="border rounded-lg overflow-hidden">
                                 <RichTextEditor
                                     value={content}
                                     onChange={setContent}
                                     placeholder="Write a milestone update..."
+                                    toolbarLeftContent={<AttachmentPickerButton onFilesSelected={addFiles} />}
                                 />
                             </div>
                             <ShowErrorText error={formValidation} field="content" />
@@ -179,9 +215,13 @@ export function AddNoteDialog({ open, onOpenChange, milestonePublicId }: Props) 
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button type="submit" disabled={loading}>
+                        <Button type="submit" disabled={loading || isUploading}>
                             {!loading ? (
-                                'Add Note'
+                                isUploading ? (
+                                    'Uploading…'
+                                ) : (
+                                    'Add Note'
+                                )
                             ) : (
                                 <>
                                     <Loader2Icon className="animate-spin" />

@@ -12,10 +12,21 @@ import RichTextEditor from '@repo/shadcn-ui/components/rich-text-editor';
 import Link from 'next/link';
 import { ROUTE } from '@/root/libs/constants';
 import { TriangleAlert } from 'lucide-react';
+import AttachmentsField from './attachments-field';
 
 export default function NewProjectForm() {
-    const { form, availableCompanies, isSubmitting, onChange, onToggleCompany, onSubmit } =
-        useNewProject();
+    const {
+        form,
+        availableCompanies,
+        isSubmitting,
+        pendingAttachments,
+        isUploading,
+        onAddFiles,
+        onRemoveAttachment,
+        onChange,
+        onToggleCompany,
+        onSubmit,
+    } = useNewProject();
 
     const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
@@ -190,17 +201,30 @@ export default function NewProjectForm() {
                             placeholder="Anything else we should know before the discovery session."
                         />
                     </div>
-                    <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm dark:border-amber-800 dark:bg-amber-950/40">
-                        <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                        <p>
-                            <span className="font-semibold text-amber-900 dark:text-amber-200">
-                                Please review carefully before submitting.
-                            </span>{' '}
-                            <span className="text-amber-800 dark:text-amber-300">
-                                Your requirements and brief cannot be edited once the project is
-                                submitted.
-                            </span>
-                        </p>
+
+                    <div className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-2">
+                            <Label>Attachments (optional)</Label>
+                            <AttachmentsField
+                                attachments={pendingAttachments}
+                                onAddFiles={onAddFiles}
+                                onRemove={onRemoveAttachment}
+                                disabled={isSubmitting}
+                            />
+                        </div>
+
+                        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm dark:border-amber-800 dark:bg-amber-950/40">
+                            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                            <p>
+                                <span className="font-semibold text-amber-900 dark:text-amber-200">
+                                    Please review carefully before submitting.
+                                </span>{' '}
+                                <span className="text-amber-800 dark:text-amber-300">
+                                    Your requirements and brief cannot be edited once the project is
+                                    submitted.
+                                </span>
+                            </p>
+                        </div>
                     </div>
                 </section>
 
@@ -208,8 +232,12 @@ export default function NewProjectForm() {
                     <Button variant="outline" asChild>
                         <Link href={ROUTE.FORGE.HOME}>Back</Link>
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Submitting...' : 'Submit Project'}
+                    <Button type="submit" disabled={isSubmitting || isUploading}>
+                        {isSubmitting
+                            ? 'Submitting...'
+                            : isUploading
+                              ? 'Uploading…'
+                              : 'Submit Project'}
                     </Button>
                 </div>
             </form>

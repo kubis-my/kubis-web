@@ -18,6 +18,7 @@ export function mapGqlMessage(msg: ThreadMessage, authUserId?: string): Message 
         timestamp: new Date(msg.createdAt),
         replyToId: msg.replyToId ?? undefined,
         deletedAt: msg.deletedAt ? new Date(msg.deletedAt) : undefined,
+        attachments: msg.attachments ?? [],
     };
 }
 

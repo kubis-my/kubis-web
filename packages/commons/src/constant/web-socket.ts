@@ -15,3 +15,7 @@ export const ThreadEvent = {
     TYPING_START: 'typing-start',
     TYPING_STOP: 'typing-stop',
 };
+
+export const AttachmentEvent = {
+    STATUS_CHANGED: 'attachment-status-changed',
+};

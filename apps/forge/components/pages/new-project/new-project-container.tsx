@@ -10,6 +10,8 @@ import { hasGraphQLError } from '@repo/commons/utils/graphql';
 import { Company } from '@repo/commons/types/account-service-schema.type';
 import { CreateProjectInput } from '@repo/commons/types/forge-service-schema.type';
 import { ROUTE } from '@/root/libs/constants';
+import { useAttachmentUpload } from '@/root/libs/attachments/use-attachment-upload';
+import type { PendingAttachment } from '@/root/libs/attachments/types';
 
 type ProjectForm = {
     name: string;
@@ -26,6 +28,10 @@ type NewProjectContextType = {
     form: ProjectForm;
     availableCompanies: Company[];
     isSubmitting: boolean;
+    pendingAttachments: PendingAttachment[];
+    isUploading: boolean;
+    onAddFiles: (files: FileList | File[]) => void;
+    onRemoveAttachment: (publicId: string) => void;
     onChange: (field: keyof Omit<ProjectForm, 'companyIds'>, value: string | object | null) => void;
     onToggleCompany: (publicId: string) => void;
     onSubmit: () => void;
@@ -78,6 +84,14 @@ export default function NewProjectContainer({ children }: Readonly<{ children: R
 
     const [createProject, { loading: isSubmitting }] = useMutation(CREATE_PROJECT);
 
+    const {
+        attachments: pendingAttachments,
+        addFiles,
+        removeAttachment,
+        completedPublicIds,
+        isUploading,
+    } = useAttachmentUpload();
+
     function onChange(field: keyof Omit<ProjectForm, 'companyIds'>, value: string | object | null) {
         setForm((prev) => ({ ...prev, [field]: value }));
     }
@@ -96,6 +110,13 @@ export default function NewProjectContainer({ children }: Readonly<{ children: R
     }
 
     async function onSubmit() {
+        if (isUploading) {
+            toast.error('Please wait for attachments to finish uploading.', {
+                position: 'top-center',
+            });
+            return;
+        }
+
         try {
             const { data, error } = await createProject({
                 variables: {
@@ -108,6 +129,8 @@ export default function NewProjectContainer({ children }: Readonly<{ children: R
                         references: form.references || undefined,
                         expectedUsers: form.expectedUsers || undefined,
                         notes: form.notes || undefined,
+                        attachmentPublicIds:
+                            completedPublicIds.length > 0 ? completedPublicIds : undefined,
                     },
                 },
                 errorPolicy: 'all',
@@ -134,7 +157,18 @@ export default function NewProjectContainer({ children }: Readonly<{ children: R
 
     return (
         <NewProjectContext.Provider
-            value={{ form, availableCompanies, isSubmitting, onChange, onToggleCompany, onSubmit }}
+            value={{
+                form,
+                availableCompanies,
+                isSubmitting,
+                pendingAttachments,
+                isUploading,
+                onAddFiles: addFiles,
+                onRemoveAttachment: removeAttachment,
+                onChange,
+                onToggleCompany,
+                onSubmit,
+            }}
         >
             {children}
         </NewProjectContext.Provider>

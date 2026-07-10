@@ -1,7 +1,7 @@
 'use client';
 
 import { Separator } from '@repo/shadcn-ui/components/separator';
-import { OverviewSection } from './overview-section';
+import OverviewSection from './overview-section';
 import { ProjectDetailsSection } from './project-details-section';
 import { StatsSection } from './stats-section';
 

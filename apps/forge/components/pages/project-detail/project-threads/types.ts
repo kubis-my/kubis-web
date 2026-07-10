@@ -1,3 +1,5 @@
+import type { Attachment } from '@repo/commons/types/forge-service-schema.type';
+
 export type Message = {
     id: string;
     senderId: string;
@@ -8,6 +10,7 @@ export type Message = {
     timestamp: Date;
     replyToId?: string;
     deletedAt?: Date;
+    attachments: Attachment[];
 };
 
 export type MessageGroup = {

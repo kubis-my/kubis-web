@@ -33,6 +33,15 @@ export const GET_THREAD_MESSAGES: TypedDocumentNode<
                 replyToId
                 deletedAt
                 createdAt
+                attachments {
+                    publicId
+                    status
+                    category
+                    filename
+                    mimeType
+                    size
+                    createdAt
+                }
             }
             pageInfo {
                 endCursor
@@ -62,6 +71,15 @@ export const SEND_MESSAGE: TypedDocumentNode<SendMessageResponse, SendMessageVar
             replyToId
             deletedAt
             createdAt
+            attachments {
+                publicId
+                status
+                category
+                filename
+                mimeType
+                size
+                createdAt
+            }
         }
     }
 `;

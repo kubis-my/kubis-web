@@ -9,6 +9,7 @@ import {
 import { cn } from '@repo/shadcn-ui/lib/utils';
 import { IconCornerUpLeft, IconRestore, IconTrash } from '@tabler/icons-react';
 import { richTextToHtml } from '@repo/shadcn-ui/components/rich-text-editor';
+import { AttachmentGallery } from '../shared/attachment-gallery';
 import { ReplyPreview } from './reply-preview';
 import type { Message, MessageGroup } from './types';
 import { formatDateTime } from '@repo/commons/utils/date';
@@ -108,7 +109,10 @@ export const MessageGroupItem = memo(function MessageGroupItem({
                                                     </p>
                                                 </div>
                                             ) : (
-                                                <MessageContent content={msg.content} />
+                                                <div className="min-w-0">
+                                                    <MessageContent content={msg.content} />
+                                                    <AttachmentGallery attachments={msg.attachments} />
+                                                </div>
                                             )}
 
                                             <p className="text-muted-foreground/70 shrink-0 text-[11px] leading-6 sm:pt-0.5">

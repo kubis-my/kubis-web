@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
                 process.env.NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL!,
                 process.env.NEXT_PUBLIC_AUTH_URL!,
                 'https://api.stripe.com',
+                'https://*.r2.cloudflarestorage.com',
             ],
             {
                 scriptSrc: ['https://js.stripe.com'],

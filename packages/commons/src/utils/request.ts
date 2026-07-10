@@ -75,7 +75,8 @@ export const getDefaultHeaders = (
                         "default-src 'self'",
                         scriptSrc,
                         "style-src 'self' 'unsafe-inline'", // unsafe-inline needed for styled-components/CSS-in-JS
-                        "img-src 'self' data: https:",
+                        "img-src 'self' data: blob: https:",
+                        "media-src 'self' blob:",
                         "font-src 'self' data:",
                         `connect-src ${sources.join(' ')}`,
                         frameSrc,

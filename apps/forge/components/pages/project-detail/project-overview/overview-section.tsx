@@ -1,9 +1,10 @@
 import { useProjectDetail } from '../project-detail-container';
+import AttachmentGrid from '../shared/attachment-grid';
 import { BriefField } from './brief-field';
 import { RichTextView } from './rich-text-view';
 import { TextField } from './text-field';
 
-export function OverviewSection() {
+export default function OverviewSection() {
     const { project } = useProjectDetail();
     const { brief } = project;
 
@@ -61,6 +62,14 @@ export function OverviewSection() {
                         />
                     </BriefField>
                 </div>
+
+                {brief.attachments.length > 0 && (
+                    <div className="px-4 py-4 sm:px-5">
+                        <BriefField label="Attachments">
+                            <AttachmentGrid attachments={brief.attachments} />
+                        </BriefField>
+                    </div>
+                )}
             </div>
         </section>
     );
