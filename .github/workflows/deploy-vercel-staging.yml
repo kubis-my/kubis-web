@@ -4,6 +4,7 @@ on:
     push:
         branches-ignore:
             - release
+            - '!ai/**'
 
 jobs:
     deploy-sso:
