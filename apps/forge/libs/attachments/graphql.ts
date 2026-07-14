@@ -1,5 +1,6 @@
 import { gql, TypedDocumentNode } from '@apollo/client';
 import type {
+    Attachment,
     PresignAttachmentUploadInput,
     PresignedAttachmentUpload,
 } from '@repo/commons/types/forge-service-schema.type';
@@ -39,5 +40,25 @@ export const COMPLETE_ATTACHMENT_UPLOAD: TypedDocumentNode<
 > = gql`
     mutation CompleteAttachmentUploadForForge($publicId: String!) {
         completeAttachmentUploadForForge(publicId: $publicId)
+    }
+`;
+
+interface AttachmentStatusResponse {
+    attachmentForForge: Pick<Attachment, 'publicId' | 'status'>;
+}
+
+interface AttachmentStatusVariables {
+    publicId: string;
+}
+
+export const ATTACHMENT_STATUS: TypedDocumentNode<
+    AttachmentStatusResponse,
+    AttachmentStatusVariables
+> = gql`
+    query AttachmentForForge($publicId: String!) {
+        attachmentForForge(publicId: $publicId) {
+            publicId
+            status
+        }
     }
 `;

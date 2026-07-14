@@ -1,15 +1,22 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useMutation } from '@apollo/client/react';
+import { useLazyQuery, useMutation } from '@apollo/client/react';
 import { toast } from 'sonner';
 import { useSocket } from '@/shadcn/providers/socket-provider';
 import { AttachmentEvent } from '@repo/commons/constant/web-socket';
 import { AttachmentStatus } from '@repo/commons/types/forge-service-schema.type';
 import { ATTACHMENT_MAX_SIZE_BYTES, resolveAttachmentCategory } from './constants';
-import { COMPLETE_ATTACHMENT_UPLOAD, PRESIGN_ATTACHMENT_UPLOAD } from './graphql';
+import {
+    ATTACHMENT_STATUS,
+    COMPLETE_ATTACHMENT_UPLOAD,
+    PRESIGN_ATTACHMENT_UPLOAD,
+} from './graphql';
 import type { PendingAttachment } from './types';
 import { isPreviewable } from './utils';
+
+const STATUS_POLL_INTERVAL_MS = 5000;
+const STATUS_POLL_MAX_ATTEMPTS = 24;
 
 export function useAttachmentUpload() {
     const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
@@ -19,6 +26,10 @@ export function useAttachmentUpload() {
     const { on, off, isConnected } = useSocket();
     const [presignUpload] = useMutation(PRESIGN_ATTACHMENT_UPLOAD);
     const [completeUpload] = useMutation(COMPLETE_ATTACHMENT_UPLOAD);
+    const [fetchAttachmentStatus] = useLazyQuery(ATTACHMENT_STATUS, {
+        fetchPolicy: 'network-only',
+    });
+    const pollAttemptsRef = useRef(new Map<string, number>());
 
     const updateAttachment = useCallback((publicId: string, patch: Partial<PendingAttachment>) => {
         setAttachments((prev) =>
@@ -140,6 +151,53 @@ export function useAttachmentUpload() {
         on(AttachmentEvent.STATUS_CHANGED, onStatusChanged);
         return () => off(AttachmentEvent.STATUS_CHANGED, onStatusChanged);
     }, [isConnected, on, off, updateAttachment]);
+
+    // Fallback for missed socket events: poll PROCESSING attachments so a dropped
+    // STATUS_CHANGED event can't leave an upload stuck and block submission
+    useEffect(() => {
+        const processingIds = attachments
+            .filter((attachment) => attachment.phase === 'PROCESSING')
+            .map((attachment) => attachment.publicId);
+
+        if (processingIds.length === 0) return;
+
+        const interval = setInterval(() => {
+            processingIds.forEach(async (publicId) => {
+                const attempts = (pollAttemptsRef.current.get(publicId) ?? 0) + 1;
+
+                if (attempts > STATUS_POLL_MAX_ATTEMPTS) {
+                    pollAttemptsRef.current.delete(publicId);
+                    updateAttachment(publicId, {
+                        phase: 'FAILED',
+                        error: 'Verification timed out',
+                    });
+                    return;
+                }
+
+                pollAttemptsRef.current.set(publicId, attempts);
+
+                try {
+                    const { data } = await fetchAttachmentStatus({ variables: { publicId } });
+                    const status = data?.attachmentForForge?.status;
+
+                    if (status === AttachmentStatus.COMPLETED) {
+                        pollAttemptsRef.current.delete(publicId);
+                        updateAttachment(publicId, { phase: 'COMPLETED' });
+                    } else if (status === AttachmentStatus.FAILED) {
+                        pollAttemptsRef.current.delete(publicId);
+                        updateAttachment(publicId, {
+                            phase: 'FAILED',
+                            error: 'Verification failed',
+                        });
+                    }
+                } catch {
+                    // Transient poll failure — the next tick retries
+                }
+            });
+        }, STATUS_POLL_INTERVAL_MS);
+
+        return () => clearInterval(interval);
+    }, [attachments, fetchAttachmentStatus, updateAttachment]);
 
     useEffect(() => {
         return () => {

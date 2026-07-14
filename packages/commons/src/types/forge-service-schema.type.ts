@@ -468,6 +468,7 @@ export interface IQuery {
     getPackagePlan(): PackagePlan | Promise<PackagePlan>;
     getMilestonesForForge(projectPublicId: string): Milestone[] | Promise<Milestone[]>;
     getMilestoneForForge(publicId: string): Milestone | Promise<Milestone>;
+    attachmentForForge(publicId: string): Attachment | Promise<Attachment>;
 }
 
 export interface IMutation {
