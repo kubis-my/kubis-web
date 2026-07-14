@@ -22,9 +22,8 @@ apps/
   forge/  Forge client project portal - default dev port 3003
 
 packages/
-  commons/            Shared constants, env schema, API clients, hooks, utilities
+  commons/            Shared constants, env schema, backend schema types, hooks, utilities
   shadcn-ui/          Shared UI components, guards, providers, dashboard blocks
-  ui/                 Additional shared UI package and component generators
   tailwind-config/    Shared Tailwind v4 / PostCSS setup
   eslint-config/      Shared ESLint flat-config presets
   typescript-config/  Shared TS config presets
@@ -92,6 +91,7 @@ NEXT_PUBLIC_FORGE_CLIENT_ID=
 NEXT_PUBLIC_ACCOUNT_SERVICE_GRAPHQL_URL=http://localhost:8003/graphql
 NEXT_PUBLIC_OPS_SERVICE_GRAPHQL_URL=http://localhost:8001/graphql
 NEXT_PUBLIC_FORGE_SERVICE_GRAPHQL_URL=http://localhost:8002/graphql
+NEXT_PUBLIC_FORGE_STRIPE_PUBLISHABLE_KEY=
 
 # SEO — search engine site verification (optional; leave blank to omit the tags)
 NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION=
@@ -129,5 +129,5 @@ Deployment is handled by GitHub Actions to Vercel:
 ## Reference Docs
 
 - `docs/ops-app-plan.md` — ops app product spec
-- `docs/forge-app-plan.md`, `docs/kubis-forge.md` — Forge product spec
 - `AGENTS.md` — contributor/agent guidelines
+- `CLAUDE.md` — Claude Code project guidance (architecture, commands, backend contract)

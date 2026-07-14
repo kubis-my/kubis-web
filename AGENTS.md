@@ -4,10 +4,12 @@
 
 `kubis-web` is a pnpm/Turborepo monorepo.
 
-- `apps/main`: main product app (Next.js, default dev port `3001`)
 - `apps/sso`: auth and OAuth app (Next.js, default dev port `3000`)
-- `packages/commons`: shared constants, API clients, and utility helpers
-- `packages/shadcn-ui`, `packages/ui`: shared UI components
+- `apps/main`: main product app (Next.js, default dev port `3001`)
+- `apps/ops`: process/production management console (Next.js, default dev port `3002`)
+- `apps/forge`: client project portal (Next.js, default dev port `3003`)
+- `packages/commons`: shared constants, env schema, backend schema types, and utility helpers
+- `packages/shadcn-ui`: shared UI components, guards, and providers
 - `packages/eslint-config`, `packages/typescript-config`, `packages/tailwind-config`: shared tooling presets
 
 Use `app/` for routes, `components/` for UI composition, and `libs/` for app-local helpers.
@@ -18,7 +20,7 @@ Run commands from repo root:
 
 - `pnpm install`: install workspace dependencies
 - `pnpm dev`: run all workspace `dev` tasks via Turbo
-- `turbo dev --filter=main` / `turbo dev --filter=sso`: run one app
+- `turbo dev --filter=<app>`: run one app (`sso`, `main`, `ops`, or `forge`)
 - `pnpm build`: build all workspaces
 - `pnpm lint`: run ESLint across workspaces
 - `pnpm check-types`: run TypeScript checks where configured
@@ -59,4 +61,4 @@ Recent history follows Conventional Commit style (`feat:`, `fix:`, `misc:`). Exa
 - `feat: add invitation decline mutation`
 - `fix: resolve profile settings validation`
 
-PRs should include clear scope, linked issue/ticket, screenshots/recordings for UI changes, and notes on env/config changes affecting `main`, `sso`, or shared packages.
+PRs should include clear scope, linked issue/ticket, screenshots/recordings for UI changes, and notes on env/config changes affecting any app or shared package.
